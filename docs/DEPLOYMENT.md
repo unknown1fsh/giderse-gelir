@@ -52,25 +52,24 @@ NEXT_PUBLIC_APP_URL=https://your-app.railway.app
 node scripts/generate-secret.js
 ```
 
-Veya online: https://generate-secret.vercel.app/32
-
 ## 4. Build Configuration
 
-`railway.json` dosyası Railway'in build konfigürasyonunu yönetir:
+`railway.json` dosyası Railway'in deployment konfigürasyonunu yönetir:
 
 ```json
 {
-  "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "npm run build:railway"
-  },
+  "$schema": "https://railway.app/railway.schema.json",
   "deploy": {
     "startCommand": "npm start",
     "healthcheckPath": "/api/health",
-    "restartPolicyType": "ON_FAILURE"
+    "healthcheckTimeout": 10000,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
   }
 }
 ```
+
+**Not:** Railway otomatik olarak `Dockerfile` veya `package.json`'daki build script'lerini kullanır. Build komutu `package.json`'daki `build:railway` script'idir.
 
 ## 5. İlk Deployment
 
@@ -128,7 +127,7 @@ export async function GET() {
 
 - Application logs: Railway otomatik toplar
 - Error tracking: Sentry, LogRocket
-- Performance: Vercel Analytics
+- Performance: Railway Metrics Dashboard
 
 ## 9. Rollback
 

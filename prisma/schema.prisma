@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,21 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Reference Tables
-
-// Sistem Parametreleri - Merkezi parametre yönetimi
 model SystemParameter {
   id           Int      @id @default(autoincrement())
-  paramGroup   String   @map("param_group") @db.VarChar(50) // BANK, GOLD_TYPE, ACCOUNT_TYPE vb
-  paramCode    String   @map("param_code") @db.VarChar(50) // Parametre kodu
-  paramValue   String   @map("param_value") @db.VarChar(255) // Parametre değeri
-  displayName  String   @map("display_name") @db.VarChar(100) // Gösterim adı
-  description  String?  @db.Text // Açıklama
-  displayOrder Int      @default(0) @map("display_order") // Sıralama
-  metadata     Json?    @default("{}") // Ek bilgiler (JSON)
-  isActive     Boolean  @default(true) @map("is_active")
+  paramGroup   String   @map("param_group") @db.VarChar(50)
+  paramCode    String   @map("param_code") @db.VarChar(50)
+  paramValue   String   @map("param_value") @db.VarChar(255)
+  displayName  String   @map("display_name") @db.VarChar(100)
+  description  String?
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
+  displayOrder Int      @default(0) @map("display_order")
+  isActive     Boolean  @default(true) @map("is_active")
+  metadata     Json?    @default("{}")
 
   @@unique([paramGroup, paramCode])
   @@index([paramGroup, isActive])
@@ -32,53 +26,47 @@ model SystemParameter {
 }
 
 model RefCurrency {
-  id        Int      @id @default(autoincrement())
-  code      String   @unique @db.VarChar(3)
-  name      String   @db.VarChar(50)
-  symbol    String   @db.VarChar(5)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Relations
+  id           Int           @id @default(autoincrement())
+  code         String        @unique @db.VarChar(3)
+  name         String        @db.VarChar(50)
+  symbol       String        @db.VarChar(5)
+  active       Boolean       @default(true)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
   accounts     Account[]
+  autoPayments AutoPayment[]
   creditCards  CreditCard[]
   eWallets     EWallet[]
-  investments  Investment[]
-  transactions Transaction[]
-  autoPayments AutoPayment[]
   fxRatesFrom  FxRate[]      @relation("FromCurrency")
   fxRatesTo    FxRate[]      @relation("ToCurrency")
+  investments  Investment[]
+  transactions Transaction[]
 
   @@map("ref_currency")
 }
 
 model RefAccountType {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique @db.VarChar(20)
-  name        String   @db.VarChar(50)
+  id          Int       @id @default(autoincrement())
+  code        String    @unique @db.VarChar(20)
+  name        String    @db.VarChar(50)
   description String?
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  accounts Account[]
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  accounts    Account[]
 
   @@map("ref_account_type")
 }
 
 model RefTxType {
-  id        Int      @id @default(autoincrement())
-  code      String   @unique @db.VarChar(10)
-  name      String   @db.VarChar(20)
-  icon      String?  @db.VarChar(50)
-  color     String?  @db.VarChar(20)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Relations
+  id           Int             @id @default(autoincrement())
+  code         String          @unique @db.VarChar(10)
+  name         String          @db.VarChar(20)
+  icon         String?         @db.VarChar(50)
+  color        String?         @db.VarChar(20)
+  active       Boolean         @default(true)
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
   categories   RefTxCategory[]
   transactions Transaction[]
 
@@ -86,134 +74,120 @@ model RefTxType {
 }
 
 model RefTxCategory {
-  id          Int      @id @default(autoincrement())
-  txTypeId    Int      @map("tx_type_id")
-  code        String   @db.VarChar(30)
-  name        String   @db.VarChar(50)
-  description String?
-  icon        String?  @db.VarChar(50)
-  color       String?  @db.VarChar(20)
-  isDefault   Boolean  @default(false) @map("is_default")
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  // Relations
+  id           Int           @id @default(autoincrement())
+  txTypeId     Int           @map("tx_type_id")
+  code         String        @db.VarChar(30)
+  name         String        @db.VarChar(50)
+  description  String?
+  icon         String?       @db.VarChar(50)
+  color        String?       @db.VarChar(20)
+  isDefault    Boolean       @default(false) @map("is_default")
+  active       Boolean       @default(true)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  autoPayments AutoPayment[]
   txType       RefTxType     @relation(fields: [txTypeId], references: [id])
   transactions Transaction[]
-  autoPayments AutoPayment[]
 
   @@unique([txTypeId, code])
   @@map("ref_tx_category")
 }
 
 model RefPaymentMethod {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique @db.VarChar(20)
-  name        String   @db.VarChar(50)
-  description String?
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  transactions Transaction[]
+  id           Int           @id @default(autoincrement())
+  code         String        @unique @db.VarChar(20)
+  name         String        @db.VarChar(50)
+  description  String?
+  active       Boolean       @default(true)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
   autoPayments AutoPayment[]
+  transactions Transaction[]
 
   @@map("ref_payment_method")
 }
 
 model RefGoldType {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique @db.VarChar(20)
-  name        String   @db.VarChar(50)
+  id          Int        @id @default(autoincrement())
+  code        String     @unique @db.VarChar(20)
+  name        String     @db.VarChar(50)
   description String?
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  goldItems GoldItem[]
+  active      Boolean    @default(true)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  goldItems   GoldItem[]
 
   @@map("ref_gold_type")
 }
 
 model RefGoldPurity {
-  id        Int      @id @default(autoincrement())
-  code      String   @unique @db.VarChar(10)
-  name      String   @db.VarChar(20)
-  purity    Decimal  @db.Decimal(3, 1)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Relations
+  id        Int        @id @default(autoincrement())
+  code      String     @unique @db.VarChar(10)
+  name      String     @db.VarChar(20)
+  purity    Decimal    @db.Decimal(3, 1)
+  active    Boolean    @default(true)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
   goldItems GoldItem[]
 
   @@map("ref_gold_purity")
 }
 
 model RefBank {
-  id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(100)
-  asciiName String   @unique @map("ascii_name") @db.VarChar(100)
-  swiftBic  String?  @map("swift_bic") @db.VarChar(11)
-  bankCode  String?  @map("bank_code") @db.VarChar(10)
-  website   String?  @db.VarChar(100)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Relations
+  id            Int           @id @default(autoincrement())
+  name          String        @db.VarChar(100)
+  asciiName     String        @unique @map("ascii_name") @db.VarChar(100)
+  swiftBic      String?       @map("swift_bic") @db.VarChar(11)
+  active        Boolean       @default(true)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  bankCode      String?       @map("bank_code") @db.VarChar(10)
+  website       String?       @db.VarChar(100)
   accounts      Account[]
-  creditCards   CreditCard[]
   beneficiaries Beneficiary[]
+  creditCards   CreditCard[]
 
   @@map("ref_bank")
 }
 
-// User Management Tables
-
 model User {
-  id                      Int       @id @default(autoincrement())
-  email                   String    @unique @db.VarChar(255)
-  name                    String    @db.VarChar(100)
-  phone                   String?   @db.VarChar(20)
-  passwordHash            String    @map("password_hash") @db.VarChar(255)
-  emailVerified           Boolean   @default(false) @map("email_verified")
-  emailVerificationToken  String?   @map("email_verification_token") @db.VarChar(255)
-  emailVerificationExpiry DateTime? @map("email_verification_expiry")
-  phoneVerified           Boolean   @default(false) @map("phone_verified")
-  avatar                  String?   @db.VarChar(500)
-  timezone                String    @default("Europe/Istanbul") @db.VarChar(50)
-  language                String    @default("tr") @db.VarChar(5)
-  currency                String    @default("TRY") @db.VarChar(3)
-  dateFormat              String    @default("DD/MM/YYYY") @map("date_format") @db.VarChar(20)
-  numberFormat            String    @default("1.234,56") @map("number_format") @db.VarChar(20)
-  theme                   String    @default("light") @db.VarChar(20)
-  notifications           Json      @default("{}")
-  settings                Json      @default("{}")
-  role                    String    @default("USER") @db.VarChar(20) // USER, ADMIN, ENTERPRISE
-  lastLoginAt             DateTime? @map("last_login_at")
-  isActive                Boolean   @default(true) @map("is_active")
-  createdAt               DateTime  @default(now()) @map("created_at")
-  updatedAt               DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  sessions           UserSession[]
-  subscriptions      UserSubscription[]
-  paymentRequests    PaymentRequest[]
-  periods            Period[]
-  accounts           Account[]
-  creditCards        CreditCard[]
-  eWallets           EWallet[]
-  beneficiaries      Beneficiary[]
-  transactions       Transaction[]
-  autoPayments       AutoPayment[]
-  goldItems          GoldItem[]
-  investments        Investment[]
-  portfolioSnapshots PortfolioSnapshot[]
-  aiReportUsages     AIReportUsage[]
+  id                      Int                 @id @default(autoincrement())
+  email                   String              @unique @db.VarChar(255)
+  name                    String              @db.VarChar(100)
+  phone                   String?             @db.VarChar(20)
+  passwordHash            String              @map("password_hash") @db.VarChar(255)
+  emailVerified           Boolean             @default(false) @map("email_verified")
+  phoneVerified           Boolean             @default(false) @map("phone_verified")
+  avatar                  String?             @db.VarChar(500)
+  timezone                String              @default("Europe/Istanbul") @db.VarChar(50)
+  language                String              @default("tr") @db.VarChar(5)
+  currency                String              @default("TRY") @db.VarChar(3)
+  dateFormat              String              @default("DD/MM/YYYY") @map("date_format") @db.VarChar(20)
+  numberFormat            String              @default("1.234,56") @map("number_format") @db.VarChar(20)
+  theme                   String              @default("light") @db.VarChar(20)
+  notifications           Json                @default("{}")
+  settings                Json                @default("{}")
+  lastLoginAt             DateTime?           @map("last_login_at")
+  isActive                Boolean             @default(true) @map("is_active")
+  createdAt               DateTime            @default(now()) @map("created_at")
+  updatedAt               DateTime            @updatedAt @map("updated_at")
+  emailVerificationToken  String?             @map("email_verification_token") @db.VarChar(255)
+  emailVerificationExpiry DateTime?           @map("email_verification_expiry")
+  role                    String              @default("USER") @db.VarChar(20)
+  accounts                Account[]
+  aiReportUsages          AIReportUsage[]
+  autoPayments            AutoPayment[]
+  beneficiaries           Beneficiary[]
+  creditCards             CreditCard[]
+  eWallets                EWallet[]
+  goldItems               GoldItem[]
+  investments             Investment[]
+  paymentRequests         PaymentRequest[]
+  periods                 Period[]
+  portfolioSnapshots      PortfolioSnapshot[]
+  transactions            Transaction[]
+  sessions                UserSession[]
+  subscriptions           UserSubscription[]
 
   @@map("user")
 }
@@ -224,15 +198,13 @@ model UserSession {
   token          String   @unique @db.VarChar(500)
   activePeriodId Int?     @map("active_period_id")
   expiresAt      DateTime @map("expires_at")
-  userAgent      String?  @map("user_agent") @db.Text
+  userAgent      String?  @map("user_agent")
   ipAddress      String?  @map("ip_address") @db.VarChar(45)
   isActive       Boolean  @default(true) @map("is_active")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activePeriod Period? @relation(fields: [activePeriodId], references: [id], onDelete: SetNull)
+  activePeriod   Period?  @relation(fields: [activePeriodId], references: [id])
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_session")
 }
@@ -241,7 +213,7 @@ model UserSubscription {
   id            Int       @id @default(autoincrement())
   userId        Int       @map("user_id")
   planId        String    @map("plan_id") @db.VarChar(50)
-  status        String    @db.VarChar(20) // active, cancelled, expired, pending
+  status        String    @db.VarChar(20)
   startDate     DateTime  @map("start_date")
   endDate       DateTime  @map("end_date")
   amount        Decimal   @db.Decimal(10, 2)
@@ -252,9 +224,7 @@ model UserSubscription {
   cancelledAt   DateTime? @map("cancelled_at")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_subscription")
 }
@@ -265,17 +235,15 @@ model PaymentRequest {
   planId      String    @map("plan_id") @db.VarChar(50)
   amount      Decimal   @db.Decimal(10, 2)
   currency    String    @default("TRY") @db.VarChar(3)
-  description String?   @db.Text
-  status      String    @default("pending") @db.VarChar(20) // pending, approved, rejected
-  adminNotes  String?   @map("admin_notes") @db.Text
+  description String?
+  status      String    @default("pending") @db.VarChar(20)
+  adminNotes  String?   @map("admin_notes")
   approvedBy  Int?      @map("approved_by")
   approvedAt  DateTime? @map("approved_at")
   rejectedAt  DateTime? @map("rejected_at")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])
@@ -283,34 +251,30 @@ model PaymentRequest {
   @@map("payment_request")
 }
 
-// Period Management Tables
-
 model Period {
-  id          Int      @id @default(autoincrement())
-  userId      Int      @map("user_id")
-  name        String   @db.VarChar(100) // "2024 Yılı", "Ocak 2024", "Q1 2024" vb.
-  periodType  String   @map("period_type") @db.VarChar(20) // YEARLY, FISCAL_YEAR, MONTHLY, CUSTOM
-  startDate   DateTime @map("start_date") @db.Date
-  endDate     DateTime @map("end_date") @db.Date
-  isClosed    Boolean  @default(false) @map("is_closed")
-  isActive    Boolean  @default(true) @map("is_active")
-  description String?  @db.Text
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            Int              @id @default(autoincrement())
+  userId        Int              @map("user_id")
+  name          String           @db.VarChar(100)
+  periodType    String           @map("period_type") @db.VarChar(20)
+  startDate     DateTime         @map("start_date") @db.Date
+  endDate       DateTime         @map("end_date") @db.Date
+  isActive      Boolean          @default(true) @map("is_active")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+  description   String?
+  isClosed      Boolean          @default(false) @map("is_closed")
   accounts      Account[]
+  autoPayments  AutoPayment[]
   creditCards   CreditCard[]
   eWallets      EWallet[]
-  transactions  Transaction[]
-  autoPayments  AutoPayment[]
   goldItems     GoldItem[]
   investments   Investment[]
-  userSessions  UserSession[]
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   periodClosing PeriodClosing?
   transfersFrom PeriodTransfer[] @relation("FromPeriod")
   transfersTo   PeriodTransfer[] @relation("ToPeriod")
+  transactions  Transaction[]
+  userSessions  UserSession[]
 
   @@index([userId, isActive])
   @@index([userId, startDate, endDate])
@@ -326,11 +290,9 @@ model PeriodClosing {
   totalLiabilities  Decimal  @map("total_liabilities") @db.Decimal(15, 2)
   netWorth          Decimal  @map("net_worth") @db.Decimal(15, 2)
   transferredToNext Boolean  @default(false) @map("transferred_to_next")
-  closingNotes      String?  @map("closing_notes") @db.Text
+  closingNotes      String?  @map("closing_notes")
   createdAt         DateTime @default(now()) @map("created_at")
-
-  // Relations
-  period Period @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  period            Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
 
   @@map("period_closing")
 }
@@ -341,161 +303,145 @@ model PeriodTransfer {
   toPeriodId     Int      @map("to_period_id")
   accountId      Int?     @map("account_id")
   transferAmount Decimal  @map("transfer_amount") @db.Decimal(15, 2)
-  transferType   String   @map("transfer_type") @db.VarChar(30) // OPENING_BALANCE, ASSET, LIABILITY
+  transferType   String   @map("transfer_type") @db.VarChar(30)
   transferDate   DateTime @default(now()) @map("transfer_date")
-  description    String?  @db.Text
+  description    String?
   createdAt      DateTime @default(now()) @map("created_at")
-
-  // Relations
-  fromPeriod Period @relation("FromPeriod", fields: [fromPeriodId], references: [id], onDelete: Cascade)
-  toPeriod   Period @relation("ToPeriod", fields: [toPeriodId], references: [id], onDelete: Cascade)
+  fromPeriod     Period   @relation("FromPeriod", fields: [fromPeriodId], references: [id], onDelete: Cascade)
+  toPeriod       Period   @relation("ToPeriod", fields: [toPeriodId], references: [id], onDelete: Cascade)
 
   @@index([fromPeriodId])
   @@index([toPeriodId])
   @@map("period_transfer")
 }
 
-// Main Tables
-
 model Account {
-  id            Int      @id @default(autoincrement())
-  userId        Int      @map("user_id")
-  periodId      Int?     @map("period_id")
-  name          String   @db.VarChar(100)
-  accountTypeId Int      @map("account_type_id")
-  bankId        Int      @map("bank_id")
-  currencyId    Int      @map("currency_id")
-  balance       Decimal  @default(0) @db.Decimal(15, 2)
-  accountNumber String?  @map("account_number") @db.VarChar(50)
-  iban          String?  @db.VarChar(34)
-  active        Boolean  @default(true)
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  period       Period?        @relation(fields: [periodId], references: [id], onDelete: Cascade)
-  accountType  RefAccountType @relation(fields: [accountTypeId], references: [id])
-  bank         RefBank        @relation(fields: [bankId], references: [id])
-  currency     RefCurrency    @relation(fields: [currencyId], references: [id])
-  transactions Transaction[]
-  autoPayments AutoPayment[]
+  id            Int            @id @default(autoincrement())
+  userId        Int            @map("user_id")
+  periodId      Int?           @map("period_id")
+  name          String         @db.VarChar(100)
+  accountTypeId Int            @map("account_type_id")
+  bankId        Int            @map("bank_id")
+  accountNumber String?        @map("account_number") @db.VarChar(50)
+  iban          String?        @db.VarChar(34)
+  balance       Decimal        @default(0) @db.Decimal(15, 2)
+  currencyId    Int            @map("currency_id")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  active        Boolean        @default(true)
+  accountType   RefAccountType @relation(fields: [accountTypeId], references: [id])
+  bank          RefBank        @relation(fields: [bankId], references: [id])
+  currency      RefCurrency    @relation(fields: [currencyId], references: [id])
+  period        Period?        @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  autoPayments  AutoPayment[]
+  transactions  Transaction[]
 
   @@index([userId, periodId])
   @@map("account")
 }
 
 model CreditCard {
-  id                Int      @id @default(autoincrement())
-  userId            Int      @map("user_id")
-  periodId          Int?     @map("period_id")
-  name              String   @db.VarChar(100)
-  bankId            Int      @map("bank_id")
-  currencyId        Int      @map("currency_id")
-  limitAmount       Decimal  @map("limit_amount") @db.Decimal(15, 2)
-  availableLimit    Decimal  @map("available_limit") @db.Decimal(15, 2)
-  statementDay      Int      @map("statement_day")
-  dueDay            Int      @map("due_day")
-  minPaymentPercent Decimal  @default(3.0) @map("min_payment_percent") @db.Decimal(5, 2)
-  active            Boolean  @default(true)
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  period       Period?       @relation(fields: [periodId], references: [id], onDelete: Cascade)
-  bank         RefBank       @relation(fields: [bankId], references: [id])
-  currency     RefCurrency   @relation(fields: [currencyId], references: [id])
-  transactions Transaction[]
-  autoPayments AutoPayment[]
+  id                Int           @id @default(autoincrement())
+  userId            Int           @map("user_id")
+  periodId          Int?          @map("period_id")
+  name              String        @db.VarChar(100)
+  bankId            Int           @map("bank_id")
+  limitAmount       Decimal       @map("limit_amount") @db.Decimal(15, 2)
+  currencyId        Int           @map("currency_id")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+  availableLimit    Decimal       @map("available_limit") @db.Decimal(15, 2)
+  statementDay      Int           @map("statement_day")
+  dueDay            Int           @map("due_day")
+  minPaymentPercent Decimal       @default(3.0) @map("min_payment_percent") @db.Decimal(5, 2)
+  active            Boolean       @default(true)
+  autoPayments      AutoPayment[]
+  bank              RefBank       @relation(fields: [bankId], references: [id])
+  currency          RefCurrency   @relation(fields: [currencyId], references: [id])
+  period            Period?       @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions      Transaction[]
 
   @@index([userId, periodId])
   @@map("credit_card")
 }
 
-// E-Cüzdanlar (PayPal, Papara, Ininal, vb.)
 model EWallet {
-  id           Int      @id @default(autoincrement())
-  userId       Int      @map("user_id")
-  periodId     Int?     @map("period_id")
-  name         String   @db.VarChar(100) // "PayPal Hesabım", "Papara", vb.
-  provider     String   @db.VarChar(50) // "PayPal", "Papara", "Ininal", vb.
-  accountEmail String?  @map("account_email") @db.VarChar(255)
-  accountPhone String?  @map("account_phone") @db.VarChar(20)
-  balance      Decimal  @default(0) @db.Decimal(15, 2)
-  currencyId   Int      @map("currency_id")
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  period       Period?       @relation(fields: [periodId], references: [id], onDelete: Cascade)
-  currency     RefCurrency   @relation(fields: [currencyId], references: [id])
-  transactions Transaction[]
+  id           Int           @id @default(autoincrement())
+  userId       Int           @map("user_id")
+  periodId     Int?          @map("period_id")
+  name         String        @db.VarChar(100)
+  balance      Decimal       @default(0) @db.Decimal(15, 2)
+  currencyId   Int           @map("currency_id")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  accountEmail String?       @map("account_email") @db.VarChar(255)
+  accountPhone String?       @map("account_phone") @db.VarChar(20)
+  active       Boolean       @default(true)
+  provider     String        @db.VarChar(50)
   autoPayments AutoPayment[]
+  currency     RefCurrency   @relation(fields: [currencyId], references: [id])
+  period       Period?       @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
 
   @@index([userId, periodId])
   @@map("e_wallet")
 }
 
-// Alıcı/Kişi bilgileri (Havale/EFT için)
 model Beneficiary {
-  id          Int      @id @default(autoincrement())
-  userId      Int      @map("user_id")
-  name        String   @db.VarChar(100) // Kişi veya kurum adı
-  iban        String?  @db.VarChar(34)
-  accountNo   String?  @map("account_no") @db.VarChar(50)
-  bankId      Int?     @map("bank_id")
-  phoneNumber String?  @map("phone_number") @db.VarChar(20)
-  email       String?  @db.VarChar(255)
-  description String? // Not
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bank         RefBank?      @relation(fields: [bankId], references: [id])
-  transactions Transaction[]
+  id           Int           @id @default(autoincrement())
+  userId       Int           @map("user_id")
+  name         String        @db.VarChar(100)
+  iban         String?       @db.VarChar(34)
+  bankId       Int?          @map("bank_id")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  accountNo    String?       @map("account_no") @db.VarChar(50)
+  active       Boolean       @default(true)
+  description  String?
+  email        String?       @db.VarChar(255)
+  phoneNumber  String?       @map("phone_number") @db.VarChar(20)
   autoPayments AutoPayment[]
+  bank         RefBank?      @relation(fields: [bankId], references: [id])
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
 
   @@map("beneficiary")
 }
 
 model Transaction {
-  id              Int      @id @default(autoincrement())
-  userId          Int      @map("user_id")
-  periodId        Int?     @map("period_id")
-  txTypeId        Int      @map("tx_type_id")
-  categoryId      Int      @map("category_id")
-  paymentMethodId Int      @map("payment_method_id")
-  accountId       Int?     @map("account_id")
-  creditCardId    Int?     @map("credit_card_id")
-  eWalletId       Int?     @map("e_wallet_id")
-  beneficiaryId   Int?     @map("beneficiary_id")
-  amount          Decimal  @db.Decimal(15, 2)
-  currencyId      Int      @map("currency_id")
-  transactionDate DateTime @map("transaction_date") @db.Date
+  id              Int              @id @default(autoincrement())
+  userId          Int              @map("user_id")
+  periodId        Int?             @map("period_id")
+  txTypeId        Int              @map("tx_type_id")
+  categoryId      Int              @map("category_id")
+  amount          Decimal          @db.Decimal(15, 2)
+  currencyId      Int              @map("currency_id")
+  paymentMethodId Int              @map("payment_method_id")
   description     String?
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  transactionDate DateTime         @map("transaction_date") @db.Date
+  accountId       Int?             @map("account_id")
+  beneficiaryId   Int?             @map("beneficiary_id")
+  creditCardId    Int?             @map("credit_card_id")
+  eWalletId       Int?             @map("e_wallet_id")
+  isRecurring     Boolean          @default(false) @map("is_recurring")
   notes           String?
+  recurringType   String?          @map("recurring_type") @db.VarChar(20)
   tags            String[]
-  isRecurring     Boolean  @default(false) @map("is_recurring")
-  recurringType   String?  @map("recurring_type") @db.VarChar(20)
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  period        Period?          @relation(fields: [periodId], references: [id], onDelete: Cascade)
-  txType        RefTxType        @relation(fields: [txTypeId], references: [id])
-  category      RefTxCategory    @relation(fields: [categoryId], references: [id])
-  paymentMethod RefPaymentMethod @relation(fields: [paymentMethodId], references: [id])
-  account       Account?         @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  creditCard    CreditCard?      @relation(fields: [creditCardId], references: [id], onDelete: Cascade)
-  eWallet       EWallet?         @relation(fields: [eWalletId], references: [id], onDelete: Cascade)
-  beneficiary   Beneficiary?     @relation(fields: [beneficiaryId], references: [id], onDelete: Cascade)
-  currency      RefCurrency      @relation(fields: [currencyId], references: [id])
+  account         Account?         @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  beneficiary     Beneficiary?     @relation(fields: [beneficiaryId], references: [id], onDelete: Cascade)
+  category        RefTxCategory    @relation(fields: [categoryId], references: [id])
+  creditCard      CreditCard?      @relation(fields: [creditCardId], references: [id], onDelete: Cascade)
+  currency        RefCurrency      @relation(fields: [currencyId], references: [id])
+  eWallet         EWallet?         @relation(fields: [eWalletId], references: [id], onDelete: Cascade)
+  paymentMethod   RefPaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  period          Period?          @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  txType          RefTxType        @relation(fields: [txTypeId], references: [id])
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, periodId])
   @@index([periodId, transactionDate])
@@ -503,77 +449,71 @@ model Transaction {
 }
 
 model AutoPayment {
-  id              Int       @id @default(autoincrement())
-  userId          Int       @map("user_id")
-  periodId        Int?      @map("period_id")
-  name            String    @db.VarChar(100)
-  amount          Decimal   @db.Decimal(15, 2)
-  currencyId      Int       @map("currency_id")
-  accountId       Int?      @map("account_id")
-  creditCardId    Int?      @map("credit_card_id")
-  eWalletId       Int?      @map("e_wallet_id")
-  beneficiaryId   Int?      @map("beneficiary_id")
-  paymentMethodId Int       @map("payment_method_id")
-  categoryId      Int       @map("category_id")
-  cronSchedule    String    @map("cron_schedule") @db.VarChar(100)
-  nextPaymentDate DateTime? @map("next_payment_date") @db.Date
-  active          Boolean   @default(true)
+  id              Int              @id @default(autoincrement())
+  userId          Int              @map("user_id")
+  periodId        Int?             @map("period_id")
+  name            String           @db.VarChar(100)
+  amount          Decimal          @db.Decimal(15, 2)
+  currencyId      Int              @map("currency_id")
+  paymentMethodId Int              @map("payment_method_id")
+  nextPaymentDate DateTime?        @map("next_payment_date") @db.Date
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  accountId       Int?             @map("account_id")
+  active          Boolean          @default(true)
+  beneficiaryId   Int?             @map("beneficiary_id")
+  creditCardId    Int?             @map("credit_card_id")
+  cronSchedule    String           @map("cron_schedule") @db.VarChar(100)
   description     String?
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  period        Period?          @relation(fields: [periodId], references: [id], onDelete: Cascade)
-  currency      RefCurrency      @relation(fields: [currencyId], references: [id])
-  account       Account?         @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  creditCard    CreditCard?      @relation(fields: [creditCardId], references: [id], onDelete: Cascade)
-  eWallet       EWallet?         @relation(fields: [eWalletId], references: [id], onDelete: Cascade)
-  beneficiary   Beneficiary?     @relation(fields: [beneficiaryId], references: [id], onDelete: Cascade)
-  paymentMethod RefPaymentMethod @relation(fields: [paymentMethodId], references: [id])
-  category      RefTxCategory    @relation(fields: [categoryId], references: [id])
+  eWalletId       Int?             @map("e_wallet_id")
+  categoryId      Int              @map("category_id")
+  account         Account?         @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  beneficiary     Beneficiary?     @relation(fields: [beneficiaryId], references: [id], onDelete: Cascade)
+  category        RefTxCategory    @relation(fields: [categoryId], references: [id])
+  creditCard      CreditCard?      @relation(fields: [creditCardId], references: [id], onDelete: Cascade)
+  currency        RefCurrency      @relation(fields: [currencyId], references: [id])
+  eWallet         EWallet?         @relation(fields: [eWalletId], references: [id], onDelete: Cascade)
+  paymentMethod   RefPaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  period          Period?          @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, periodId])
   @@map("auto_payment")
 }
 
 model GoldItem {
-  id              Int      @id @default(autoincrement())
-  userId          Int      @map("user_id")
-  periodId        Int?     @map("period_id")
-  name            String   @db.VarChar(100)
-  goldTypeId      Int      @map("gold_type_id")
-  goldPurityId    Int      @map("gold_purity_id")
-  weightGrams     Decimal  @map("weight_grams") @db.Decimal(8, 3)
-  purchasePrice   Decimal  @map("purchase_price") @db.Decimal(15, 2)
-  purchaseDate    DateTime @map("purchase_date") @db.Date
-  currentValueTry Decimal? @map("current_value_try") @db.Decimal(15, 2)
+  id              Int           @id @default(autoincrement())
+  userId          Int           @map("user_id")
+  periodId        Int?          @map("period_id")
+  name            String        @db.VarChar(100)
+  goldTypeId      Int           @map("gold_type_id")
+  goldPurityId    Int           @map("gold_purity_id")
+  weightGrams     Decimal       @map("weight_grams") @db.Decimal(8, 3)
+  purchasePrice   Decimal       @map("purchase_price") @db.Decimal(15, 2)
+  purchaseDate    DateTime      @map("purchase_date") @db.Date
+  currentValueTry Decimal?      @map("current_value_try") @db.Decimal(15, 2)
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
   description     String?
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  period     Period?       @relation(fields: [periodId], references: [id], onDelete: Cascade)
-  goldType   RefGoldType   @relation(fields: [goldTypeId], references: [id])
-  goldPurity RefGoldPurity @relation(fields: [goldPurityId], references: [id])
+  goldPurity      RefGoldPurity @relation(fields: [goldPurityId], references: [id])
+  goldType        RefGoldType   @relation(fields: [goldTypeId], references: [id])
+  period          Period?       @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, periodId])
   @@map("gold_item")
 }
 
 model FxRate {
-  id             Int      @id @default(autoincrement())
-  fromCurrencyId Int      @map("from_currency_id")
-  toCurrencyId   Int      @map("to_currency_id")
-  rate           Decimal  @db.Decimal(15, 6)
-  rateDate       DateTime @map("rate_date") @db.Date
-  source         String   @default("TCMB") @db.VarChar(50)
-  createdAt      DateTime @default(now()) @map("created_at")
-
-  // Relations
-  fromCurrency RefCurrency @relation("FromCurrency", fields: [fromCurrencyId], references: [id])
-  toCurrency   RefCurrency @relation("ToCurrency", fields: [toCurrencyId], references: [id])
+  id             Int         @id @default(autoincrement())
+  fromCurrencyId Int         @map("from_currency_id")
+  toCurrencyId   Int         @map("to_currency_id")
+  rate           Decimal     @db.Decimal(15, 6)
+  rateDate       DateTime    @map("rate_date") @db.Date
+  source         String      @default("TCMB") @db.VarChar(50)
+  createdAt      DateTime    @default(now()) @map("created_at")
+  fromCurrency   RefCurrency @relation("FromCurrency", fields: [fromCurrencyId], references: [id])
+  toCurrency     RefCurrency @relation("ToCurrency", fields: [toCurrencyId], references: [id])
 
   @@unique([fromCurrencyId, toCurrencyId, rateDate])
   @@map("fx_rate")
@@ -586,63 +526,55 @@ model PortfolioSnapshot {
   totalAssets      Decimal  @map("total_assets") @db.Decimal(15, 2)
   totalLiabilities Decimal  @map("total_liabilities") @db.Decimal(15, 2)
   netWorth         Decimal  @map("net_worth") @db.Decimal(15, 2)
-  breakdown        Json
   createdAt        DateTime @default(now()) @map("created_at")
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  breakdown        Json
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, snapshotDate])
   @@map("portfolio_snapshot")
 }
 
-// Yatırım Araçları (Premium özelliği)
 model Investment {
-  id              Int       @id @default(autoincrement())
-  userId          Int       @map("user_id")
-  periodId        Int?      @map("period_id")
-  investmentType  String    @map("investment_type") @db.VarChar(50) // stock, crypto, fund, bond, commodity, forex, real-estate, other
-  name            String    @db.VarChar(200)
-  symbol          String?   @db.VarChar(20) // AAPL, BTC, THYAO, vb.
-  quantity        Decimal   @db.Decimal(18, 8)
-  purchasePrice   Decimal   @map("purchase_price") @db.Decimal(15, 2)
-  currentPrice    Decimal?  @map("current_price") @db.Decimal(15, 2)
-  purchaseDate    DateTime  @map("purchase_date") @db.Date
-  currencyId      Int       @map("currency_id")
-  category        String?   @db.VarChar(100) // Teknoloji, Finans, Enerji vb.
-  riskLevel       String    @map("risk_level") @db.VarChar(20) // low, medium, high
+  id              Int         @id @default(autoincrement())
+  userId          Int         @map("user_id")
+  periodId        Int?        @map("period_id")
+  name            String      @db.VarChar(200)
+  investmentType  String      @map("investment_type") @db.VarChar(50)
+  currencyId      Int         @map("currency_id")
+  purchaseDate    DateTime    @map("purchase_date") @db.Date
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+  active          Boolean     @default(true)
+  category        String?     @db.VarChar(100)
+  currentPrice    Decimal?    @map("current_price") @db.Decimal(15, 2)
+  lastPriceUpdate DateTime?   @map("last_price_update")
+  metadata        Json?       @default("{}")
   notes           String?
-  metadata        Json?     @default("{}") // API'den gelen ek bilgiler (logo, website, vb.)
-  lastPriceUpdate DateTime? @map("last_price_update")
-  active          Boolean   @default(true)
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  period   Period?     @relation(fields: [periodId], references: [id], onDelete: Cascade)
-  currency RefCurrency @relation(fields: [currencyId], references: [id])
+  purchasePrice   Decimal     @map("purchase_price") @db.Decimal(15, 2)
+  quantity        Decimal     @db.Decimal(18, 8)
+  riskLevel       String      @map("risk_level") @db.VarChar(20)
+  symbol          String?     @db.VarChar(20)
+  currency        RefCurrency @relation(fields: [currencyId], references: [id])
+  period          Period?     @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, periodId, active])
   @@index([investmentType])
   @@map("investment")
 }
 
-// AI Analiz Raporu Kullanım Takibi (Premium özelliği)
 model AIReportUsage {
   id           Int      @id @default(autoincrement())
   userId       Int      @map("user_id")
-  reportType   String   @map("report_type") @db.VarChar(50) // premium, enterprise, enterprise_premium
+  reportType   String   @map("report_type") @db.VarChar(50)
   reportDate   DateTime @map("report_date")
-  monthYear    String   @map("month_year") @db.VarChar(7) // "2024-01" formatında
-  reportData   Json     @map("report_data") // Rapor içeriği (JSON)
-  status       String   @default("processing") @db.VarChar(20) // processing, completed, failed
-  errorMessage String?  @map("error_message") @db.Text
+  monthYear    String   @map("month_year") @db.VarChar(7)
+  reportData   Json     @map("report_data")
+  status       String   @default("processing") @db.VarChar(20)
+  errorMessage String?  @map("error_message")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, monthYear])
   @@index([userId, reportDate])

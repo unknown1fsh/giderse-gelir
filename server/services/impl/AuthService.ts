@@ -125,50 +125,72 @@ export class AuthService {
   // Çıktı: LoginResult
   // Hata: UnauthorizedError
   async login(data: LoginUserDTO, userAgent?: string, ipAddress?: string): Promise<LoginResult> {
-    const user = await this.userRepository.findByEmailWithSubscriptions(data.email)
-    if (!user) {
-      throw new UnauthorizedError('Geçersiz e-posta veya şifre')
-    }
+    try {
+      const user = await this.userRepository.findByEmailWithSubscriptions(data.email)
+      if (!user) {
+        // eslint-disable-next-line no-console
+        console.log('[AUTH] Login başarısız - kullanıcı bulunamadı:', data.email)
+        throw new UnauthorizedError('Geçersiz e-posta veya şifre')
+      }
 
-    if (!user.isActive) {
-      throw new UnauthorizedError('Hesabınız deaktif edilmiş')
-    }
+      if (!user.isActive) {
+        // eslint-disable-next-line no-console
+        console.log('[AUTH] Login başarısız - kullanıcı aktif değil:', user.id)
+        throw new UnauthorizedError('Hesabınız deaktif edilmiş')
+      }
 
-    const isValidPassword = await bcrypt.compare(data.password, user.passwordHash)
-    if (!isValidPassword) {
-      throw new UnauthorizedError('Geçersiz e-posta veya şifre')
-    }
+      const isValidPassword = await bcrypt.compare(data.password, user.passwordHash)
+      if (!isValidPassword) {
+        // eslint-disable-next-line no-console
+        console.log('[AUTH] Login başarısız - şifre yanlış:', user.id)
+        throw new UnauthorizedError('Geçersiz e-posta veya şifre')
+      }
 
-    const plan = user.subscriptions[0]?.planId || PlanId.FREE
+      const plan = user.subscriptions[0]?.planId || PlanId.FREE
 
-    // Önceki aktif sessionları pasif hale getir (her kullanıcı tek session)
-    await this.prisma.userSession.updateMany({
-      where: { userId: user.id, isActive: true },
-      data: { isActive: false },
-    })
+      // Önceki aktif sessionları pasif hale getir (her kullanıcı tek session)
+      await this.prisma.userSession.updateMany({
+        where: { userId: user.id, isActive: true },
+        data: { isActive: false },
+      })
 
-    const token = this.generateToken(user.id, user.email, plan)
-    const expiresAt = new Date(Date.now() + this.sessionDurationDays * 24 * 60 * 60 * 1000)
+      const token = this.generateToken(user.id, user.email, plan)
+      const expiresAt = new Date(Date.now() + this.sessionDurationDays * 24 * 60 * 60 * 1000)
 
-    const session = await this.prisma.userSession.create({
-      data: {
+      const session = await this.prisma.userSession.create({
+        data: {
+          userId: user.id,
+          token,
+          expiresAt,
+          userAgent,
+          ipAddress,
+        },
+      })
+
+      await this.userService.updateLastLogin(user.id)
+
+      // eslint-disable-next-line no-console
+      console.log('[AUTH] Login başarılı:', {
         userId: user.id,
-        token,
-        expiresAt,
-        userAgent,
-        ipAddress,
-      },
-    })
+        email: user.email,
+        sessionId: session.id,
+        expiresAt: expiresAt.toISOString(),
+      })
 
-    await this.userService.updateLastLogin(user.id)
-
-    return {
-      user: UserMapper.prismaToDTO(user),
-      session: {
-        id: session.id,
-        token: session.token,
-        expiresAt: session.expiresAt,
-      },
+      return {
+        user: UserMapper.prismaToDTO(user),
+        session: {
+          id: session.id,
+          token: session.token,
+          expiresAt: session.expiresAt,
+        },
+      }
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        throw error
+      }
+      console.error('[AUTH] Login error:', error)
+      throw new UnauthorizedError('Giriş yapılırken bir hata oluştu')
     }
   }
 
@@ -214,46 +236,69 @@ export class AuthService {
   // Çıktı: UserDTO veya null
   // Hata: -
   async validateSession(token: string): Promise<UserDTO | null> {
-    const decoded = this.verifyToken(token)
-    if (!decoded) {
-      return null
-    }
+    try {
+      const decoded = this.verifyToken(token)
+      if (!decoded) {
+        // eslint-disable-next-line no-console
+        console.log('[AUTH] Token doğrulanamadı - JWT geçersiz veya süresi dolmuş')
+        return null
+      }
 
-    const session = await this.prisma.userSession.findUnique({
-      where: { token },
-      include: {
-        user: {
-          include: {
-            subscriptions: {
-              where: { status: 'active' },
-              orderBy: { createdAt: 'desc' },
-              take: 1,
+      const session = await this.prisma.userSession.findUnique({
+        where: { token },
+        include: {
+          user: {
+            include: {
+              subscriptions: {
+                where: { status: 'active' },
+                orderBy: { createdAt: 'desc' },
+                take: 1,
+              },
             },
           },
         },
-      },
-    })
+      })
 
-    if (!session || !session.isActive || session.expiresAt < new Date()) {
+      if (!session) {
+        // eslint-disable-next-line no-console
+        console.log('[AUTH] Session bulunamadı - token veritabanında yok')
+        return null
+      }
+
+      if (!session.isActive) {
+        // eslint-disable-next-line no-console
+        console.log('[AUTH] Session aktif değil - isActive: false')
+        return null
+      }
+
+      if (session.expiresAt < new Date()) {
+        // eslint-disable-next-line no-console
+        console.log('[AUTH] Session süresi dolmuş - expiresAt:', session.expiresAt.toISOString())
+        return null
+      }
+
+      if (!session.user.isActive) {
+        // eslint-disable-next-line no-console
+        console.log('[AUTH] Kullanıcı aktif değil - userId:', session.userId)
+        return null
+      }
+
+      const userDTO = UserMapper.prismaToDTO(session.user)
+
+      // eslint-disable-next-line no-console
+      console.log('🔐 User authenticated:', {
+        id: userDTO.id,
+        email: userDTO.email,
+        plan: userDTO.plan,
+        hasActiveSubscription: session.user.subscriptions.length > 0,
+        subscriptionPlan: session.user.subscriptions[0]?.planId || 'none',
+      })
+
+      return userDTO
+    } catch (error) {
+      console.error('[AUTH] validateSession error:', error)
       return null
     }
-
-    if (!session.user.isActive) {
-      return null
-    }
-
-    const userDTO = UserMapper.prismaToDTO(session.user)
-
-    // eslint-disable-next-line no-console
-    console.log('🔐 User authenticated:', {
-      id: userDTO.id,
-      email: userDTO.email,
-      plan: userDTO.plan,
-      hasActiveSubscription: session.user.subscriptions.length > 0,
-      subscriptionPlan: session.user.subscriptions[0]?.planId || 'none',
-    })
-
-    return userDTO
   }
 
   // Bu metot çıkış yapar.

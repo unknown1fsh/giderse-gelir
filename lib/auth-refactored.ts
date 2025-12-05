@@ -13,13 +13,22 @@ export async function getCurrentUser(request: NextRequest): Promise<UserDTO | nu
     const token = request.cookies.get('auth-token')?.value
 
     if (!token) {
+      // eslint-disable-next-line no-console
+      console.log('[AUTH] Token bulunamadı - cookie yok')
       return null
     }
 
     const authService = new AuthService(prisma)
-    return await authService.validateSession(token)
+    const user = await authService.validateSession(token)
+
+    if (!user) {
+      // eslint-disable-next-line no-console
+      console.log('[AUTH] Session doğrulanamadı - token geçersiz veya session aktif değil')
+    }
+
+    return user
   } catch (error) {
-    console.error('Get current user error:', error)
+    console.error('[AUTH] Get current user error:', error)
     return null
   }
 }
@@ -41,15 +50,22 @@ export async function setAuthCookie(token: string, expiresAt: Date): Promise<voi
   const cookieStore = await cookies()
   // Railway'da HTTPS kullanıldığı için secure flag'i kontrol et
   const isProduction = process.env.NODE_ENV === 'production'
-  const isSecure = isProduction || process.env.NEXTAUTH_URL?.startsWith('https://')
+  const isSecure = isProduction || process.env.NEXTAUTH_URL?.startsWith('https://') || false
 
   cookieStore.set('auth-token', token, {
     expires: expiresAt,
     httpOnly: true,
-    secure: isSecure ?? false,
-    sameSite: isSecure ? 'lax' : 'lax',
+    secure: isSecure,
+    sameSite: 'lax',
     path: '/',
     // Railway için domain ayarı gerekmez (otomatik)
+  })
+
+  // eslint-disable-next-line no-console
+  console.log('[AUTH] Cookie ayarlandı:', {
+    secure: isSecure,
+    expires: expiresAt.toISOString(),
+    isProduction,
   })
 }
 

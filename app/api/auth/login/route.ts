@@ -22,7 +22,8 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     )
   }
 
-  const { email, password } = await request.json()
+  const body = (await request.json()) as { email?: string; password?: string }
+  const { email, password } = body
 
   if (!email || !password) {
     throw new BadRequestError('E-posta ve şifre gereklidir')
@@ -41,7 +42,7 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
   // Cookie ayarla
   await setAuthCookie(result.session.token, result.session.expiresAt)
 
-  return NextResponse.json(
+  const response = NextResponse.json(
     {
       success: true,
       user: result.user,
@@ -50,4 +51,17 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     },
     { status: 200 }
   )
+
+  // Cookie'nin response header'ında olduğunu doğrula
+  const cookieHeader = response.headers.get('set-cookie')
+  // eslint-disable-next-line no-console
+  if (cookieHeader) {
+    // eslint-disable-next-line no-console
+    console.log("[AUTH] Cookie response header'da ayarlandı")
+  } else {
+    // eslint-disable-next-line no-console
+    console.warn("[AUTH] UYARI: Cookie response header'da yok!")
+  }
+
+  return response
 })

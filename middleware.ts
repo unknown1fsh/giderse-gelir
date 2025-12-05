@@ -26,6 +26,11 @@ const authRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password', '/
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Health check endpoint'i middleware'den geçmeden direkt dönsün
+  if (pathname === '/api/health') {
+    return NextResponse.next()
+  }
+
   // Production'da HTTPS kontrolü
   if (process.env.NODE_ENV === 'production') {
     const protocol = request.headers.get('x-forwarded-proto') || request.nextUrl.protocol

@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ArrowLeft, Download } from 'lucide-react'
+import { Download, MessageSquare } from 'lucide-react'
 import FileUpload from '@/components/help/file-upload'
+import NavigationButtons from '@/components/help/navigation-buttons'
 
 interface Ticket {
   id: number
@@ -68,8 +67,12 @@ function formatDate(dateString: string) {
 }
 
 function formatFileSize(bytes: number) {
-  if (bytes < 1024) return bytes + ' B'
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB'
+  if (bytes < 1024) {
+    return bytes + ' B'
+  }
+  if (bytes < 1024 * 1024) {
+    return (bytes / 1024).toFixed(2) + ' KB'
+  }
   return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
 }
 
@@ -87,7 +90,7 @@ export default function TicketDetailPage() {
     setLoading(true)
     try {
       const response = await fetch(`/api/help/tickets/${params.id}`)
-      const result = await response.json() as { success: boolean; data?: Ticket }
+      const result = (await response.json()) as { success: boolean; data?: Ticket }
 
       if (result.success && result.data) {
         setTicket(result.data)
@@ -130,16 +133,23 @@ export default function TicketDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <Link href="/help/tickets">
-          <Button variant="outline" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{ticket.subject}</h1>
-          <p className="text-gray-600 mt-1">Talep No: {ticket.ticketNumber}</p>
+    <div className="space-y-6 pb-8">
+      {/* Navigation Buttons */}
+      <NavigationButtons backHref="/help/tickets" backLabel="Destek Taleplerine Dön" />
+
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 p-8 md:p-12 text-white shadow-2xl">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20" />
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+              <MessageSquare className="h-8 w-8" />
+            </div>
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-2">{ticket.subject}</h1>
+              <p className="text-lg md:text-xl text-white/90">Talep No: {ticket.ticketNumber}</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -149,9 +159,7 @@ export default function TicketDetailPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Talep Detayları</CardTitle>
-                <Badge className={statusColors[ticket.status]}>
-                  {statusLabels[ticket.status]}
-                </Badge>
+                <Badge className={statusColors[ticket.status]}>{statusLabels[ticket.status]}</Badge>
               </div>
               <CardDescription>
                 {ticket.category.name} • {formatDate(ticket.createdAt)}
@@ -176,7 +184,9 @@ export default function TicketDetailPage() {
                     >
                       <div>
                         <p className="text-sm font-medium">{attachment.fileName}</p>
-                        <p className="text-xs text-gray-500">{formatFileSize(attachment.fileSize)}</p>
+                        <p className="text-xs text-gray-500">
+                          {formatFileSize(attachment.fileSize)}
+                        </p>
                       </div>
                       <a
                         href={attachment.filePath}
@@ -225,7 +235,12 @@ export default function TicketDetailPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <FileUpload ticketId={ticket.id} onUploadSuccess={() => { void fetchTicket() }} />
+                <FileUpload
+                  ticketId={ticket.id}
+                  onUploadSuccess={() => {
+                    void fetchTicket()
+                  }}
+                />
               </CardContent>
             </Card>
           )}
@@ -239,9 +254,7 @@ export default function TicketDetailPage() {
             <CardContent className="space-y-3">
               <div>
                 <p className="text-sm text-gray-500">Durum</p>
-                <Badge className={statusColors[ticket.status]}>
-                  {statusLabels[ticket.status]}
-                </Badge>
+                <Badge className={statusColors[ticket.status]}>{statusLabels[ticket.status]}</Badge>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Öncelik</p>
@@ -270,4 +283,3 @@ export default function TicketDetailPage() {
     </div>
   )
 }
-

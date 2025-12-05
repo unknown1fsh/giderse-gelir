@@ -12,9 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Plus } from 'lucide-react'
 
 interface Category {
   id: number
@@ -43,7 +42,7 @@ export default function TicketForm({ onSuccess }: TicketFormProps) {
     const fetchCategories = async () => {
       try {
         const response = await fetch('/api/help/categories')
-        const result = await response.json() as { success: boolean; data?: Category[] }
+        const result = (await response.json()) as { success: boolean; data?: Category[] }
 
         if (result.success && result.data) {
           setCategories(result.data)
@@ -74,7 +73,11 @@ export default function TicketForm({ onSuccess }: TicketFormProps) {
         }),
       })
 
-      const result = await response.json() as { success: boolean; data?: { id: number }; error?: string }
+      const result = (await response.json()) as {
+        success: boolean
+        data?: { id: number }
+        error?: string
+      }
 
       if (result.success && result.data) {
         if (onSuccess) {
@@ -94,90 +97,93 @@ export default function TicketForm({ onSuccess }: TicketFormProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Yeni Destek Talebi</CardTitle>
-        <CardDescription>
-          Sorununuzu detaylı bir şekilde açıklayın, size en kısa sürede yardımcı olacağız.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={(e) => { void handleSubmit(e) }} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="category">Kategori *</Label>
-            <Select
-              value={formData.categoryId}
-              onValueChange={value => setFormData(prev => ({ ...prev, categoryId: value }))}
-              required
-            >
-              <SelectTrigger id="category">
-                <SelectValue placeholder="Kategori seçin" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map(category => (
-                  <SelectItem key={category.id} value={category.id.toString()}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+    <div>
+      <form
+        onSubmit={e => {
+          void handleSubmit(e)
+        }}
+        className="space-y-6"
+      >
+        <div className="space-y-2">
+          <Label htmlFor="category">Kategori *</Label>
+          <Select
+            value={formData.categoryId}
+            onValueChange={value => setFormData(prev => ({ ...prev, categoryId: value }))}
+            required
+          >
+            <SelectTrigger id="category">
+              <SelectValue placeholder="Kategori seçin" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map(category => (
+                <SelectItem key={category.id} value={category.id.toString()}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="subject">Konu *</Label>
-            <Input
-              id="subject"
-              value={formData.subject}
-              onChange={e => setFormData(prev => ({ ...prev, subject: e.target.value }))}
-              placeholder="Sorununuzu kısaca özetleyin"
-              required
-              maxLength={500}
-            />
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="subject">Konu *</Label>
+          <Input
+            id="subject"
+            value={formData.subject}
+            onChange={e => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+            placeholder="Sorununuzu kısaca özetleyin"
+            required
+            maxLength={500}
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Açıklama *</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Sorununuzu detaylı bir şekilde açıklayın..."
-              required
-              rows={6}
-            />
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="description">Açıklama *</Label>
+          <Textarea
+            id="description"
+            value={formData.description}
+            onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            placeholder="Sorununuzu detaylı bir şekilde açıklayın..."
+            required
+            rows={6}
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="priority">Öncelik</Label>
-            <Select
-              value={formData.priority}
-              onValueChange={value => setFormData(prev => ({ ...prev, priority: value }))}
-            >
-              <SelectTrigger id="priority">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Düşük</SelectItem>
-                <SelectItem value="medium">Orta</SelectItem>
-                <SelectItem value="high">Yüksek</SelectItem>
-                <SelectItem value="urgent">Acil</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="priority">Öncelik</Label>
+          <Select
+            value={formData.priority}
+            onValueChange={value => setFormData(prev => ({ ...prev, priority: value }))}
+          >
+            <SelectTrigger id="priority">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">Düşük</SelectItem>
+              <SelectItem value="medium">Orta</SelectItem>
+              <SelectItem value="high">Yüksek</SelectItem>
+              <SelectItem value="urgent">Acil</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Gönderiliyor...
-              </>
-            ) : (
-              'Destek Talebi Oluştur'
-            )}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+        <Button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Gönderiliyor...
+            </>
+          ) : (
+            <>
+              <Plus className="h-4 w-4 mr-2" />
+              Destek Talebi Oluştur
+            </>
+          )}
+        </Button>
+      </form>
+    </div>
   )
 }
-

@@ -9,6 +9,7 @@ import SearchBar from '@/components/help/search-bar'
 import CategoryTabs from '@/components/help/category-tabs'
 import StatsCards from '@/components/help/stats-cards'
 import { MessageSquare, BookOpen, Plus, HelpCircle, Sparkles } from 'lucide-react'
+import NavigationButtons from '@/components/help/navigation-buttons'
 
 interface FAQ {
   id: number
@@ -87,6 +88,9 @@ export default function HelpPage() {
 
   return (
     <div className="space-y-8 pb-8">
+      {/* Navigation Buttons */}
+      <NavigationButtons backHref="/dashboard" backLabel="Dashboard'a Dön" />
+
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 p-8 md:p-12 text-white shadow-2xl">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20" />

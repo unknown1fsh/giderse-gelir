@@ -8,6 +8,7 @@ import {
   AutoPayment,
 } from '@prisma/client'
 import { getReportLevelForPlan } from '@/lib/ai-report-limit'
+import { OpenAIService } from '@/server/services/OpenAIService'
 
 export interface AIReportData {
   summary: {
@@ -79,9 +80,24 @@ export interface AIReportData {
 
 export class AIAnalysisService {
   private prisma: PrismaClient
+  private openAIService: OpenAIService | null
 
   constructor(prisma: PrismaClient) {
     this.prisma = prisma
+    // OpenAI servisini başlat (API key yoksa null olur, hata durumunda exception fırlatılır)
+    try {
+      this.openAIService = new OpenAIService()
+    } catch (error) {
+      console.error('OpenAI servisi başlatılamadı:', error)
+      this.openAIService = null
+      // Plan'a göre fallback olmayacak, exception fırlatılacak
+      if (error instanceof Error && error.message.includes('OPENAI_API_KEY')) {
+        throw new Error(
+          "OpenAI API anahtarı yapılandırılmamış. Lütfen OPENAI_API_KEY environment variable'ını ayarlayın."
+        )
+      }
+      throw error
+    }
   }
 
   /**
@@ -220,7 +236,7 @@ export class AIAnalysisService {
   /**
    * Premium seviyesi rapor oluşturur
    */
-  private generatePremiumReport(
+  private async generatePremiumReport(
     data: Awaited<ReturnType<typeof this.collectFinancialData>>,
     _userId: number
   ): Promise<AIReportData> {
@@ -285,11 +301,23 @@ export class AIAnalysisService {
     )
 
     // AI Önerileri (5-10 adet)
-    const insights = this.generatePremiumInsights(
+    const insights = await this.generatePremiumInsights(
       thisMonthIncome,
       thisMonthExpense,
       categoryAnalysis,
-      savingsRate
+      savingsRate,
+      {
+        cashFlow,
+        creditCardDebt: data.creditCards.reduce(
+          (sum, card) => sum + Number(card.limitAmount) - Number(card.availableLimit),
+          0
+        ),
+        investmentValue: data.investments.reduce(
+          (sum, inv) => sum + Number(inv.currentValue || 0),
+          0
+        ),
+        totalAccounts: data.accounts.length,
+      }
     )
 
     return {
@@ -317,21 +345,17 @@ export class AIAnalysisService {
     const premiumReport = await this.generatePremiumReport(data, userId)
 
     // Enterprise ekstra analizler
-    const riskAnalysis = this.calculateRiskAnalysis(data)
-    const predictions = this.generatePredictions(
-      data.transactions as Array<{
-        txType: { code: string }
-        category: { name: string }
-        amount: number | string | bigint
-        transactionDate: Date | string
-      }>,
+    const riskAnalysis = await this.calculateRiskAnalysis(data)
+    const predictions = await this.generatePredictions(
+      premiumReport.cashFlow,
+      premiumReport.summary,
       3
     )
 
     // 15-20 AI önerisi
     const enterpriseInsights = [
       ...premiumReport.insights,
-      ...this.generateEnterpriseInsights(data, premiumReport),
+      ...(await this.generateEnterpriseInsights(data, premiumReport)),
     ]
 
     return {
@@ -352,13 +376,17 @@ export class AIAnalysisService {
     const enterpriseReport = await this.generateEnterpriseReport(data, userId)
 
     // Enterprise Premium ekstra analizler
-    const advancedPredictions = this.generatePredictions(data.transactions, 6)
-    const benchmarks = this.generateBenchmarks(enterpriseReport)
+    const advancedPredictions = await this.generatePredictions(
+      enterpriseReport.cashFlow,
+      enterpriseReport.summary,
+      6
+    )
+    const benchmarks = await this.generateBenchmarks(enterpriseReport)
 
     // 30+ AI önerisi
     const premiumInsights = [
       ...enterpriseReport.insights,
-      ...this.generateEnterprisePremiumInsights(data, enterpriseReport),
+      ...(await this.generateEnterprisePremiumInsights(data, enterpriseReport)),
     ]
 
     return {
@@ -415,146 +443,159 @@ export class AIAnalysisService {
   /**
    * Premium seviyesi AI önerileri
    */
-  private generatePremiumInsights(
+  private async generatePremiumInsights(
     income: number,
     expense: number,
     categoryAnalysis: Array<{ category: string; amount: number; percentage: number }>,
-    savingsRate: number
-  ): Array<{
-    type: 'savings' | 'optimization' | 'investment' | 'risk' | 'trend'
-    title: string
-    description: string
-    priority: 'high' | 'medium' | 'low'
-    impact: string
-  }> {
-    const insights = []
-
-    // Tasarruf oranı düşükse
-    if (savingsRate < 10) {
-      insights.push({
-        type: 'savings' as const,
-        title: 'Tasarruf Oranınızı Artırın',
-        description: `Şu anki tasarruf oranınız %${savingsRate.toFixed(1)}. Finansal güvenlik için en az %20 tasarruf hedefleyin.`,
-        priority: 'high' as const,
-        impact: 'Aylık ortalama ₺2,000-5,000 ek tasarruf potansiyeli',
-      })
+    savingsRate: number,
+    additionalData: {
+      cashFlow: Array<{ month: string; income: number; expense: number; balance: number }>
+      creditCardDebt?: number
+      investmentValue?: number
+      totalAccounts?: number
+    }
+  ): Promise<
+    Array<{
+      type: 'savings' | 'optimization' | 'investment' | 'risk' | 'trend'
+      title: string
+      description: string
+      priority: 'high' | 'medium' | 'low'
+      impact: string
+    }>
+  > {
+    if (!this.openAIService) {
+      throw new Error('OpenAI servisi kullanılamıyor')
     }
 
-    // En yüksek harcama kategorisine öneri
-    if (categoryAnalysis.length > 0) {
-      const topCategory = categoryAnalysis[0]
-      insights.push({
-        type: 'optimization' as const,
-        title: `${topCategory.category} Harcamalarınızı Optimize Edin`,
-        description: `Bu kategori toplam harcamalarınızın %${topCategory.percentage.toFixed(1)}'ini oluşturuyor. Alternatif çözümler araştırın.`,
-        priority: 'medium' as const,
-        impact: `%10-15 tasarruf ile aylık ₺${Math.round(topCategory.amount * 0.12)} kazanç`,
-      })
-    }
+    try {
+      const financialData = {
+        summary: {
+          totalIncome: income,
+          totalExpense: expense,
+          netAmount: income - expense,
+          savingsRate,
+        },
+        categoryAnalysis,
+        topCategories: categoryAnalysis.slice(0, 10).map(cat => ({
+          category: cat.category,
+          amount: cat.amount,
+        })),
+        cashFlow: additionalData.cashFlow,
+        creditCardDebt: additionalData.creditCardDebt,
+        investmentValue: additionalData.investmentValue,
+        totalAccounts: additionalData.totalAccounts,
+      }
 
-    // Gelir artırma önerisi
-    if (expense > income * 0.9) {
-      insights.push({
-        type: 'optimization' as const,
-        title: 'Gelir Artırma Stratejileri',
-        description: 'Harcamalarınız gelirinize çok yakın. Gelir artırma fırsatları araştırın.',
-        priority: 'high' as const,
-        impact: 'Yan gelir kaynakları ile %10-20 gelir artışı mümkün',
-      })
+      const insights = await this.openAIService.generateInsights(financialData)
+      return insights.slice(0, 10)
+    } catch (error) {
+      console.error('OpenAI generatePremiumInsights error:', error)
+      throw error
     }
-
-    // Yatırım önerisi
-    if (savingsRate > 15) {
-      insights.push({
-        type: 'investment' as const,
-        title: 'Tasarruflarınızı Değerlendirin',
-        description:
-          'İyi bir tasarruf oranına sahipsiniz. Tasarruflarınızı yatırıma dönüştürmeyi düşünün.',
-        priority: 'medium' as const,
-        impact: 'Uzun vadede %8-12 getiri potansiyeli',
-      })
-    }
-
-    return insights.slice(0, 10)
   }
 
   /**
    * Enterprise seviyesi AI önerileri
    */
-  private generateEnterpriseInsights(
-    _data: Awaited<ReturnType<typeof this.collectFinancialData>>,
-    _premiumReport: AIReportData
-  ): Array<{
-    type: 'savings' | 'optimization' | 'investment' | 'risk' | 'trend'
-    title: string
-    description: string
-    priority: 'high' | 'medium' | 'low'
-    impact: string
-  }> {
-    const insights = []
+  private async generateEnterpriseInsights(
+    data: Awaited<ReturnType<typeof this.collectFinancialData>>,
+    premiumReport: AIReportData
+  ): Promise<
+    Array<{
+      type: 'savings' | 'optimization' | 'investment' | 'risk' | 'trend'
+      title: string
+      description: string
+      priority: 'high' | 'medium' | 'low'
+      impact: string
+    }>
+  > {
+    if (!this.openAIService) {
+      throw new Error('OpenAI servisi kullanılamıyor')
+    }
 
-    // Bütçe performans analizi
-    insights.push({
-      type: 'optimization' as const,
-      title: 'Bütçe Performans Analizi',
-      description:
-        'Detaylı bütçe analizi ile departman bazlı optimizasyon fırsatları tespit edildi.',
-      priority: 'high' as const,
-      impact: 'Kurumsal seviyede %15-20 maliyet optimizasyonu',
-    })
+    try {
+      const totalCardDebt = data.creditCards.reduce(
+        (sum, card) => sum + Number(card.limitAmount) - Number(card.availableLimit),
+        0
+      )
+      const investmentValue = data.investments.reduce(
+        (sum, inv) => sum + Number(inv.currentValue || 0),
+        0
+      )
 
-    // Nakit akış optimizasyonu
-    insights.push({
-      type: 'optimization' as const,
-      title: 'Nakit Akış Optimizasyonu',
-      description: 'Nakit akış analizi ile ödeme planlarınızı optimize edebilirsiniz.',
-      priority: 'medium' as const,
-      impact: 'Ödeme planlaması ile %5-8 nakit akış iyileştirmesi',
-    })
+      const financialData = {
+        summary: premiumReport.summary,
+        categoryAnalysis: premiumReport.categoryAnalysis,
+        topCategories: premiumReport.topCategories,
+        cashFlow: premiumReport.cashFlow,
+        creditCardDebt: totalCardDebt,
+        investmentValue,
+        totalAccounts: data.accounts.length,
+      }
 
-    return insights
+      // Enterprise için daha fazla öneri
+      const insights = await this.openAIService.generateInsights(financialData)
+      return insights.slice(0, 10) // Premium'dan fazla 10 öneri daha
+    } catch (error) {
+      console.error('OpenAI generateEnterpriseInsights error:', error)
+      throw error
+    }
   }
 
   /**
    * Enterprise Premium seviyesi AI önerileri
    */
-  private generateEnterprisePremiumInsights(
-    _data: Awaited<ReturnType<typeof this.collectFinancialData>>,
-    _enterpriseReport: AIReportData
-  ): Array<{
-    type: 'savings' | 'optimization' | 'investment' | 'risk' | 'trend'
-    title: string
-    description: string
-    priority: 'high' | 'medium' | 'low'
-    impact: string
-  }> {
-    const insights = []
+  private async generateEnterprisePremiumInsights(
+    data: Awaited<ReturnType<typeof this.collectFinancialData>>,
+    enterpriseReport: AIReportData
+  ): Promise<
+    Array<{
+      type: 'savings' | 'optimization' | 'investment' | 'risk' | 'trend'
+      title: string
+      description: string
+      priority: 'high' | 'medium' | 'low'
+      impact: string
+    }>
+  > {
+    if (!this.openAIService) {
+      throw new Error('OpenAI servisi kullanılamıyor')
+    }
 
-    // Çok boyutlu analiz önerileri
-    insights.push({
-      type: 'optimization' as const,
-      title: 'Holding Yapısı Optimizasyonu',
-      description: 'Çoklu şirket konsolidasyonu ile grup bazlı optimizasyon fırsatları belirlendi.',
-      priority: 'high' as const,
-      impact: 'Grup genelinde %20-25 maliyet optimizasyonu potansiyeli',
-    })
+    try {
+      const totalCardDebt = data.creditCards.reduce(
+        (sum, card) => sum + Number(card.limitAmount) - Number(card.availableLimit),
+        0
+      )
+      const investmentValue = data.investments.reduce(
+        (sum, inv) => sum + Number(inv.currentValue || 0),
+        0
+      )
 
-    // Senaryo analizleri
-    insights.push({
-      type: 'trend' as const,
-      title: 'Senaryo Analizi Önerisi',
-      description: 'Farklı senaryolara göre finansal durumunuzu simüle edin.',
-      priority: 'medium' as const,
-      impact: 'Risk yönetimi ve stratejik planlama için kritik',
-    })
+      const financialData = {
+        summary: enterpriseReport.summary,
+        categoryAnalysis: enterpriseReport.categoryAnalysis,
+        topCategories: enterpriseReport.topCategories,
+        cashFlow: enterpriseReport.cashFlow,
+        creditCardDebt: totalCardDebt,
+        investmentValue,
+        totalAccounts: data.accounts.length,
+      }
 
-    return insights
+      // Enterprise Premium için daha fazla öneri (15+)
+      const insights = await this.openAIService.generateInsights(financialData)
+      return insights.slice(0, 15) // Enterprise'dan fazla 15 öneri daha
+    } catch (error) {
+      console.error('OpenAI generateEnterprisePremiumInsights error:', error)
+      throw error
+    }
   }
 
   /**
    * Risk analizi
    */
-  private calculateRiskAnalysis(data: Awaited<ReturnType<typeof this.collectFinancialData>>): {
+  private async calculateRiskAnalysis(
+    data: Awaited<ReturnType<typeof this.collectFinancialData>>
+  ): Promise<{
     overallRisk: 'low' | 'medium' | 'high'
     riskFactors: Array<{
       factor: string
@@ -562,73 +603,81 @@ export class AIAnalysisService {
       description: string
     }>
     mitigation: string[]
-  } {
-    const riskFactors: Array<{
-      factor: string
-      level: 'low' | 'medium' | 'high'
-      description: string
-    }> = []
-
-    // Kredi kartı borç riski
-    const totalCardDebt = data.creditCards.reduce(
-      (sum, card) => sum + Number(card.limitAmount) - Number(card.availableLimit),
-      0
-    )
-    if (totalCardDebt > 0) {
-      riskFactors.push({
-        factor: 'Kredi Kartı Borcu',
-        level: totalCardDebt > 50000 ? 'high' : 'medium',
-        description: `Toplam kredi kartı borcunuz: ₺${totalCardDebt.toLocaleString('tr-TR')}`,
-      })
+  }> {
+    if (!this.openAIService) {
+      throw new Error('OpenAI servisi kullanılamıyor')
     }
 
-    // Nakit akış riski
-    const recentTransactions = data.transactions.slice(0, 30)
-    const expenses = recentTransactions
-      .filter(t => t.txType.code === 'GIDER')
-      .reduce((sum, t) => sum + Number(t.amount), 0)
-    const income = recentTransactions
-      .filter(t => t.txType.code === 'GELIR')
-      .reduce((sum, t) => sum + Number(t.amount), 0)
+    try {
+      const totalCardDebt = data.creditCards.reduce(
+        (sum, card) => sum + Number(card.limitAmount) - Number(card.availableLimit),
+        0
+      )
+      const investmentValue = data.investments.reduce(
+        (sum, inv) => sum + Number(inv.currentValue || 0),
+        0
+      )
 
-    if (expenses > income * 1.1) {
-      riskFactors.push({
-        factor: 'Nakit Akış Riski',
-        level: 'high',
-        description: 'Harcamalarınız gelirinizden fazla. Acil önlem alınmalı.',
+      // Son 3 ayın nakit akışını hesapla
+      const now = new Date()
+      const cashFlow: Array<{ month: string; income: number; expense: number; balance: number }> =
+        []
+      for (let i = 2; i >= 0; i--) {
+        const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1)
+        const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0)
+
+        const monthTransactions = data.transactions.filter(
+          t => new Date(t.transactionDate) >= monthStart && new Date(t.transactionDate) <= monthEnd
+        )
+
+        const income = monthTransactions
+          .filter(t => t.txType.code === 'GELIR')
+          .reduce((sum, t) => sum + Number(t.amount), 0)
+        const expense = monthTransactions
+          .filter(t => t.txType.code === 'GIDER')
+          .reduce((sum, t) => sum + Number(t.amount), 0)
+
+        cashFlow.push({
+          month: `${monthStart.getFullYear()}-${String(monthStart.getMonth() + 1).padStart(2, '0')}`,
+          income,
+          expense,
+          balance: income - expense,
+        })
+      }
+
+      const avgIncome = cashFlow.reduce((sum, m) => sum + m.income, 0) / cashFlow.length
+      const avgExpense = cashFlow.reduce((sum, m) => sum + m.expense, 0) / cashFlow.length
+      const netAmount = avgIncome - avgExpense
+      const savingsRate = avgIncome > 0 ? (netAmount / avgIncome) * 100 : 0
+
+      const riskAnalysis = await this.openAIService.generateRiskAnalysis({
+        summary: {
+          totalIncome: avgIncome,
+          totalExpense: avgExpense,
+          netAmount,
+          savingsRate,
+        },
+        creditCardDebt: totalCardDebt,
+        cashFlow,
+        investmentValue,
+        totalAccounts: data.accounts.length,
       })
-    }
 
-    const overallRisk =
-      riskFactors.filter(f => f.level === 'high').length > 0
-        ? 'high'
-        : riskFactors.filter(f => f.level === 'medium').length > 0
-          ? 'medium'
-          : 'low'
-
-    return {
-      overallRisk,
-      riskFactors,
-      mitigation: [
-        'Acil fon oluşturun (3-6 aylık giderler)',
-        'Kredi kartı borçlarını önceliklendirin',
-        'Gereksiz harcamaları kesin',
-      ],
+      return riskAnalysis
+    } catch (error) {
+      console.error('OpenAI calculateRiskAnalysis error:', error)
+      throw error
     }
   }
 
   /**
    * Gelecek tahminleri
    */
-  private generatePredictions(
-    transactions: Array<{
-      txType: { code: string }
-      category: { name: string }
-      amount: number | string | bigint
-      transactionDate: Date | string
-    }>,
+  private async generatePredictions(
+    cashFlow: Array<{ month: string; income: number; expense: number; balance: number }>,
+    summary: { totalIncome: number; totalExpense: number; savingsRate: number },
     months: number
-  ): {
+  ): Promise<{
     next3Months: Array<{
       month: string
       predictedIncome: number
@@ -636,97 +685,79 @@ export class AIAnalysisService {
       confidence: number
     }>
     recommendations: string[]
-  } {
-    const now = new Date()
-    const predictions = []
-
-    // Son 3 ayın ortalaması
-    const recentMonths = []
-    for (let i = 1; i <= 3; i++) {
-      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0)
-
-      const monthTransactions = transactions.filter(
-        t => new Date(t.transactionDate) >= monthStart && new Date(t.transactionDate) <= monthEnd
-      )
-
-      const income = monthTransactions
-        .filter(t => t.txType.code === 'GELIR')
-        .reduce((sum, t) => sum + Number(t.amount), 0)
-      const expense = monthTransactions
-        .filter(t => t.txType.code === 'GIDER')
-        .reduce((sum, t) => sum + Number(t.amount), 0)
-
-      recentMonths.push({ income, expense })
+  }> {
+    if (!this.openAIService) {
+      throw new Error('OpenAI servisi kullanılamıyor')
     }
 
-    const avgIncome = recentMonths.reduce((sum, m) => sum + m.income, 0) / recentMonths.length
-    const avgExpense = recentMonths.reduce((sum, m) => sum + m.expense, 0) / recentMonths.length
-
-    // Tahminler
-    for (let i = 1; i <= months; i++) {
-      const futureMonth = new Date(now.getFullYear(), now.getMonth() + i, 1)
-      predictions.push({
-        month: `${futureMonth.getFullYear()}-${String(futureMonth.getMonth() + 1).padStart(2, '0')}`,
-        predictedIncome: avgIncome * (1 + 0.02 * i), // %2 aylık artış varsayımı
-        predictedExpense: avgExpense * (1 + 0.03 * i), // %3 aylık artış varsayımı (enflasyon)
-        confidence: Math.max(60, 85 - i * 5), // Zamanla güven azalır
+    try {
+      const predictions = await this.openAIService.generatePredictions({
+        cashFlow,
+        summary,
       })
-    }
 
-    return {
-      next3Months: predictions as Array<{
-        month: string
-        predictedIncome: number
-        predictedExpense: number
-        confidence: number
-      }>,
-      recommendations: [
-        'Tahminlere göre gelecek aylarda bütçenizi gözden geçirin',
-        'Enflasyon etkisini göz önünde bulundurun',
-        'Gelir artırma stratejileri geliştirin',
-      ],
+      // İstenen ay sayısına göre ayarla (OpenAI her zaman 3 ay döner, biz 6 ay isteyebiliriz)
+      if (months > 3) {
+        // Ek aylar için basit ekstrapolasyon
+        const lastPrediction = predictions.next3Months[predictions.next3Months.length - 1]
+        const firstPrediction = predictions.next3Months[0]
+        if (firstPrediction && lastPrediction) {
+          const growthRateIncome =
+            lastPrediction.predictedIncome /
+            (firstPrediction.predictedIncome || lastPrediction.predictedIncome)
+          const growthRateExpense =
+            lastPrediction.predictedExpense /
+            (firstPrediction.predictedExpense || lastPrediction.predictedExpense)
+
+          const now = new Date()
+          for (let i = 3; i < months; i++) {
+            const futureMonth = new Date(now.getFullYear(), now.getMonth() + i + 1, 1)
+            predictions.next3Months.push({
+              month: `${futureMonth.getFullYear()}-${String(futureMonth.getMonth() + 1).padStart(2, '0')}`,
+              predictedIncome: lastPrediction.predictedIncome * Math.pow(growthRateIncome, i - 2),
+              predictedExpense:
+                lastPrediction.predictedExpense * Math.pow(growthRateExpense, i - 2),
+              confidence: Math.max(50, lastPrediction.confidence - (i - 2) * 5),
+            })
+          }
+        }
+      } else {
+        // 3 aydan az ise sadece ilk N ayı al
+        predictions.next3Months = predictions.next3Months.slice(0, months)
+      }
+
+      return predictions
+    } catch (error) {
+      console.error('OpenAI generatePredictions error:', error)
+      throw error
     }
   }
 
   /**
    * Benchmark karşılaştırmaları
    */
-  private generateBenchmarks(report: AIReportData): Array<{
-    category: string
-    yourAverage: number
-    industryAverage: number
-    percentile: number
-  }> {
-    // Örnek benchmark verileri (gerçek uygulamada veritabanından gelecek)
-    const benchmarks = []
-
-    report.topCategories.forEach(cat => {
-      // Örnek industry average'lar (gerçekte AI veya database'den gelecek)
-      const industryAverages: Record<string, number> = {
-        Market: 2500,
-        Fatura: 1800,
-        Ulaşım: 1500,
-        Eğlence: 1200,
-        Giyim: 800,
-      }
-
-      const industryAvg = industryAverages[cat.category] || cat.amount * 0.9
-      const percentile = (cat.amount / industryAvg) * 50 + 50 // Basit hesaplama
-
-      benchmarks.push({
-        category: cat.category,
-        yourAverage: cat.amount,
-        industryAverage: industryAvg,
-        percentile: Math.min(100, Math.max(0, percentile)),
-      })
-    })
-
-    return benchmarks as Array<{
+  private async generateBenchmarks(report: AIReportData): Promise<
+    Array<{
       category: string
       yourAverage: number
       industryAverage: number
       percentile: number
     }>
+  > {
+    if (!this.openAIService) {
+      throw new Error('OpenAI servisi kullanılamıyor')
+    }
+
+    try {
+      const benchmarks = await this.openAIService.generateBenchmarks({
+        topCategories: report.topCategories,
+        summary: report.summary,
+      })
+
+      return benchmarks
+    } catch (error) {
+      console.error('OpenAI generateBenchmarks error:', error)
+      throw error
+    }
   }
 }

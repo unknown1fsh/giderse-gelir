@@ -14,8 +14,8 @@ const requiredEnvVars: EnvVar[] = [
   {
     name: 'DATABASE_URL',
     required: true,
-    description: 'PostgreSQL veritabanı bağlantı URL\'i',
-    validate: (value) => {
+    description: "PostgreSQL veritabanı bağlantı URL'i",
+    validate: value => {
       if (!value.startsWith('postgresql://')) {
         return 'DATABASE_URL postgresql:// ile başlamalıdır'
       }
@@ -26,7 +26,7 @@ const requiredEnvVars: EnvVar[] = [
     name: 'JWT_SECRET',
     required: true,
     description: 'JWT token imzalama için secret key',
-    validate: (value) => {
+    validate: value => {
       if (value.length < 32) {
         return 'JWT_SECRET en az 32 karakter olmalıdır'
       }
@@ -39,8 +39,8 @@ const requiredEnvVars: EnvVar[] = [
   {
     name: 'NEXT_PUBLIC_APP_URL',
     required: true,
-    description: 'Uygulamanın public URL\'i',
-    validate: (value) => {
+    description: "Uygulamanın public URL'i",
+    validate: value => {
       try {
         new URL(value)
         return true
@@ -56,7 +56,7 @@ const optionalEnvVars: EnvVar[] = [
     name: 'RESEND_API_KEY',
     required: false,
     description: 'Resend email servisi API key',
-    validate: (value) => {
+    validate: value => {
       if (value && !value.startsWith('re_')) {
         return 'RESEND_API_KEY re_ ile başlamalıdır'
       }
@@ -82,9 +82,20 @@ const optionalEnvVars: EnvVar[] = [
     name: 'NODE_ENV',
     required: false,
     description: 'Node.js environment (development, production)',
-    validate: (value) => {
+    validate: value => {
       if (value && !['development', 'production', 'test'].includes(value)) {
         return 'NODE_ENV development, production veya test olmalıdır'
+      }
+      return true
+    },
+  },
+  {
+    name: 'OPENAI_API_KEY',
+    required: false,
+    description: 'OpenAI API key (AI Analiz Raporu için)',
+    validate: value => {
+      if (value && !value.startsWith('sk-')) {
+        return 'OPENAI_API_KEY sk- ile başlamalıdır'
       }
       return true
     },
@@ -159,7 +170,7 @@ export function assertEnvironmentValid(): void {
   if (result.errors.length > 0) {
     console.error('❌ Environment Variable Errors:')
     result.errors.forEach(error => console.error(`  - ${error}`))
-    
+
     if (!isDevelopment) {
       // Production'da hata varsa uygulamayı durdur
       throw new Error(`Environment validation failed: ${result.errors.join(', ')}`)
@@ -194,4 +205,3 @@ export function requireEnv(name: string): string {
 export function getEnv(name: string, defaultValue?: string): string | undefined {
   return process.env[name] || defaultValue
 }
-

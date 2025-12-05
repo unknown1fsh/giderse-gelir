@@ -8,12 +8,14 @@ Bu dokümantasyon, GiderSe Gelir uygulaması için gerekli tüm environment vari
 
 **Açıklama:** PostgreSQL veritabanı bağlantı URL'i
 
-**Format:** 
+**Format:**
+
 ```
 postgresql://username:password@host:port/database?schema=public
 ```
 
 **Örnek:**
+
 ```bash
 DATABASE_URL=postgresql://postgres:password@localhost:5432/giderse_gelir?schema=public
 ```
@@ -31,16 +33,19 @@ DATABASE_URL=postgresql://postgres:password@localhost:5432/giderse_gelir?schema=
 **Format:** En az 32 karakter, güçlü random string
 
 **Örnek:**
+
 ```bash
 JWT_SECRET=your-super-secret-jwt-key-change-in-production-minimum-32-characters
 ```
 
 **Oluşturma:**
+
 ```bash
 npm run generate:secret
 ```
 
 **Validation:**
+
 - Minimum 32 karakter
 - Production'da default değer değiştirilmeli
 
@@ -53,6 +58,7 @@ npm run generate:secret
 **Format:** Geçerli URL
 
 **Örnekler:**
+
 ```bash
 # Development
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -72,6 +78,7 @@ NEXT_PUBLIC_APP_URL=https://your-app.railway.app
 **Format:** Geçerli URL
 
 **Örnek:**
+
 ```bash
 NEXTAUTH_URL=https://your-app.railway.app
 ```
@@ -87,6 +94,7 @@ NEXTAUTH_URL=https://your-app.railway.app
 **Format:** Güçlü random string
 
 **Örnek:**
+
 ```bash
 NEXTAUTH_SECRET=your-very-secure-secret-key-here-at-least-32-characters-long
 ```
@@ -98,11 +106,13 @@ NEXTAUTH_SECRET=your-very-secure-secret-key-here-at-least-32-characters-long
 **Açıklama:** Node.js environment
 
 **Olası Değerler:**
+
 - `development` - Geliştirme ortamı
 - `production` - Production ortamı
 - `test` - Test ortamı
 
 **Örnek:**
+
 ```bash
 NODE_ENV=production
 ```
@@ -120,6 +130,7 @@ NODE_ENV=production
 **Format:** `re_` ile başlayan string
 
 **Örnek:**
+
 ```bash
 RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
@@ -139,6 +150,7 @@ RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 **Format:** PayTR'dan alınan merchant ID
 
 **Örnek:**
+
 ```bash
 PAYTR_MERCHANT_ID=123456
 ```
@@ -156,6 +168,7 @@ PAYTR_MERCHANT_ID=123456
 **Format:** PayTR'dan alınan merchant key
 
 **Örnek:**
+
 ```bash
 PAYTR_MERCHANT_KEY=your-merchant-key
 ```
@@ -171,6 +184,7 @@ PAYTR_MERCHANT_KEY=your-merchant-key
 **Format:** PayTR'dan alınan merchant salt
 
 **Örnek:**
+
 ```bash
 PAYTR_MERCHANT_SALT=your-merchant-salt
 ```
@@ -186,6 +200,7 @@ PAYTR_MERCHANT_SALT=your-merchant-salt
 **Varsayılan:** `https://www.paytr.com/odeme`
 
 **Örnek:**
+
 ```bash
 PAYTR_API_URL=https://www.paytr.com/odeme
 ```
@@ -201,6 +216,7 @@ PAYTR_API_URL=https://www.paytr.com/odeme
 **Varsayılan:** `noreply@giderse.com`
 
 **Örnek:**
+
 ```bash
 FROM_EMAIL=noreply@giderse.com
 ```
@@ -216,9 +232,30 @@ FROM_EMAIL=noreply@giderse.com
 **Varsayılan:** `GiderSe Gelir`
 
 **Örnek:**
+
 ```bash
 FROM_NAME=GiderSe Gelir
 ```
+
+---
+
+### OPENAI_API_KEY (Opsiyonel)
+
+**Açıklama:** OpenAI API key (AI Analiz Raporu için)
+
+**Format:** `sk-` ile başlayan string
+
+**Örnek:**
+
+```bash
+OPENAI_API_KEY=sk-your-openai-api-key-here
+```
+
+**Kayıt:** https://platform.openai.com/api-keys
+
+**Kullanım:** AI Analiz Raporu oluşturma (Premium özellik)
+
+**Validation:** `sk-` ile başlamalı
 
 ---
 
@@ -286,4 +323,3 @@ cp env.example .env
 
 **Son Güncelleme:** 2025-01-26
 **Versiyon:** 2.1.1
-

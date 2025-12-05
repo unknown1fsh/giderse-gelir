@@ -89,7 +89,7 @@ async function main() {
   console.log('✅ İşlem türleri eklendi')
 
   // İşlem kategorileri
-  const gelirCategories = await Promise.all([
+  const _gelirCategories = await Promise.all([
     prisma.refTxCategory.upsert({
       where: { txTypeId_code: { txTypeId: txTypes[0].id, code: 'MAAS' } },
       update: {},
@@ -142,7 +142,7 @@ async function main() {
     }),
   ])
 
-  const giderCategories = await Promise.all([
+  const _giderCategories = await Promise.all([
     prisma.refTxCategory.upsert({
       where: { txTypeId_code: { txTypeId: txTypes[1].id, code: 'MARKET' } },
       update: {},
@@ -752,7 +752,7 @@ async function main() {
         paramCode: purity.code,
         paramValue: purity.name,
         displayName: purity.name,
-        description: `${purity.name} - ${purity.purity} ayar`,
+        description: `${purity.name} - ${purity.purity.toString()} ayar`,
         displayOrder: goldPurities.indexOf(purity) + 1,
         metadata: {
           purity: purity.purity.toString(),
@@ -792,7 +792,7 @@ async function main() {
   console.log(`✅ TX_TYPE parametreleri eklendi (${txTypes.length} tür)`)
 
   // TX_CATEGORY parametreleri
-  const categories = await prisma.transactionCategory.findMany()
+  const categories = await prisma.refTxCategory.findMany()
   for (const category of categories) {
     await prisma.systemParameter.upsert({
       where: {
@@ -874,13 +874,13 @@ async function main() {
 
   console.log('\n🎉 Tüm sistem parametreleri eklendi!\n')
 
-  // Demo veriler
-  const tryCurrency = currencies.find(c => c.code === 'TRY')!
-  const usdCurrency = currencies.find(c => c.code === 'USD')!
-  const vadesizType = accountTypes.find(t => t.code === 'VADESIZ')!
-  const dovizType = accountTypes.find(t => t.code === 'DOVIZ')!
-  const ziraatBank = banks.find(b => b.name === 'Ziraat Bankası')!
-  const garantiBank = banks.find(b => b.name === 'Garanti BBVA')!
+  // Demo veriler (şimdilik kullanılmıyor, gelecekte kullanılabilir)
+  // const tryCurrency = currencies.find(c => c.code === 'TRY')!
+  // const usdCurrency = currencies.find(c => c.code === 'USD')!
+  // const vadesizType = accountTypes.find(t => t.code === 'VADESIZ')!
+  // const dovizType = accountTypes.find(t => t.code === 'DOVIZ')!
+  // const ziraatBank = banks.find(b => b.name === 'Ziraat Bankası')!
+  // const garantiBank = banks.find(b => b.name === 'Garanti BBVA')!
 
   // Demo hesaplar (sadece reference data için, user-specific değil)
   console.log('✅ Demo hesaplar atlandı (user-specific olacak)')
@@ -893,16 +893,18 @@ async function main() {
   // Demo altın eşyası (sadece reference data için, user-specific değil)
   console.log('✅ Demo altın eşyaları atlandı (user-specific olacak)')
 
-  // Demo işlemler
-  const maasCategory = gelirCategories.find(c => c.code === 'MAAS')!
-  const marketCategory = giderCategories.find(c => c.code === 'MARKET')!
-  const havaleMethod = paymentMethods.find(m => m.code === 'HAVALE_EFT')!
-  const krediKartiMethod = paymentMethods.find(m => m.code === 'KREDI_KARTI')!
+  // Demo işlemler (şimdilik kullanılmıyor, gelecekte kullanılabilir)
+  // const maasCategory = gelirCategories.find(c => c.code === 'MAAS')!
+  // const marketCategory = giderCategories.find(c => c.code === 'MARKET')!
+  // const havaleMethod = paymentMethods.find(m => m.code === 'HAVALE_EFT')!
+  // const krediKartiMethod = paymentMethods.find(m => m.code === 'KREDI_KARTI')!
 
   // Demo işlemler (sadece reference data için, user-specific değil)
   console.log('✅ Demo işlemler atlandı (user-specific olacak)')
 
   // Demo döviz kurları
+  const tryCurrency = currencies.find(c => c.code === 'TRY')!
+  const usdCurrency = currencies.find(c => c.code === 'USD')!
   await Promise.all([
     prisma.fxRate.create({
       data: {

@@ -188,6 +188,8 @@ model User {
   transactions            Transaction[]
   sessions                UserSession[]
   subscriptions           UserSubscription[]
+  supportTickets          SupportTicket[]
+  supportTicketReplies    SupportTicketReply[]
 
   @@map("user")
 }
@@ -580,4 +582,91 @@ model AIReportUsage {
   @@index([userId, reportDate])
   @@index([status])
   @@map("ai_report_usage")
+}
+
+model FAQ {
+  id           Int      @id @default(autoincrement())
+  question     String   @db.VarChar(500)
+  answer       String   @db.Text
+  category     String?  @db.VarChar(100)
+  displayOrder Int      @default(0) @map("display_order")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, displayOrder])
+  @@index([category])
+  @@map("faq")
+}
+
+model SupportTicketCategory {
+  id          Int              @id @default(autoincrement())
+  name        String           @db.VarChar(100)
+  description String?
+  icon        String?          @db.VarChar(50)
+  color       String?          @db.VarChar(20)
+  isActive    Boolean          @default(true) @map("is_active")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  tickets     SupportTicket[]
+
+  @@index([isActive])
+  @@map("support_ticket_category")
+}
+
+model SupportTicket {
+  id          Int                      @id @default(autoincrement())
+  ticketNumber String                  @unique @map("ticket_number") @db.VarChar(50)
+  userId       Int                     @map("user_id")
+  categoryId   Int                     @map("category_id")
+  subject      String                  @db.VarChar(500)
+  description  String                  @db.Text
+  status       String                  @default("pending") @db.VarChar(20)
+  priority     String                  @default("medium") @db.VarChar(20)
+  createdAt    DateTime                @default(now()) @map("created_at")
+  updatedAt    DateTime                @updatedAt @map("updated_at")
+  resolvedAt   DateTime?               @map("resolved_at")
+  resolvedBy   Int?                    @map("resolved_by")
+  user         User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category     SupportTicketCategory   @relation(fields: [categoryId], references: [id])
+  attachments  SupportTicketAttachment[]
+  replies      SupportTicketReply[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([categoryId])
+  @@index([ticketNumber])
+  @@index([createdAt])
+  @@map("support_ticket")
+}
+
+model SupportTicketAttachment {
+  id         Int           @id @default(autoincrement())
+  ticketId   Int           @map("ticket_id")
+  fileName   String        @map("file_name") @db.VarChar(255)
+  filePath   String        @map("file_path") @db.VarChar(500)
+  fileSize   Int           @map("file_size")
+  mimeType   String        @map("mime_type") @db.VarChar(100)
+  uploadedAt DateTime      @default(now()) @map("uploaded_at")
+  ticket     SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@map("support_ticket_attachment")
+}
+
+model SupportTicketReply {
+  id         Int           @id @default(autoincrement())
+  ticketId   Int           @map("ticket_id")
+  userId     Int           @map("user_id")
+  message    String        @db.Text
+  isInternal Boolean       @default(false) @map("is_internal")
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+  ticket     SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("support_ticket_reply")
 }

@@ -25,7 +25,7 @@ export async function sendVerificationEmail(
   const verificationUrl = `${APP_URL}/auth/verify-email?token=${token}`
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: email,
       subject: 'E-posta Adresinizi Doğrulayın',
@@ -116,7 +116,7 @@ export async function sendWelcomeEmail(
   }
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: email,
       subject: 'GiderSe Gelir\'e Hoş Geldiniz! 🎉',
@@ -212,7 +212,7 @@ export async function sendPasswordResetEmail(
   const resetUrl = `${APP_URL}/auth/reset-password?token=${resetToken}`
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: email,
       subject: 'Şifre Sıfırlama İsteği',
@@ -270,6 +270,397 @@ ${resetUrl}
 Bu link 1 saat içinde geçerliliğini yitirecektir.
 
 Bu e-postayı siz talep etmediyseniz, lütfen görmezden gelin.
+
+© ${new Date().getFullYear()} GiderSe Gelir. Tüm hakları saklıdır.
+      `.trim(),
+    })
+
+    if (error) {
+      console.error('Resend email error:', error)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Email gönderme hatası:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Email gönderilemedi',
+    }
+  }
+}
+
+/**
+ * Destek talebi oluşturulduğunda kullanıcıya onay emaili gönderir
+ */
+export async function sendSupportTicketCreatedEmail(
+  email: string,
+  name: string,
+  ticketNumber: string,
+  subject: string
+): Promise<{ success: boolean; error?: string }> {
+  if (!resend) {
+    console.warn('Resend API key bulunamadı, email gönderilmedi')
+    return { success: false, error: 'Email servisi yapılandırılmamış' }
+  }
+
+  const ticketUrl = `${APP_URL}/help/tickets/${ticketNumber}`
+
+  try {
+    const { error } = await resend.emails.send({
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      to: email,
+      subject: `Destek Talebiniz Alındı - ${ticketNumber}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1 style="color: white; margin: 0; font-size: 28px;">GiderSe Gelir</h1>
+            </div>
+            
+            <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+              <h2 style="color: #333; margin-top: 0;">Merhaba ${name},</h2>
+              
+              <p style="color: #666; font-size: 16px;">
+                Destek talebiniz başarıyla alındı. En kısa sürede size dönüş yapacağız.
+              </p>
+              
+              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
+                <p style="margin: 0; color: #333; font-weight: bold;">Talep Numarası:</p>
+                <p style="margin: 5px 0 0 0; color: #667eea; font-size: 18px; font-weight: bold;">${ticketNumber}</p>
+                <p style="margin: 15px 0 0 0; color: #333; font-weight: bold;">Konu:</p>
+                <p style="margin: 5px 0 0 0; color: #666;">${subject}</p>
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${ticketUrl}" 
+                   style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
+                  Talebimi Görüntüle
+                </a>
+              </div>
+              
+              <p style="color: #999; font-size: 12px; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
+                Talebinizin durumunu yukarıdaki linkten takip edebilirsiniz.
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
+              <p>© ${new Date().getFullYear()} GiderSe Gelir. Tüm hakları saklıdır.</p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `
+Merhaba ${name},
+
+Destek talebiniz başarıyla alındı. En kısa sürede size dönüş yapacağız.
+
+Talep Numarası: ${ticketNumber}
+Konu: ${subject}
+
+Talebinizi görüntülemek için: ${ticketUrl}
+
+© ${new Date().getFullYear()} GiderSe Gelir. Tüm hakları saklıdır.
+      `.trim(),
+    })
+
+    if (error) {
+      console.error('Resend email error:', error)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Email gönderme hatası:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Email gönderilemedi',
+    }
+  }
+}
+
+/**
+ * Destek talebi durumu değiştiğinde kullanıcıya bildirim gönderir
+ */
+export async function sendSupportTicketStatusChangedEmail(
+  email: string,
+  name: string,
+  ticketNumber: string,
+  subject: string,
+  oldStatus: string,
+  newStatus: string
+): Promise<{ success: boolean; error?: string }> {
+  if (!resend) {
+    console.warn('Resend API key bulunamadı, email gönderilmedi')
+    return { success: false, error: 'Email servisi yapılandırılmamış' }
+  }
+
+  const statusLabels: Record<string, string> = {
+    pending: 'Beklemede',
+    in_progress: 'İşlemde',
+    resolved: 'Çözüldü',
+    closed: 'Kapatıldı',
+  }
+
+  const ticketUrl = `${APP_URL}/help/tickets/${ticketNumber}`
+
+  try {
+    const { error } = await resend.emails.send({
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      to: email,
+      subject: `Destek Talebi Durum Güncellemesi - ${ticketNumber}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1 style="color: white; margin: 0; font-size: 28px;">GiderSe Gelir</h1>
+            </div>
+            
+            <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+              <h2 style="color: #333; margin-top: 0;">Merhaba ${name},</h2>
+              
+              <p style="color: #666; font-size: 16px;">
+                Destek talebinizin durumu güncellendi.
+              </p>
+              
+              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
+                <p style="margin: 0; color: #333; font-weight: bold;">Talep Numarası:</p>
+                <p style="margin: 5px 0 0 0; color: #667eea; font-size: 18px; font-weight: bold;">${ticketNumber}</p>
+                <p style="margin: 15px 0 0 0; color: #333; font-weight: bold;">Konu:</p>
+                <p style="margin: 5px 0 0 0; color: #666;">${subject}</p>
+                <p style="margin: 15px 0 0 0; color: #333; font-weight: bold;">Yeni Durum:</p>
+                <p style="margin: 5px 0 0 0; color: #667eea; font-size: 16px; font-weight: bold;">${statusLabels[newStatus] || newStatus}</p>
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${ticketUrl}" 
+                   style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
+                  Talebi Görüntüle
+                </a>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
+              <p>© ${new Date().getFullYear()} GiderSe Gelir. Tüm hakları saklıdır.</p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `
+Merhaba ${name},
+
+Destek talebinizin durumu güncellendi.
+
+Talep Numarası: ${ticketNumber}
+Konu: ${subject}
+Yeni Durum: ${statusLabels[newStatus] || newStatus}
+
+Talebinizi görüntülemek için: ${ticketUrl}
+
+© ${new Date().getFullYear()} GiderSe Gelir. Tüm hakları saklıdır.
+      `.trim(),
+    })
+
+    if (error) {
+      console.error('Resend email error:', error)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Email gönderme hatası:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Email gönderilemedi',
+    }
+  }
+}
+
+/**
+ * Admin yanıtı geldiğinde kullanıcıya bildirim gönderir
+ */
+export async function sendSupportTicketReplyEmail(
+  email: string,
+  name: string,
+  ticketNumber: string,
+  subject: string,
+  replyMessage: string
+): Promise<{ success: boolean; error?: string }> {
+  if (!resend) {
+    console.warn('Resend API key bulunamadı, email gönderilmedi')
+    return { success: false, error: 'Email servisi yapılandırılmamış' }
+  }
+
+  const ticketUrl = `${APP_URL}/help/tickets/${ticketNumber}`
+
+  try {
+    const { error } = await resend.emails.send({
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      to: email,
+      subject: `Destek Talebinize Yanıt - ${ticketNumber}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1 style="color: white; margin: 0; font-size: 28px;">GiderSe Gelir</h1>
+            </div>
+            
+            <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+              <h2 style="color: #333; margin-top: 0;">Merhaba ${name},</h2>
+              
+              <p style="color: #666; font-size: 16px;">
+                Destek talebinize yeni bir yanıt geldi.
+              </p>
+              
+              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
+                <p style="margin: 0; color: #333; font-weight: bold;">Talep Numarası:</p>
+                <p style="margin: 5px 0 0 0; color: #667eea; font-size: 18px; font-weight: bold;">${ticketNumber}</p>
+                <p style="margin: 15px 0 0 0; color: #333; font-weight: bold;">Konu:</p>
+                <p style="margin: 5px 0 0 0; color: #666;">${subject}</p>
+              </div>
+              
+              <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; color: #333; font-weight: bold; margin-bottom: 10px;">Yanıt:</p>
+                <p style="margin: 0; color: #666; white-space: pre-wrap;">${replyMessage}</p>
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${ticketUrl}" 
+                   style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
+                  Talebi Görüntüle
+                </a>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
+              <p>© ${new Date().getFullYear()} GiderSe Gelir. Tüm hakları saklıdır.</p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `
+Merhaba ${name},
+
+Destek talebinize yeni bir yanıt geldi.
+
+Talep Numarası: ${ticketNumber}
+Konu: ${subject}
+
+Yanıt:
+${replyMessage}
+
+Talebinizi görüntülemek için: ${ticketUrl}
+
+© ${new Date().getFullYear()} GiderSe Gelir. Tüm hakları saklıdır.
+      `.trim(),
+    })
+
+    if (error) {
+      console.error('Resend email error:', error)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Email gönderme hatası:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Email gönderilemedi',
+    }
+  }
+}
+
+/**
+ * Yeni destek talebi geldiğinde admin'e bildirim gönderir
+ */
+export async function sendAdminNewTicketNotification(
+  adminEmail: string,
+  ticketNumber: string,
+  userName: string,
+  userEmail: string,
+  subject: string,
+  category: string
+): Promise<{ success: boolean; error?: string }> {
+  if (!resend) {
+    console.warn('Resend API key bulunamadı, email gönderilmedi')
+    return { success: false, error: 'Email servisi yapılandırılmamış' }
+  }
+
+  const ticketUrl = `${APP_URL}/admin/support-tickets/${ticketNumber}`
+
+  try {
+    const { error } = await resend.emails.send({
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      to: adminEmail,
+      subject: `Yeni Destek Talebi - ${ticketNumber}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1 style="color: white; margin: 0; font-size: 28px;">Yeni Destek Talebi</h1>
+            </div>
+            
+            <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+              <p style="color: #666; font-size: 16px;">
+                Yeni bir destek talebi alındı ve incelemeniz gerekiyor.
+              </p>
+              
+              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
+                <p style="margin: 0; color: #333; font-weight: bold;">Talep Numarası:</p>
+                <p style="margin: 5px 0 0 0; color: #dc2626; font-size: 18px; font-weight: bold;">${ticketNumber}</p>
+                <p style="margin: 15px 0 0 0; color: #333; font-weight: bold;">Kullanıcı:</p>
+                <p style="margin: 5px 0 0 0; color: #666;">${userName} (${userEmail})</p>
+                <p style="margin: 15px 0 0 0; color: #333; font-weight: bold;">Kategori:</p>
+                <p style="margin: 5px 0 0 0; color: #666;">${category}</p>
+                <p style="margin: 15px 0 0 0; color: #333; font-weight: bold;">Konu:</p>
+                <p style="margin: 5px 0 0 0; color: #666;">${subject}</p>
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${ticketUrl}" 
+                   style="display: inline-block; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
+                  Talebi İncele
+                </a>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
+              <p>© ${new Date().getFullYear()} GiderSe Gelir. Tüm hakları saklıdır.</p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `
+Yeni Destek Talebi
+
+Yeni bir destek talebi alındı ve incelemeniz gerekiyor.
+
+Talep Numarası: ${ticketNumber}
+Kullanıcı: ${userName} (${userEmail})
+Kategori: ${category}
+Konu: ${subject}
+
+Talebi incelemek için: ${ticketUrl}
 
 © ${new Date().getFullYear()} GiderSe Gelir. Tüm hakları saklıdır.
       `.trim(),

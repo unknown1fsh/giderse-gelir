@@ -20,6 +20,7 @@ import {
   X,
   Shield,
   Brain,
+  HelpCircle,
 } from 'lucide-react'
 
 const navigation = [
@@ -35,6 +36,7 @@ const navigation = [
     color: 'text-pink-500',
     premium: true,
   },
+  { name: 'Yardım', href: '/help', icon: HelpCircle, color: 'text-blue-500' },
 ]
 
 interface SidebarProps {

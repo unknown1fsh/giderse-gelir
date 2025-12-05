@@ -17,6 +17,7 @@ const protectedRoutes = [
   '/beneficiaries',
   '/ewallets',
   '/admin',
+  '/help',
 ]
 
 // Auth rotaları (giriş yapmış kullanıcılar erişemez)

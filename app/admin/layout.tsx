@@ -19,6 +19,7 @@ import {
   X,
   ArrowLeft,
   Receipt,
+  MessageSquare,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -69,6 +70,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/investments', label: 'Yatırımlar', icon: TrendingUp },
     { href: '/admin/subscriptions', label: 'Abonelikler', icon: SubscriptionIcon },
     { href: '/admin/payments', label: 'Ödemeler', icon: Receipt },
+    { href: '/admin/support-tickets', label: 'Destek Talepleri', icon: MessageSquare },
+    { href: '/admin/faq', label: 'SSS Yönetimi', icon: FileText },
     { href: '/admin/system', label: 'Sistem', icon: Activity },
     { href: '/admin/reports', label: 'Raporlar', icon: FileText },
   ]

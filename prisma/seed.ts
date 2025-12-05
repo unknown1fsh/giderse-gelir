@@ -903,37 +903,42 @@ async function main() {
   console.log('✅ Demo işlemler atlandı (user-specific olacak)')
 
   // Demo döviz kurları
-  const tryCurrency = currencies.find(c => c.code === 'TRY')!
-  const usdCurrency = currencies.find(c => c.code === 'USD')!
-  await Promise.all([
-    prisma.fxRate.create({
-      data: {
-        fromCurrencyId: usdCurrency.id,
-        toCurrencyId: tryCurrency.id,
-        rate: 30.25,
-        rateDate: new Date('2024-01-01'),
-        source: 'TCMB',
-      },
-    }),
-    prisma.fxRate.create({
-      data: {
-        fromCurrencyId: currencies.find(c => c.code === 'EUR')!.id,
-        toCurrencyId: tryCurrency.id,
-        rate: 33.15,
-        rateDate: new Date('2024-01-01'),
-        source: 'TCMB',
-      },
-    }),
-    prisma.fxRate.create({
-      data: {
-        fromCurrencyId: currencies.find(c => c.code === 'XAU')!.id,
-        toCurrencyId: tryCurrency.id,
-        rate: 2040.5,
-        rateDate: new Date('2024-01-01'),
-        source: 'TCMB',
-      },
-    }),
-  ])
+  const tryCurrency = currencies.find((c): c is { id: number; code: string } => c.code === 'TRY')
+  const usdCurrency = currencies.find((c): c is { id: number; code: string } => c.code === 'USD')
+  const eurCurrency = currencies.find((c): c is { id: number; code: string } => c.code === 'EUR')
+  const xauCurrency = currencies.find((c): c is { id: number; code: string } => c.code === 'XAU')
+
+  if (tryCurrency && usdCurrency && eurCurrency && xauCurrency) {
+    await Promise.all([
+      prisma.fxRate.create({
+        data: {
+          fromCurrencyId: usdCurrency.id,
+          toCurrencyId: tryCurrency.id,
+          rate: 30.25,
+          rateDate: new Date('2024-01-01'),
+          source: 'TCMB',
+        },
+      }),
+      prisma.fxRate.create({
+        data: {
+          fromCurrencyId: eurCurrency.id,
+          toCurrencyId: tryCurrency.id,
+          rate: 33.15,
+          rateDate: new Date('2024-01-01'),
+          source: 'TCMB',
+        },
+      }),
+      prisma.fxRate.create({
+        data: {
+          fromCurrencyId: xauCurrency.id,
+          toCurrencyId: tryCurrency.id,
+          rate: 2040.5,
+          rateDate: new Date('2024-01-01'),
+          source: 'TCMB',
+        },
+      }),
+    ])
+  }
 
   console.log('✅ Demo döviz kurları eklendi')
 

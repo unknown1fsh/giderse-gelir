@@ -104,6 +104,7 @@ export default function TicketDetailPage() {
 
   useEffect(() => {
     void fetchTicket()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id])
 
   if (loading) {

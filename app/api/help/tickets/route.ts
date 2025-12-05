@@ -64,11 +64,17 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     throw new UnauthorizedError('Oturum bulunamadı')
   }
 
-  const body = await request.json() as { categoryId?: number; subject?: string; description?: string; priority?: string }
-  const { categoryId, subject, description, priority } = body
+  const body = await request.json() as { categoryId?: number | string; subject?: string; description?: string; priority?: string }
+  const { categoryId: rawCategoryId, subject, description, priority } = body
 
-  if (!categoryId || !subject || !description) {
+  if (!rawCategoryId || !subject || !description) {
     throw new BadRequestError('Kategori, konu ve açıklama gereklidir')
+  }
+
+  const categoryId = typeof rawCategoryId === 'string' ? parseInt(rawCategoryId, 10) : rawCategoryId
+
+  if (isNaN(categoryId)) {
+    throw new BadRequestError('Geçersiz kategori ID')
   }
 
   // Kategori kontrolü

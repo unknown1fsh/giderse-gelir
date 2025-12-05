@@ -20,37 +20,61 @@ export const POST = ExceptionMapper.asyncHandler(
     const ticketId = parseInt(params.id)
     const isTicketNumber = params.id.startsWith('SUP-')
 
-    const body = await request.json()
+    const body = (await request.json()) as { message?: string; isInternal?: boolean }
     const { message, isInternal } = body
 
     if (!message || message.trim().length === 0) {
       throw new BadRequestError('Yanıt mesajı gereklidir')
     }
 
-    let ticket
+    type TicketWithRelations = {
+      id: number
+      ticketNumber: string
+      subject: string
+      user: {
+        id: number
+        name: string
+        email: string
+      }
+      category: {
+        id: number
+        name: string
+      }
+    }
+
+    let ticket: TicketWithRelations | null = null
 
     if (isTicketNumber) {
       ticket = await prisma.supportTicket.findUnique({
         where: { ticketNumber: params.id },
-      })
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          category: true,
+        },
+      }) as TicketWithRelations | null
     } else if (!isNaN(ticketId)) {
       ticket = await prisma.supportTicket.findUnique({
         where: { id: ticketId },
-      })
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          category: true,
+        },
+      }) as TicketWithRelations | null
     } else {
       throw new BadRequestError('Geçersiz talep ID veya numarası')
     }
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        category: true,
-      },
-    })
 
     if (!ticket) {
       throw new NotFoundError('Destek talebi bulunamadı')
@@ -98,4 +122,3 @@ export const POST = ExceptionMapper.asyncHandler(
     })
   }
 )
-

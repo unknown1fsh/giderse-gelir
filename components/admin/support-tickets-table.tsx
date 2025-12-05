@@ -104,6 +104,7 @@ export default function SupportTicketsTable() {
 
   useEffect(() => {
     void fetchTickets()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, statusFilter, page])
 
   return (

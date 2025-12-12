@@ -108,6 +108,10 @@ export default function PremiumPage() {
     )
   }
 
+  const handleUpgradeClick = () => {
+    handleUpgrade()
+  }
+
   const handleBack = () => {
     router.back()
   }
@@ -170,7 +174,7 @@ export default function PremiumPage() {
               </div>
 
               <Button
-                onClick={handleUpgrade}
+                onClick={handleUpgradeClick}
                 disabled={isProcessing}
                 size="lg"
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-lg px-8 py-6 rounded-xl shadow-2xl hover:shadow-purple-500/50 transform hover:scale-105 transition-all duration-200"
@@ -217,16 +221,17 @@ export default function PremiumPage() {
             {keyFeatures.map((feature, index) => (
               <Card
                 key={index}
-                className="group relative overflow-hidden border-2 border-slate-200 hover:border-purple-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                variant="glass"
+                className="group relative overflow-hidden border-2 border-slate-200 hover:border-purple-300 hover:shadow-glow-lg transition-all duration-300 hover:-translate-y-1"
               >
                 <CardContent className="p-6">
                   <div
-                    className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.gradient} mb-4 group-hover:scale-110 transition-transform duration-300`}
+                    className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.gradient} mb-4 group-hover:scale-110 group-hover:shadow-glow transition-all duration-300`}
                   >
                     <feature.icon className="h-6 w-6 text-white" />
                   </div>
 
-                  <h3 className="font-bold text-xl text-slate-900 mb-2">{feature.title}</h3>
+                  <h3 className="font-bold text-xl text-slate-900 mb-2 group-hover:text-gradient-premium transition-all duration-300">{feature.title}</h3>
                   <p className="text-slate-600 leading-relaxed">{feature.description}</p>
                 </CardContent>
 
@@ -249,7 +254,7 @@ export default function PremiumPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
               {/* Premium Plan */}
-              <Card className="relative overflow-hidden border-2 border-purple-300 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <Card variant="glass" className="relative overflow-hidden border-2 border-purple-300 hover:shadow-glow-lg transition-all duration-300 hover:-translate-y-2">
                 <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1 text-sm font-bold rounded-bl-xl">
                   <Star className="h-4 w-4 inline mr-1" />
                   En Popüler
@@ -316,7 +321,7 @@ export default function PremiumPage() {
               </Card>
 
               {/* Enterprise Plan */}
-              <Card className="relative overflow-hidden border-2 border-blue-200 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <Card variant="glass" className="relative overflow-hidden border-2 border-blue-200 hover:shadow-glow-lg transition-all duration-300 hover:-translate-y-2">
                 <CardContent className="p-8">
                   <div className="text-center mb-6">
                     <div className="inline-flex p-4 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mb-4">
@@ -370,7 +375,7 @@ export default function PremiumPage() {
               </Card>
 
               {/* Enterprise Premium Plan */}
-              <Card className="relative overflow-hidden border-2 border-amber-300 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 bg-gradient-to-br from-amber-50 to-orange-50">
+              <Card variant="glass" className="relative overflow-hidden border-2 border-amber-300 hover:shadow-glow-lg transition-all duration-300 hover:-translate-y-2 bg-gradient-to-br from-amber-50 to-orange-50">
                 <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-1 text-sm font-bold rounded-bl-xl">
                   <Sparkles className="h-4 w-4 inline mr-1" />
                   Ultra Premium
@@ -434,7 +439,7 @@ export default function PremiumPage() {
                 Detaylı Özellik Karşılaştırması
               </h3>
 
-              <Card className="max-w-6xl mx-auto overflow-hidden border-2 border-slate-200">
+              <Card variant="glass" className="max-w-6xl mx-auto overflow-hidden border-2 border-slate-200 hover:shadow-glow transition-all duration-300">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
@@ -564,7 +569,7 @@ export default function PremiumPage() {
         {/* Final CTA - Güçlü son çağrı */}
         {!isAlreadyPremium && (
           <div className="text-center">
-            <Card className="max-w-3xl mx-auto bg-gradient-to-br from-purple-600 to-pink-600 border-0 shadow-2xl">
+            <Card variant="glass" className="max-w-3xl mx-auto bg-gradient-to-br from-purple-600 to-pink-600 border-0 shadow-glow-lg hover:shadow-glow-xl transition-all duration-300">
               <CardContent className="p-12">
                 <Crown className="h-16 w-16 text-white mx-auto mb-6" />
 
@@ -578,7 +583,7 @@ export default function PremiumPage() {
 
                 <div className="flex flex-col items-center space-y-4">
                   <Button
-                    onClick={handleUpgrade}
+                    onClick={handleUpgradeClick}
                     disabled={isProcessing}
                     size="lg"
                     className="bg-white text-purple-600 hover:bg-purple-50 font-bold text-lg px-10 py-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-200"
@@ -608,7 +613,7 @@ export default function PremiumPage() {
         {/* Premium Üye Mesajı */}
         {isAlreadyPremium && (
           <div className="text-center">
-            <Card className="max-w-2xl mx-auto bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200">
+            <Card variant="glass" className="max-w-2xl mx-auto bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 hover:shadow-glow transition-all duration-300">
               <CardContent className="p-10">
                 <div className="inline-flex p-4 bg-green-100 rounded-full mb-6">
                   <Check className="h-10 w-10 text-green-600" />

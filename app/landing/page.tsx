@@ -34,37 +34,37 @@ export default function LandingPage() {
     description: string
     color: string
   }[] = [
-    {
-      icon: Brain,
-      title: 'AI Destekli Analiz',
-      description: 'Ayda 4 kez detaylı finansal analiz ve kişiselleştirilmiş öneriler',
-      color: 'from-purple-500 to-pink-600',
-    },
-    {
-      icon: BarChart3,
-      title: 'Gelişmiş Raporlar',
-      description: 'Detaylı finansal raporlar ve trend analizleri',
-      color: 'from-blue-500 to-indigo-600',
-    },
-    {
-      icon: CreditCard,
-      title: 'Kredi Kartı Yönetimi',
-      description: 'Tüm kartlarınızı tek yerden yönetin ve takip edin',
-      color: 'from-green-500 to-emerald-600',
-    },
-    {
-      icon: Calendar,
-      title: 'Otomatik Ödemeler',
-      description: 'Tekrarlayan ödemeleri otomatik takip edin',
-      color: 'from-orange-500 to-red-600',
-    },
-    {
-      icon: Shield,
-      title: 'Güvenli Veri',
-      description: 'End-to-end şifreleme ile güvenli saklama',
-      color: 'from-cyan-500 to-blue-600',
-    },
-  ]
+      {
+        icon: Brain,
+        title: 'AI Destekli Analiz',
+        description: 'Ayda 4 kez detaylı finansal analiz ve kişiselleştirilmiş öneriler',
+        color: 'from-purple-500 to-pink-600',
+      },
+      {
+        icon: BarChart3,
+        title: 'Gelişmiş Raporlar',
+        description: 'Detaylı finansal raporlar ve trend analizleri',
+        color: 'from-blue-500 to-indigo-600',
+      },
+      {
+        icon: CreditCard,
+        title: 'Kredi Kartı Yönetimi',
+        description: 'Tüm kartlarınızı tek yerden yönetin ve takip edin',
+        color: 'from-green-500 to-emerald-600',
+      },
+      {
+        icon: Calendar,
+        title: 'Otomatik Ödemeler',
+        description: 'Tekrarlayan ödemeleri otomatik takip edin',
+        color: 'from-orange-500 to-red-600',
+      },
+      {
+        icon: Shield,
+        title: 'Güvenli Veri',
+        description: 'End-to-end şifreleme ile güvenli saklama',
+        color: 'from-cyan-500 to-blue-600',
+      },
+    ]
 
   const pricingPlans = [
     {
@@ -141,16 +141,19 @@ export default function LandingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Animated Background Mesh */}
+      <div className="absolute inset-0 bg-gradient-mesh opacity-50"></div>
+
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 animate-gradient-x"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-12 sm:pb-16">
           <div className="text-center">
             {/* Logo */}
-            <div className="flex justify-center mb-6 sm:mb-8">
-              <div className="flex items-center space-x-2 sm:space-x-3 bg-white/10 backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 border border-white/20">
-                <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
+            <div className="flex justify-center mb-6 sm:mb-8 animate-scale-up">
+              <div className="flex items-center space-x-2 sm:space-x-3 bg-white/10 backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105">
+                <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-glow">
                   <span className="text-lg sm:text-2xl font-bold text-white">₺</span>
                 </div>
                 <span className="text-white font-medium text-sm sm:text-base">GiderSE-Gelir</span>
@@ -158,8 +161,8 @@ export default function LandingPage() {
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 px-4">
-              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 px-4 animate-scale-up">
+              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-gradient-x">
                 Finansal
               </span>
               <br />
@@ -167,14 +170,14 @@ export default function LandingPage() {
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg sm:text-xl md:text-2xl text-slate-300 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
+            <p className="text-lg sm:text-xl md:text-2xl text-slate-300 mb-6 sm:mb-8 max-w-2xl mx-auto px-4 animate-scale-up">
               Gelir ve giderlerinizi akıllıca yönetin, finansal hedeflerinize ulaşın.
             </p>
 
             {/* AI Badge - Küçük ve sade */}
-            <div className="flex justify-center mb-6 sm:mb-8">
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-full px-4 py-2 border border-purple-500/30">
-                <Brain className="h-4 w-4 text-purple-400" />
+            <div className="flex justify-center mb-6 sm:mb-8 animate-scale-up">
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-full px-4 py-2 border border-purple-500/30 hover:from-purple-600/30 hover:to-pink-600/30 hover:shadow-glow transition-all duration-300">
+                <Brain className="h-4 w-4 text-purple-400 animate-pulse-slow" />
                 <span className="text-sm text-purple-300 font-medium">
                   AI Destekli Finansal Analiz
                 </span>
@@ -182,10 +185,11 @@ export default function LandingPage() {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 px-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 px-4 animate-scale-up">
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold shadow-2xl w-full sm:w-auto"
+                variant="premium"
+                className="w-full sm:w-auto"
                 onClick={() => router.push('/auth/register')}
               >
                 <Rocket className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
@@ -207,9 +211,9 @@ export default function LandingPage() {
               {stats.map((stat, index) => {
                 const Icon = stat.icon
                 return (
-                  <div key={index} className="text-center">
+                  <div key={index} className="text-center group hover:scale-105 transition-transform duration-300">
                     <div className="flex justify-center mb-2">
-                      <div className="p-2 sm:p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
+                      <div className="p-2 sm:p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 group-hover:bg-white/20 group-hover:shadow-glow transition-all duration-300">
                         <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
                       </div>
                     </div>
@@ -508,15 +512,16 @@ export default function LandingPage() {
               return (
                 <Card
                   key={index}
-                  className="backdrop-blur-sm transition-all duration-300 group bg-white/10 border-white/20 hover:bg-white/15 hover:scale-105"
+                  variant="glass"
+                  className="group cursor-pointer hover:scale-105 hover:shadow-glow-lg transition-all duration-300"
                 >
                   <CardContent className="p-6">
                     <div
-                      className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${feature.color} mb-4 group-hover:scale-110 transition-transform`}
+                      className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${feature.color} mb-4 group-hover:scale-110 group-hover:shadow-glow transition-all duration-300`}
                     >
                       <Icon className="h-6 w-6 text-white" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2 text-white">{feature.title}</h3>
+                    <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-gradient-premium transition-all duration-300">{feature.title}</h3>
                     <p className="text-slate-300 text-sm sm:text-base">{feature.description}</p>
                   </CardContent>
                 </Card>
@@ -547,9 +552,8 @@ export default function LandingPage() {
               return (
                 <Card
                   key={index}
-                  className={`relative bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/15 transition-all duration-300 ${
-                    plan.popular ? 'ring-2 ring-purple-500/50 sm:scale-105' : ''
-                  } ${plan.ultra ? 'ring-2 ring-amber-500/50 sm:scale-105' : ''}`}
+                  className={`relative bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/15 transition-all duration-300 ${plan.popular ? 'ring-2 ring-purple-500/50 sm:scale-105' : ''
+                    } ${plan.ultra ? 'ring-2 ring-amber-500/50 sm:scale-105' : ''}`}
                 >
                   {plan.popular && (
                     <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2">
@@ -589,13 +593,12 @@ export default function LandingPage() {
                       ))}
                     </ul>
                     <Button
-                      className={`w-full ${
-                        plan.popular
-                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white'
-                          : plan.ultra
-                            ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white'
-                            : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
-                      }`}
+                      className={`w-full ${plan.popular
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white'
+                        : plan.ultra
+                          ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white'
+                          : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                        }`}
                       onClick={() => router.push('/auth/register')}
                     >
                       {plan.name === 'Ücretsiz' ? 'Ücretsiz Başla' : 'Planı Seç'}

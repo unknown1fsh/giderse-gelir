@@ -10,19 +10,21 @@ export default function PaymentFailedPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-4">
-      <Card className="w-full max-w-md">
+      <Card variant="glass" className="w-full max-w-md hover:shadow-glow-lg transition-all duration-300">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center">
+          <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center shadow-glow">
             <XCircle className="h-8 w-8 text-white" />
           </div>
-          <CardTitle className="text-2xl font-bold text-red-600">Ödeme Başarısız</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gradient-expense">Ödeme Başarısız</CardTitle>
           <CardDescription>Ödeme işlemi tamamlanamadı</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Hata nedenleri */}
-          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-5">
+          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-5 hover:shadow-md transition-all duration-300">
             <div className="flex items-start space-x-3 mb-3">
-              <HelpCircle className="h-5 w-5 text-red-600 mt-0.5" />
+              <div className="p-2 rounded-lg bg-gradient-to-br from-red-500 to-rose-600 shadow-glow">
+                <HelpCircle className="h-5 w-5 text-white" />
+              </div>
               <div>
                 <h3 className="font-semibold text-red-900 mb-1">Olası Nedenler</h3>
                 <p className="text-red-800 text-sm">
@@ -51,9 +53,11 @@ export default function PaymentFailedPage() {
           </div>
 
           {/* Alternatif çözümler */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 hover:shadow-md transition-all duration-300">
             <h3 className="font-semibold text-blue-900 mb-3 flex items-center">
-              <Mail className="h-5 w-5 mr-2" />
+              <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-glow mr-2">
+                <Mail className="h-4 w-4 text-white" />
+              </div>
               Alternatif Ödeme Yöntemleri
             </h3>
             <div className="space-y-3 text-sm text-blue-800">
@@ -84,7 +88,8 @@ export default function PaymentFailedPage() {
           <div className="space-y-3">
             <Button
               onClick={() => router.push('/premium')}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              variant="premium"
+              className="w-full hover:shadow-glow-lg transition-all duration-300"
               size="lg"
             >
               <RefreshCw className="mr-2 h-5 w-5" />
@@ -93,7 +98,7 @@ export default function PaymentFailedPage() {
             <Button
               onClick={() => router.push('/dashboard')}
               variant="outline"
-              className="w-full"
+              className="w-full glass hover:shadow-glow transition-all duration-300"
               size="lg"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -102,9 +107,11 @@ export default function PaymentFailedPage() {
           </div>
 
           {/* Destek bilgileri */}
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-5">
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-5 hover:shadow-md transition-all duration-300">
             <h3 className="font-semibold text-purple-900 mb-3 flex items-center">
-              <Phone className="h-5 w-5 mr-2" />
+              <div className="p-1.5 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 shadow-glow mr-2">
+                <Phone className="h-4 w-4 text-white" />
+              </div>
               Yardıma mı İhtiyacınız Var?
             </h3>
             <div className="space-y-2 text-sm">

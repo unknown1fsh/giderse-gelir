@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -110,6 +111,7 @@ export default function LoginPage() {
                     placeholder="ornek@email.com"
                     className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-slate-400 focus:border-purple-500"
                     required
+                    suppressHydrationWarning
                   />
                 </div>
               </div>
@@ -126,6 +128,7 @@ export default function LoginPage() {
                     placeholder="Şifrenizi girin"
                     className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-slate-400 focus:border-purple-500"
                     required
+                    suppressHydrationWarning
                   />
                   <button
                     type="button"
@@ -141,7 +144,10 @@ export default function LoginPage() {
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
+                    checked={rememberMe}
+                    onChange={e => setRememberMe(e.target.checked)}
                     className="rounded border-white/20 bg-white/5 text-purple-600 focus:ring-purple-500"
+                    suppressHydrationWarning
                   />
                   <span className="text-sm text-slate-300">Beni hatırla</span>
                 </label>

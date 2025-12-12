@@ -34,7 +34,7 @@ export default function NewOtherInvestmentPage() {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           const data: ReferenceData = await response.json()
           setCurrencies(data.currencies)
-          const tryCurrency = data.currencies.find(c => c.code === 'TRY')
+          const tryCurrency = data.currencies.find((c: Currency) => c.code === 'TRY')
           if (tryCurrency) {
             setFormData(prev => ({ ...prev, currencyId: tryCurrency.id }))
           }

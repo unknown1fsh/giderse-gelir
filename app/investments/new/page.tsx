@@ -20,21 +20,9 @@ import {
   ArrowLeft,
   Save,
   Building2,
-  TrendingUp,
-  PieChart,
-  Shield,
-  Coins,
-  Layers,
-  Globe,
-  Star,
   CheckCircle,
-  AlertCircle,
-  Info,
   Calculator,
-  Target,
-  Calendar,
   FileText,
-  Sparkles,
 } from 'lucide-react'
 
 interface InvestmentType {

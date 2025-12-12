@@ -792,8 +792,13 @@ async function main() {
   console.log(`✅ TX_TYPE parametreleri eklendi (${txTypes.length} tür)`)
 
   // TX_CATEGORY parametreleri
-  const categories = await prisma.refTxCategory.findMany()
+  const categories = await prisma.refTxCategory.findMany({
+    include: { txType: true },
+  })
   for (const category of categories) {
+    // txTypeCode'u refTxType'ın code'undan al
+    const txTypeCode = category.txType?.code || ''
+    
     await prisma.systemParameter.upsert({
       where: {
         paramGroup_paramCode: {
@@ -801,7 +806,15 @@ async function main() {
           paramCode: `${category.code}_${category.txTypeId}`,
         },
       },
-      update: {},
+      update: {
+        metadata: {
+          txTypeId: category.txTypeId,
+          txTypeCode: txTypeCode, // SystemParameter mapping için gerekli
+          icon: category.icon,
+          color: category.color,
+          isDefault: category.isDefault,
+        },
+      },
       create: {
         paramGroup: 'TX_CATEGORY',
         paramCode: `${category.code}_${category.txTypeId}`,
@@ -811,6 +824,7 @@ async function main() {
         displayOrder: categories.indexOf(category) + 1,
         metadata: {
           txTypeId: category.txTypeId,
+          txTypeCode: txTypeCode, // SystemParameter mapping için gerekli
           icon: category.icon,
           color: category.color,
           isDefault: category.isDefault,

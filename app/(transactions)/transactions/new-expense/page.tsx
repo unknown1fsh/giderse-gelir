@@ -44,6 +44,7 @@ export default function NewExpensePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [giderTxTypeId, setGiderTxTypeId] = useState<number>(0)
+  const [gelirTxTypeId, setGelirTxTypeId] = useState<number>(0)
   const [showBeneficiaryModal, setShowBeneficiaryModal] = useState(false)
   const [showEWalletModal, setShowEWalletModal] = useState(false)
 
@@ -109,10 +110,33 @@ export default function NewExpensePage() {
           const data = (await response.json()) as ReferenceData
           setReferenceData(data)
 
-          const giderType = data.txTypes.find(t => t.code === 'GIDER')
+          // GIDER tipini bul - farklı olası kod formatlarını kontrol et
+          const giderType = data.txTypes.find(
+            t => t.code === 'GIDER' || t.code === 'gider' || t.name?.toLowerCase().includes('gider')
+          )
+          
+          // GELIR tipini de bul (gelir kategorilerini hariç tutmak için)
+          const gelirType = data.txTypes.find(
+            t => t.code === 'GELIR' || t.code === 'gelir' || t.name?.toLowerCase().includes('gelir')
+          )
+          
           if (giderType) {
+            console.log('✅ GIDER tipi bulundu:', giderType)
             setGiderTxTypeId(giderType.id)
             setFormData(prev => ({ ...prev, txTypeId: giderType.id }))
+          } else {
+            console.warn('⚠️ GIDER tipi bulunamadı. Mevcut txTypes:', data.txTypes)
+            // İkinci txType'ı varsayılan olarak kullan (fallback - genelde GIDER ikinci sırada)
+            if (data.txTypes.length > 1) {
+              const secondType = data.txTypes[1]
+              console.warn('⚠️ İkinci txType kullanılıyor:', secondType)
+              setGiderTxTypeId(secondType.id)
+              setFormData(prev => ({ ...prev, txTypeId: secondType.id }))
+            }
+          }
+          
+          if (gelirType) {
+            setGelirTxTypeId(gelirType.id)
           }
 
           const tryCurrency = data.currencies.find(c => c.code === 'TRY')
@@ -131,8 +155,50 @@ export default function NewExpensePage() {
     void fetchReferenceData()
   }, [])
 
-  const giderCategories =
-    referenceData?.categories.filter(cat => cat.txTypeId === giderTxTypeId) || []
+  // Kategorileri filtrele - sadece gider kategorilerini göster, gelir kategorilerini kesinlikle hariç tut
+  const giderCategories = referenceData?.categories
+    ? giderTxTypeId > 0
+      ? referenceData.categories.filter(cat => {
+          // Sadece gider kategorilerini göster
+          const isGider = cat.txTypeId === giderTxTypeId
+          // Gelir kategorilerini kesinlikle hariç tut
+          const isGelir = gelirTxTypeId > 0 && cat.txTypeId === gelirTxTypeId
+          return isGider && !isGelir
+        })
+      : // Eğer giderTxTypeId bulunamadıysa, gelir olmayan kategorileri göster (fallback)
+        referenceData.categories.filter(cat => gelirTxTypeId > 0 ? cat.txTypeId !== gelirTxTypeId : true)
+    : []
+  
+  // Debug log - sadece geliştirme ortamında
+  useEffect(() => {
+    if (referenceData && process.env.NODE_ENV === 'development') {
+      console.log('📊 Reference Data Debug (Gider):', {
+        giderTxTypeId,
+        gelirTxTypeId,
+        totalCategories: referenceData.categories.length,
+        giderCategoriesCount: giderCategories.length,
+        gelirCategoriesCount: referenceData.categories.filter(c => c.txTypeId === gelirTxTypeId).length,
+        txTypes: referenceData.txTypes.map(t => ({ id: t.id, code: t.code, name: t.name })),
+        sampleCategories: referenceData.categories.slice(0, 10).map(c => ({
+          id: c.id,
+          name: c.name,
+          txTypeId: c.txTypeId,
+          isGelir: c.txTypeId === gelirTxTypeId,
+          isGider: c.txTypeId === giderTxTypeId,
+        })),
+      })
+      
+      if (giderCategories.length === 0 && referenceData.categories.length > 0) {
+        console.warn('⚠️ Gider kategorileri bulunamadı!')
+      }
+      
+      // Gelir kategorilerinin gider listesinde olup olmadığını kontrol et
+      const gelirInGider = giderCategories.some(c => c.txTypeId === gelirTxTypeId)
+      if (gelirInGider && gelirTxTypeId > 0) {
+        console.error('❌ HATA: Gelir kategorileri gider listesinde görünüyor!')
+      }
+    }
+  }, [referenceData, giderTxTypeId, gelirTxTypeId, giderCategories.length])
 
   const selectedPaymentMethod = referenceData?.paymentMethods.find(
     p => p.id === formData.paymentMethodId
@@ -582,12 +648,28 @@ export default function NewExpensePage() {
                   required
                 >
                   <option value={0}>Gider kategorisi seçiniz</option>
-                  {giderCategories.map(category => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
+                  {giderCategories.length > 0 ? (
+                    giderCategories.map(category => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))
+                  ) : referenceData && referenceData.categories.length > 0 ? (
+                    // Fallback: Eğer gider kategorileri yoksa, gelir olmayan kategorileri göster
+                    referenceData.categories
+                      .filter(cat => gelirTxTypeId > 0 ? cat.txTypeId !== gelirTxTypeId : true)
+                      .map(category => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))
+                  ) : null}
                 </select>
+                {!referenceData || referenceData.categories.length === 0 ? (
+                  <p className="text-xs text-red-600 mt-1">
+                    ❌ Kategoriler yüklenemedi. Lütfen sayfayı yenileyin.
+                  </p>
+                ) : null}
               </div>
 
               <div>

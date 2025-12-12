@@ -326,19 +326,19 @@ export default function InvestmentsPage() {
 
             {/* Portfolio Summary */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <Card variant="glass" className="bg-white/10 backdrop-blur-sm border-white/20 hover:shadow-glow transition-all duration-300 group">
                 <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-white mb-2">
+                  <div className="text-3xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">
                     ₺{totalValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                   </div>
                   <div className="text-blue-100">Toplam Değer</div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <Card variant="glass" className="bg-white/10 backdrop-blur-sm border-white/20 hover:shadow-glow transition-all duration-300 group">
                 <CardContent className="p-6 text-center">
                   <div
-                    className={`text-3xl font-bold mb-2 flex items-center justify-center ${
+                    className={`text-3xl font-bold mb-2 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ${
                       totalProfitLoss >= 0 ? 'text-green-300' : 'text-red-300'
                     }`}
                   >
@@ -356,10 +356,10 @@ export default function InvestmentsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <Card variant="glass" className="bg-white/10 backdrop-blur-sm border-white/20 hover:shadow-glow transition-all duration-300 group">
                 <CardContent className="p-6 text-center">
                   <div
-                    className={`text-3xl font-bold mb-2 ${
+                    className={`text-3xl font-bold mb-2 group-hover:scale-110 transition-transform duration-300 ${
                       totalProfitLossPercentage >= 0 ? 'text-green-300' : 'text-red-300'
                     }`}
                   >
@@ -390,16 +390,17 @@ export default function InvestmentsPage() {
               return (
                 <Card
                   key={type.id}
-                  className="group cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 hover:border-blue-300"
+                  variant="glass"
+                  className="group cursor-pointer hover:shadow-glow-lg transition-all duration-300 hover:scale-105 border-2 hover:border-blue-300"
                   onClick={() => setSelectedType(selectedType === type.id ? 'all' : type.id)}
                 >
                   <CardContent className="p-6">
                     <div
-                      className={`inline-flex p-4 rounded-2xl bg-gradient-to-r ${type.color} mb-4 group-hover:scale-110 transition-transform`}
+                      className={`inline-flex p-4 rounded-2xl bg-gradient-to-r ${type.color} mb-4 group-hover:scale-110 group-hover:shadow-glow transition-all duration-300`}
                     >
                       <Icon className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">{type.name}</h3>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-gradient transition-all duration-300">{type.name}</h3>
                     <p className="text-gray-600 mb-4">{type.description}</p>
 
                     <div className="flex items-center justify-between mb-4">
@@ -426,7 +427,8 @@ export default function InvestmentsPage() {
                     </div>
 
                     <Button
-                      className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+                      variant="glow"
+                      className="w-full hover:shadow-glow transition-all duration-300"
                       onClick={e => {
                         e.stopPropagation()
                         handleAddInvestment(type.id)
@@ -465,7 +467,7 @@ export default function InvestmentsPage() {
 
           <TabsContent value="portfolio" className="space-y-6">
             {/* Search and Filters */}
-            <Card className="bg-white/80 backdrop-blur-sm">
+            <Card variant="glass" className="hover:shadow-glow transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1">
@@ -493,8 +495,9 @@ export default function InvestmentsPage() {
                     </SelectContent>
                   </Select>
                   <Button
+                    variant="success"
                     onClick={() => handleAddInvestment('stock')}
-                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white"
+                    className="hover:shadow-glow transition-all duration-300"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Yeni Yatırım
@@ -511,7 +514,8 @@ export default function InvestmentsPage() {
                 return (
                   <Card
                     key={investment.id}
-                    className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300"
+                    variant="glass"
+                    className="hover:shadow-glow-lg transition-all duration-300 hover:scale-[1.01]"
                   >
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
@@ -590,18 +594,21 @@ export default function InvestmentsPage() {
               })}
 
               {filteredInvestments.length === 0 && (
-                <Card className="bg-white/80 backdrop-blur-sm">
+                <Card variant="glass" className="hover:shadow-glow transition-all duration-300">
                   <CardContent className="p-12 text-center">
-                    <Building2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                    <div className="p-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-glow mx-auto mb-4 w-20 h-20 flex items-center justify-center">
+                      <Building2 className="h-10 w-10 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gradient mb-2">
                       Henüz yatırım bulunmuyor
                     </h3>
                     <p className="text-gray-500 mb-6">
                       İlk yatırımınızı ekleyerek portföyünüzü oluşturmaya başlayın
                     </p>
                     <Button
+                      variant="glow"
                       onClick={() => handleAddInvestment('stock')}
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+                      className="hover:shadow-glow-lg transition-all duration-300"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       İlk Yatırımımı Ekle
@@ -613,18 +620,21 @@ export default function InvestmentsPage() {
           </TabsContent>
 
           <TabsContent value="analysis" className="space-y-6">
-            <Card className="bg-white/80 backdrop-blur-sm">
+            <Card variant="glass" className="hover:shadow-glow transition-all duration-300">
               <CardContent className="p-8">
                 <div className="text-center">
-                  <BarChart3 className="h-16 w-16 text-blue-500 mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">📊 Gelişmiş Analiz</h3>
+                  <div className="p-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-glow mx-auto mb-4 w-20 h-20 flex items-center justify-center">
+                    <BarChart3 className="h-10 w-10 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gradient mb-2">📊 Gelişmiş Analiz</h3>
                   <p className="text-gray-600 mb-6">
                     Premium üyelik ile detaylı portföy analizleri, risk hesaplamaları ve performans
                     raporlarına erişin
                   </p>
                   <Button
+                    variant="premium"
                     onClick={() => setShowPremiumModal(true)}
-                    className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white"
+                    className="hover:shadow-glow-lg transition-all duration-300"
                   >
                     <Crown className="h-4 w-4 mr-2" />
                     Premium Analizlere Eriş
@@ -635,19 +645,22 @@ export default function InvestmentsPage() {
           </TabsContent>
 
           <TabsContent value="market" className="space-y-6">
-            <Card className="bg-white/80 backdrop-blur-sm">
+            <Card variant="glass" className="hover:shadow-glow transition-all duration-300">
               <CardContent className="p-8">
                 <div className="text-center">
-                  <Activity className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                  <div className="p-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 shadow-glow mx-auto mb-4 w-20 h-20 flex items-center justify-center">
+                    <Activity className="h-10 w-10 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gradient-finance mb-2">
                     📈 Canlı Piyasa Verileri
                   </h3>
                   <p className="text-gray-600 mb-6">
                     Gerçek zamanlı piyasa verileri, fiyat hareketleri ve teknik analizler
                   </p>
                   <Button
+                    variant="success"
                     onClick={() => setShowPremiumModal(true)}
-                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white"
+                    className="hover:shadow-glow-lg transition-all duration-300"
                   >
                     <Zap className="h-4 w-4 mr-2" />
                     Canlı Verilere Eriş
@@ -658,17 +671,19 @@ export default function InvestmentsPage() {
           </TabsContent>
 
           <TabsContent value="news" className="space-y-6">
-            <Card className="bg-white/80 backdrop-blur-sm">
+            <Card variant="glass" className="hover:shadow-glow transition-all duration-300">
               <CardContent className="p-8">
                 <div className="text-center">
-                  <Bell className="h-16 w-16 text-orange-500 mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">📰 Yatırım Haberleri</h3>
+                  <div className="p-4 rounded-full bg-gradient-to-br from-orange-500 to-red-600 shadow-glow mx-auto mb-4 w-20 h-20 flex items-center justify-center">
+                    <Bell className="h-10 w-10 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gradient-expense mb-2">📰 Yatırım Haberleri</h3>
                   <p className="text-gray-600 mb-6">
                     Kişiselleştirilmiş haber akışı, piyasa analizleri ve yatırım önerileri
                   </p>
                   <Button
+                    className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white hover:shadow-glow-lg transition-all duration-300"
                     onClick={() => setShowPremiumModal(true)}
-                    className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white"
                   >
                     <Sparkles className="h-4 w-4 mr-2" />
                     Premium Haberlere Eriş

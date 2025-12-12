@@ -5,8 +5,9 @@ import { getCurrentUser } from '@/lib/auth-refactored'
 import { SystemParameterService } from '@/server/services/impl/SystemParameterService'
 
 // Bu endpoint tüm referans verilerini getirir
-// TX_TYPE ve TX_CATEGORY: SystemParameter'dan
-// BANK, ACCOUNT_TYPE, CURRENCY, GOLD: Eski Ref tablolarından (Foreign Key uyumu için)
+// TX_TYPE ve TX_CATEGORY: Ref tablolarından (Transaction tablosu bunlara bağlı)
+// BANK, ACCOUNT_TYPE, CURRENCY, GOLD: Ref tablolarından (Foreign Key uyumu için)
+// PAYMENT_METHOD, CURRENCY: SystemParameter'dan (UI için)
 export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => {
   // Kullanıcı kontrolü (opsiyonel - bazı referans veriler public olabilir)
   const user = await getCurrentUser(request)
@@ -16,11 +17,11 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
 
   const parameterService = new SystemParameterService(prisma)
 
-  // TRANSACTION parametreleri için SystemParameter kullan (Frontend UI)
-  // ACCOUNT/GOLD parametreleri için Ref tabloları (Foreign Key uyumu)
+  // TRANSACTION parametreleri için REF TABLOLARINDAN çek (Foreign Key uyumu için)
+  // ACCOUNT/GOLD parametreleri için Ref tabloları (Foreign Key direkt uyumlu)
   const [
-    txTypeParams,
-    txCategoryParams,
+    refTxTypes,
+    refTxCategories,
     paymentMethodParams,
     currencyParams,
     refBanks,
@@ -28,9 +29,13 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
     refGoldTypes,
     refGoldPurities,
   ] = await Promise.all([
-    // Transaction için: SystemParameter (Backend'de mapping yapılacak)
-    parameterService.getByGroup('TX_TYPE'),
-    parameterService.getByGroup('TX_CATEGORY'),
+    // Transaction için: Ref tablolarından çek (Transaction tablosu bunlara bağlı)
+    prisma.refTxType.findMany({ where: { active: true }, orderBy: { code: 'asc' } }),
+    prisma.refTxCategory.findMany({ 
+      where: { active: true }, 
+      include: { txType: true },
+      orderBy: { name: 'asc' } 
+    }),
     parameterService.getByGroup('PAYMENT_METHOD'),
     parameterService.getByGroup('CURRENCY'),
     // Account/Gold için: Ref tabloları (Foreign Key direkt uyumlu)
@@ -41,9 +46,9 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
   ])
 
   // eslint-disable-next-line no-console
-  console.log('📊 SystemParameter veriler:', {
-    txTypes: txTypeParams.length,
-    categories: txCategoryParams.length,
+  console.log('📊 Reference veriler:', {
+    txTypes: refTxTypes.length,
+    categories: refTxCategories.length,
     paymentMethods: paymentMethodParams.length,
     currencies: currencyParams.length,
   })
@@ -80,37 +85,26 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
       : Promise.resolve([]),
   ])
 
-  // TX_TYPE ID mapping oluştur (SystemParameter ID <-> Code)
-  const txTypeMapping: Record<string, number> = {}
-  txTypeParams.forEach(t => {
-    txTypeMapping[t.paramCode] = t.id // GELIR -> 44, GIDER -> 45
-  })
-
   const response = {
-    // İşlem parametreleri (PARAMETRE TABLOSUNDAN - Sadece TX_TYPE ve TX_CATEGORY)
-    txTypes: txTypeParams.map(t => ({
+    // İşlem parametreleri (REF TABLOLARINDAN - Transaction tablosu bunlara bağlı)
+    txTypes: refTxTypes.map(t => ({
       id: t.id,
-      code: t.paramCode,
-      name: t.displayName,
-      icon: (t.metadata?.icon as string | null | undefined) || null,
-      color: (t.metadata?.color as string | null | undefined) || null,
+      code: t.code,
+      name: t.name,
+      icon: t.icon || null,
+      color: t.color || null,
     })),
-    categories: txCategoryParams.map(c => {
-      // txTypeCode ile SystemParameter TX_TYPE ID'sine map et
-      const txTypeCode = (c.metadata?.txTypeCode as string | undefined) || ''
-      const mappedTxTypeId = (txTypeMapping[txTypeCode] as number | undefined) || 0
-
-      return {
-        id: c.id,
-        name: c.displayName,
-        code: (c.metadata?.code as string | undefined) || c.paramCode,
-        txTypeId: mappedTxTypeId, // SystemParameter TX_TYPE ID'si
-        txTypeName: (c.metadata?.txTypeName as string | undefined) || '',
-        icon: (c.metadata?.icon as string | null | undefined) || null,
-        color: (c.metadata?.color as string | null | undefined) || null,
-        isDefault: (c.metadata?.isDefault as boolean | undefined) || false,
-      }
-    }),
+    categories: refTxCategories.map(c => ({
+      id: c.id,
+      name: c.name,
+      code: c.code,
+      txTypeId: c.txTypeId, // Ref tablosundan direkt txTypeId
+      txTypeName: c.txType.name,
+      icon: c.icon || null,
+      color: c.color || null,
+      isDefault: c.isDefault,
+      description: c.description || null,
+    })),
     paymentMethods: paymentMethodParams.map(p => ({
       id: p.id,
       code: p.paramCode,
@@ -186,11 +180,11 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
 
     // Meta bilgi
     _meta: {
-      source: 'Mixed (TX/Payment/Currency: SystemParameter, Account/Gold: RefTables)',
+      source: 'Mixed (TX/Category: RefTables, Payment/Currency: SystemParameter, Account/Gold: RefTables)',
       totalBanks: refBanks.length,
       totalGoldTypes: refGoldTypes.length,
       totalGoldPurities: refGoldPurities.length,
-      totalCategories: txCategoryParams.length,
+      totalCategories: refTxCategories.length,
       totalPaymentMethods: paymentMethodParams.length,
       totalCurrencies: currencyParams.length,
       timestamp: new Date().toISOString(),

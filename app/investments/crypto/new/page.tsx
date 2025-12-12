@@ -28,7 +28,6 @@ interface Currency {
 export default function NewCryptoInvestmentPage() {
   const router = useRouter()
   const [cryptoList, setCryptoList] = useState<Crypto[]>([])
-  const [currencies, setCurrencies] = useState<Currency[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -56,10 +55,9 @@ export default function NewCryptoInvestmentPage() {
         const refResponse = await fetch('/api/reference-data')
         if (refResponse.ok) {
           const refData = await refResponse.json()
-          setCurrencies(refData.currencies)
           
           // TRY'yi varsayılan yap
-          const tryCurrency = refData.currencies.find((c: any) => c.code === 'TRY')
+          const tryCurrency = refData.currencies.find((c: Currency) => c.code === 'TRY')
           if (tryCurrency) {
             setFormData(prev => ({ ...prev, currencyId: tryCurrency.id }))
           }

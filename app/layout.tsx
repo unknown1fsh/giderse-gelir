@@ -1,11 +1,21 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import { UserProvider } from '@/lib/user-context'
 import { PeriodProvider } from '@/lib/period-context'
 import { GlobalErrorHandler } from '@/lib/error-handler'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-jakarta',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'GiderSE-Gelir - Kişisel Finans Yönetimi',
@@ -14,7 +24,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="tr" className="scroll-smooth">
+    <html lang="tr" className={`${inter.variable} ${jakarta.variable} scroll-smooth`}>
       <body className={`${inter.className} antialiased`}>
         <GlobalErrorHandler />
         <UserProvider>

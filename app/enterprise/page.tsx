@@ -244,6 +244,7 @@ export default function EnterprisePage() {
       <EnterprisePremiumContactModal
         open={isContactModalOpen}
         onOpenChange={setIsContactModalOpen}
+        planId="enterprise"
       />
     </div>
   )

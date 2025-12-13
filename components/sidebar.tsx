@@ -162,7 +162,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         {user && (user.plan === 'free' || !user.plan) && (
           <div className="mx-6 my-4 shrink-0">
             <Link
-              href="/premium"
+              href="/help/tickets/new?intent=membership&planId=premium&source=sidebar"
               onClick={handleLinkClick}
               className="block p-4 bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-xl border border-purple-500/30 hover:from-purple-600/30 hover:to-pink-600/30 hover:shadow-glow transition-all duration-300 group"
             >
@@ -171,8 +171,8 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   <Crown className="h-4 w-4 text-white" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-white font-semibold text-sm">Premium Satın Al</p>
-                  <p className="text-xs text-purple-200">Gelişmiş özellikler</p>
+                  <p className="text-white font-semibold text-sm">Premium Talebi Oluştur</p>
+                  <p className="text-xs text-purple-200">Destek ekibine mesaj gönder</p>
                 </div>
                 <div className="text-purple-300 group-hover:text-white transition-colors duration-300">
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

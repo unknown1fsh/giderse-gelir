@@ -51,7 +51,14 @@ export default function EnterpriseDashboardPage() {
 
   useEffect(() => {
     async function fetchDashboardData() {
-      if (loading || !user) {
+      if (loading) {
+        return
+      }
+
+      if (!user) {
+        setData(null)
+        setError(null)
+        setDataLoading(false)
         return
       }
 

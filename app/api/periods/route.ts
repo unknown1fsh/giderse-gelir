@@ -26,6 +26,8 @@ export async function GET(request: NextRequest) {
           select: {
             transactions: true,
             accounts: true,
+            creditCards: true,
+            eWallets: true,
             investments: true,
             goldItems: true,
           },

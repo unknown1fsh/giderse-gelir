@@ -72,7 +72,17 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function fetchDashboardData() {
-      if (loading || !user) {
+      // User context hâlâ yükleniyorsa bekle
+      if (loading) {
+        return
+      }
+
+      // Kullanıcı yoksa (örn: /api/auth/me 401) dashboard verisi çekme.
+      // Bu durumda sayfanın sonsuz loading'de kalmaması için dataLoading'i kapat.
+      if (!user) {
+        setData(null)
+        setError(null)
+        setDataLoading(false)
         return
       }
 

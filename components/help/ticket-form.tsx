@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,40 +23,159 @@ interface Category {
   color: string | null
 }
 
-interface TicketFormProps {
-  onSuccess?: (ticketId: number) => void
+export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent'
+
+export interface TicketFormPrefill {
+  categoryHint?: string
+  subject?: string
+  description?: string
+  priority?: TicketPriority
 }
 
-export default function TicketForm({ onSuccess }: TicketFormProps) {
+interface TicketFormProps {
+  onSuccess?: (ticketId: number) => void
+  prefill?: TicketFormPrefill
+}
+
+function normalize(text: string) {
+  return text
+    .toLocaleLowerCase('tr-TR')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+export default function TicketForm({ onSuccess, prefill }: TicketFormProps) {
   const router = useRouter()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
+  const [autoCategoryNote, setAutoCategoryNote] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     categoryId: '',
-    subject: '',
-    description: '',
-    priority: 'medium',
+    subject: prefill?.subject || '',
+    description: prefill?.description || '',
+    priority: (prefill?.priority || 'medium') as TicketPriority,
   })
+
+  const categoryHint = useMemo(() => normalize(prefill?.categoryHint || ''), [prefill?.categoryHint])
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
+  const [categoriesError, setCategoriesError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchCategories = async () => {
+      setCategoriesLoading(true)
+      setCategoriesError(null)
       try {
         const response = await fetch('/api/help/categories')
+        
+        if (!response.ok) {
+          const errorData = (await response.json()) as { error?: string }
+          throw new Error(errorData.error || `HTTP ${response.status}`)
+        }
+
         const result = (await response.json()) as { success: boolean; data?: Category[] }
 
         if (result.success && result.data) {
           setCategories(result.data)
+          if (result.data.length === 0) {
+            setCategoriesError('Hiç kategori bulunamadı. Lütfen admin panelinden kategori ekleyin.')
+          }
+        } else {
+          setCategoriesError('Kategoriler yüklenemedi.')
         }
       } catch (error) {
         console.error('Kategori yükleme hatası:', error)
+        setCategoriesError(
+          error instanceof Error
+            ? `Kategori yükleme hatası: ${error.message}`
+            : 'Kategoriler yüklenirken bir hata oluştu.'
+        )
+      } finally {
+        setCategoriesLoading(false)
       }
     }
 
     void fetchCategories()
   }, [])
 
+  // Prefill değişirse konu/açıklama/öncelik alanlarını güncelle
+  useEffect(() => {
+    if (!prefill) {
+      return
+    }
+    setFormData(prev => ({
+      ...prev,
+      subject: prefill.subject ?? prev.subject,
+      description: prefill.description ?? prev.description,
+      priority: (prefill.priority ?? prev.priority) as TicketPriority,
+    }))
+  }, [prefill])
+
+  // Kategori otomatik seçimi (membership gibi akışlarda kullanıcı uğraşmasın)
+  useEffect(() => {
+    if (categories.length === 0 || categoriesLoading) {
+      return
+    }
+    if (formData.categoryId) {
+      return
+    }
+
+    let selected: Category | undefined
+
+    if (categoryHint) {
+      // Premium için özel arama: "Premium", "Üyelik", "Abonelik" gibi kelimeleri ara
+      if (categoryHint === 'premium' || categoryHint === 'üyelik') {
+        const premiumKeywords = ['premium', 'üyelik', 'abonelik', 'membership', 'subscription']
+        selected = categories.find(c => {
+          const normalizedName = normalize(c.name)
+          return premiumKeywords.some(keyword => normalizedName.includes(keyword))
+        })
+      }
+
+      // Eğer premium için bulunamadıysa, genel arama yap
+      if (!selected) {
+        // Önce tam eşleşme ara
+        selected = categories.find(c => normalize(c.name) === categoryHint)
+        
+        // Tam eşleşme yoksa içeriyor mu kontrol et
+        if (!selected) {
+          selected = categories.find(c => {
+            const normalizedName = normalize(c.name)
+            return normalizedName.includes(categoryHint) || categoryHint.includes(normalizedName)
+          })
+        }
+      }
+    }
+
+    // Eğer hala bulunamadıysa ilk kategoriyi seç
+    if (!selected && categories.length > 0) {
+      selected = categories[0]
+      if (prefill?.categoryHint) {
+        setAutoCategoryNote(
+          `Kategori otomatik seçildi (\"${selected.name}\"). İsterseniz değiştirebilirsiniz.`
+        )
+      }
+    } else if (selected && prefill?.categoryHint) {
+      setAutoCategoryNote(`Kategori otomatik seçildi (\"${selected.name}\").`)
+    }
+
+    if (selected) {
+      setFormData(prev => ({ ...prev, categoryId: selected!.id.toString() }))
+    }
+  }, [categories, categoryHint, formData.categoryId, prefill?.categoryHint, categoriesLoading])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData.categoryId) {
+      alert('Lütfen bir kategori seçin')
+      return
+    }
+
+    const categoryId = parseInt(formData.categoryId, 10)
+    if (Number.isNaN(categoryId)) {
+      alert('Geçersiz kategori')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -66,7 +185,7 @@ export default function TicketForm({ onSuccess }: TicketFormProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          categoryId: parseInt(formData.categoryId),
+          categoryId,
           subject: formData.subject,
           description: formData.description,
           priority: formData.priority,
@@ -106,22 +225,43 @@ export default function TicketForm({ onSuccess }: TicketFormProps) {
       >
         <div className="space-y-2">
           <Label htmlFor="category">Kategori *</Label>
-          <Select
-            value={formData.categoryId}
-            onValueChange={value => setFormData(prev => ({ ...prev, categoryId: value }))}
-            required
-          >
-            <SelectTrigger id="category">
-              <SelectValue placeholder="Kategori seçin" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map(category => (
-                <SelectItem key={category.id} value={category.id.toString()}>
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {categoriesLoading ? (
+            <div className="flex items-center gap-2 p-3 border border-gray-300 rounded-md">
+              <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
+              <span className="text-sm text-gray-600">Kategoriler yükleniyor...</span>
+            </div>
+          ) : (
+            <Select
+              value={formData.categoryId}
+              onValueChange={value => setFormData(prev => ({ ...prev, categoryId: value }))}
+              required
+              disabled={categories.length === 0}
+            >
+              <SelectTrigger id="category">
+                <SelectValue placeholder={categories.length === 0 ? 'Kategori bulunamadı' : 'Kategori seçin'} />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.length > 0 ? (
+                  categories.map(category => (
+                    <SelectItem key={category.id} value={category.id.toString()}>
+                      {category.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="px-2 py-1.5 text-sm text-gray-500">Kategori bulunamadı</div>
+                )}
+              </SelectContent>
+            </Select>
+          )}
+          {autoCategoryNote && <p className="text-xs text-slate-500">{autoCategoryNote}</p>}
+          {categoriesError && (
+            <p className="text-xs text-red-600">{categoriesError}</p>
+          )}
+          {!categoriesLoading && categories.length === 0 && !categoriesError && (
+            <p className="text-xs text-red-600">
+              Destek kategorisi bulunamadı. Lütfen admin panelinden en az bir destek kategorisi ekleyin.
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -168,7 +308,7 @@ export default function TicketForm({ onSuccess }: TicketFormProps) {
 
         <Button
           type="submit"
-          disabled={loading}
+          disabled={loading || categories.length === 0}
           className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
         >
           {loading ? (
@@ -183,6 +323,11 @@ export default function TicketForm({ onSuccess }: TicketFormProps) {
             </>
           )}
         </Button>
+        {categories.length === 0 && (
+          <p className="text-xs text-red-600">
+            Destek kategorisi bulunamadı. Lütfen admin panelinden en az bir destek kategorisi ekleyin.
+          </p>
+        )}
       </form>
     </div>
   )

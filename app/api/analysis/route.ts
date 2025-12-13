@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth-refactored'
+import { getActivePeriod, getCurrentUser } from '@/lib/auth-refactored'
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,13 +34,32 @@ export async function GET(request: NextRequest) {
         startDate.setDate(now.getDate() - 30)
     }
 
+    const activePeriod = await getActivePeriod(request)
+    const txBaseWhere: { userId: number; periodId?: number } = { userId: user.id }
+    const accountBaseWhere: { userId: number; active: boolean; periodId?: number } = {
+      userId: user.id,
+      active: true,
+    }
+    const cardBaseWhere: { userId: number; active: boolean; periodId?: number } = {
+      userId: user.id,
+      active: true,
+    }
+    const goldBaseWhere: { userId: number; periodId?: number } = { userId: user.id }
+
+    if (activePeriod) {
+      txBaseWhere.periodId = activePeriod.id
+      accountBaseWhere.periodId = activePeriod.id
+      cardBaseWhere.periodId = activePeriod.id
+      goldBaseWhere.periodId = activePeriod.id
+    }
+
     // Paralel veri çekme
     const [transactions, accounts, creditCards, goldItems, lastMonthTransactions] =
       await Promise.all([
         // Bu dönem işlemleri
         prisma.transaction.findMany({
           where: {
-            userId: user.id,
+            ...txBaseWhere,
             transactionDate: {
               gte: startDate,
               lte: now,
@@ -57,10 +76,7 @@ export async function GET(request: NextRequest) {
         }),
         // Hesaplar
         prisma.account.findMany({
-          where: {
-            userId: user.id,
-            active: true,
-          },
+          where: accountBaseWhere,
           include: {
             currency: true,
             bank: true,
@@ -68,10 +84,7 @@ export async function GET(request: NextRequest) {
         }),
         // Kredi kartları
         prisma.creditCard.findMany({
-          where: {
-            userId: user.id,
-            active: true,
-          },
+          where: cardBaseWhere,
           include: {
             currency: true,
             bank: true,
@@ -79,9 +92,7 @@ export async function GET(request: NextRequest) {
         }),
         // Altın eşyalar
         prisma.goldItem.findMany({
-          where: {
-            userId: user.id,
-          },
+          where: goldBaseWhere,
           include: {
             goldType: true,
             goldPurity: true,
@@ -90,7 +101,7 @@ export async function GET(request: NextRequest) {
         // Geçen ay işlemleri (trend hesaplama için)
         prisma.transaction.findMany({
           where: {
-            userId: user.id,
+            ...txBaseWhere,
             transactionDate: {
               gte: new Date(startDate.getTime() - (now.getTime() - startDate.getTime())),
               lt: startDate,
@@ -225,7 +236,7 @@ export async function GET(request: NextRequest) {
       // Her ay için ayrı veri çek
       const monthTransactions = await prisma.transaction.findMany({
         where: {
-          userId: user.id,
+          ...txBaseWhere,
           transactionDate: {
             gte: monthStart,
             lte: monthEnd,
@@ -256,7 +267,7 @@ export async function GET(request: NextRequest) {
     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
     const thisMonthTransactions = await prisma.transaction.findMany({
       where: {
-        userId: user.id,
+        ...txBaseWhere,
         transactionDate: {
           gte: thisMonthStart,
         },

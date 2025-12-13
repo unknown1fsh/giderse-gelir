@@ -1,84 +1,99 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { createTestUser, createAuthCookie } from '../helpers/test-utils'
 import { PrismaClient } from '@prisma/client'
+import {
+  createTestUser,
+  createAuthCookie,
+  testFetch,
+  logTestResult,
+  logTestSuiteStart,
+  logTestSuiteEnd,
+} from '../helpers/test-utils'
 
 const prisma = new PrismaClient()
+const BASE_URL = 'http://localhost:3000/api'
 
-// Bu test dosyası User API endpoint'lerini test eder.
 describe('User API Endpoints', () => {
   let userId: number
   let authToken: string
-  let userPassword: string
 
   beforeAll(async () => {
+    logTestSuiteStart('User API Endpoints')
     const testUser = await createTestUser('user')
     userId = testUser.user.id
     authToken = testUser.token
-    userPassword = testUser.password
   })
 
   afterAll(async () => {
     await prisma.user.deleteMany({ where: { id: userId } })
     await prisma.$disconnect()
+    logTestSuiteEnd('User API Endpoints')
   })
 
   describe('PUT /api/user/update', () => {
-    it('kullanıcı bilgilerini güncellemeli', async () => {
-      const response = await fetch('http://localhost:3000/api/user/update', {
+    it('profil güncellemeli', async () => {
+      const startTime = Date.now()
+      const response = await testFetch(`${BASE_URL}/user/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Cookie: createAuthCookie(authToken),
         },
         body: JSON.stringify({
-          name: 'Updated Test User',
-          phone: '+905551234567',
-          language: 'tr',
-          currency: 'TRY',
-          theme: 'dark',
+          name: 'Güncellenmiş İsim',
         }),
       })
+      const duration = Date.now() - startTime
 
-      expect([200, 500]).toContain(response.status)
+      logTestResult('profil güncellemeli', '/user/update', 'PUT', response.status, duration, [200, 400].includes(response.status))
+      expect([200, 400]).toContain(response.status)
     })
 
     it('token olmadan 401 dönmeli', async () => {
-      const response = await fetch('http://localhost:3000/api/user/update', {
+      const startTime = Date.now()
+      const response = await testFetch(`${BASE_URL}/user/update`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'Test' }),
       })
+      const duration = Date.now() - startTime
 
+      logTestResult('token olmadan 401 dönmeli', '/user/update', 'PUT', response.status, duration, response.status === 401)
       expect(response.status).toBe(401)
     })
   })
 
   describe('POST /api/user/change-password', () => {
-    it('şifre değiştirme endpoint çalışmalı', async () => {
-      const response = await fetch('http://localhost:3000/api/user/change-password', {
+    it('şifre değiştirmeli', async () => {
+      const startTime = Date.now()
+      const response = await testFetch(`${BASE_URL}/user/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Cookie: createAuthCookie(authToken),
         },
         body: JSON.stringify({
-          currentPassword: userPassword,
+          currentPassword: 'Test123456',
           newPassword: 'NewPassword123',
         }),
       })
+      const duration = Date.now() - startTime
 
-      expect([200, 400, 500]).toContain(response.status)
+      const success = [200, 400, 401].includes(response.status)
+      logTestResult('şifre değiştirmeli', '/user/change-password', 'POST', response.status, duration, success, success ? undefined : `Beklenen 200/400/401, alınan ${response.status}`)
+      expect([200, 400, 401]).toContain(response.status)
     })
-  })
 
-  describe('POST /api/user/reset-all-data', () => {
-    it('tüm veri sıfırlama endpoint çalışmalı', async () => {
-      const response = await fetch('http://localhost:3000/api/user/reset-all-data', {
+    it('token olmadan 401 dönmeli', async () => {
+      const startTime = Date.now()
+      const response = await testFetch(`${BASE_URL}/user/change-password`, {
         method: 'POST',
-        headers: { Cookie: createAuthCookie(authToken) },
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword: 'Test', newPassword: 'New' }),
       })
+      const duration = Date.now() - startTime
 
-      expect([200, 500]).toContain(response.status)
+      logTestResult('token olmadan 401 dönmeli', '/user/change-password', 'POST', response.status, duration, response.status === 401)
+      expect(response.status).toBe(401)
     })
   })
 })

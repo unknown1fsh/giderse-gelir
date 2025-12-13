@@ -80,6 +80,7 @@ export default function RegisterPage() {
         message?: string
         error?: string
         errorCode?: string
+        premiumRequestCreated?: boolean
       }
 
       if (!response.ok) {
@@ -92,6 +93,12 @@ export default function RegisterPage() {
       }
 
       if (data.success) {
+        // Premium isteği varsa kullanıcıya bilgi ver
+        if (data.premiumRequestCreated) {
+          alert(
+            'Kayıt başarılı! Premium üyelik talebiniz admin onayına gönderildi. Onaylandıktan sonra premium özelliklere erişebileceksiniz.'
+          )
+        }
         // Başarılı kayıt sonrası dashboard'a yönlendir (full page reload ile context'leri yenile)
         window.location.href = '/dashboard'
       } else {

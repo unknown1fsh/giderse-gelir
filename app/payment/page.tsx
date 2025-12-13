@@ -12,8 +12,23 @@ function PaymentPageContent() {
   const searchParams = useSearchParams()
   const [isValid, setIsValid] = useState(false)
   const [isChecking, setIsChecking] = useState(true)
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
   useEffect(() => {
+    // Ücretli üyelik ödeme linkleri artık destek talebine yönlenir (legacy fallback)
+    const productTypeOrPlan = searchParams.get('productType') || searchParams.get('planId') || ''
+    const productId = searchParams.get('productId') || ''
+    const legacyPlanId =
+      productTypeOrPlan === 'subscription' ? productId : productTypeOrPlan
+
+    if (legacyPlanId === 'premium' || legacyPlanId === 'enterprise') {
+      setIsRedirecting(true)
+      router.replace(
+        `/help/tickets/new?intent=membership&planId=${legacyPlanId}&source=payment_legacy`
+      )
+      return
+    }
+
     // Query parametrelerini kontrol et
     const productType = searchParams.get('productType') || searchParams.get('planId')
     const amount = searchParams.get('amount')
@@ -24,7 +39,7 @@ function PaymentPageContent() {
       setIsValid(false)
     }
     setIsChecking(false)
-  }, [searchParams])
+  }, [searchParams, router])
 
   const productType = searchParams.get('productType') || searchParams.get('planId') || ''
   const productId = searchParams.get('productId') || undefined
@@ -40,14 +55,14 @@ function PaymentPageContent() {
 
   const productName = planNames[productType] || productType
 
-  if (isChecking) {
+  if (isChecking || isRedirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-4">
         <Card className="w-full max-w-md">
           <CardContent className="py-8">
             <div className="text-center">
               <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
-              <p className="text-gray-600">Yükleniyor...</p>
+              <p className="text-gray-600">Yönlendiriliyorsunuz...</p>
             </div>
           </CardContent>
         </Card>

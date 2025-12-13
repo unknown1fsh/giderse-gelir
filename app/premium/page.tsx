@@ -102,10 +102,9 @@ export default function PremiumPage() {
       return
     }
 
-    // Premium/Enterprise için PayTR ödeme sayfasına yönlendir
-    router.push(
-      `/payment?planId=${planId}&productType=${planId}&amount=${amount}&description=${encodeURIComponent(`${planId} plan abonelik ücreti`)}`
-    )
+    // Premium/Enterprise için satın alımı destek talebine yönlendir
+    // (Ücretli üyelik talepleri admin panelindeki destek taleplerine düşer)
+    router.push(`/help/tickets/new?intent=membership&planId=${planId}&source=premium_page`)
   }
 
   const handleUpgradeClick = () => {

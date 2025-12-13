@@ -113,7 +113,7 @@ export default function EnterprisePremiumPage() {
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:from-amber-600 hover:via-orange-600 hover:to-red-600 text-white px-16 py-8 text-2xl font-black shadow-2xl transform hover:scale-110 transition-all duration-300 border-2 border-amber-400/50"
-                onClick={() => router.push('/auth/register')}
+                onClick={() => setIsContactModalOpen(true)}
               >
                 <Rocket className="h-8 w-8 mr-4" />
                 ULTRA PREMIUM'U BAŞLAT
@@ -557,7 +557,7 @@ export default function EnterprisePremiumPage() {
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:from-amber-600 hover:via-orange-600 hover:to-red-600 text-white px-20 py-8 text-2xl font-black shadow-2xl border-2 border-amber-400/50"
-                  onClick={() => router.push('/auth/register')}
+                  onClick={() => setIsContactModalOpen(true)}
                 >
                   <Crown className="h-8 w-8 mr-4" />
                   ULTRA PREMIUM BAŞLAT
@@ -581,6 +581,7 @@ export default function EnterprisePremiumPage() {
       <EnterprisePremiumContactModal
         open={isContactModalOpen}
         onOpenChange={setIsContactModalOpen}
+        planId="enterprise_premium"
       />
     </div>
   )

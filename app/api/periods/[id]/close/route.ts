@@ -179,7 +179,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
               bankId: card.bankId,
               currencyId: card.currencyId,
               limitAmount: card.limitAmount,
-              availableLimit: card.limitAmount, // Yeni dönemde sıfırdan başla
+              // ✅ Borcu taşı: kullanılabilir limit aynı kalsın
+              availableLimit: card.availableLimit,
               statementDay: card.statementDay,
               dueDay: card.dueDay,
               minPaymentPercent: card.minPaymentPercent,

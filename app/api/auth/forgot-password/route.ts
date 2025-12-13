@@ -36,11 +36,19 @@ export async function POST(request: NextRequest) {
     const resetTokenExpiry = new Date(Date.now() + 3600000) // 1 saat
 
     // Token'ı veritabanına kaydet
+    // Not: User modelinde resetToken/resetTokenExpiry alanları yoksa 500 hatası oluşuyordu.
+    // Bu yüzden token'ı settings JSON'u altında saklıyoruz.
+    const currentSettings = (user.settings as any) || {}
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        resetToken,
-        resetTokenExpiry,
+        settings: {
+          ...currentSettings,
+          passwordReset: {
+            token: resetToken,
+            expiresAt: resetTokenExpiry.toISOString(),
+          },
+        },
       },
     })
 

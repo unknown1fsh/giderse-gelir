@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from './auth-refactored'
 import { PrismaClient } from '@prisma/client'
-import { isPremiumPlan, isEnterprisePlan, PLAN_IDS } from './plan-config'
+import { isPremiumPlan, isEnterprisePlan, PLAN_IDS, getPlanLimits } from './plan-config'
 
 const prisma = new PrismaClient()
 
@@ -199,15 +199,8 @@ export async function checkFeatureLimit(
     }
   }
 
-  // Free plan limitleri
-  const limits: Record<string, number> = {
-    transactions: 50,
-    accounts: 3,
-    creditCards: 2,
-    analysis: 10,
-  }
-
-  const limit = limits[feature] || -1
+  const limits = getPlanLimits(currentPlan) as Record<string, number>
+  const limit = limits[feature] ?? -1
 
   return {
     allowed: limit === -1 || currentCount < limit,

@@ -63,11 +63,19 @@ const priorityColors: Record<string, string> = {
   urgent: 'bg-red-100 text-red-800',
 }
 
+interface Category {
+  id: number
+  name: string
+}
+
 export default function TicketsPage() {
   const [tickets, setTickets] = useState<Ticket[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
+  const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
 
   const fetchTickets = async () => {
@@ -88,13 +96,38 @@ export default function TicketsPage() {
     }
   }
 
+  const fetchCategories = async () => {
+    setCategoriesLoading(true)
+    try {
+      const response = await fetch('/api/help/categories')
+      const result = (await response.json()) as { success: boolean; data?: Category[] }
+
+      if (result.success && result.data) {
+        setCategories(result.data)
+      }
+    } catch (error) {
+      console.error('Kategori yükleme hatası:', error)
+    } finally {
+      setCategoriesLoading(false)
+    }
+  }
+
   useEffect(() => {
     void fetchTickets()
+    void fetchCategories()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter])
 
   const filteredTickets = useMemo(() => {
     let filtered = tickets
+
+    // Category filter
+    if (categoryFilter !== 'all') {
+      const categoryId = parseInt(categoryFilter, 10)
+      if (!isNaN(categoryId)) {
+        filtered = filtered.filter(ticket => ticket.category.id === categoryId)
+      }
+    }
 
     // Priority filter
     if (priorityFilter !== 'all') {
@@ -114,7 +147,7 @@ export default function TicketsPage() {
     }
 
     return filtered
-  }, [tickets, priorityFilter, searchQuery])
+  }, [tickets, categoryFilter, priorityFilter, searchQuery])
 
   const stats = useMemo(() => {
     const total = tickets.length
@@ -254,6 +287,23 @@ export default function TicketsPage() {
                 <SelectItem value="medium">Orta</SelectItem>
                 <SelectItem value="high">Yüksek</SelectItem>
                 <SelectItem value="urgent">Acil</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={categoryFilter}
+              onValueChange={setCategoryFilter}
+              disabled={categoriesLoading || categories.length === 0}
+            >
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder={categoriesLoading ? 'Yükleniyor...' : 'Kategori'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tüm Kategoriler</SelectItem>
+                {categories.map(category => (
+                  <SelectItem key={category.id} value={category.id.toString()}>
+                    {category.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

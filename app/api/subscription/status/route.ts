@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-refactored'
 import { PrismaClient } from '@prisma/client'
-import { getPlanById, PLAN_IDS } from '@/lib/plan-config'
+import { getPlanById, getPlanLimits, PLAN_IDS } from '@/lib/plan-config'
 
 const prisma = new PrismaClient()
 
@@ -48,8 +48,8 @@ export async function GET(request: NextRequest) {
     // Plan özelliklerini düzleştir
     const features = planConfig?.categories.flatMap(cat => cat.features) || []
     
-    // Transaction limitini kontrol et
-    const transactionLimit = planConfig?.id === PLAN_IDS.FREE ? 50 : -1
+    // Transaction limitini merkezi konfigürasyondan al
+    const transactionLimit = getPlanLimits(currentPlan).transactions
 
     return NextResponse.json({
       success: true,

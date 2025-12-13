@@ -7,11 +7,14 @@ import { BaseDTO } from './BaseDTO'
 export class TransactionDTO extends BaseDTO {
   id: number
   userId: number
+  periodId?: number
   txTypeId: number
   categoryId: number
   paymentMethodId: number
   accountId?: number
   creditCardId?: number
+  eWalletId?: number
+  beneficiaryId?: number
   amount: number
   currencyId: number
   transactionDate: Date
@@ -23,11 +26,14 @@ export class TransactionDTO extends BaseDTO {
   constructor(data: {
     id: number
     userId: number
+    periodId?: number
     txTypeId: number
     categoryId: number
     paymentMethodId: number
     accountId?: number
     creditCardId?: number
+    eWalletId?: number
+    beneficiaryId?: number
     amount: number
     currencyId: number
     transactionDate: Date
@@ -39,11 +45,14 @@ export class TransactionDTO extends BaseDTO {
     super()
     this.id = data.id
     this.userId = data.userId
+    this.periodId = data.periodId
     this.txTypeId = data.txTypeId
     this.categoryId = data.categoryId
     this.paymentMethodId = data.paymentMethodId
     this.accountId = data.accountId
     this.creditCardId = data.creditCardId
+    this.eWalletId = data.eWalletId
+    this.beneficiaryId = data.beneficiaryId
     this.amount = data.amount
     this.currencyId = data.currencyId
     this.transactionDate = data.transactionDate
@@ -64,6 +73,8 @@ export class CreateTransactionDTO {
   paymentMethodId: number
   accountId?: number
   creditCardId?: number
+  eWalletId?: number
+  beneficiaryId?: number
   amount: number
   currencyId: number
   transactionDate: Date
@@ -76,6 +87,8 @@ export class CreateTransactionDTO {
     paymentMethodId: number
     accountId?: number
     creditCardId?: number
+    eWalletId?: number
+    beneficiaryId?: number
     amount: number
     currencyId: number
     transactionDate: Date
@@ -87,6 +100,8 @@ export class CreateTransactionDTO {
     this.paymentMethodId = data.paymentMethodId
     this.accountId = data.accountId
     this.creditCardId = data.creditCardId
+    this.eWalletId = data.eWalletId
+    this.beneficiaryId = data.beneficiaryId
     this.amount = data.amount
     this.currencyId = data.currencyId
     this.transactionDate = data.transactionDate

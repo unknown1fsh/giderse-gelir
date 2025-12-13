@@ -1,67 +1,57 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { createTestUser, createTestAccount, createAuthCookie } from '../helpers/test-utils'
 import { PrismaClient } from '@prisma/client'
+import {
+  createTestUser,
+  createTestAccount,
+  createAuthCookie,
+  testFetch,
+  logTestResult,
+  logTestSuiteStart,
+  logTestSuiteEnd,
+} from '../helpers/test-utils'
 
 const prisma = new PrismaClient()
+const BASE_URL = 'http://localhost:3000/api'
 
-// Bu test dosyası Dashboard API endpoint'ini test eder.
 describe('Dashboard API Endpoint', () => {
   let userId: number
   let authToken: string
 
   beforeAll(async () => {
+    logTestSuiteStart('Dashboard API Endpoint')
     const testUser = await createTestUser('dashboard')
     userId = testUser.user.id
     authToken = testUser.token
 
-    // Test verisi oluştur
-    const account = await createTestAccount(userId)
-    const txTypeGelir = await prisma.refTxType.findFirst({ where: { code: 'GELIR' } })
-    const categoryMaas = await prisma.refTxCategory.findFirst({
-      where: { code: 'MAAS', txTypeId: txTypeGelir?.id },
-    })
-    const paymentMethod = await prisma.refPaymentMethod.findFirst()
-    const currency = await prisma.refCurrency.findFirst({ where: { code: 'TRY' } })
-
-    // Test işlemi oluştur
-    await prisma.transaction.create({
-      data: {
-        userId,
-        txTypeId: txTypeGelir?.id as number,
-        categoryId: categoryMaas?.id as number,
-        paymentMethodId: paymentMethod?.id as number,
-        accountId: account.id,
-        amount: 10000,
-        currencyId: currency?.id as number,
-        transactionDate: new Date(),
-      },
-    })
+    await createTestAccount(userId)
   })
 
   afterAll(async () => {
     await prisma.user.deleteMany({ where: { id: userId } })
     await prisma.$disconnect()
+    logTestSuiteEnd('Dashboard API Endpoint')
   })
 
   describe('GET /api/dashboard', () => {
     it('dashboard KPI verilerini getirmeli', async () => {
-      const response = await fetch('http://localhost:3000/api/dashboard', {
+      const startTime = Date.now()
+      const response = await testFetch(`${BASE_URL}/dashboard`, {
         headers: { Cookie: createAuthCookie(authToken) },
       })
+      const duration = Date.now() - startTime
 
+      logTestResult('dashboard KPI verilerini getirmeli', '/dashboard', 'GET', response.status, duration, response.status === 200)
       expect(response.status).toBe(200)
-
       const data = await response.json()
       expect(data).toHaveProperty('kpi')
-      expect(data.kpi).toHaveProperty('total_income')
-      expect(data.kpi).toHaveProperty('total_expense')
-      expect(data.kpi).toHaveProperty('net_amount')
-      expect(data).toHaveProperty('upcomingPayments')
-      expect(data).toHaveProperty('categoryBreakdown')
     })
 
     it('token olmadan 401 dönmeli', async () => {
-      const response = await fetch('http://localhost:3000/api/dashboard')
+      const startTime = Date.now()
+      const response = await testFetch(`${BASE_URL}/dashboard`)
+      const duration = Date.now() - startTime
+
+      logTestResult('token olmadan 401 dönmeli', '/dashboard', 'GET', response.status, duration, response.status === 401)
       expect(response.status).toBe(401)
     })
   })

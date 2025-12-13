@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth-refactored'
+import { getActivePeriod, getCurrentUser } from '@/lib/auth-refactored'
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,10 +38,13 @@ export async function GET(request: NextRequest) {
     const period = searchParams.get('period') || '12m'
     const metric = searchParams.get('metric') || 'all'
 
+    const activePeriod = await getActivePeriod(request)
+
     // Kullanıcı bazlı veri çekme
     const transactions = await prisma.transaction.findMany({
       where: {
         userId: user.id,
+        periodId: activePeriod?.id,
       },
       include: {
         txType: true,

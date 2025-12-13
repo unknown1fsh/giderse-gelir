@@ -25,6 +25,7 @@ export class TransactionRepository extends BaseRepository<Transaction> {
     return this.prisma.transaction.findUnique({
       where: { id },
       include: {
+        period: true,
         txType: true,
         category: true,
         paymentMethod: true,
@@ -38,6 +39,16 @@ export class TransactionRepository extends BaseRepository<Transaction> {
           include: {
             bank: true,
             currency: true,
+          },
+        },
+        eWallet: {
+          include: {
+            currency: true,
+          },
+        },
+        beneficiary: {
+          include: {
+            bank: true,
           },
         },
         currency: true,
@@ -64,6 +75,7 @@ export class TransactionRepository extends BaseRepository<Transaction> {
     return this.prisma.transaction.findMany({
       where: { userId },
       include: {
+        period: true,
         txType: true,
         category: true,
         paymentMethod: true,
@@ -77,6 +89,16 @@ export class TransactionRepository extends BaseRepository<Transaction> {
           include: {
             bank: true,
             currency: true,
+          },
+        },
+        eWallet: {
+          include: {
+            currency: true,
+          },
+        },
+        beneficiary: {
+          include: {
+            bank: true,
           },
         },
         currency: true,
@@ -127,6 +149,7 @@ export class TransactionRepository extends BaseRepository<Transaction> {
     return this.prisma.transaction.create({
       data,
       include: {
+        period: true,
         txType: true,
         category: true,
         paymentMethod: true,
@@ -140,6 +163,16 @@ export class TransactionRepository extends BaseRepository<Transaction> {
           include: {
             bank: true,
             currency: true,
+          },
+        },
+        eWallet: {
+          include: {
+            currency: true,
+          },
+        },
+        beneficiary: {
+          include: {
+            bank: true,
           },
         },
         currency: true,

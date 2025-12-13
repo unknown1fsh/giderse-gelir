@@ -5,6 +5,7 @@ import { TransactionMapper } from '../../mappers/TransactionMapper'
 import { TransactionDTO, CreateTransactionDTO } from '../../dto/TransactionDTO'
 import { TransactionValidationService } from './TransactionValidationService'
 import { ValidationError } from '../../errors'
+import { getPlanLimits } from '../../../lib/plan-config'
 
 // Bu sınıf işlem (transaction) iş mantığını yönetir.
 export class TransactionService extends BaseService<TransactionDTO> {
@@ -60,46 +61,53 @@ export class TransactionService extends BaseService<TransactionDTO> {
   // Girdi: CreateTransactionDTO ve kullanıcı ID'si
   // Çıktı: Oluşturulan işlem
   // Hata: ValidationError, BusinessRuleError
-  async create(data: CreateTransactionDTO & { userId: number }) {
+  async create(data: CreateTransactionDTO & { userId: number; periodId?: number }) {
     // ✅ ÖNEMLİ: Tüm validasyonları çalıştır
     await this.validationService.validateTransaction({
       txTypeId: data.txTypeId,
       categoryId: data.categoryId,
       accountId: data.accountId,
       creditCardId: data.creditCardId,
-      eWalletId: (data as any).eWalletId,
-      beneficiaryId: (data as any).beneficiaryId,
+      eWalletId: data.eWalletId,
       paymentMethodId: data.paymentMethodId,
       amount: data.amount,
       transactionDate: data.transactionDate,
     })
 
-    // SystemParameter ID'lerini Ref tablo ID'lerine map et
-    // Frontend SystemParameter gönderiyor ama Transaction tablosu Ref tablolarına bağlı
-    const [refTxTypeId, refCategoryId, refPaymentMethodId, refCurrencyId] = await Promise.all([
-      this.mapSystemParameterToRefTxType(data.txTypeId),
-      this.mapSystemParameterToRefCategory(data.categoryId, data.txTypeId),
+    // PAYMENT_METHOD ve CURRENCY UI'dan SystemParameter ID olarak gelir
+    // Transaction tablosu RefPaymentMethod/RefCurrency'a bağlı olduğu için burada map ediyoruz
+    const [refPaymentMethodId, refCurrencyId, txType] = await Promise.all([
       this.mapSystemParameterToRefPaymentMethod(data.paymentMethodId),
       this.mapSystemParameterToRefCurrency(data.currencyId),
+      this.prisma.refTxType.findUnique({ where: { id: data.txTypeId }, select: { code: true } }),
     ])
+
+    if (!txType) {
+      throw new ValidationError(`Geçersiz işlem tipi ID: ${data.txTypeId}`)
+    }
 
     // ✅ NAKİT ÖDEMELERİ: Hesap/Kart/E-Cüzdan seçilmemişse otomatik "Nakit" hesabına ata
     // Mapping SONRASI refPaymentMethodId kullan
     let effectiveAccountId = data.accountId
-    if (!data.accountId && !data.creditCardId && !(data as any).eWalletId) {
-      effectiveAccountId = await this.ensureCashAccount(data.userId, refPaymentMethodId)
+    if (!data.accountId && !data.creditCardId && !data.eWalletId) {
+      effectiveAccountId = await this.ensureCashAccount(data.userId, refPaymentMethodId, data.periodId)
     }
 
     const createData: Prisma.TransactionCreateInput = {
       user: { connect: { id: data.userId } },
-      txType: { connect: { id: refTxTypeId } }, // RefTxType ID (3 veya 4)
-      category: { connect: { id: refCategoryId } }, // RefTxCategory ID
+      txType: { connect: { id: data.txTypeId } },
+      category: { connect: { id: data.categoryId } },
       paymentMethod: { connect: { id: refPaymentMethodId } }, // RefPaymentMethod ID
       currency: { connect: { id: refCurrencyId } }, // RefCurrency ID
       amount: new Prisma.Decimal(data.amount),
       transactionDate: data.transactionDate,
       description: data.description,
       tags: data.tags || [],
+    }
+
+    // ✅ PERIOD: periodId geldiyse transaction'ı aktif döneme bağla
+    if (data.periodId) {
+      createData.period = { connect: { id: data.periodId } }
     }
 
     // Hesap/Kart/E-Cüzdan/Alıcı bağlantısı
@@ -109,12 +117,12 @@ export class TransactionService extends BaseService<TransactionDTO> {
       createData.creditCard = { connect: { id: data.creditCardId } }
     }
     
-    if ((data as any).eWalletId) {
-      createData.eWallet = { connect: { id: (data as any).eWalletId } }
+    if (data.eWalletId) {
+      createData.eWallet = { connect: { id: data.eWalletId } }
     }
     
-    if ((data as any).beneficiaryId) {
-      createData.beneficiary = { connect: { id: (data as any).beneficiaryId } }
+    if (data.beneficiaryId) {
+      createData.beneficiary = { connect: { id: data.beneficiaryId } }
     }
 
     // Transaction oluştur
@@ -124,9 +132,9 @@ export class TransactionService extends BaseService<TransactionDTO> {
     const balanceUpdateData = { 
       ...data, 
       accountId: effectiveAccountId,
-      eWalletId: (data as any).eWalletId
+      eWalletId: data.eWalletId
     }
-    await this.updateAccountBalance(balanceUpdateData, refTxTypeId)
+    await this.updateAccountBalance(balanceUpdateData, txType.code)
 
     return transaction
   }
@@ -134,7 +142,11 @@ export class TransactionService extends BaseService<TransactionDTO> {
   // Bu metot kullanıcının "Nakit" hesabını bulur veya oluşturur
   // Girdi: userId, refPaymentMethodId (RefPaymentMethod ID - mapping yapılmış)
   // Çıktı: Nakit hesap ID
-  private async ensureCashAccount(userId: number, refPaymentMethodId: number): Promise<number> {
+  private async ensureCashAccount(
+    userId: number,
+    refPaymentMethodId: number,
+    periodId?: number
+  ): Promise<number> {
     // Nakit ödeme kontrolü (Ref tablo ID ile)
     const refPaymentMethod = await this.prisma.refPaymentMethod.findUnique({
       where: { id: refPaymentMethodId },
@@ -152,6 +164,7 @@ export class TransactionService extends BaseService<TransactionDTO> {
         userId,
         name: 'Nakit',
         active: true,
+        periodId: periodId ?? undefined,
       },
     })
 
@@ -193,6 +206,7 @@ export class TransactionService extends BaseService<TransactionDTO> {
       cashAccount = await this.prisma.account.create({
         data: {
           userId,
+          periodId: periodId ?? undefined,
           name: 'Nakit',
           bankId: cashBank.id,
           accountTypeId: accountType.id,
@@ -212,10 +226,10 @@ export class TransactionService extends BaseService<TransactionDTO> {
   // Hata: -
   private async updateAccountBalance(
     data: CreateTransactionDTO & { userId: number; eWalletId?: number },
-    refTxTypeId: number
+    txTypeCode: string
   ): Promise<void> {
     const amount = new Prisma.Decimal(data.amount)
-    const isIncome = refTxTypeId === 3 // GELIR: +, GIDER: -
+    const isIncome = txTypeCode === 'GELIR' // GELIR: +, GIDER: -
 
     // Hesap seçiliyse
     if (data.accountId) {
@@ -270,67 +284,6 @@ export class TransactionService extends BaseService<TransactionDTO> {
         })
       }
     }
-  }
-
-  // Bu metot SystemParameter TX_TYPE ID'sini RefTxType ID'sine map eder
-  // Girdi: SystemParameter txTypeId (44, 45)
-  // Çıktı: RefTxType ID (3, 4)
-  private async mapSystemParameterToRefTxType(systemParamId: number): Promise<number> {
-    // SystemParameter'dan kodu al
-    const systemParam = await this.prisma.systemParameter.findUnique({
-      where: { id: systemParamId },
-    })
-
-    if (!systemParam) {
-      throw new ValidationError(`Geçersiz işlem tipi ID: ${systemParamId}`)
-    }
-
-    // RefTxType'dan aynı koda sahip kaydı bul
-    const refTxType = await this.prisma.refTxType.findFirst({
-      where: { code: systemParam.paramCode }, // GELIR veya GIDER
-    })
-
-    if (!refTxType) {
-      throw new ValidationError(`RefTxType bulunamadı: ${systemParam.paramCode}`)
-    }
-
-    return refTxType.id // 3 veya 4
-  }
-
-  // Bu metot SystemParameter TX_CATEGORY ID'sini RefTxCategory ID'sine map eder
-  // Girdi: SystemParameter categoryId, SystemParameter txTypeId
-  // Çıktı: RefTxCategory ID
-  private async mapSystemParameterToRefCategory(
-    systemParamId: number,
-    systemTxTypeId: number
-  ): Promise<number> {
-    // SystemParameter'dan kategoriyi al
-    const systemParam = await this.prisma.systemParameter.findUnique({
-      where: { id: systemParamId },
-    })
-
-    if (!systemParam) {
-      throw new ValidationError(`Geçersiz kategori ID: ${systemParamId}`)
-    }
-
-    // txTypeId'yi RefTxType ID'sine çevir
-    const refTxTypeId = await this.mapSystemParameterToRefTxType(systemTxTypeId)
-
-    // RefTxCategory'den displayName ile eşleşen kaydı bul
-    const refCategory = await this.prisma.refTxCategory.findFirst({
-      where: {
-        name: systemParam.displayName, // "Maaş", "Kira" vb.
-        txTypeId: refTxTypeId, // 3 veya 4
-      },
-    })
-
-    if (!refCategory) {
-      throw new ValidationError(
-        `RefTxCategory bulunamadı: ${systemParam.displayName} (txTypeId: ${refTxTypeId})`
-      )
-    }
-
-    return refCategory.id
   }
 
   // Bu metot SystemParameter PAYMENT_METHOD ID'sini RefPaymentMethod ID'sine map eder
@@ -400,6 +353,7 @@ export class TransactionService extends BaseService<TransactionDTO> {
         txType: true,
         account: true,
         creditCard: true,
+        eWallet: true,
       },
     })
 
@@ -445,6 +399,18 @@ export class TransactionService extends BaseService<TransactionDTO> {
         data: { availableLimit: newLimit },
       })
     }
+
+    // E-cüzdandan yapılmışsa
+    if (transaction.eWalletId && transaction.eWallet) {
+      const newBalance = isIncome
+        ? transaction.eWallet.balance.sub(amount) // Gelir silindi: bakiye azalır
+        : transaction.eWallet.balance.add(amount) // Gider silindi: bakiye artar
+
+      await this.prisma.eWallet.update({
+        where: { id: transaction.eWalletId },
+        data: { balance: newBalance },
+      })
+    }
   }
 
   // Bu metot kullanıcının aylık işlem sayısını kontrol eder.
@@ -467,11 +433,10 @@ export class TransactionService extends BaseService<TransactionDTO> {
     userId: number,
     plan: string
   ): Promise<{ allowed: boolean; current: number; limit: number }> {
-    if (plan !== 'free') {
+    const limit = getPlanLimits(plan).transactions
+    if (limit === -1) {
       return { allowed: true, current: 0, limit: -1 }
     }
-
-    const limit = 50
     const current = await this.getMonthlyTransactionCount(userId)
 
     return {

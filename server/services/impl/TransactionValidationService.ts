@@ -9,19 +9,33 @@ export class TransactionValidationService {
     this.prisma = prisma
   }
 
+  private async isCashPayment(paymentMethodId?: number): Promise<boolean> {
+    if (!paymentMethodId) {
+      return false
+    }
+
+    // Frontend genelde SystemParameter ID gönderir
+    const systemParam = await this.prisma.systemParameter.findUnique({
+      where: { id: paymentMethodId },
+      select: { paramCode: true },
+    })
+    if (systemParam?.paramCode) {
+      return systemParam.paramCode === 'NAKIT'
+    }
+
+    // Bazı yerlerde RefPaymentMethod ID gelebilir (fallback)
+    const refPaymentMethod = await this.prisma.refPaymentMethod.findUnique({
+      where: { id: paymentMethodId },
+      select: { code: true },
+    })
+    return refPaymentMethod?.code === 'NAKIT'
+  }
+
   // Bu metot kategori ve işlem tipinin uyumlu olup olmadığını kontrol eder.
-  // Girdi: categoryId (SystemParameter ID), txTypeId (SystemParameter ID)
+  // Girdi: categoryId (RefTxCategory ID), txTypeId (RefTxType ID)
   // Çıktı: void (hata fırlatır veya devam eder)
   // Hata: ValidationError
   async validateCategoryMatchesType(categoryId: number, txTypeId: number): Promise<void> {
-    // TX_TYPE ve TX_CATEGORY artık SystemParameter'da
-    // Frontend zaten doğru kategorileri filtreliyor (txTypeId'ye göre)
-    // Bu yüzden bu validation basitleştirilebilir
-
-    // SystemParameter'dan kategori ve tip kontrolü yapılabilir
-    // ancak şimdilik frontend'in doğru veriyi göndereceğine güveniyoruz
-    // Zod validation zaten categoryId ve txTypeId'nin pozitif olduğunu kontrol eder
-
     if (!categoryId || categoryId <= 0) {
       throw new ValidationError('Geçersiz kategori ID')
     }
@@ -30,67 +44,91 @@ export class TransactionValidationService {
       throw new ValidationError('Geçersiz işlem tipi ID')
     }
 
-    // NOT: Frontend /transactions/new-income sadece GELIR kategorileri,
-    // /transactions/new-expense sadece GIDER kategorileri gösterir
-    // Bu nedenle kategori-tip uyumsuzluğu frontend'de engellenmiştir
+    const category = await this.prisma.refTxCategory.findUnique({
+      where: { id: categoryId },
+      select: { txTypeId: true },
+    })
+
+    if (!category) {
+      throw new ValidationError('Kategori bulunamadı')
+    }
+
+    if (category.txTypeId !== txTypeId) {
+      throw new ValidationError('Kategori ile işlem tipi uyumsuz')
+    }
   }
 
   // Bu metot işlem tipinin aktif olup olmadığını kontrol eder.
-  // Girdi: txTypeId (SystemParameter ID)
+  // Girdi: txTypeId (RefTxType ID)
   // Çıktı: void
   // Hata: BadRequestError
   async validateTransactionTypeIsActive(txTypeId: number): Promise<void> {
-    // TX_TYPE artık SystemParameter'da, direkt Zod validation yeterli
-    // SystemParameter'dan kontrol etmeye gerek yok çünkü frontend zaten
-    // sadece aktif parametreleri gösteriyor
     if (!txTypeId || txTypeId <= 0) {
       throw new BadRequestError('Geçersiz işlem tipi ID')
     }
 
-    // SystemParameter kontrolü (opsiyonel - şimdilik basit kontrol yeterli)
-    // Gelecekte gerekirse SystemParameter tablosundan kontrol eklenebilir
+    const txType = await this.prisma.refTxType.findUnique({
+      where: { id: txTypeId },
+      select: { active: true },
+    })
+
+    if (!txType) {
+      throw new BadRequestError('İşlem tipi bulunamadı')
+    }
+
+    if (!txType.active) {
+      throw new BadRequestError('İşlem tipi pasif')
+    }
   }
 
   // Bu metot kategorinin aktif olup olmadığını kontrol eder.
-  // Girdi: categoryId (SystemParameter ID)
+  // Girdi: categoryId (RefTxCategory ID)
   // Çıktı: void
   // Hata: BadRequestError
   async validateCategoryIsActive(categoryId: number): Promise<void> {
-    // TX_CATEGORY artık SystemParameter'da, direkt Zod validation yeterli
-    // SystemParameter'dan kontrol etmeye gerek yok çünkü frontend zaten
-    // sadece aktif parametreleri gösteriyor
     if (!categoryId || categoryId <= 0) {
       throw new BadRequestError('Geçersiz kategori ID')
     }
 
-    // SystemParameter kontrolü (opsiyonel - şimdilik basit kontrol yeterli)
-    // Gelecekte gerekirse SystemParameter tablosundan kontrol eklenebilir
+    const category = await this.prisma.refTxCategory.findUnique({
+      where: { id: categoryId },
+      select: { active: true },
+    })
+
+    if (!category) {
+      throw new BadRequestError('Kategori bulunamadı')
+    }
+
+    if (!category.active) {
+      throw new BadRequestError('Kategori pasif')
+    }
   }
 
-  // Bu metot hesap veya kredi kartından en az birinin seçildiğini kontrol eder.
-  // NOT: Nakit ödemeler için bu kontrol ATLANIR
-  // Girdi: accountId, creditCardId, paymentMethodId
+  // Bu metot ödeme kaynağının doğru seçildiğini kontrol eder.
+  // NOT: Nakit ödemeler için kaynak zorunlu değildir (otomatik Nakit hesabı kullanılır)
+  // Girdi: accountId, creditCardId, eWalletId, paymentMethodId
   // Çıktı: void
   // Hata: ValidationError
-  validateAccountOrCreditCard(
-    accountId?: number,
-    creditCardId?: number,
+  async validatePaymentSource(data: {
+    accountId?: number
+    creditCardId?: number
+    eWalletId?: number
     paymentMethodId?: number
-  ): void {
-    // Nakit ödeme için hesap/kart zorunlu değil (otomatik Nakit hesabı kullanılır)
-    // Nakit kodları kontrol et (SystemParameter: 62, RefPaymentMethod: 3)
-    const isNakitPayment = paymentMethodId === 62 || paymentMethodId === 3
-
-    if (isNakitPayment) {
-      return // Nakit için zorunluluk yok
+  }): Promise<void> {
+    const isCash = await this.isCashPayment(data.paymentMethodId)
+    if (isCash) {
+      return
     }
 
-    if (!accountId && !creditCardId) {
-      throw new ValidationError('Hesap veya kredi kartından en az birini seçmelisiniz')
-    }
+    const sources = [data.accountId, data.creditCardId, data.eWalletId].filter(
+      v => typeof v === 'number' && v > 0
+    )
 
-    if (accountId && creditCardId) {
-      throw new ValidationError('Hem hesap hem kredi kartı seçilemez, birini seçiniz')
+    if (sources.length === 0) {
+      throw new ValidationError('Hesap, kredi kartı veya e-cüzdandan birini seçmelisiniz')
+    }
+    if (sources.length > 1) {
+      throw new ValidationError('Aynı anda sadece 1 ödeme kaynağı seçebilirsiniz (hesap/kart/e-cüzdan)')
     }
   }
 
@@ -136,6 +174,7 @@ export class TransactionValidationService {
     categoryId: number
     accountId?: number
     creditCardId?: number
+    eWalletId?: number
     paymentMethodId?: number
     amount: number
     transactionDate: Date
@@ -144,7 +183,12 @@ export class TransactionValidationService {
     await this.validateTransactionTypeIsActive(data.txTypeId)
     await this.validateCategoryIsActive(data.categoryId)
     await this.validateCategoryMatchesType(data.categoryId, data.txTypeId)
-    this.validateAccountOrCreditCard(data.accountId, data.creditCardId, data.paymentMethodId)
+    await this.validatePaymentSource({
+      accountId: data.accountId,
+      creditCardId: data.creditCardId,
+      eWalletId: data.eWalletId,
+      paymentMethodId: data.paymentMethodId,
+    })
     this.validateAmount(data.amount)
     this.validateTransactionDate(data.transactionDate)
   }

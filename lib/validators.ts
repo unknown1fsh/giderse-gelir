@@ -42,6 +42,8 @@ export const transactionSchema = z.object({
   paymentMethodId: z.number().int().positive('Geçerli ödeme yöntemi seçiniz'),
   accountId: z.number().int().positive().optional(),
   creditCardId: z.number().int().positive().optional(),
+  eWalletId: z.number().int().positive().optional(),
+  beneficiaryId: z.number().int().positive().optional(),
   amount: z.number().positive('Tutar pozitif olmalıdır'),
   currencyId: z.number().int().positive('Geçerli para birimi seçiniz'),
   transactionDate: z.date(),

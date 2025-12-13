@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth-refactored'
+import { getActivePeriod, getCurrentUser } from '@/lib/auth-refactored'
+import { Prisma } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,6 +10,10 @@ export async function GET(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Oturum bulunamadı' }, { status: 401 })
     }
+
+    const activePeriod = await getActivePeriod(request)
+    const txPeriodFilter = activePeriod ? Prisma.sql`AND t.period_id = ${activePeriod.id}` : Prisma.empty
+    const cardPeriodFilter = activePeriod ? Prisma.sql`AND cc.period_id = ${activePeriod.id}` : Prisma.empty
 
     // Son 30 gün KPI'larını al (kullanıcı bazlı)
     const kpiData = await prisma.$queryRaw`
@@ -22,6 +27,7 @@ export async function GET(request: NextRequest) {
       JOIN ref_tx_type tt ON t.tx_type_id = tt.id
       WHERE t.user_id = ${user.id}
         AND t.transaction_date >= CURRENT_DATE - INTERVAL '30 days'
+        ${txPeriodFilter}
     `
 
     // Yaklaşan kart ödemeleri (kullanıcı bazlı)
@@ -44,6 +50,7 @@ export async function GET(request: NextRequest) {
       JOIN ref_bank b ON cc.bank_id = b.id
       WHERE cc.user_id = ${user.id}
         AND cc.active = true
+        ${cardPeriodFilter}
     `
 
     // Kategori bazlı dağılım (kullanıcı bazlı)
@@ -58,21 +65,38 @@ export async function GET(request: NextRequest) {
       JOIN ref_tx_type tt ON t.tx_type_id = tt.id
       WHERE t.user_id = ${user.id}
         AND t.transaction_date >= CURRENT_DATE - INTERVAL '30 days'
+        ${txPeriodFilter}
       GROUP BY tc.name, tt.name, tc.id
       ORDER BY total_amount DESC
     `
 
     // ✅ TOPLAM VARLIK HESAPLAMA (Transaction'larla senkronize)
     // Hesap bakiyeleri toplamı
+    const accountWhere: { userId: number; active: boolean; periodId?: number } = {
+      userId: user.id,
+      active: true,
+    }
+    const cardWhere: { userId: number; active: boolean; periodId?: number } = {
+      userId: user.id,
+      active: true,
+    }
+    const goldWhere: { userId: number; periodId?: number } = { userId: user.id }
+
+    if (activePeriod) {
+      accountWhere.periodId = activePeriod.id
+      cardWhere.periodId = activePeriod.id
+      goldWhere.periodId = activePeriod.id
+    }
+
     const accountsData = await prisma.account.findMany({
-      where: { userId: user.id, active: true },
+      where: accountWhere,
       select: { balance: true },
     })
     const totalAccountBalance = accountsData.reduce((sum, acc) => sum + parseFloat(acc.balance.toString()), 0)
 
     // Kredi kartı borçları toplamı
     const cardsData = await prisma.creditCard.findMany({
-      where: { userId: user.id, active: true },
+      where: cardWhere,
       select: { limitAmount: true, availableLimit: true },
     })
     const totalCardDebt = cardsData.reduce((sum, card) => {
@@ -82,7 +106,7 @@ export async function GET(request: NextRequest) {
 
     // Altın değeri toplamı
     const goldData = await prisma.goldItem.findMany({
-      where: { userId: user.id },
+      where: goldWhere,
       select: { currentValueTry: true, purchasePrice: true },
     })
     const totalGoldValue = goldData.reduce((sum, gold) => {

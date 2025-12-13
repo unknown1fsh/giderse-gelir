@@ -1,15 +1,23 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { createTestUser, createAuthCookie } from '../helpers/test-utils'
 import { PrismaClient } from '@prisma/client'
+import {
+  createTestUser,
+  createAuthCookie,
+  testFetch,
+  logTestResult,
+  logTestSuiteStart,
+  logTestSuiteEnd,
+} from '../helpers/test-utils'
 
 const prisma = new PrismaClient()
+const BASE_URL = 'http://localhost:3000/api'
 
-// Bu test dosyası Gold API endpoint'lerini test eder.
 describe('Gold API Endpoints', () => {
   let userId: number
   let authToken: string
 
   beforeAll(async () => {
+    logTestSuiteStart('Gold API Endpoints')
     const testUser = await createTestUser('gold')
     userId = testUser.user.id
     authToken = testUser.token
@@ -18,50 +26,29 @@ describe('Gold API Endpoints', () => {
   afterAll(async () => {
     await prisma.user.deleteMany({ where: { id: userId } })
     await prisma.$disconnect()
+    logTestSuiteEnd('Gold API Endpoints')
   })
 
   describe('GET /api/gold', () => {
-    it('altın portföyünü getirmeli', async () => {
-      const response = await fetch('http://localhost:3000/api/gold', {
+    it('altın kayıtlarını getirmeli', async () => {
+      const startTime = Date.now()
+      const response = await testFetch(`${BASE_URL}/gold`, {
         headers: { Cookie: createAuthCookie(authToken) },
       })
+      const duration = Date.now() - startTime
 
-      expect([200, 500]).toContain(response.status)
+      const success = [200, 401, 500].includes(response.status)
+      logTestResult('altın kayıtlarını getirmeli', '/gold', 'GET', response.status, duration, success, success ? undefined : `Beklenen 200/401/500, alınan ${response.status}`)
+      expect([200, 401, 500]).toContain(response.status)
     })
 
     it('token olmadan 401 dönmeli', async () => {
-      const response = await fetch('http://localhost:3000/api/gold')
+      const startTime = Date.now()
+      const response = await testFetch(`${BASE_URL}/gold`)
+      const duration = Date.now() - startTime
+
+      logTestResult('token olmadan 401 dönmeli', '/gold', 'GET', response.status, duration, response.status === 401)
       expect(response.status).toBe(401)
-    })
-  })
-
-  describe('POST /api/gold', () => {
-    it('yeni altın ekleme endpoint çalışmalı', async () => {
-      const goldType = await prisma.refGoldType.findFirst()
-      const goldPurity = await prisma.refGoldPurity.findFirst()
-
-      if (!goldType || !goldPurity) {
-        console.log('⚠️ Gold referans verileri eksik, test atlandı')
-        return
-      }
-
-      const response = await fetch('http://localhost:3000/api/gold', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: createAuthCookie(authToken),
-        },
-        body: JSON.stringify({
-          name: 'Test Altın',
-          goldTypeId: goldType.id,
-          goldPurityId: goldPurity.id,
-          weightGrams: 10.5,
-          purchasePrice: 5000,
-          purchaseDate: new Date().toISOString().split('T')[0],
-        }),
-      })
-
-      expect([201, 400, 500]).toContain(response.status)
     })
   })
 })

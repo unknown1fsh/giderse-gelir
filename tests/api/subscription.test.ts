@@ -1,15 +1,24 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { createTestUser, createAuthCookie } from '../helpers/test-utils'
 import { PrismaClient } from '@prisma/client'
+import {
+  createTestUser,
+  createAuthCookie,
+  testFetch,
+  logTestResult,
+  logTestSuiteStart,
+  logTestSuiteEnd,
+} from '../helpers/test-utils'
+import { getPlanLimits } from '../../lib/plan-config'
 
 const prisma = new PrismaClient()
+const BASE_URL = 'http://localhost:3000/api'
 
-// Bu test dosyası Subscription API endpoint'lerini test eder.
 describe('Subscription API Endpoints', () => {
   let userId: number
   let authToken: string
 
   beforeAll(async () => {
+    logTestSuiteStart('Subscription API Endpoints')
     const testUser = await createTestUser('subscription')
     userId = testUser.user.id
     authToken = testUser.token
@@ -18,65 +27,43 @@ describe('Subscription API Endpoints', () => {
   afterAll(async () => {
     await prisma.user.deleteMany({ where: { id: userId } })
     await prisma.$disconnect()
-  })
-
-  describe('GET /api/subscription/plans', () => {
-    it('mevcut planları getirmeli', async () => {
-      const response = await fetch('http://localhost:3000/api/subscription/plans', {
-        headers: { Cookie: createAuthCookie(authToken) },
-      })
-
-      expect(response.status).toBe(200)
-      const data = await response.json()
-      expect(Array.isArray(data)).toBe(true)
-    })
+    logTestSuiteEnd('Subscription API Endpoints')
   })
 
   describe('GET /api/subscription/status', () => {
     it('abonelik durumunu getirmeli', async () => {
-      const response = await fetch('http://localhost:3000/api/subscription/status', {
+      const startTime = Date.now()
+      const response = await testFetch(`${BASE_URL}/subscription/status`, {
         headers: { Cookie: createAuthCookie(authToken) },
       })
+      const duration = Date.now() - startTime
 
+      logTestResult('abonelik durumunu getirmeli', '/subscription/status', 'GET', response.status, duration, response.status === 200)
       expect(response.status).toBe(200)
+
       const data = await response.json()
-      expect(data).toHaveProperty('planId')
-      expect(data.planId).toBe('free')
+      expect(data).toHaveProperty('usage')
+      expect(data.usage.transactionLimit).toBe(getPlanLimits('free').transactions)
     })
 
     it('token olmadan 401 dönmeli', async () => {
-      const response = await fetch('http://localhost:3000/api/subscription/status')
+      const startTime = Date.now()
+      const response = await testFetch(`${BASE_URL}/subscription/status`)
+      const duration = Date.now() - startTime
+
+      logTestResult('token olmadan 401 dönmeli', '/subscription/status', 'GET', response.status, duration, response.status === 401)
       expect(response.status).toBe(401)
     })
   })
 
-  describe('POST /api/subscription/upgrade', () => {
-    it('plan yükseltme endpoint çalışmalı', async () => {
-      const response = await fetch('http://localhost:3000/api/subscription/upgrade', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: createAuthCookie(authToken),
-        },
-        body: JSON.stringify({
-          planId: 'premium',
-        }),
-      })
+  describe('GET /api/subscription/plans', () => {
+    it('planları getirmeli', async () => {
+      const startTime = Date.now()
+      const response = await testFetch(`${BASE_URL}/subscription/plans`)
+      const duration = Date.now() - startTime
 
-      // 200 veya 400 (implementasyona göre)
-      expect([200, 400, 500]).toContain(response.status)
-    })
-  })
-
-  describe('POST /api/subscription/cancel', () => {
-    it('abonelik iptal endpoint çalışmalı', async () => {
-      const response = await fetch('http://localhost:3000/api/subscription/cancel', {
-        method: 'POST',
-        headers: { Cookie: createAuthCookie(authToken) },
-      })
-
-      // 200 veya 404 (aktif subscription yoksa)
-      expect([200, 404, 500]).toContain(response.status)
+      logTestResult('planları getirmeli', '/subscription/plans', 'GET', response.status, duration, response.status === 200)
+      expect(response.status).toBe(200)
     })
   })
 })

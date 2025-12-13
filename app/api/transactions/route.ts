@@ -106,6 +106,8 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     paymentMethodId: number
     accountId?: number
     creditCardId?: number
+    eWalletId?: number
+    beneficiaryId?: number
     amount: number
     currencyId: number
     transactionDate: string

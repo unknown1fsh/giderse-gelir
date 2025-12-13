@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Dialog,
@@ -20,16 +20,19 @@ import { useUser } from '@/lib/user-context'
 interface EnterprisePremiumContactModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  planId?: 'enterprise' | 'enterprise_premium'
 }
 
 export function EnterprisePremiumContactModal({
   open,
   onOpenChange,
+  planId = 'enterprise_premium',
 }: EnterprisePremiumContactModalProps) {
   const router = useRouter()
   const { user } = useUser()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [categoryId, setCategoryId] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -38,28 +41,100 @@ export function EnterprisePremiumContactModal({
     message: '',
   })
 
+  const planLabel = useMemo(() => {
+    return planId === 'enterprise' ? 'Enterprise' : 'Enterprise Premium'
+  }, [planId])
+
+  useEffect(() => {
+    // Modal açılınca kategorileri çekip üyelik kategorisini otomatik seç
+    if (!open) {
+      return
+    }
+
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/help/categories')
+        const result = (await response.json()) as {
+          success: boolean
+          data?: Array<{ id: number; name: string }>
+        }
+
+        if (!result.success || !result.data || result.data.length === 0) {
+          setCategoryId(null)
+          return
+        }
+
+        const normalize = (t: string) => t.toLocaleLowerCase('tr-TR')
+        const hint = 'üyelik'
+        const found =
+          result.data.find(c => normalize(c.name).includes(hint)) ||
+          result.data.find(c => normalize(c.name).includes('abonelik')) ||
+          result.data.find(c => normalize(c.name).includes('premium')) ||
+          result.data[0]
+
+        setCategoryId(found.id)
+      } catch {
+        setCategoryId(null)
+      }
+    }
+
+    void fetchCategories()
+  }, [open])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
     try {
-      const response = await fetch('/api/payment-request/create', {
+      if (!categoryId) {
+        alert('Destek kategorisi bulunamadı. Lütfen admin panelinden destek kategorisi ekleyin.')
+        return
+      }
+
+      const subject =
+        planId === 'enterprise'
+          ? 'Enterprise üyelik / demo talebi'
+          : 'Enterprise Premium demo / iletişim talebi'
+
+      const descriptionLines: string[] = [
+        `Merhaba, ${planLabel} için iletişim/demoya ihtiyacım var.`,
+        '',
+        `Ad Soyad: ${formData.name}`,
+        `E-posta: ${formData.email}`,
+        `Şirket: ${formData.company}`,
+        `Telefon: ${formData.phone}`,
+      ]
+
+      if (formData.message) {
+        descriptionLines.push('', 'Mesaj:', formData.message)
+      }
+
+      descriptionLines.push('', `PlanId: ${planId}`)
+
+      const response = await fetch('/api/help/tickets', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          planId: 'enterprise_premium',
-          amount: 0, // Özel fiyat için 0
-          description: `Enterprise Premium Talep - ${formData.company}\n\nTelefon: ${formData.phone}\n\nMesaj: ${formData.message}`,
+          categoryId,
+          subject,
+          description: descriptionLines.join('\n'),
+          priority: 'high',
         }),
       })
 
       if (response.ok) {
+        const result = (await response.json()) as { success?: boolean; data?: { id?: number } }
         setIsSuccess(true)
         setTimeout(() => {
           onOpenChange(false)
-          router.push('/dashboard')
+          const ticketId = result?.data?.id
+          if (ticketId) {
+            router.push(`/help/tickets/${ticketId}`)
+          } else {
+            router.push('/help/tickets')
+          }
         }, 3000)
       } else {
         const data = (await response.json()) as { error?: string }
@@ -90,7 +165,7 @@ export function EnterprisePremiumContactModal({
             </div>
             <DialogTitle className="text-2xl font-bold text-center">Talebiniz Alındı!</DialogTitle>
             <DialogDescription className="text-center text-lg">
-              Enterprise Premium talebiniz başarıyla alındı. Ekibimiz en kısa sürede sizinle iletişime
+              {planLabel} talebiniz destek kaydı olarak alındı. Ekibimiz en kısa sürede sizinle iletişime
               geçecektir.
             </DialogDescription>
             <p className="text-sm text-slate-600 text-center">
@@ -107,7 +182,7 @@ export function EnterprisePremiumContactModal({
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-            Enterprise Premium İletişim
+            {planLabel} İletişim
           </DialogTitle>
           <DialogDescription>
             Lütfen bilgilerinizi paylaşın, ekibimiz en kısa sürede sizinle iletişime geçsin.
@@ -204,7 +279,7 @@ export function EnterprisePremiumContactModal({
               ) : (
                 <>
                   <Send className="mr-2 h-4 w-4" />
-                  Talep Gönder
+                Destek Talebi Gönder
                 </>
               )}
             </Button>

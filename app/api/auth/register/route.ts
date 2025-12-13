@@ -41,7 +41,12 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     throw new BadRequestError('Geçersiz e-posta formatı')
   }
 
-  // AuthService ile kullanıcı kaydı
+  // Premium seçilirse, kullanıcı free olarak kaydedilecek ve destek talebi oluşturulacak
+  const requestedPlan = plan || 'free'
+  const actualPlan = requestedPlan === 'premium' ? 'free' : requestedPlan
+  const isPremiumRequest = requestedPlan === 'premium'
+
+  // AuthService ile kullanıcı kaydı (her zaman free olarak)
   const authService = new AuthService(prisma)
 
   const registerDTO = new RegisterUserDTO({
@@ -49,7 +54,7 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     email,
     phone,
     password,
-    plan: plan || 'free',
+    plan: actualPlan,
   })
 
   const user = await authService.register(registerDTO)
@@ -83,13 +88,119 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
   // Cookie ayarla
   await setAuthCookie(loginResult.session.token, loginResult.session.expiresAt)
 
+  // Premium isteği varsa destek talebi oluştur
+  if (isPremiumRequest) {
+    try {
+      // Üyelik kategorisini bul (veya ilk aktif kategoriyi kullan)
+      const membershipCategory = await prisma.supportTicketCategory.findFirst({
+        where: {
+          isActive: true,
+          name: {
+            contains: 'Üyelik',
+            mode: 'insensitive',
+          },
+        },
+      })
+
+      const category = membershipCategory || await prisma.supportTicketCategory.findFirst({
+        where: {
+          isActive: true,
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      })
+
+      if (category) {
+        // Benzersiz ticket number oluştur
+        function generateTicketNumber(): string {
+          const now = new Date()
+          const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '')
+          const random = Math.floor(100000 + Math.random() * 900000)
+          return `SUP-${dateStr}-${random}`
+        }
+
+        let ticketNumber = generateTicketNumber()
+        let exists = await prisma.supportTicket.findUnique({
+          where: { ticketNumber },
+        })
+
+        while (exists) {
+          ticketNumber = generateTicketNumber()
+          exists = await prisma.supportTicket.findUnique({
+            where: { ticketNumber },
+          })
+        }
+
+        const subject = 'Premium üyelik talebi'
+        const description = `Kayıt sırasında Premium üyelik seçildi.
+
+Kullanıcı Bilgileri:
+- Ad Soyad: ${name}
+- E-posta: ${email}
+- Telefon: ${phone || 'Belirtilmemiş'}
+
+Plan: Premium
+Kayıt Tarihi: ${new Date().toLocaleString('tr-TR')}
+
+Not: Kullanıcı şu anda Free üye olarak kaydedilmiştir. Premium üyeliği admin onayından sonra aktif edilecektir.`
+
+        // Destek talebini oluştur
+        await prisma.supportTicket.create({
+          data: {
+            ticketNumber,
+            userId: user.id,
+            categoryId: category.id,
+            subject,
+            description,
+            status: 'pending',
+            priority: 'high',
+          },
+        })
+
+        // Admin'lere bildirim gönder (async, hata olsa bile devam eder)
+        const { sendAdminNewTicketNotification } = await import('@/lib/email')
+        const admins = await prisma.user.findMany({
+          where: {
+            role: 'ADMIN',
+            isActive: true,
+          },
+          select: {
+            email: true,
+          },
+        })
+
+        for (const admin of admins) {
+          sendAdminNewTicketNotification(
+            admin.email,
+            ticketNumber,
+            name,
+            email,
+            subject,
+            category.name
+          ).catch((error) => {
+            console.error('Admin bildirim email hatası:', error)
+          })
+        }
+      }
+    } catch (ticketError) {
+      console.error('Premium destek talebi oluşturma hatası:', ticketError)
+      // Destek talebi oluşturulamasa bile kayıt başarılı
+    }
+  }
+
+  const successMessage = isPremiumRequest
+    ? 'Kayıt başarılı ve giriş yapıldı. Premium üyelik talebiniz admin onayına gönderildi. Lütfen e-posta adresinizi doğrulayın.'
+    : 'Kayıt başarılı ve giriş yapıldı. Lütfen e-posta adresinizi doğrulayın.'
+
   return NextResponse.json(
     {
       success: true,
       user: loginResult.user,
       session: loginResult.session,
-      message: 'Kayıt başarılı ve giriş yapıldı. Lütfen e-posta adresinizi doğrulayın.',
+      message: successMessage,
       emailVerificationSent: true,
+      premiumRequestCreated: isPremiumRequest,
     },
     { status: 201 }
   )

@@ -31,71 +31,91 @@ async function main() {
     for (const user of users) {
       console.log(`\n👤 ${user.name} (${user.email}) için migration yapılıyor...`)
 
-      // Kullanıcının dönemi var mı kontrol et
-      const existingPeriod = await prisma.period.findFirst({
-        where: { userId: user.id },
+      // 1) Aktif dönem varsa onu kullan
+      let period = await prisma.period.findFirst({
+        where: { userId: user.id, isActive: true, isClosed: false },
+        orderBy: { startDate: 'desc' },
       })
 
-      if (existingPeriod) {
-        console.log(`   ⏭️  Zaten dönem var, atlanıyor...`)
-        continue
+      // 2) Aktif dönem yoksa: en son açık dönemi aktif yap
+      if (!period) {
+        const latestOpenPeriod = await prisma.period.findFirst({
+          where: { userId: user.id, isClosed: false },
+          orderBy: { startDate: 'desc' },
+        })
+
+        if (latestOpenPeriod) {
+          await prisma.$transaction(async tx => {
+            await tx.period.updateMany({
+              where: { userId: user.id },
+              data: { isActive: false },
+            })
+            period = await tx.period.update({
+              where: { id: latestOpenPeriod.id },
+              data: { isActive: true },
+            })
+          })
+          console.log(`   ✅ Mevcut dönem aktif yapıldı: ${period?.name} (ID: ${period?.id})`)
+        }
       }
 
-      // Varsayılan dönem oluştur (Tüm Zamanlar)
-      const userCreatedYear = user.createdAt.getFullYear()
-      const currentYear = new Date().getFullYear()
+      // 3) Hiç dönem yoksa varsayılan dönem oluştur
+      if (!period) {
+        const userCreatedYear = user.createdAt.getFullYear()
+        const currentYear = new Date().getFullYear()
 
-      const period = await prisma.period.create({
-        data: {
-          userId: user.id,
-          name: 'Tüm Zamanlar',
-          periodType: 'CUSTOM',
-          startDate: new Date(userCreatedYear, 0, 1), // Kullanıcının kayıt yılının başı
-          endDate: new Date(currentYear, 11, 31), // Bu yılın sonu
-          isClosed: false,
-          isActive: true,
-          description: 'Otomatik oluşturulan varsayılan dönem (migration)',
-        },
-      })
+        period = await prisma.period.create({
+          data: {
+            userId: user.id,
+            name: 'Tüm Zamanlar',
+            periodType: 'CUSTOM',
+            startDate: new Date(userCreatedYear, 0, 1), // Kullanıcının kayıt yılının başı
+            endDate: new Date(currentYear, 11, 31), // Bu yılın sonu
+            isClosed: false,
+            isActive: true,
+            description: 'Otomatik oluşturulan varsayılan dönem (migration)',
+          },
+        })
 
-      console.log(`   ✅ Dönem oluşturuldu: ${period.name} (ID: ${period.id})`)
+        console.log(`   ✅ Dönem oluşturuldu: ${period.name} (ID: ${period.id})`)
+      }
 
-      // Mevcut kayıtları bu döneme ata
+      // periodId NULL olan kayıtları aktif döneme ata (idempotent)
       const updates = await Promise.allSettled([
         // Accounts
         prisma.account.updateMany({
-          where: { userId: user.id },
-          data: { periodId: period.id },
+          where: { userId: user.id, periodId: null },
+          data: { periodId: period!.id },
         }),
         // Credit Cards
         prisma.creditCard.updateMany({
-          where: { userId: user.id },
-          data: { periodId: period.id },
+          where: { userId: user.id, periodId: null },
+          data: { periodId: period!.id },
         }),
         // E-Wallets
         prisma.eWallet.updateMany({
-          where: { userId: user.id },
-          data: { periodId: period.id },
+          where: { userId: user.id, periodId: null },
+          data: { periodId: period!.id },
         }),
         // Transactions
         prisma.transaction.updateMany({
-          where: { userId: user.id },
-          data: { periodId: period.id },
+          where: { userId: user.id, periodId: null },
+          data: { periodId: period!.id },
         }),
         // Auto Payments
         prisma.autoPayment.updateMany({
-          where: { userId: user.id },
-          data: { periodId: period.id },
+          where: { userId: user.id, periodId: null },
+          data: { periodId: period!.id },
         }),
         // Gold Items
         prisma.goldItem.updateMany({
-          where: { userId: user.id },
-          data: { periodId: period.id },
+          where: { userId: user.id, periodId: null },
+          data: { periodId: period!.id },
         }),
         // Investments
         prisma.investment.updateMany({
-          where: { userId: user.id },
-          data: { periodId: period.id },
+          where: { userId: user.id, periodId: null },
+          data: { periodId: period!.id },
         }),
       ])
 
@@ -131,9 +151,10 @@ async function main() {
         where: {
           userId: user.id,
           isActive: true,
+          activePeriodId: null,
         },
         data: {
-          activePeriodId: period.id,
+          activePeriodId: period!.id,
         },
       })
 

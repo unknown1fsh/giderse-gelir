@@ -20,7 +20,6 @@ import {
   Bell,
   Shield,
   Palette,
-  Globe,
   Database,
   Download,
   Upload,
@@ -88,6 +87,29 @@ export default function SettingsPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
+  const [currencies, setCurrencies] = useState<
+    Array<{ id: number; code: string; name: string; symbol: string }>
+  >([])
+
+  // Para birimlerini yükle
+  useEffect(() => {
+    async function fetchCurrencies() {
+      try {
+        const response = await fetch('/api/reference-data')
+        if (response.ok) {
+          const data = (await response.json()) as {
+            currencies?: Array<{ id: number; code: string; name: string; symbol: string }>
+          }
+          if (data.currencies && data.currencies.length > 0) {
+            setCurrencies(data.currencies)
+          }
+        }
+      } catch (error) {
+        console.error('Para birimleri yüklenemedi:', error)
+      }
+    }
+    void fetchCurrencies()
+  }, [])
 
   // Kullanıcı verilerini yükle
   useEffect(() => {
@@ -116,7 +138,9 @@ export default function SettingsPage() {
   ]
 
   const handleSave = async () => {
-    if (!user) {return}
+    if (!user) {
+      return
+    }
 
     setIsSaving(true)
     setSaveMessage('')
@@ -147,21 +171,26 @@ export default function SettingsPage() {
 
   const handleExport = () => {
     // Veri dışa aktarma işlemi
+    // eslint-disable-next-line no-console
     console.log('Veri dışa aktarılıyor...')
   }
 
   const handleImport = () => {
     // Veri içe aktarma işlemi
+    // eslint-disable-next-line no-console
     console.log('Veri içe aktarılıyor...')
   }
 
   const handleDeleteAccount = () => {
     // Hesap silme işlemi
+    // eslint-disable-next-line no-console
     console.log('Hesap siliniyor...')
   }
 
   const handleResetAllData = async () => {
-    if (!user) {return}
+    if (!user) {
+      return
+    }
 
     // Kullanıcıdan onay al
     const confirmed = window.confirm(
@@ -175,7 +204,9 @@ export default function SettingsPage() {
         'Devam etmek istediğinizden emin misiniz?'
     )
 
-    if (!confirmed) {return}
+    if (!confirmed) {
+      return
+    }
 
     // İkinci onay
     const doubleConfirmed = window.confirm(
@@ -184,7 +215,9 @@ export default function SettingsPage() {
         'Kesinlikle devam etmek istiyor musunuz?'
     )
 
-    if (!doubleConfirmed) {return}
+    if (!doubleConfirmed) {
+      return
+    }
 
     try {
       setIsSaving(true)
@@ -247,7 +280,9 @@ export default function SettingsPage() {
                 Anasayfa
               </Button>
               <Button
-                onClick={handleSave}
+                onClick={() => {
+                  void handleSave()
+                }}
                 disabled={isSaving || loading}
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
               >
@@ -411,19 +446,31 @@ export default function SettingsPage() {
                                   type="button"
                                   size="sm"
                                   variant="outline"
-                                  onClick={async () => {
-                                    if (!user.email) return
-                                    const response = await fetch('/api/auth/resend-verification', {
-                                      method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify({ email: user.email }),
-                                    })
-                                    const data = await response.json()
-                                    if (response.ok && data.success) {
-                                      alert('Doğrulama e-postası gönderildi. Lütfen e-posta kutunuzu kontrol edin.')
-                                    } else {
-                                      alert(data.message || 'E-posta gönderilemedi')
-                                    }
+                                  onClick={() => {
+                                    void (async () => {
+                                      if (!user.email) {
+                                        return
+                                      }
+                                      const response = await fetch(
+                                        '/api/auth/resend-verification',
+                                        {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({ email: user.email }),
+                                        }
+                                      )
+                                      const data = (await response.json()) as {
+                                        success?: boolean
+                                        message?: string
+                                      }
+                                      if (response.ok && data.success) {
+                                        alert(
+                                          'Doğrulama e-postası gönderildi. Lütfen e-posta kutunuzu kontrol edin.'
+                                        )
+                                      } else {
+                                        alert(data.message || 'E-posta gönderilemedi')
+                                      }
+                                    })()
                                   }}
                                   className="text-xs"
                                 >
@@ -641,16 +688,34 @@ export default function SettingsPage() {
                       <Select
                         value={settings.currency}
                         onValueChange={value => setSettings({ ...settings, currency: value })}
+                        disabled={currencies.length === 0}
                       >
                         <SelectTrigger className="border-slate-200 focus:border-purple-500">
-                          <SelectValue />
+                          <SelectValue
+                            placeholder={
+                              currencies.length === 0 ? 'Yükleniyor...' : 'Para birimi seçin'
+                            }
+                          />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="TRY">₺ Türk Lirası</SelectItem>
-                          <SelectItem value="USD">$ Amerikan Doları</SelectItem>
-                          <SelectItem value="EUR">€ Euro</SelectItem>
+                          {currencies.length > 0 ? (
+                            currencies.map(currency => (
+                              <SelectItem key={currency.id} value={currency.code}>
+                                {currency.symbol} {currency.name} ({currency.code})
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="TRY" disabled>
+                              Para birimleri yükleniyor...
+                            </SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
+                      {currencies.length === 0 && (
+                        <p className="text-xs text-red-600 mt-1">
+                          Para birimleri yüklenemedi. Lütfen sayfayı yenileyin.
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -863,7 +928,9 @@ export default function SettingsPage() {
                             <p>• Altın ve yatırım verileri silinecek</p>
                           </div>
                           <Button
-                            onClick={handleResetAllData}
+                            onClick={() => {
+                              void handleResetAllData()
+                            }}
                             variant="destructive"
                             className="mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold"
                           >

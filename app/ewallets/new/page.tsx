@@ -37,11 +37,11 @@ export default function NewEWalletPage() {
       try {
         const response = await fetch('/api/reference-data')
         if (response.ok) {
-          const data = await response.json()
+          const data = (await response.json()) as ReferenceData
           setReferenceData(data)
 
           // Varsayılan para birimini TRY yap
-          const tryCurrency = data.currencies.find((c: Currency) => c.code === 'TRY')
+          const tryCurrency = data.currencies.find(c => c.code === 'TRY')
           if (tryCurrency) {
             setFormData(prev => ({ ...prev, currencyId: tryCurrency.id }))
           }
@@ -130,7 +130,9 @@ export default function NewEWalletPage() {
             <Wallet className="h-6 w-6 text-blue-500" />
             <h1 className="text-3xl font-bold text-blue-600">Yeni E-Cüzdan Ekle</h1>
           </div>
-          <p className="text-muted-foreground">PayPal, Papara, Ininal vb. dijital cüzdan bilgilerinizi girin</p>
+          <p className="text-muted-foreground">
+            PayPal, Papara, Ininal vb. dijital cüzdan bilgilerinizi girin
+          </p>
         </div>
       </div>
 
@@ -142,7 +144,7 @@ export default function NewEWalletPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-6">
+          <form onSubmit={e => void handleSubmit(e)} className="space-y-6">
             {/* Temel Bilgiler */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-slate-700 flex items-center gap-2">
@@ -254,17 +256,31 @@ export default function NewEWalletPage() {
                   <label className="block text-sm font-medium mb-2">Para Birimi *</label>
                   <select
                     value={formData.currencyId}
-                    onChange={e => setFormData(prev => ({ ...prev, currencyId: parseInt(e.target.value) }))}
+                    onChange={e =>
+                      setFormData(prev => ({ ...prev, currencyId: parseInt(e.target.value) }))
+                    }
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
+                    disabled={!referenceData?.currencies || referenceData.currencies.length === 0}
                   >
                     <option value={0}>Para birimi seçiniz</option>
-                    {referenceData?.currencies.map(currency => (
-                      <option key={currency.id} value={currency.id}>
-                        {currency.code} - {currency.name} ({currency.symbol})
+                    {referenceData?.currencies && referenceData.currencies.length > 0 ? (
+                      referenceData.currencies.map(currency => (
+                        <option key={currency.id} value={currency.id}>
+                          {currency.code} - {currency.name} ({currency.symbol})
+                        </option>
+                      ))
+                    ) : (
+                      <option value={0} disabled>
+                        Para birimleri yükleniyor...
                       </option>
-                    ))}
+                    )}
                   </select>
+                  {(!referenceData?.currencies || referenceData.currencies.length === 0) && (
+                    <p className="text-xs text-red-600 mt-1">
+                      Para birimleri yüklenemedi. Lütfen sayfayı yenileyin.
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -308,4 +324,3 @@ export default function NewEWalletPage() {
     </div>
   )
 }
-

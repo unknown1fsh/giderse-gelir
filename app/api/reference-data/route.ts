@@ -24,6 +24,7 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
     refTxCategories,
     paymentMethodParams,
     currencyParams,
+    refCurrencies,
     refBanks,
     refAccountTypes,
     refGoldTypes,
@@ -31,13 +32,15 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
   ] = await Promise.all([
     // Transaction için: Ref tablolarından çek (Transaction tablosu bunlara bağlı)
     prisma.refTxType.findMany({ where: { active: true }, orderBy: { code: 'asc' } }),
-    prisma.refTxCategory.findMany({ 
-      where: { active: true }, 
+    prisma.refTxCategory.findMany({
+      where: { active: true },
       include: { txType: true },
-      orderBy: { name: 'asc' } 
+      orderBy: { name: 'asc' },
     }),
     parameterService.getByGroup('PAYMENT_METHOD'),
     parameterService.getByGroup('CURRENCY'),
+    // Para birimleri için: SystemParameter boşsa refCurrency tablosundan fallback
+    prisma.refCurrency.findMany({ where: { active: true }, orderBy: { code: 'asc' } }),
     // Account/Gold için: Ref tabloları (Foreign Key direkt uyumlu)
     prisma.refBank.findMany({ where: { active: true }, orderBy: { name: 'asc' } }),
     prisma.refAccountType.findMany({ where: { active: true }, orderBy: { code: 'asc' } }),
@@ -50,7 +53,8 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
     txTypes: refTxTypes.length,
     categories: refTxCategories.length,
     paymentMethods: paymentMethodParams.length,
-    currencies: currencyParams.length,
+    currencies: currencyParams.length > 0 ? currencyParams.length : refCurrencies.length,
+    currenciesSource: currencyParams.length > 0 ? 'SystemParameter' : 'RefCurrency',
   })
 
   // Kullanıcıya özel veriler (sadece login olmuşsa)
@@ -128,12 +132,21 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
       name: a.name,
       description: a.description,
     })),
-    currencies: currencyParams.map(c => ({
-      id: c.id,
-      code: c.paramCode,
-      name: c.displayName.split('(')[0].trim(),
-      symbol: (c.metadata?.symbol as string | undefined) || c.paramCode,
-    })),
+    // Para birimleri: SystemParameter'dan geliyorsa onu kullan, yoksa refCurrency'dan fallback
+    currencies:
+      currencyParams.length > 0
+        ? currencyParams.map(c => ({
+            id: c.id,
+            code: c.paramCode,
+            name: c.displayName.split('(')[0].trim(),
+            symbol: (c.metadata?.symbol as string | undefined) || c.paramCode,
+          }))
+        : refCurrencies.map(c => ({
+            id: c.id,
+            code: c.code,
+            name: c.name,
+            symbol: c.symbol,
+          })),
     goldTypes: refGoldTypes.map(g => ({
       id: g.id,
       code: g.code,
@@ -180,13 +193,14 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
 
     // Meta bilgi
     _meta: {
-      source: 'Mixed (TX/Category: RefTables, Payment/Currency: SystemParameter, Account/Gold: RefTables)',
+      source:
+        'Mixed (TX/Category: RefTables, Payment/Currency: SystemParameter, Account/Gold: RefTables)',
       totalBanks: refBanks.length,
       totalGoldTypes: refGoldTypes.length,
       totalGoldPurities: refGoldPurities.length,
       totalCategories: refTxCategories.length,
       totalPaymentMethods: paymentMethodParams.length,
-      totalCurrencies: currencyParams.length,
+      totalCurrencies: currencyParams.length > 0 ? currencyParams.length : refCurrencies.length,
       timestamp: new Date().toISOString(),
     },
   }

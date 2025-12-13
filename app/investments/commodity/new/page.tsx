@@ -219,13 +219,26 @@ export default function NewCommodityInvestmentPage() {
                     setFormData(prev => ({ ...prev, currencyId: Number(e.target.value) }))
                   }
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500"
+                  disabled={currencies.length === 0}
                 >
-                  {currencies.map(c => (
-                    <option key={c.id} value={c.id}>
-                      {c.code} - {c.name}
+                  <option value={0}>Para birimi seçiniz</option>
+                  {currencies.length > 0 ? (
+                    currencies.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.code} - {c.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option value={0} disabled>
+                      Para birimleri yükleniyor...
                     </option>
-                  ))}
+                  )}
                 </select>
+                {currencies.length === 0 && (
+                  <p className="text-xs text-red-600 mt-1">
+                    Para birimleri yüklenemedi. Lütfen sayfayı yenileyin.
+                  </p>
+                )}
               </div>
 
               <div className="col-span-2">

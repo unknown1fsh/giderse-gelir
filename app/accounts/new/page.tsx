@@ -65,13 +65,12 @@ export default function NewAccountPage() {
       try {
         const response = await fetch('/api/reference-data')
         if (response.ok) {
-          const data = await response.json()
-          console.log('Reference data:', data)
+          const data = (await response.json()) as ReferenceData
           setReferenceData(data)
 
           // Varsayılan değerleri set et
           if (data.currencies && data.currencies.length > 0) {
-            const tryCurrency = data.currencies.find((c: any) => c.code === 'TRY')
+            const tryCurrency = data.currencies.find(c => c.code === 'TRY')
             if (tryCurrency) {
               setFormData(prev => ({ ...prev, currencyId: tryCurrency.id }))
             }
@@ -86,7 +85,7 @@ export default function NewAccountPage() {
       }
     }
 
-    fetchReferenceData()
+    void fetchReferenceData()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -115,8 +114,8 @@ export default function NewAccountPage() {
       if (response.ok) {
         router.push('/accounts')
       } else {
-        const error = await response.json()
-        alert(`Hata: ${error.error}`)
+        const error = (await response.json()) as { error?: string }
+        alert(`Hata: ${error.error || 'Hesap kaydedilemedi'}`)
       }
     } catch (error) {
       console.error('Hesap kaydedilemedi:', error)
@@ -217,7 +216,12 @@ export default function NewAccountPage() {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form
+            onSubmit={e => {
+              void handleSubmit(e)
+            }}
+            className="space-y-6"
+          >
             {/* Ortak alanlar */}
             <div>
               <label className="block text-sm font-medium mb-2">Hesap Adı *</label>
@@ -288,14 +292,26 @@ export default function NewAccountPage() {
                       }
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
+                      disabled={!referenceData?.currencies || referenceData.currencies.length === 0}
                     >
                       <option value={0}>Seçiniz</option>
-                      {referenceData?.currencies.map(currency => (
-                        <option key={currency.id} value={currency.id}>
-                          {currency.code} - {currency.name}
+                      {referenceData?.currencies && referenceData.currencies.length > 0 ? (
+                        referenceData.currencies.map(currency => (
+                          <option key={currency.id} value={currency.id}>
+                            {currency.code} - {currency.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option value={0} disabled>
+                          Para birimleri yükleniyor...
                         </option>
-                      ))}
+                      )}
                     </select>
+                    {(!referenceData?.currencies || referenceData.currencies.length === 0) && (
+                      <p className="text-xs text-red-600 mt-1">
+                        Para birimleri yüklenemedi. Lütfen sayfayı yenileyin.
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -387,14 +403,26 @@ export default function NewAccountPage() {
                       }
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
+                      disabled={!referenceData?.currencies || referenceData.currencies.length === 0}
                     >
                       <option value={0}>Seçiniz</option>
-                      {referenceData?.currencies.map(currency => (
-                        <option key={currency.id} value={currency.id}>
-                          {currency.code} - {currency.name}
+                      {referenceData?.currencies && referenceData.currencies.length > 0 ? (
+                        referenceData.currencies.map(currency => (
+                          <option key={currency.id} value={currency.id}>
+                            {currency.code} - {currency.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option value={0} disabled>
+                          Para birimleri yükleniyor...
                         </option>
-                      ))}
+                      )}
                     </select>
+                    {(!referenceData?.currencies || referenceData.currencies.length === 0) && (
+                      <p className="text-xs text-red-600 mt-1">
+                        Para birimleri yüklenemedi. Lütfen sayfayı yenileyin.
+                      </p>
+                    )}
                   </div>
                 </div>
 

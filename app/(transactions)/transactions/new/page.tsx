@@ -77,12 +77,12 @@ export default function NewTransactionPage() {
       try {
         const response = await fetch('/api/reference-data')
         if (response.ok) {
-          const data = await response.json()
+          const data = (await response.json()) as ReferenceData
           setReferenceData(data)
 
           // Varsayılan para birimini TRY yap
           if (data.currencies.length > 0) {
-            const tryCurrency = data.currencies.find((c: any) => c.code === 'TRY')
+            const tryCurrency = data.currencies.find(c => c.code === 'TRY')
             if (tryCurrency) {
               setFormData(prev => ({ ...prev, currencyId: tryCurrency.id }))
             }
@@ -96,7 +96,7 @@ export default function NewTransactionPage() {
       }
     }
 
-    fetchReferenceData()
+    void fetchReferenceData()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -126,7 +126,7 @@ export default function NewTransactionPage() {
     setSaving(true)
 
     try {
-      const submitData: any = {
+      const submitData: Record<string, unknown> = {
         txTypeId: formData.txTypeId,
         categoryId: formData.categoryId,
         paymentMethodId: formData.paymentMethodId,
@@ -158,7 +158,12 @@ export default function NewTransactionPage() {
       if (response.ok) {
         router.push('/transactions')
       } else {
-        const error = await response.json()
+        const error = (await response.json()) as {
+          limitReached?: boolean
+          currentCount?: number
+          limit?: number
+          error?: string
+        }
         if (error.limitReached) {
           // Limit aşıldığında çekici modal göster
           setLimitInfo({
@@ -168,7 +173,7 @@ export default function NewTransactionPage() {
           })
           setShowPremiumModal(true)
         } else {
-          alert(`Hata: ${error.error}`)
+          alert(`Hata: ${error.error || 'İşlem eklenemedi'}`)
         }
       }
     } catch (error) {
@@ -211,7 +216,12 @@ export default function NewTransactionPage() {
           <CardDescription>İşlem detaylarını doldurun</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form
+            onSubmit={e => {
+              void handleSubmit(e)
+            }}
+            className="space-y-6"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2">İşlem Türü *</label>
@@ -289,14 +299,26 @@ export default function NewTransactionPage() {
                   }
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
+                  disabled={!referenceData?.currencies || referenceData.currencies.length === 0}
                 >
                   <option value={0}>Seçiniz</option>
-                  {referenceData?.currencies.map(currency => (
-                    <option key={currency.id} value={currency.id}>
-                      {currency.code} - {currency.name}
+                  {referenceData?.currencies && referenceData.currencies.length > 0 ? (
+                    referenceData.currencies.map(currency => (
+                      <option key={currency.id} value={currency.id}>
+                        {currency.code} - {currency.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option value={0} disabled>
+                      Para birimleri yükleniyor...
                     </option>
-                  ))}
+                  )}
                 </select>
+                {(!referenceData?.currencies || referenceData.currencies.length === 0) && (
+                  <p className="text-xs text-red-600 mt-1">
+                    Para birimleri yüklenemedi. Lütfen sayfayı yenileyin.
+                  </p>
+                )}
               </div>
             </div>
 

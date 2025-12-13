@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/select'
 import { X } from 'lucide-react'
 
-interface UserDetail {
+export interface UserDetail {
   id: number
   email: string
   name: string

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import DataTable from './DataTable'
 import UserDetailModal from './UserDetailModal'
 import { Button } from '@/components/ui/button'
+import type { UserDetail } from './UserDetailModal'
 import {
   Select,
   SelectContent,
@@ -28,7 +29,7 @@ interface User {
 export default function AdminUsers() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null)
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -138,7 +139,7 @@ export default function AdminUsers() {
       }
       if (result.success) {
         // API'den gelen user verisini modal'a uygun formata dönüştür
-        const userData: User & { emailVerified: boolean; _count?: UserCounts } = {
+        const userData: UserDetail = {
           ...result.data.user,
           _count: result.data.counts,
         }

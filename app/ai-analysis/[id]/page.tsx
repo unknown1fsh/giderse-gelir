@@ -310,7 +310,7 @@ export default function AIReportDetailPage() {
                   <span className="text-sm font-medium text-green-900">Toplam Gelir</span>
                 </div>
                 <div className="text-2xl font-bold text-green-700">
-                  {formatCurrency(reportData.summary.totalIncome)}
+                  {formatCurrency(reportData.summary.totalIncome, 'TRY')}
                 </div>
               </div>
 
@@ -320,7 +320,7 @@ export default function AIReportDetailPage() {
                   <span className="text-sm font-medium text-red-900">Toplam Gider</span>
                 </div>
                 <div className="text-2xl font-bold text-red-700">
-                  {formatCurrency(reportData.summary.totalExpense)}
+                  {formatCurrency(reportData.summary.totalExpense, 'TRY')}
                 </div>
               </div>
 
@@ -332,7 +332,7 @@ export default function AIReportDetailPage() {
                 <div
                   className={`text-2xl font-bold ${reportData.summary.netAmount >= 0 ? 'text-blue-700' : 'text-red-700'}`}
                 >
-                  {formatCurrency(reportData.summary.netAmount)}
+                  {formatCurrency(reportData.summary.netAmount, 'TRY')}
                 </div>
               </div>
 
@@ -375,7 +375,7 @@ export default function AIReportDetailPage() {
                       </div>
                       <div className="text-right">
                         <div className="font-bold text-slate-900">
-                          {formatCurrency(category.amount)}
+                          {formatCurrency(category.amount, 'TRY')}
                         </div>
                         {categoryData && (
                           <div className="text-sm text-slate-600">
@@ -455,17 +455,19 @@ export default function AIReportDetailPage() {
                         variant={flow.balance >= 0 ? 'default' : 'destructive'}
                         className="text-sm"
                       >
-                        {formatCurrency(flow.balance)}
+                        {formatCurrency(flow.balance, 'TRY')}
                       </Badge>
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-green-700 font-medium">Gelir:</span>{' '}
-                        <span className="text-slate-700">{formatCurrency(flow.income)}</span>
+                        <span className="text-slate-700">{formatCurrency(flow.income, 'TRY')}</span>
                       </div>
                       <div>
                         <span className="text-red-700 font-medium">Gider:</span>{' '}
-                        <span className="text-slate-700">{formatCurrency(flow.expense)}</span>
+                        <span className="text-slate-700">
+                          {formatCurrency(flow.expense, 'TRY')}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -499,20 +501,23 @@ export default function AIReportDetailPage() {
                       <div>
                         <span className="text-sm text-green-700">Tahmini Gelir:</span>
                         <div className="font-bold text-green-900">
-                          {formatCurrency(prediction.predictedIncome)}
+                          {formatCurrency(prediction.predictedIncome, 'TRY')}
                         </div>
                       </div>
                       <div>
                         <span className="text-sm text-red-700">Tahmini Gider:</span>
                         <div className="font-bold text-red-900">
-                          {formatCurrency(prediction.predictedExpense)}
+                          {formatCurrency(prediction.predictedExpense, 'TRY')}
                         </div>
                       </div>
                     </div>
                     <div className="pt-2 border-t border-blue-200">
                       <span className="text-sm text-blue-700">
                         Tahmini Net:{' '}
-                        {formatCurrency(prediction.predictedIncome - prediction.predictedExpense)}
+                        {formatCurrency(
+                          prediction.predictedIncome - prediction.predictedExpense,
+                          'TRY'
+                        )}
                       </span>
                     </div>
                   </div>
@@ -611,13 +616,13 @@ export default function AIReportDetailPage() {
                       <div>
                         <span className="text-slate-600">Sizin Ortalamanız:</span>
                         <div className="font-bold text-slate-900">
-                          {formatCurrency(benchmark.yourAverage)}
+                          {formatCurrency(benchmark.yourAverage, 'TRY')}
                         </div>
                       </div>
                       <div>
                         <span className="text-slate-600">Endüstri Ortalaması:</span>
                         <div className="font-bold text-slate-900">
-                          {formatCurrency(benchmark.industryAverage)}
+                          {formatCurrency(benchmark.industryAverage, 'TRY')}
                         </div>
                       </div>
                     </div>

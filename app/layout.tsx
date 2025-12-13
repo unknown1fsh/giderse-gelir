@@ -19,7 +19,11 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: 'GiderSE-Gelir - Kişisel Finans Yönetimi',
-  description: 'Modern kişisel finans platformu ile gelir ve giderlerinizi kolayca takip edin',
+  description:
+    'Gelir-gider takibi, analizler ve kullanıcı verilerinize dayalı AI tavsiyeleriyle bütçenizi daha akıllı yönetin.',
+  icons: {
+    icon: '/logo.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

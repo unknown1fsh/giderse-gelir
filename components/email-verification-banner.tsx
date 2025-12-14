@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Mail, X, Loader2, CheckCircle2 } from 'lucide-react'
+import { Mail, Loader2, CheckCircle2 } from 'lucide-react'
 import { useUser } from '@/lib/user-context'
 
 export default function EmailVerificationBanner() {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+// import { prisma } from '@/lib/prisma' // TODO: Kullanılacak
 import { getCurrentUser } from '@/lib/auth-refactored'
 
 export async function GET(request: NextRequest) {
@@ -219,8 +219,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { reportType, format, dateRange, includeCharts, includeForecasts, includeAIInsights } =
-      body
+    const {
+      reportType,
+      format,
+      dateRange: _dateRange,
+      includeCharts: _includeCharts,
+      includeForecasts: _includeForecasts,
+      includeAIInsights: _includeAIInsights,
+    } = body
 
     // Rapor oluşturma simülasyonu
     const reportId = Math.random().toString(36).substr(2, 9)

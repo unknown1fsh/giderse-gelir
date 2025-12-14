@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { useUser } from '@/lib/user-context'
+// import { useUser } from '@/lib/user-context' // TODO: Kullanılacak
 import { EnterprisePremiumContactModal } from '@/components/enterprise-premium-contact-modal'
 import {
   Building2,
@@ -23,11 +23,11 @@ import {
 
 export default function EnterprisePage() {
   const router = useRouter()
-  const { user } = useUser()
+  // const { user } = useUser() // TODO: Kullanılacak
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
 
-  const _isAlreadyEnterprise = user?.plan === 'enterprise'
-  const _isAlreadyEnterprisePremium = user?.plan === 'enterprise_premium'
+  // const _isAlreadyEnterprise = user?.plan === 'enterprise' // TODO: Kullanılacak
+  // const _isAlreadyEnterprisePremium = user?.plan === 'enterprise_premium' // TODO: Kullanılacak
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 relative overflow-hidden">

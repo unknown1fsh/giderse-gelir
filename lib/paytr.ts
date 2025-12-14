@@ -7,6 +7,7 @@ const MERCHANT_SALT = process.env.PAYTR_MERCHANT_SALT
 const PAYTR_API_URL = process.env.PAYTR_API_URL || 'https://www.paytr.com/odeme'
 
 interface CreatePaymentLinkParams {
+  planId?: string
   email: string
   name: string
   amount: number // TL cinsinden (örn: 250.00)

@@ -61,7 +61,7 @@ export class AuthService {
           email: data.email,
           phone: data.phone,
           passwordHash,
-          plan: data.plan || 'free',
+          // plan: data.plan || 'free', // TODO: User modelinde yok, UserSubscription'da tutuluyor
         },
       })
 
@@ -86,12 +86,12 @@ export class AuthService {
           id: user.id,
           name: user.name,
           email: user.email,
-          phone: user.phone,
-          avatar: user.avatar,
-          plan: data.plan || 'free',
+          phone: user.phone ?? undefined,
+          avatar: user.avatar ?? undefined,
+          // plan: data.plan || 'free', // TODO: User modelinde yok, UserSubscription'da tutuluyor
           isActive: user.isActive,
           createdAt: user.createdAt,
-          lastLoginAt: user.lastLoginAt,
+          lastLoginAt: user.lastLoginAt ?? undefined,
         },
       }
     } catch (error) {
@@ -166,8 +166,8 @@ export class AuthService {
           id: user.id,
           name: user.name,
           email: user.email,
-          phone: user.phone,
-          avatar: user.avatar,
+          phone: user.phone ?? undefined,
+          avatar: user.avatar ?? undefined,
           plan: user.subscriptions[0]?.planId || 'free',
           isActive: user.isActive,
           createdAt: user.createdAt,
@@ -192,7 +192,7 @@ export class AuthService {
   static async validateSession(token: string): Promise<User | null> {
     try {
       // JWT token doğrula
-      const decoded = jwt.verify(token, JWT_SECRET) as any
+      jwt.verify(token, JWT_SECRET) // Token doğrulama için kullanılıyor
 
       // Session'ı veritabanından kontrol et
       const session = await prisma.userSession.findUnique({
@@ -222,12 +222,12 @@ export class AuthService {
         id: session.user.id,
         name: session.user.name,
         email: session.user.email,
-        phone: session.user.phone,
-        avatar: session.user.avatar,
+        phone: session.user.phone ?? undefined,
+        avatar: session.user.avatar ?? undefined,
         plan: session.user.subscriptions[0]?.planId || 'free',
         isActive: session.user.isActive,
         createdAt: session.user.createdAt,
-        lastLoginAt: session.user.lastLoginAt,
+        lastLoginAt: session.user.lastLoginAt ?? undefined,
       }
     } catch (error) {
       console.error('Session validation error:', error)
@@ -273,11 +273,6 @@ export class AuthService {
       phone?: string
       avatar?: string
       timezone?: string
-      language?: string
-      currency?: string
-      dateFormat?: string
-      numberFormat?: string
-      theme?: string
       notifications?: any
       settings?: any
     }
@@ -294,12 +289,12 @@ export class AuthService {
           id: user.id,
           name: user.name,
           email: user.email,
-          phone: user.phone,
-          avatar: user.avatar,
+          phone: user.phone ?? undefined,
+          avatar: user.avatar ?? undefined,
           plan: 'free', // Bu bilgi subscription'dan alınmalı
           isActive: user.isActive,
           createdAt: user.createdAt,
-          lastLoginAt: user.lastLoginAt,
+          lastLoginAt: user.lastLoginAt ?? undefined,
         },
       }
     } catch (error) {

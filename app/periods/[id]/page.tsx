@@ -21,6 +21,7 @@ import PageHeader from '@/components/page-header'
 
 interface PeriodDetail {
   id: number
+  userId: number
   name: string
   periodType: string
   startDate: string
@@ -28,6 +29,8 @@ interface PeriodDetail {
   isClosed: boolean
   isActive: boolean
   description?: string
+  createdAt: string
+  updatedAt: string
   _count: {
     transactions: number
     accounts: number
@@ -132,7 +135,19 @@ export default function PeriodDetailPage() {
         title={
           <div className="flex flex-wrap items-center gap-3 min-w-0">
             <h1 className="text-2xl sm:text-3xl font-bold break-words">
-              {formatPeriodName(period)}
+              {formatPeriodName({
+                id: period.id,
+                userId: period.userId,
+                name: period.name,
+                periodType: period.periodType as 'YEARLY' | 'FISCAL_YEAR' | 'MONTHLY' | 'CUSTOM',
+                startDate: new Date(period.startDate),
+                endDate: new Date(period.endDate),
+                isClosed: period.isClosed,
+                isActive: period.isActive,
+                description: period.description,
+                createdAt: new Date(period.createdAt),
+                updatedAt: new Date(period.updatedAt),
+              })}
             </h1>
             {period.isClosed ? (
               <span className="flex items-center gap-1 px-3 py-1 bg-slate-200 text-slate-700 rounded-full text-sm font-medium">

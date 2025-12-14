@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import BrandLogo from '@/components/brand-logo'
 import LandingCalculators from '@/components/landing/landing-calculators'
+import FeatureCarousel from '@/components/landing/feature-carousel'
+import FeedbackForm from '@/components/landing/feedback-form'
 
 export default function LandingPage() {
   const router = useRouter()
@@ -129,7 +131,37 @@ export default function LandingPage() {
         </div>
       </div>
 
+      {/* Feature Carousel */}
+      <FeatureCarousel />
+
+      {/* Demo CTA Section */}
+      <div className="relative py-12 sm:py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-blue-600/20 backdrop-blur-sm rounded-3xl border border-white/10 p-8 sm:p-12 shadow-2xl">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
+              Uygulamayı Denemek İster misiniz?
+            </h2>
+            <p className="text-lg sm:text-xl text-slate-300 mb-6 max-w-2xl mx-auto">
+              Demo sayfasında uygulamanın özelliklerini keşfedin, işlemler ekleyin ve finansal
+              yönetimin nasıl çalıştığını görün.
+            </p>
+            <Button
+              size="lg"
+              variant="premium"
+              className="w-full sm:w-auto"
+              onClick={() => router.push('/demo')}
+            >
+              <Play className="h-5 w-5 mr-2" />
+              Demo'yu Hemen Dene
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <LandingCalculators />
+
+      {/* Feedback Form Section */}
+      <FeedbackForm />
 
       {/* Footer */}
       <div className="py-8 sm:py-12 border-t border-white/10">

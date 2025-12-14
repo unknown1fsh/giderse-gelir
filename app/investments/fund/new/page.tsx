@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Save, PieChart } from 'lucide-react'
 import { parseCurrencyInput } from '@/lib/validators'
-import type { MarketSearchResult } from '../types'
+import type { MarketSearchResult } from '@/app/investments/types'
 
 interface SelectedFund {
   symbol: string

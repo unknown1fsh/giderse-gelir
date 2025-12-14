@@ -101,7 +101,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       })
 
       // Kapanış kaydı oluştur
-      const closing = await tx.periodClosing.create({
+      const closing = await (tx as any).periodClosing.create({
         data: {
           periodId,
           closedAt: new Date(),
@@ -119,7 +119,20 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       // Bakiye devri yapılacaksa
       if (transferBalances) {
         // Bir sonraki dönemi bul veya oluştur
-        const nextPeriodData = getNextPeriodSuggestion(period)
+        const periodForSuggestion: import('@/lib/period-helpers').Period = {
+          id: period.id,
+          userId: period.userId,
+          name: period.name,
+          periodType: period.periodType as 'YEARLY' | 'FISCAL_YEAR' | 'MONTHLY' | 'CUSTOM',
+          startDate: period.startDate,
+          endDate: period.endDate,
+          isClosed: period.isClosed,
+          isActive: period.isActive,
+          description: period.description,
+          createdAt: period.createdAt,
+          updatedAt: period.updatedAt,
+        }
+        const nextPeriodData = getNextPeriodSuggestion(periodForSuggestion)
 
         // Yeni dönem oluştur
         nextPeriod = await tx.period.create({
@@ -227,7 +240,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
               category: investment.category,
               riskLevel: investment.riskLevel,
               notes: investment.notes,
-              metadata: investment.metadata,
+              metadata: investment.metadata
+                ? (JSON.parse(JSON.stringify(investment.metadata)) as Prisma.InputJsonValue)
+                : ({} as Prisma.InputJsonValue),
               active: true,
             },
           })

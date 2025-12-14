@@ -135,9 +135,9 @@ export class TransactionRepository extends BaseRepository<Transaction> {
   // Girdi: İşlem verileri
   // Çıktı: Oluşturulan işlem
   // Hata: Prisma hataları
-  async create(data: Prisma.TransactionCreateInput): Promise<Transaction> {
+  async create(data: Partial<Transaction>): Promise<Transaction> {
     return this.prisma.transaction.create({
-      data,
+      data: data as Prisma.TransactionCreateInput,
     })
   }
 

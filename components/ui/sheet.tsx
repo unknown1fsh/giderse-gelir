@@ -16,10 +16,10 @@ const Sheet = React.forwardRef<
     }
   }, [open])
 
-  const handleOpenChange = (newOpen: boolean) => {
-    setIsOpen(newOpen)
-    onOpenChange?.(newOpen)
-  }
+  // const handleOpenChange = (newOpen: boolean) => {
+  //   setIsOpen(newOpen)
+  //   onOpenChange?.(newOpen)
+  // } // TODO: Kullanılacak
 
   if (!isOpen) {
     return null

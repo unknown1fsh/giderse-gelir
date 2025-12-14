@@ -45,16 +45,17 @@ async function main() {
         })
 
         if (latestOpenPeriod) {
-          await prisma.$transaction(async tx => {
+          const updatedPeriod = await prisma.$transaction(async tx => {
             await tx.period.updateMany({
               where: { userId: user.id },
               data: { isActive: false },
             })
-            period = await tx.period.update({
+            return await tx.period.update({
               where: { id: latestOpenPeriod.id },
               data: { isActive: true },
             })
           })
+          period = updatedPeriod
           console.log(`   ✅ Mevcut dönem aktif yapıldı: ${period?.name} (ID: ${period?.id})`)
         }
       }

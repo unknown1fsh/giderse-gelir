@@ -46,7 +46,8 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     email: user.email,
     name: user.name,
     amount,
-    planId,
+    productType: planId,
+    productId: planId,
     userId: user.id,
     description: `${planId} plan abonelik ücreti`,
   })

@@ -89,7 +89,7 @@ export default function PremiumPage() {
     { name: 'Otomatik bulut yedekleme', free: false, premium: true },
   ]
 
-  const handleUpgrade = (planId: string = 'premium', amount: number = 250) => {
+  const handleUpgrade = (planId: string = 'premium', _amount: number = 250) => {
     if (isAlreadyPremium && planId === 'premium') {
       return
     }

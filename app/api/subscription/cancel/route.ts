@@ -39,10 +39,11 @@ export async function POST(request: NextRequest) {
     })
 
     // Kullanıcının planını free'e çevir
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { plan: 'free' },
-    })
+    // Plan bilgisi UserSubscription modelinde tutuluyor, User modelinde değil
+    // await prisma.user.update({
+    //   where: { id: user.id },
+    //   data: { plan: 'free' },
+    // })
 
     // Ücretsiz plan aboneliği oluştur
     await prisma.userSubscription.create({

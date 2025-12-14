@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth-refactored'
 import { isPremiumPlan } from '@/lib/plan-config'
@@ -144,7 +145,7 @@ export async function POST(request: NextRequest) {
         category,
         riskLevel: riskLevel || 'medium',
         currencyId,
-        metadata: metadata || {},
+        metadata: (metadata ? JSON.parse(JSON.stringify(metadata)) : {}) as Prisma.InputJsonValue,
         lastPriceUpdate: currentPrice ? new Date() : null,
       },
       include: {

@@ -256,14 +256,6 @@ import {
 } from 'lucide-react'
 */
 
-interface TrendData {
-  period: string
-  income: number
-  expenses: number
-  netFlow: number
-  trend: 'up' | 'down' | 'stable'
-}
-
 interface PremiumFeature {
   id: string
   title: string
@@ -277,7 +269,6 @@ interface PremiumFeature {
 
 export default function TrendsAnalysis() {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(true)
   const [selectedFeature, setSelectedFeature] = useState<string | null>(null)
   const { handlePremiumFeature } = usePremium()
   const { user } = useUser()
@@ -285,7 +276,6 @@ export default function TrendsAnalysis() {
   // Kullanıcı tipi tespiti
   const isEnterpriseUser =
     user?.email?.includes('enterprise') || user?.plan === 'enterprise_premium'
-  const isIndividualUser = user?.email?.includes('demo') || user?.plan === 'premium'
 
   const handleBack = () => {
     router.back()

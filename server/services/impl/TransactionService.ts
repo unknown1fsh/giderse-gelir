@@ -140,7 +140,7 @@ export class TransactionService extends BaseService<TransactionDTO> {
     }
     await this.updateAccountBalance(balanceUpdateData, txType.code)
 
-    return transaction
+    return TransactionMapper.prismaToDTO(transaction)
   }
 
   // Bu metot kullanıcının "Nakit" hesabını bulur veya oluşturur

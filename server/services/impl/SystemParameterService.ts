@@ -8,7 +8,7 @@ import { NotFoundError } from '../../errors'
 export class SystemParameterService {
   private repository: SystemParameterRepository
 
-  constructor(private prisma: PrismaClient) {
+  constructor(prisma: PrismaClient) {
     this.repository = new SystemParameterRepository(prisma)
   }
 

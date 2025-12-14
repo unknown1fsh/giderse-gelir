@@ -50,7 +50,7 @@ export class AuthService {
     await this.prisma.userSubscription.create({
       data: {
         userId: user.id,
-        planId: data.plan || PlanId.FREE,
+        planId: PlanId.FREE, // Her zaman free olarak başlat
         status: 'active',
         startDate: new Date(),
         endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),

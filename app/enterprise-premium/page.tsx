@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+// import { useRouter } from 'next/navigation' // TODO: Kullanılacak
+// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card' // TODO: Kullanılacak
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { useUser } from '@/lib/user-context'
+// import { Badge } from '@/components/ui/badge' // TODO: Kullanılacak
+// import { useUser } from '@/lib/user-context' // TODO: Kullanılacak
 import { EnterprisePremiumContactModal } from '@/components/enterprise-premium-contact-modal'
 import {
   Building2,
@@ -35,8 +35,8 @@ import {
 } from 'lucide-react'
 
 export default function EnterprisePremiumPage() {
-  const router = useRouter()
-  const { user } = useUser()
+  // const router = useRouter() // TODO: Kullanılacak
+  // const { user } = useUser() // TODO: Kullanılacak
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
 
   return (

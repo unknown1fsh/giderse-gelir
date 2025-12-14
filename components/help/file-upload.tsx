@@ -88,12 +88,27 @@ export default function FileUpload({ ticketId, onUploadSuccess }: FileUploadProp
 
         const result = (await response.json()) as {
           success: boolean
-          data?: { id: number; fileName: string; filePath: string }
+          data?: {
+            id: number
+            fileName: string
+            filePath: string
+            fileSize?: number
+            mimeType?: string
+          }
           error?: string
         }
 
         if (result.success && result.data) {
-          setUploadedFiles(prev => [...prev, result.data!])
+          setUploadedFiles(prev => [
+            ...prev,
+            {
+              id: result.data!.id,
+              fileName: result.data!.fileName,
+              filePath: result.data!.filePath,
+              fileSize: result.data!.fileSize || 0,
+              mimeType: result.data!.mimeType || '',
+            },
+          ])
         } else {
           alert(`${file.name} yüklenirken hata oluştu: ${result.error || 'Bilinmeyen hata'}`)
         }

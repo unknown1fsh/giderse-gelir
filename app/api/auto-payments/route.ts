@@ -93,15 +93,13 @@ export async function POST(request: NextRequest) {
     const autoPayment = await prisma.autoPayment.create({
       data: {
         userId: user.id,
-        txTypeId: body.txTypeId || 2, // Varsayılan GIDER
         name: body.name,
         description: body.description || null,
         amount: body.amount || 0,
         currencyId: body.currencyId || 1,
         paymentMethodId: body.paymentMethodId || 1,
         cronSchedule: getCronSchedule(body.frequency || 'monthly'),
-        nextPaymentDate: new Date(body.nextPaymentDate),
-        endDate: body.endDate ? new Date(body.endDate) : null,
+        nextPaymentDate: body.nextPaymentDate ? new Date(body.nextPaymentDate) : null,
         categoryId: body.categoryId,
         accountId: body.accountId || null,
         creditCardId: body.creditCardId || null,

@@ -13,13 +13,13 @@ const nextConfig = {
   },
 
   typescript: {
-    // Production build için TypeScript hatalarını ignore et (geliştirme devam ediyor)
-    ignoreBuildErrors: true,
+    // TypeScript hataları build'i durdurur
+    ignoreBuildErrors: false,
   },
 
   eslint: {
-    // Production build için ESLint hatalarını ignore et (geliştirme devam ediyor)
-    ignoreDuringBuilds: true,
+    // ESLint hataları build'i durdurur
+    ignoreDuringBuilds: false,
   },
 
   // Image optimization

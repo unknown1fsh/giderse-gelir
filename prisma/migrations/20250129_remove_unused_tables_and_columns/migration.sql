@@ -1,0 +1,3 @@
+-- This migration file was missing and has been restored
+-- If this migration was already applied to the database, this file can remain empty
+-- If not, you may need to add the appropriate SQL statements here

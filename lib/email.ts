@@ -390,7 +390,7 @@ export async function sendSupportTicketStatusChangedEmail(
   name: string,
   ticketNumber: string,
   subject: string,
-  oldStatus: string,
+  _oldStatus: string,
   newStatus: string
 ): Promise<{ success: boolean; error?: string }> {
   if (!resend) {

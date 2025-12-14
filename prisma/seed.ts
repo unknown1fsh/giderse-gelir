@@ -89,7 +89,7 @@ async function main() {
   console.log('✅ İşlem türleri eklendi')
 
   // İşlem kategorileri
-  const _gelirCategories = await Promise.all([
+  await Promise.all([
     prisma.refTxCategory.upsert({
       where: { txTypeId_code: { txTypeId: txTypes[0].id, code: 'MAAS' } },
       update: {},
@@ -142,7 +142,7 @@ async function main() {
     }),
   ])
 
-  const _giderCategories = await Promise.all([
+  await Promise.all([
     prisma.refTxCategory.upsert({
       where: { txTypeId_code: { txTypeId: txTypes[1].id, code: 'MARKET' } },
       update: {},
@@ -917,10 +917,10 @@ async function main() {
   console.log('✅ Demo işlemler atlandı (user-specific olacak)')
 
   // Demo döviz kurları
-  const tryCurrency = currencies.find((c): c is { id: number; code: string } => c.code === 'TRY')
-  const usdCurrency = currencies.find((c): c is { id: number; code: string } => c.code === 'USD')
-  const eurCurrency = currencies.find((c): c is { id: number; code: string } => c.code === 'EUR')
-  const xauCurrency = currencies.find((c): c is { id: number; code: string } => c.code === 'XAU')
+  const tryCurrency = currencies.find(c => c.code === 'TRY')
+  const usdCurrency = currencies.find(c => c.code === 'USD')
+  const eurCurrency = currencies.find(c => c.code === 'EUR')
+  const xauCurrency = currencies.find(c => c.code === 'XAU')
 
   if (tryCurrency && usdCurrency && eurCurrency && xauCurrency) {
     await Promise.all([

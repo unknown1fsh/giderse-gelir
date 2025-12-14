@@ -85,6 +85,7 @@ export default function HelpDashboard() {
         const ticketsResult = (await ticketsResponse.json()) as {
           success: boolean
           data?: Array<{
+            id: number
             status: string
             priority: string
             createdAt: string

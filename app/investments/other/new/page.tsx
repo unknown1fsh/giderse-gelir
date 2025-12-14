@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Save, Star } from 'lucide-react'
 import { parseCurrencyInput } from '@/lib/validators'
-import type { Currency, ReferenceData } from '../types'
+import type { Currency, ReferenceData } from '@/app/investments/types'
 
 export default function NewOtherInvestmentPage() {
   const router = useRouter()

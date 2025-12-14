@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getCurrentUser } from '@/lib/auth-refactored'
 
 export async function GET() {
   try {
@@ -51,13 +52,20 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Kullanıcı doğrulama
+    const user = await getCurrentUser(request)
+    if (!user) {
+      return NextResponse.json({ error: 'Oturum bulunamadı' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { name, accountTypeId, bankId, currencyId, balance, accountNumber, iban } = body
 
     const newAccount = await prisma.account.create({
       data: {
+        userId: user.id,
         name,
         accountTypeId: parseInt(accountTypeId),
         bankId: parseInt(bankId),

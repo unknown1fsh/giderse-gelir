@@ -7,7 +7,7 @@ import { ExceptionMapper } from '@/server/errors'
 // GET /api/parameters/BANK/ZIRAAT -> Ziraat Bankası parametresini getirir
 export const GET = ExceptionMapper.asyncHandler(
   async (
-    request: NextRequest,
+    _request: NextRequest,
     { params }: { params: Promise<{ group: string; code: string }> }
   ) => {
     const { group, code } = await params

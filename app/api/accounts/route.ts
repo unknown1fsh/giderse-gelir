@@ -213,8 +213,8 @@ export async function POST(request: NextRequest) {
       } = {
         userId: user.id,
         name: body.name,
-        goldTypeId: body.goldTypeId,
-        goldPurityId: body.goldPurityId,
+        goldTypeId: body.goldTypeId ? parseInt(String(body.goldTypeId)) : 0,
+        goldPurityId: body.goldPurityId ? parseInt(String(body.goldPurityId)) : 0,
         weightGrams: body.weight || 0,
         purchasePrice: body.purchasePrice || 0,
         purchaseDate: new Date(),

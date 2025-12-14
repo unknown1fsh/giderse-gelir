@@ -3,16 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import {
-  ArrowLeft,
-  Home,
-  Calendar,
-  DollarSign,
-  Tag,
-  Wallet,
-  CreditCard,
-  FileText,
-} from 'lucide-react'
+import { ArrowLeft, Home } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -84,8 +75,10 @@ export default function NewAutoPaymentPage() {
           const data = await response.json()
           setReferenceData({
             categories: data.categories || [],
+            paymentMethods: data.paymentMethods || [],
             accounts: data.accounts || [],
             creditCards: data.creditCards || [],
+            currencies: data.currencies || [],
           })
         } else {
           setError('Referans verileri yüklenemedi')

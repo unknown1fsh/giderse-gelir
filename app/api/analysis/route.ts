@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Paralel veri çekme
-    const [transactions, accounts, creditCards, goldItems, lastMonthTransactions] =
+    const [transactions, accounts, _creditCards, goldItems, lastMonthTransactions] =
       await Promise.all([
         // Bu dönem işlemleri
         prisma.transaction.findMany({

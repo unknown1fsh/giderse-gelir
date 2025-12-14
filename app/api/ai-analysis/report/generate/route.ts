@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth-refactored'
 import { ExceptionMapper } from '@/server/errors'
@@ -86,7 +87,7 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     await prisma.aIReportUsage.update({
       where: { id: usageRecord.id },
       data: {
-        reportData: reportData as unknown as Record<string, unknown>,
+        reportData: JSON.parse(JSON.stringify(reportData)) as Prisma.InputJsonValue,
         status: 'completed',
       },
     })

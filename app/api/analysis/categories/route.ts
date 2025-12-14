@@ -34,8 +34,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { searchParams } = new URL(request.url)
-    const period = searchParams.get('period') || '30d'
+    // const { searchParams } = new URL(request.url)
+    // const period = searchParams.get('period') || '30d' // TODO: Kullanılacak
 
     const activePeriod = await getActivePeriod(request)
 

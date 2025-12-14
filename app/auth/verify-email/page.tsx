@@ -137,7 +137,7 @@ function VerifyEmailContent() {
 
           {status === 'error' && (
             <>
-              <Alert variant="destructive">
+              <Alert className="border-destructive/50 text-destructive [&>svg]:text-destructive">
                 <XCircle className="h-5 w-5" />
                 <AlertDescription>{errorMessage}</AlertDescription>
               </Alert>

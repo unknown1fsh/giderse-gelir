@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './card'
+import { Card, CardContent, CardHeader, CardTitle } from './card'
 import { AlertTriangle, X } from 'lucide-react'
 
 interface ConfirmationDialogProps {

@@ -12,6 +12,7 @@ interface User {
   plan: string
   role: string
   isActive: boolean
+  emailVerified?: boolean
   createdAt: Date
   lastLoginAt?: Date
 }

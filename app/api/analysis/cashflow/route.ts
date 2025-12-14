@@ -34,8 +34,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { searchParams } = new URL(request.url)
-    const period = searchParams.get('period') || '12m'
+    // const { searchParams } = new URL(request.url)
+    // const period = searchParams.get('period') || '12m' // TODO: Kullanılacak
 
     const activePeriod = await getActivePeriod(request)
 
@@ -55,7 +55,13 @@ export async function GET(request: NextRequest) {
     })
 
     // Nakit akışı hesaplamaları
-    const monthlyData = []
+    const monthlyData: Array<{
+      month: string
+      income: number
+      expense: number
+      net: number
+      balance: number
+    }> = []
     const now = new Date()
 
     for (let i = 11; i >= 0; i--) {

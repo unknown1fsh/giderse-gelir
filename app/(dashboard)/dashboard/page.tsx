@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency } from '@/lib/validators'
 import { useUser } from '@/lib/user-context'
+import DashboardSkeleton from '@/components/dashboard/dashboard-skeleton'
 import {
   TrendingUp,
   TrendingDown,
@@ -55,7 +56,6 @@ interface DashboardData {
 export default function DashboardPage() {
   const { user, loading, refreshUser } = useUser()
   const [data, setData] = useState<DashboardData | null>(null)
-  const [dataLoading, setDataLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   // Plan değişikliklerini dinle
@@ -77,17 +77,14 @@ export default function DashboardPage() {
         return
       }
 
-      // Kullanıcı yoksa (örn: /api/auth/me 401) dashboard verisi çekme.
-      // Bu durumda sayfanın sonsuz loading'de kalmaması için dataLoading'i kapat.
+      // Kullanıcı yoksa (örn: /api/auth/me 401) dashboard verisi çekme
       if (!user) {
         setData(null)
         setError(null)
-        setDataLoading(false)
         return
       }
 
       try {
-        setDataLoading(true)
         setError(null)
 
         const response = await fetch('/api/dashboard', {
@@ -97,7 +94,6 @@ export default function DashboardPage() {
         if (!response.ok) {
           // 401 hatası normaldir (kullanıcı giriş yapmamış)
           if (response.status === 401) {
-            setDataLoading(false)
             return
           }
           throw new Error('Dashboard verileri alınamadı')
@@ -108,42 +104,35 @@ export default function DashboardPage() {
       } catch (err) {
         console.error('Dashboard data fetch error:', err)
         setError('Dashboard verileri yüklenirken bir hata oluştu')
-      } finally {
-        setDataLoading(false)
       }
     }
 
     void fetchDashboardData()
   }, [user, loading])
 
-  if (loading || dataLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative inline-block">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-500"></div>
-            <div className="absolute inset-0 rounded-full animate-ping border-4 border-purple-300 opacity-20"></div>
-          </div>
-          <p className="mt-4 text-slate-600 font-medium animate-pulse">Yükleniyor...</p>
-        </div>
-      </div>
-    )
+  // User context yükleniyorsa skeleton göster
+  if (loading) {
+    return <DashboardSkeleton />
   }
 
-  if (error || !data) {
+  // Veri yüklenirken skeleton göster, hata durumunda hata mesajı
+  if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 flex items-center justify-center">
         <div className="text-center max-w-md px-4">
           <div className="inline-flex p-4 rounded-full bg-red-100 mb-4">
             <AlertCircle className="h-16 w-16 text-red-500" />
           </div>
-          <p className="text-red-600 font-semibold text-lg">
-            {error || 'Dashboard verileri yüklenemedi'}
-          </p>
+          <p className="text-red-600 font-semibold text-lg">{error}</p>
           <p className="text-slate-500 mt-2">Lütfen sayfayı yenilemeyi deneyin</p>
         </div>
       </div>
     )
+  }
+
+  // Veri yoksa skeleton göster
+  if (!data) {
+    return <DashboardSkeleton />
   }
 
   return (

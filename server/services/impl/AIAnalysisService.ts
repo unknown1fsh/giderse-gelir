@@ -132,8 +132,38 @@ export class AIAnalysisService {
   private async collectFinancialData(userId: number): Promise<{
     transactions: Array<
       Transaction & {
-        txType: { code: string }
-        category: { name: string }
+        txType: {
+          code: string
+          id: number
+          name: string
+          createdAt: Date
+          updatedAt: Date
+          active: boolean
+          icon: string | null
+          color: string | null
+        }
+        category: {
+          name: string
+          id: number
+          txTypeId: number
+          code: string
+          description: string | null
+          icon: string | null
+          color: string | null
+          isDefault: boolean
+          active: boolean
+          createdAt: Date
+          updatedAt: Date
+        }
+        currency: {
+          symbol: string
+          id: number
+          name: string
+          createdAt: Date
+          updatedAt: Date
+          active: boolean
+          code: string
+        }
         amount: number | string | bigint
         transactionDate: Date | string
       }
@@ -224,7 +254,13 @@ export class AIAnalysisService {
     })
 
     return {
-      transactions,
+      transactions: transactions.map(tx => ({
+        ...tx,
+        amount:
+          typeof tx.amount === 'object' && 'toNumber' in tx.amount
+            ? tx.amount.toNumber()
+            : tx.amount,
+      })) as any,
       accounts,
       creditCards,
       investments,
@@ -312,10 +348,13 @@ export class AIAnalysisService {
           (sum, card) => sum + Number(card.limitAmount) - Number(card.availableLimit),
           0
         ),
-        investmentValue: data.investments.reduce(
-          (sum, inv) => sum + Number(inv.currentValue || 0),
-          0
-        ),
+        investmentValue: data.investments.reduce((sum, inv) => {
+          const currentPrice = inv.currentPrice
+            ? Number(inv.currentPrice)
+            : Number(inv.purchasePrice)
+          const quantity = Number(inv.quantity)
+          return sum + currentPrice * quantity
+        }, 0),
         totalAccounts: data.accounts.length,
       }
     )
@@ -475,7 +514,12 @@ export class AIAnalysisService {
           netAmount: income - expense,
           savingsRate,
         },
-        categoryAnalysis,
+        categoryAnalysis: categoryAnalysis.map(cat => ({
+          category: cat.category,
+          amount: cat.amount,
+          percentage: cat.percentage,
+          count: (cat as any).count || 0,
+        })),
         topCategories: categoryAnalysis.slice(0, 10).map(cat => ({
           category: cat.category,
           amount: cat.amount,
@@ -518,10 +562,11 @@ export class AIAnalysisService {
         (sum, card) => sum + Number(card.limitAmount) - Number(card.availableLimit),
         0
       )
-      const investmentValue = data.investments.reduce(
-        (sum, inv) => sum + Number(inv.currentValue || 0),
-        0
-      )
+      const investmentValue = data.investments.reduce((sum, inv) => {
+        const currentPrice = inv.currentPrice ? Number(inv.currentPrice) : Number(inv.purchasePrice)
+        const quantity = Number(inv.quantity)
+        return sum + currentPrice * quantity
+      }, 0)
 
       const financialData = {
         summary: premiumReport.summary,
@@ -566,10 +611,11 @@ export class AIAnalysisService {
         (sum, card) => sum + Number(card.limitAmount) - Number(card.availableLimit),
         0
       )
-      const investmentValue = data.investments.reduce(
-        (sum, inv) => sum + Number(inv.currentValue || 0),
-        0
-      )
+      const investmentValue = data.investments.reduce((sum, inv) => {
+        const currentPrice = inv.currentPrice ? Number(inv.currentPrice) : Number(inv.purchasePrice)
+        const quantity = Number(inv.quantity)
+        return sum + currentPrice * quantity
+      }, 0)
 
       const financialData = {
         summary: enterpriseReport.summary,
@@ -613,10 +659,11 @@ export class AIAnalysisService {
         (sum, card) => sum + Number(card.limitAmount) - Number(card.availableLimit),
         0
       )
-      const investmentValue = data.investments.reduce(
-        (sum, inv) => sum + Number(inv.currentValue || 0),
-        0
-      )
+      const investmentValue = data.investments.reduce((sum, inv) => {
+        const currentPrice = inv.currentPrice ? Number(inv.currentPrice) : Number(inv.purchasePrice)
+        const quantity = Number(inv.quantity)
+        return sum + currentPrice * quantity
+      }, 0)
 
       // Son 3 ayın nakit akışını hesapla
       const now = new Date()

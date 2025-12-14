@@ -65,7 +65,7 @@ export default function PortfolioPage() {
       try {
         const [accountsRes, investmentsRes] = await Promise.all([
           fetch('/api/accounts'),
-          fetch('/api/investments').catch(() => ({ ok: false })),
+          fetch('/api/investments').catch(() => ({ ok: false }) as Response),
         ])
 
         if (accountsRes.ok) {
@@ -75,7 +75,7 @@ export default function PortfolioPage() {
           setError('Portföy verileri yüklenemedi')
         }
 
-        if (investmentsRes.ok) {
+        if (investmentsRes.ok && investmentsRes instanceof Response) {
           const invData = await investmentsRes.json()
           setInvestments(invData)
         }
@@ -153,7 +153,7 @@ export default function PortfolioPage() {
   // Varlık dağılımı yüzdeleri
   const bankPercentage = totalAssets > 0 ? (totalBankBalance / totalAssets) * 100 : 0
   const goldPercentage = totalAssets > 0 ? (totalGoldValue / totalAssets) * 100 : 0
-  const investmentPercentage = totalAssets > 0 ? (totalInvestmentValue / totalAssets) * 100 : 0
+  // const investmentPercentage = totalAssets > 0 ? (totalInvestmentValue / totalAssets) * 100 : 0 // TODO: Kullanılacak
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">

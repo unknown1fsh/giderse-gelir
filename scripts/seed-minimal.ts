@@ -41,8 +41,6 @@ async function main() {
       create: {
         code: 'INCOME',
         name: 'Gelir',
-        category: 'INCOME',
-        description: 'Gelir işlemleri',
       },
     }),
     prisma.refTxType.upsert({
@@ -51,8 +49,6 @@ async function main() {
       create: {
         code: 'EXPENSE',
         name: 'Gider',
-        category: 'EXPENSE',
-        description: 'Gider işlemleri',
       },
     }),
   ])
@@ -64,103 +60,106 @@ async function main() {
     prisma.refPaymentMethod.upsert({
       where: { code: 'CASH' },
       update: {},
-      create: { code: 'CASH', name: 'Nakit', requiresAccount: false },
+      create: { code: 'CASH', name: 'Nakit' },
     }),
     prisma.refPaymentMethod.upsert({
       where: { code: 'BANK_TRANSFER' },
       update: {},
-      create: { code: 'BANK_TRANSFER', name: 'Banka Havalesi', requiresAccount: true },
+      create: { code: 'BANK_TRANSFER', name: 'Banka Havalesi' },
     }),
     prisma.refPaymentMethod.upsert({
       where: { code: 'CREDIT_CARD' },
       update: {},
-      create: { code: 'CREDIT_CARD', name: 'Kredi Kartı', requiresAccount: false },
+      create: { code: 'CREDIT_CARD', name: 'Kredi Kartı' },
     }),
   ])
   console.log(`✅ ${paymentMethods.length} ödeme yöntemi eklendi\n`)
 
   // 4. Kategoriler (Kritik - Sadece Ana Kategoriler)
   console.log('📁 Kategoriler ekleniyor...')
+  const incomeTxType = txTypes.find(t => t.code === 'INCOME')!
+  const expenseTxType = txTypes.find(t => t.code === 'EXPENSE')!
+
   const categories = await Promise.all([
     // Gelir Kategorileri
-    prisma.refCategory.upsert({
-      where: { code: 'SALARY' },
+    prisma.refTxCategory.upsert({
+      where: { txTypeId_code: { txTypeId: incomeTxType.id, code: 'SALARY' } },
       update: {},
       create: {
+        txTypeId: incomeTxType.id,
         code: 'SALARY',
         name: 'Maaş',
-        type: 'INCOME',
         description: 'Maaş geliri',
       },
     }),
-    prisma.refCategory.upsert({
-      where: { code: 'BUSINESS' },
+    prisma.refTxCategory.upsert({
+      where: { txTypeId_code: { txTypeId: incomeTxType.id, code: 'BUSINESS' } },
       update: {},
       create: {
+        txTypeId: incomeTxType.id,
         code: 'BUSINESS',
         name: 'İş Geliri',
-        type: 'INCOME',
         description: 'İş ve ticaret geliri',
       },
     }),
-    prisma.refCategory.upsert({
-      where: { code: 'OTHER_INCOME' },
+    prisma.refTxCategory.upsert({
+      where: { txTypeId_code: { txTypeId: incomeTxType.id, code: 'OTHER_INCOME' } },
       update: {},
       create: {
+        txTypeId: incomeTxType.id,
         code: 'OTHER_INCOME',
         name: 'Diğer Gelir',
-        type: 'INCOME',
         description: 'Diğer gelir türleri',
       },
     }),
     // Gider Kategorileri
-    prisma.refCategory.upsert({
-      where: { code: 'FOOD' },
+    prisma.refTxCategory.upsert({
+      where: { txTypeId_code: { txTypeId: expenseTxType.id, code: 'FOOD' } },
       update: {},
       create: {
+        txTypeId: expenseTxType.id,
         code: 'FOOD',
         name: 'Yiyecek & İçecek',
-        type: 'EXPENSE',
         description: 'Yemek, market alışverişi',
       },
     }),
-    prisma.refCategory.upsert({
-      where: { code: 'TRANSPORT' },
+    prisma.refTxCategory.upsert({
+      where: { txTypeId_code: { txTypeId: expenseTxType.id, code: 'TRANSPORT' } },
       update: {},
       create: {
+        txTypeId: expenseTxType.id,
         code: 'TRANSPORT',
         name: 'Ulaşım',
-        type: 'EXPENSE',
         description: 'Ulaşım giderleri',
       },
     }),
-    prisma.refCategory.upsert({
-      where: { code: 'BILLS' },
+    prisma.refTxCategory.upsert({
+      where: { txTypeId_code: { txTypeId: expenseTxType.id, code: 'BILLS' } },
       update: {},
       create: {
+        txTypeId: expenseTxType.id,
         code: 'BILLS',
         name: 'Faturalar',
-        type: 'EXPENSE',
         description: 'Elektrik, su, doğalgaz vb.',
       },
     }),
-    prisma.refCategory.upsert({
-      where: { code: 'SHOPPING' },
+    prisma.refTxCategory.upsert({
+      where: { txTypeId_code: { txTypeId: expenseTxType.id, code: 'SHOPPING' } },
       update: {},
       create: {
+        txTypeId: expenseTxType.id,
         code: 'SHOPPING',
         name: 'Alışveriş',
-        type: 'EXPENSE',
         description: 'Giyim, elektronik vb.',
       },
     }),
-    prisma.refCategory.upsert({
-      where: { code: 'OTHER_EXPENSE' },
+    prisma.refTxCategory.upsert({
+      where: { txTypeId_code: { txTypeId: expenseTxType.id, code: 'OTHER_EXPENSE' } },
       update: {},
       create: {
+        txTypeId: expenseTxType.id,
         code: 'OTHER_EXPENSE',
         name: 'Diğer Gider',
-        type: 'EXPENSE',
         description: 'Diğer gider türleri',
       },
     }),

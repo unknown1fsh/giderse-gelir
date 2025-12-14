@@ -272,7 +272,7 @@ export function getPlanLimits(planId: string) {
 }
 
 export function isValidPlanId(planId: string): planId is PlanId {
-  return Object.values(PLAN_IDS).includes(planId as PlanId)
+  return (Object.values(PLAN_IDS) as string[]).includes(planId)
 }
 
 export function getAllPlans(): PlanConfig[] {
@@ -281,11 +281,13 @@ export function getAllPlans(): PlanConfig[] {
 
 // Premium özellikleri kontrol etme
 export function isPremiumPlan(planId: string): boolean {
-  return [PLAN_IDS.PREMIUM, PLAN_IDS.ENTERPRISE, PLAN_IDS.ENTERPRISE_PREMIUM].includes(
-    planId as PlanId
+  return (
+    planId === PLAN_IDS.PREMIUM ||
+    planId === PLAN_IDS.ENTERPRISE ||
+    planId === PLAN_IDS.ENTERPRISE_PREMIUM
   )
 }
 
 export function isEnterprisePlan(planId: string): boolean {
-  return [PLAN_IDS.ENTERPRISE, PLAN_IDS.ENTERPRISE_PREMIUM].includes(planId as PlanId)
+  return planId === PLAN_IDS.ENTERPRISE || planId === PLAN_IDS.ENTERPRISE_PREMIUM
 }

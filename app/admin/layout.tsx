@@ -74,6 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/payments', label: 'Ödemeler', icon: Receipt },
     { href: '/admin/help', label: 'Help Dashboard', icon: HelpCircle },
     { href: '/admin/support-tickets', label: 'Destek Talepleri', icon: MessageSquare },
+    { href: '/admin/feedback', label: 'Görüşler', icon: MessageSquare },
     { href: '/admin/faq', label: 'SSS Yönetimi', icon: FileText },
     { href: '/admin/system', label: 'Sistem', icon: Activity },
     { href: '/admin/reports', label: 'Raporlar', icon: FileText },

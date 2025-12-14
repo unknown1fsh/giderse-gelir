@@ -149,11 +149,11 @@ export default function SettingsPage() {
       const success = await updateUser({
         name: settings.name,
         phone: settings.phone,
-        theme: settings.theme,
-        language: settings.language,
-        currency: settings.currency,
-        dateFormat: settings.dateFormat,
-        numberFormat: settings.numberFormat,
+        // theme: settings.theme, // TODO: Prisma User modelinde yok, settings JSON içinde tutulabilir
+        // language: settings.language, // TODO: Prisma User modelinde yok
+        // currency: settings.currency, // TODO: Prisma User modelinde yok
+        // dateFormat: settings.dateFormat, // TODO: Prisma User modelinde yok
+        // numberFormat: settings.numberFormat, // TODO: Prisma User modelinde yok
       })
 
       if (success) {

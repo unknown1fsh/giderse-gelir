@@ -293,7 +293,9 @@ export default function TicketForm({ onSuccess, prefill }: TicketFormProps) {
           <Label htmlFor="priority">Öncelik</Label>
           <Select
             value={formData.priority}
-            onValueChange={value => setFormData(prev => ({ ...prev, priority: value }))}
+            onValueChange={value =>
+              setFormData(prev => ({ ...prev, priority: value as TicketPriority }))
+            }
           >
             <SelectTrigger id="priority">
               <SelectValue />

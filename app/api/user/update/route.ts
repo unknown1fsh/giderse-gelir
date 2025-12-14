@@ -18,11 +18,11 @@ export async function PUT(request: NextRequest) {
       'phone',
       'avatar',
       'timezone',
-      'language',
-      'currency',
-      'dateFormat',
-      'numberFormat',
-      'theme',
+      // 'language', // TODO: Prisma User modelinde yok
+      // 'currency', // TODO: Prisma User modelinde yok
+      // 'dateFormat', // TODO: Prisma User modelinde yok
+      // 'numberFormat', // TODO: Prisma User modelinde yok
+      // 'theme', // TODO: Prisma User modelinde yok
       'notifications',
       'settings',
     ]

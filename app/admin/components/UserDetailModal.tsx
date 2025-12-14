@@ -12,11 +12,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { X } from 'lucide-react'
+import { getDisplayName } from '@/lib/utils'
 
 export interface UserDetail {
   id: number
   email: string
-  name: string
+  username?: string
+  name?: string
   phone?: string
   role: string
   plan: string
@@ -125,7 +127,7 @@ export default function UserDetailModal({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-slate-600">Ad Soyad</label>
-                <p className="text-sm text-slate-900 mt-1">{user.name}</p>
+                <p className="text-sm text-slate-900 mt-1">{getDisplayName(user)}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-slate-600">E-posta</label>

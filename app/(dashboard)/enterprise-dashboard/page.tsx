@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useUser } from '@/lib/user-context'
+import { getDisplayName } from '@/lib/utils'
 import { formatCurrency } from '@/lib/validators'
 import {
   TrendingUp,
@@ -181,7 +182,11 @@ export default function EnterpriseDashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-3xl font-black text-white mb-2">
-                    Hoş geldin, <span className="text-amber-400">{user?.name}</span>! 👑
+                    Hoş geldin,{' '}
+                    <span className="text-amber-400">
+                      {user ? getDisplayName(user) : 'Kullanıcı'}
+                    </span>
+                    ! 👑
                   </h2>
                   <p className="text-amber-200 text-lg">
                     Ultra Premium Enterprise üyeliğiniz aktif. Tüm gelişmiş özellikler

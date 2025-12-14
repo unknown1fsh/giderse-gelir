@@ -16,7 +16,8 @@ export class UserMapper {
     return new UserEntity({
       id: prismaUser.id,
       email: prismaUser.email,
-      name: prismaUser.name,
+      username: prismaUser.username,
+      name: prismaUser.name ?? undefined,
       phone: prismaUser.phone ?? undefined,
       passwordHash: prismaUser.passwordHash,
       emailVerified: prismaUser.emailVerified,
@@ -46,6 +47,7 @@ export class UserMapper {
     return new UserDTO({
       id: entity.id,
       email: entity.email,
+      username: entity.username,
       name: entity.name,
       phone: entity.phone,
       avatar: entity.avatar,
@@ -66,7 +68,8 @@ export class UserMapper {
     return new UserDTO({
       id: prismaUser.id,
       email: prismaUser.email,
-      name: prismaUser.name,
+      username: prismaUser.username,
+      name: prismaUser.name ?? undefined,
       phone: prismaUser.phone ?? undefined,
       avatar: prismaUser.avatar ?? undefined,
       plan,

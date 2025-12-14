@@ -13,11 +13,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Eye, Trash2 } from 'lucide-react'
+import { getDisplayName } from '@/lib/utils'
 
 interface User {
   id: number
   email: string
-  name: string
+  username?: string
+  name?: string
   phone?: string
   role: string
   plan: string
@@ -180,7 +182,7 @@ export default function AdminUsers() {
     const headers = ['ID', 'Ad Soyad', 'E-posta', 'Telefon', 'Rol', 'Plan', 'Durum', 'Kayıt Tarihi']
     const rows = users.map(user => [
       user.id,
-      user.name,
+      getDisplayName(user),
       user.email,
       user.phone || '',
       user.role,
@@ -204,10 +206,12 @@ export default function AdminUsers() {
       render: (user: User) => (
         <div className="flex items-center min-w-0">
           <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
-            {user.name.charAt(0).toUpperCase()}
+            {getDisplayName(user).charAt(0).toUpperCase()}
           </div>
           <div className="ml-4 min-w-0">
-            <div className="text-sm font-medium text-slate-900 truncate">{user.name}</div>
+            <div className="text-sm font-medium text-slate-900 truncate">
+              {getDisplayName(user)}
+            </div>
             <div className="text-sm text-slate-500 truncate">{user.email}</div>
           </div>
         </div>

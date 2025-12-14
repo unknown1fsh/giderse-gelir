@@ -42,9 +42,11 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
   }
 
   // PayTR ödeme linki oluştur
+  const { getDisplayName } = await import('@/lib/utils')
+  const displayName = getDisplayName(user)
   const paymentResult = await createPaymentLink({
     email: user.email,
-    name: user.name,
+    name: displayName,
     amount,
     productType: planId,
     productId: planId,

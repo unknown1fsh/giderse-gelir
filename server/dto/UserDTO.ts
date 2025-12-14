@@ -7,7 +7,8 @@ import { BaseDTO } from './BaseDTO'
 export class UserDTO extends BaseDTO {
   id: number
   email: string
-  name: string
+  username: string
+  name?: string
   phone?: string
   avatar?: string
   plan: string
@@ -19,7 +20,8 @@ export class UserDTO extends BaseDTO {
   constructor(data: {
     id: number
     email: string
-    name: string
+    username: string
+    name?: string
     phone?: string
     avatar?: string
     plan: string
@@ -31,6 +33,7 @@ export class UserDTO extends BaseDTO {
     super()
     this.id = data.id
     this.email = data.email
+    this.username = data.username
     this.name = data.name
     this.phone = data.phone
     this.avatar = data.avatar
@@ -47,21 +50,24 @@ export class UserDTO extends BaseDTO {
 // Çıktı: RegisterUserDTO instance
 // Hata: -
 export class RegisterUserDTO {
-  name: string
+  username: string
   email: string
+  name?: string
   phone?: string
   password: string
   plan?: string
 
   constructor(data: {
-    name: string
+    username: string
     email: string
+    name?: string
     phone?: string
     password: string
     plan?: string
   }) {
-    this.name = data.name
+    this.username = data.username
     this.email = data.email
+    this.name = data.name
     this.phone = data.phone
     this.password = data.password
     this.plan = data.plan

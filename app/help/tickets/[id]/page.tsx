@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Download, MessageSquare } from 'lucide-react'
 import FileUpload from '@/components/help/file-upload'
 import NavigationButtons from '@/components/help/navigation-buttons'
+import { getDisplayName } from '@/lib/utils'
 
 interface Ticket {
   id: number
@@ -34,7 +35,7 @@ interface Ticket {
     createdAt: string
     user: {
       id: number
-      name: string
+      name: string | null
       email: string
       role: string
     }
@@ -216,7 +217,9 @@ export default function TicketDetailPage() {
                     <div className="flex items-center justify-between mb-2">
                       <div>
                         <p className="font-semibold">
-                          {reply.user.role === 'ADMIN' ? '👨‍💼 Destek Ekibi' : reply.user.name}
+                          {reply.user.role === 'ADMIN'
+                            ? '👨‍💼 Destek Ekibi'
+                            : getDisplayName(reply.user)}
                         </p>
                         <p className="text-xs text-gray-500">{formatDate(reply.createdAt)}</p>
                       </div>

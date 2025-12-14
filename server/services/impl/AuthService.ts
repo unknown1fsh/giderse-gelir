@@ -40,9 +40,16 @@ export class AuthService {
   // Çıktı: UserDTO
   // Hata: ConflictError
   async register(data: RegisterUserDTO): Promise<UserDTO> {
-    const existingUser = await this.userRepository.findByEmail(data.email)
-    if (existingUser) {
+    // Email kontrolü
+    const existingUserByEmail = await this.userRepository.findByEmail(data.email)
+    if (existingUserByEmail) {
       throw new ConflictError('Bu e-posta adresi zaten kullanılıyor')
+    }
+
+    // Username kontrolü
+    const existingUserByUsername = await this.userRepository.findByUsername(data.username)
+    if (existingUserByUsername) {
+      throw new ConflictError('Bu kullanıcı adı zaten kullanılıyor')
     }
 
     const user = await this.userService.create(data)

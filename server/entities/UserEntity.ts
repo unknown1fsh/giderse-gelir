@@ -6,7 +6,8 @@ import { BaseEntity } from './BaseEntity'
 // Hata: -
 export class UserEntity extends BaseEntity {
   email: string
-  name: string
+  username: string
+  name?: string
   phone?: string
   passwordHash: string
   emailVerified: boolean
@@ -27,7 +28,8 @@ export class UserEntity extends BaseEntity {
   constructor(data: {
     id: number
     email: string
-    name: string
+    username: string
+    name?: string
     phone?: string
     passwordHash: string
     emailVerified: boolean
@@ -49,6 +51,7 @@ export class UserEntity extends BaseEntity {
   }) {
     super(data.id, data.createdAt, data.updatedAt)
     this.email = data.email
+    this.username = data.username
     this.name = data.name
     this.phone = data.phone
     this.passwordHash = data.passwordHash

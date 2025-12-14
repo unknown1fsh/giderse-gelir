@@ -133,7 +133,9 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
 
   // Email bildirimleri gönder
   try {
-    await sendSupportTicketCreatedEmail(user.email, user.name, ticketNumber, subject)
+    const { getDisplayName } = await import('@/lib/utils')
+    const displayName = getDisplayName(user)
+    await sendSupportTicketCreatedEmail(user.email, displayName, ticketNumber, subject)
 
     // Admin'lere bildirim gönder
     const admins = await prisma.user.findMany({
@@ -150,7 +152,7 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
       await sendAdminNewTicketNotification(
         admin.email,
         ticketNumber,
-        user.name,
+        displayName,
         user.email,
         subject,
         category.name

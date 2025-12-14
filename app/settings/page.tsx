@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { useUser } from '@/lib/user-context'
+import { getDisplayName } from '@/lib/utils'
 import {
   Settings,
   User,
@@ -343,7 +344,7 @@ export default function SettingsPage() {
                     <User className="h-4 w-4 text-white" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-slate-800">{user.name}</p>
+                    <p className="font-semibold text-slate-800">{getDisplayName(user)}</p>
                     <div className="flex items-center space-x-1">
                       {user.plan === 'premium' ? (
                         <>

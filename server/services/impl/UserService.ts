@@ -47,19 +47,52 @@ export class UserService extends BaseService<UserDTO> {
     return users.map(user => UserMapper.prismaToDTO(user))
   }
 
+  // Bu metot username validasyonu yapar.
+  // Girdi: username
+  // Çıktı: void
+  // Hata: Error (geçersiz format)
+  private validateUsername(username: string): void {
+    // 3-50 karakter arası
+    if (username.length < 3 || username.length > 50) {
+      throw new Error('Kullanıcı adı 3-50 karakter arasında olmalıdır')
+    }
+
+    // Sadece harf, rakam, alt çizgi ve tire
+    const usernameRegex = /^[a-zA-Z0-9_-]+$/
+    if (!usernameRegex.test(username)) {
+      throw new Error('Kullanıcı adı sadece harf, rakam, alt çizgi ve tire içerebilir')
+    }
+
+    // Başlangıç ve bitiş harf veya rakam olmalı
+    if (!/^[a-zA-Z0-9]/.test(username) || !/[a-zA-Z0-9]$/.test(username)) {
+      throw new Error('Kullanıcı adı harf veya rakam ile başlayıp bitmelidir')
+    }
+  }
+
   // Bu metot yeni kullanıcı kaydı oluşturur.
   // Girdi: RegisterUserDTO
   // Çıktı: UserDTO
   // Hata: ConflictError (e-posta zaten mevcut), ValidationError
   async create(data: RegisterUserDTO): Promise<UserDTO> {
-    const existingUser = await this.userRepository.findByEmail(data.email)
-    if (existingUser) {
+    // Username validasyonu
+    this.validateUsername(data.username)
+
+    // Email kontrolü
+    const existingUserByEmail = await this.userRepository.findByEmail(data.email)
+    if (existingUserByEmail) {
       throw new Error('Bu e-posta adresi zaten kullanılıyor')
+    }
+
+    // Username kontrolü
+    const existingUserByUsername = await this.userRepository.findByUsername(data.username)
+    if (existingUserByUsername) {
+      throw new Error('Bu kullanıcı adı zaten kullanılıyor')
     }
 
     const passwordHash = await bcrypt.hash(data.password, 12)
 
     const user = await this.userRepository.create({
+      username: data.username,
       name: data.name,
       email: data.email,
       phone: data.phone,

@@ -186,9 +186,11 @@ export const PUT = ExceptionMapper.asyncHandler(
     // Durum değiştiyse email gönder
     if (status && status !== oldStatus) {
       try {
+        const { getDisplayName } = await import('@/lib/utils')
+        const displayName = getDisplayName(ticket.user)
         await sendSupportTicketStatusChangedEmail(
           ticket.user.email,
-          ticket.user.name,
+          displayName,
           ticket.ticketNumber,
           ticket.subject,
           oldStatus,

@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowLeft, Download, Send, Loader2 } from 'lucide-react'
+import { getDisplayName } from '@/lib/utils'
 
 interface Ticket {
   id: number
@@ -32,7 +33,8 @@ interface Ticket {
   }
   user: {
     id: number
-    name: string
+    username?: string
+    name?: string
     email: string
     phone: string | null
   }
@@ -50,7 +52,8 @@ interface Ticket {
     isInternal: boolean
     user: {
       id: number
-      name: string
+      username?: string
+      name?: string
       email: string
       role: string
     }
@@ -339,7 +342,7 @@ export default function AdminTicketDetailPage() {
                     <div className="flex items-center justify-between mb-2">
                       <div>
                         <p className="font-semibold">
-                          {reply.user.role === 'ADMIN' ? '👨‍💼 Admin' : reply.user.name}
+                          {reply.user.role === 'ADMIN' ? '👨‍💼 Admin' : getDisplayName(reply.user)}
                           {reply.isInternal && (
                             <Badge variant="secondary" className="ml-2">
                               İç Not
@@ -384,7 +387,7 @@ export default function AdminTicketDetailPage() {
 
               <div>
                 <p className="text-sm text-gray-500">Kullanıcı</p>
-                <p className="text-sm font-medium">{ticket.user.name}</p>
+                <p className="text-sm font-medium">{getDisplayName(ticket.user)}</p>
                 <p className="text-xs text-gray-500">{ticket.user.email}</p>
                 {ticket.user.phone && <p className="text-xs text-gray-500">{ticket.user.phone}</p>}
               </div>

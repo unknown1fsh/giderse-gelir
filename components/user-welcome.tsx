@@ -1,6 +1,7 @@
 'use client'
 
 import { useUser } from '@/lib/user-context'
+import { getDisplayName } from '@/lib/utils'
 import { User, Crown, Sparkles } from 'lucide-react'
 
 export default function UserWelcomeSection() {
@@ -87,7 +88,9 @@ export default function UserWelcomeSection() {
               <User className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">Hoş geldin, {user.name}! 👋</h2>
+              <h2 className="text-2xl font-bold text-slate-800">
+                Hoş geldin, {getDisplayName(user)}! 👋
+              </h2>
               <p className="text-slate-600">{planInfo.description}</p>
             </div>
           </div>

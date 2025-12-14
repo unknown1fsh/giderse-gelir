@@ -10,7 +10,7 @@ import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 import crypto from 'crypto'
 
 // Bu metot yeni kullanıcı kaydı oluşturur (POST).
-// Girdi: NextRequest (JSON body: name, email, password, phone?, plan?)
+// Girdi: NextRequest (JSON body: username, email, password, name?, phone?, plan?)
 // Çıktı: NextResponse (user bilgisi + token)
 // Hata: 400, 409, 429, 500
 export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) => {
@@ -24,15 +24,29 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     )
   }
 
-  const { name, email, phone, password, plan } = await request.json()
+  const { username, email, name, phone, password, plan } = await request.json()
 
   // Validation
-  if (!name || !email || !password) {
-    throw new BadRequestError('Gerekli alanlar eksik (name, email, password)')
+  if (!username || !email || !password) {
+    throw new BadRequestError('Gerekli alanlar eksik (username, email, password)')
   }
 
   if (password.length < 8) {
     throw new BadRequestError('Şifre en az 8 karakter olmalıdır')
+  }
+
+  // Username validasyonu
+  if (username.length < 3 || username.length > 50) {
+    throw new BadRequestError('Kullanıcı adı 3-50 karakter arasında olmalıdır')
+  }
+
+  const usernameRegex = /^[a-zA-Z0-9_-]+$/
+  if (!usernameRegex.test(username)) {
+    throw new BadRequestError('Kullanıcı adı sadece harf, rakam, alt çizgi ve tire içerebilir')
+  }
+
+  if (!/^[a-zA-Z0-9]/.test(username) || !/[a-zA-Z0-9]$/.test(username)) {
+    throw new BadRequestError('Kullanıcı adı harf veya rakam ile başlayıp bitmelidir')
   }
 
   // E-posta format kontrolü
@@ -50,8 +64,9 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
   const authService = new AuthService(prisma)
 
   const registerDTO = new RegisterUserDTO({
-    name,
+    username,
     email,
+    name,
     phone,
     password,
     // plan: actualPlan, // TODO: User modelinde yok, UserSubscription'da tutuluyor
@@ -73,7 +88,8 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
   })
 
   // Verification email gönder (async, hata olsa bile kayıt devam eder)
-  sendVerificationEmail(user.email, user.name, verificationToken).catch(error => {
+  const displayName = user.name || user.username
+  sendVerificationEmail(user.email, displayName, verificationToken).catch(error => {
     console.error('Email gönderme hatası (kayıt sonrası):', error)
     // Email gönderilemese bile kayıt başarılı, kullanıcıya bilgi verilecek
   })
@@ -138,7 +154,8 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
         const description = `Kayıt sırasında Premium üyelik seçildi.
 
 Kullanıcı Bilgileri:
-- Ad Soyad: ${name}
+- Kullanıcı Adı: ${username}
+- Ad Soyad: ${name || 'Belirtilmemiş'}
 - E-posta: ${email}
 - Telefon: ${phone || 'Belirtilmemiş'}
 
@@ -176,7 +193,7 @@ Not: Kullanıcı şu anda Free üye olarak kaydedilmiştir. Premium üyeliği ad
           sendAdminNewTicketNotification(
             admin.email,
             ticketNumber,
-            name,
+            name || username,
             email,
             subject,
             category.name

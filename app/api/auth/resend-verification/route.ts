@@ -56,7 +56,9 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
   })
 
   // Email gönder (hata olsa bile başarılı mesaj döndür)
-  await sendVerificationEmail(user.email, user.name, verificationToken).catch(error => {
+  const { getDisplayName } = await import('@/lib/utils')
+  const displayName = getDisplayName(user)
+  await sendVerificationEmail(user.email, displayName, verificationToken).catch(error => {
     console.error('Email gönderme hatası:', error)
     // Hata olsa bile sessizce devam et
   })

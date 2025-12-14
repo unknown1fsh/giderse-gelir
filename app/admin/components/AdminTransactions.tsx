@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import DataTable from './DataTable'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency } from '@/lib/validators'
+import { getDisplayName } from '@/lib/utils'
 
 interface Transaction {
   id: number
@@ -12,7 +13,8 @@ interface Transaction {
   description?: string
   user: {
     id: number
-    name: string
+    username?: string
+    name?: string
     email: string
   }
   category: {
@@ -75,7 +77,7 @@ export default function AdminTransactions() {
     const headers = ['ID', 'Kullanıcı', 'Kategori', 'Tip', 'Tutar', 'Tarih', 'Açıklama']
     const rows = transactions.map(tx => [
       tx.id,
-      tx.user.name,
+      getDisplayName(tx.user),
       tx.category.name,
       tx.txType.name,
       `${tx.currency.symbol}${tx.amount}`,
@@ -97,7 +99,7 @@ export default function AdminTransactions() {
       header: 'Kullanıcı',
       render: (tx: Transaction) => (
         <div>
-          <div className="text-sm font-medium text-slate-900">{tx.user.name}</div>
+          <div className="text-sm font-medium text-slate-900">{getDisplayName(tx.user)}</div>
           <div className="text-sm text-slate-500">{tx.user.email}</div>
         </div>
       ),

@@ -105,9 +105,11 @@ export const POST = ExceptionMapper.asyncHandler(
     // Eğer public yanıtsa kullanıcıya email gönder
     if (!isInternal) {
       try {
+        const { getDisplayName } = await import('@/lib/utils')
+        const displayName = getDisplayName(ticket.user)
         await sendSupportTicketReplyEmail(
           ticket.user.email,
-          ticket.user.name,
+          displayName,
           ticket.ticketNumber,
           ticket.subject,
           message.trim()

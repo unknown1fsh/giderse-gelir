@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import DataTable from './DataTable'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency } from '@/lib/validators'
+import { getDisplayName } from '@/lib/utils'
 
 interface Subscription {
   id: number
@@ -15,7 +16,8 @@ interface Subscription {
   currency: string
   user: {
     id: number
-    name: string
+    username?: string
+    name?: string
     email: string
   }
 }
@@ -66,7 +68,7 @@ export default function AdminSubscriptions() {
     const headers = ['ID', 'Kullanıcı', 'Plan', 'Durum', 'Başlangıç', 'Bitiş', 'Tutar']
     const rows = subscriptions.map(sub => [
       sub.id,
-      sub.user.name,
+      getDisplayName(sub.user),
       sub.planId,
       sub.status,
       new Date(sub.startDate).toLocaleDateString('tr-TR'),
@@ -101,7 +103,7 @@ export default function AdminSubscriptions() {
       header: 'Kullanıcı',
       render: (sub: Subscription) => (
         <div>
-          <div className="text-sm font-medium text-slate-900">{sub.user.name}</div>
+          <div className="text-sm font-medium text-slate-900">{getDisplayName(sub.user)}</div>
           <div className="text-sm text-slate-500">{sub.user.email}</div>
         </div>
       ),

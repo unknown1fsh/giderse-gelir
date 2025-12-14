@@ -9,7 +9,7 @@ const prisma = new PrismaClient()
 export interface User {
   id: number
   email: string
-  name: string
+  name?: string | null
   phone?: string
   avatar?: string
   plan: string
@@ -51,12 +51,47 @@ export class AuthService {
         throw new Error('Bu e-posta adresi zaten kullanılıyor')
       }
 
+      // Email'den username oluştur
+      const emailPrefix = data.email.split('@')[0].toLowerCase()
+      let baseUsername = emailPrefix.replace(/[^a-z0-9_]/g, '_')
+      if (baseUsername.length < 3) {
+        baseUsername = 'user_' + baseUsername
+      }
+      // 50 karakter sınırına uy (sayaç için yer bırak)
+      if (baseUsername.length > 45) {
+        baseUsername = baseUsername.substring(0, 45)
+      }
+
+      // Benzersiz username oluştur
+      let username = baseUsername
+      let counter = 1
+      let existingUserByUsername = await prisma.user.findUnique({
+        where: { username },
+      })
+
+      while (existingUserByUsername) {
+        const counterSuffix = `_${counter}`
+        // Toplam uzunluğu 50 karakteri aşmaması için kısalt
+        const maxBaseLength = 50 - counterSuffix.length
+        username = `${baseUsername.substring(0, maxBaseLength)}${counterSuffix}`
+        existingUserByUsername = await prisma.user.findUnique({
+          where: { username },
+        })
+        counter++
+        // Sonsuz döngü önleme
+        if (counter > 1000) {
+          username = `user_${Date.now()}`.substring(0, 50)
+          break
+        }
+      }
+
       // Şifre hash'leme
       const passwordHash = await bcrypt.hash(data.password, 12)
 
       // Kullanıcı oluştur
       const user = await prisma.user.create({
         data: {
+          username,
           name: data.name,
           email: data.email,
           phone: data.phone,
@@ -84,7 +119,7 @@ export class AuthService {
         success: true,
         user: {
           id: user.id,
-          name: user.name,
+          name: user.name ?? undefined,
           email: user.email,
           phone: user.phone ?? undefined,
           avatar: user.avatar ?? undefined,
@@ -164,7 +199,7 @@ export class AuthService {
         success: true,
         user: {
           id: user.id,
-          name: user.name,
+          name: user.name ?? undefined,
           email: user.email,
           phone: user.phone ?? undefined,
           avatar: user.avatar ?? undefined,
@@ -220,7 +255,7 @@ export class AuthService {
 
       return {
         id: session.user.id,
-        name: session.user.name,
+        name: session.user.name ?? undefined,
         email: session.user.email,
         phone: session.user.phone ?? undefined,
         avatar: session.user.avatar ?? undefined,
@@ -287,7 +322,7 @@ export class AuthService {
         success: true,
         user: {
           id: user.id,
-          name: user.name,
+          name: user.name ?? undefined,
           email: user.email,
           phone: user.phone ?? undefined,
           avatar: user.avatar ?? undefined,

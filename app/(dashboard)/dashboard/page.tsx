@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency } from '@/lib/validators'
 import { useUser } from '@/lib/user-context'
+import { getDisplayName } from '@/lib/utils'
 import DashboardSkeleton from '@/components/dashboard/dashboard-skeleton'
 import {
   TrendingUp,
@@ -147,7 +148,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-800">
-                  Hoş geldin, {user?.name || 'Kullanıcı'}! 👋
+                  Hoş geldin, {user ? getDisplayName(user) : 'Kullanıcı'}! 👋
                 </h2>
                 <p className="text-sm sm:text-base text-slate-600">
                   {user?.plan === 'free'

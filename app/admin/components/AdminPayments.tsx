@@ -15,6 +15,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { CheckCircle, XCircle, Clock, MessageSquare } from 'lucide-react'
+import { getDisplayName } from '@/lib/utils'
 
 interface PaymentRequest {
   id: number
@@ -30,7 +31,8 @@ interface PaymentRequest {
   createdAt: string
   user: {
     id: number
-    name: string
+    username?: string
+    name?: string
     email: string
   }
 }
@@ -146,7 +148,7 @@ export default function AdminPayments() {
     ]
     const rows = paymentRequests.map(pr => [
       pr.id,
-      pr.user.name,
+      getDisplayName(pr.user),
       pr.user.email,
       pr.planId,
       `${pr.currency}${pr.amount}`,
@@ -198,7 +200,7 @@ export default function AdminPayments() {
       header: 'Kullanıcı',
       render: (pr: PaymentRequest) => (
         <div>
-          <div className="text-sm font-medium text-slate-900">{pr.user.name}</div>
+          <div className="text-sm font-medium text-slate-900">{getDisplayName(pr.user)}</div>
           <div className="text-sm text-slate-500">{pr.user.email}</div>
         </div>
       ),
@@ -332,7 +334,7 @@ export default function AdminPayments() {
               {selectedRequest && (
                 <div className="mt-2 space-y-1 text-sm">
                   <p>
-                    <strong>Kullanıcı:</strong> {selectedRequest.user.name} (
+                    <strong>Kullanıcı:</strong> {getDisplayName(selectedRequest.user)} (
                     {selectedRequest.user.email})
                   </p>
                   <p>

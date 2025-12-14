@@ -23,6 +23,7 @@ import BrandLogo from '@/components/brand-logo'
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
+    username: '',
     name: '',
     email: '',
     phone: '',
@@ -61,6 +62,26 @@ export default function RegisterPage() {
       return
     }
 
+    // Username validasyonu
+    if (formData.username.length < 3 || formData.username.length > 50) {
+      setError('Kullanıcı adı 3-50 karakter arasında olmalıdır')
+      setIsLoading(false)
+      return
+    }
+
+    const usernameRegex = /^[a-zA-Z0-9_-]+$/
+    if (!usernameRegex.test(formData.username)) {
+      setError('Kullanıcı adı sadece harf, rakam, alt çizgi ve tire içerebilir')
+      setIsLoading(false)
+      return
+    }
+
+    if (!/^[a-zA-Z0-9]/.test(formData.username) || !/[a-zA-Z0-9]$/.test(formData.username)) {
+      setError('Kullanıcı adı harf veya rakam ile başlayıp bitmelidir')
+      setIsLoading(false)
+      return
+    }
+
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -68,9 +89,10 @@ export default function RegisterPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
+          username: formData.username,
+          name: formData.name || undefined,
           email: formData.email,
-          phone: formData.phone,
+          phone: formData.phone || undefined,
           password: formData.password,
           plan: formData.plan,
         }),
@@ -234,10 +256,37 @@ export default function RegisterPage() {
                 </div>
               </div>
 
+              {/* Username - Zorunlu */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-300">
+                  Kullanıcı Adı <span className="text-red-400">*</span>
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    placeholder="kullanici_adi"
+                    minLength={3}
+                    maxLength={50}
+                    className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-slate-400 focus:border-purple-500"
+                    required
+                  />
+                </div>
+                <p className="text-xs text-slate-400">
+                  3-50 karakter, sadece harf, rakam, alt çizgi ve tire. Harf/rakam ile başlayıp
+                  bitmeli.
+                </p>
+              </div>
+
               {/* Personal Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-300">Ad Soyad</label>
+                  <label className="text-sm font-medium text-slate-300">
+                    Ad Soyad <span className="text-slate-500 text-xs">(Opsiyonel)</span>
+                  </label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
@@ -245,15 +294,16 @@ export default function RegisterPage() {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="Adınızı girin"
+                      placeholder="Adınızı girin (isteğe bağlı)"
                       className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-slate-400 focus:border-purple-500"
-                      required
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-300">Telefon</label>
+                  <label className="text-sm font-medium text-slate-300">
+                    Telefon <span className="text-slate-500 text-xs">(Opsiyonel)</span>
+                  </label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
@@ -263,7 +313,6 @@ export default function RegisterPage() {
                       onChange={handleInputChange}
                       placeholder="+90 555 123 45 67"
                       className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-slate-400 focus:border-purple-500"
-                      required
                     />
                   </div>
                 </div>

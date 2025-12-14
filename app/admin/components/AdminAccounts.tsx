@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import DataTable from './DataTable'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency } from '@/lib/validators'
+import { getDisplayName } from '@/lib/utils'
 
 interface Account {
   id: number
@@ -14,7 +15,8 @@ interface Account {
   active: boolean
   user: {
     id: number
-    name: string
+    username?: string
+    name?: string
     email: string
   }
   bank: {
@@ -77,7 +79,7 @@ export default function AdminAccounts() {
     const headers = ['ID', 'Kullanıcı', 'Hesap Adı', 'Banka', 'Tip', 'Bakiye', 'Durum']
     const rows = accounts.map(acc => [
       acc.id,
-      acc.user.name,
+      getDisplayName(acc.user),
       acc.name,
       acc.bank.name,
       acc.accountType.name,

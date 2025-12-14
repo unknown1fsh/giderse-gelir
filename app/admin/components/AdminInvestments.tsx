@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import DataTable from './DataTable'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency } from '@/lib/validators'
+import { getDisplayName } from '@/lib/utils'
 
 interface Investment {
   id: number
@@ -19,7 +20,8 @@ interface Investment {
   }
   user: {
     id: number
-    name: string
+    username?: string
+    name?: string
     email: string
   }
 }
@@ -79,7 +81,7 @@ export default function AdminInvestments() {
     ]
     const rows = investments.map(inv => [
       inv.id,
-      inv.user.name,
+      getDisplayName(inv.user),
       inv.name,
       inv.investmentType,
       inv.symbol || '-',
@@ -102,7 +104,7 @@ export default function AdminInvestments() {
       header: 'Kullanıcı',
       render: (inv: Investment) => (
         <div>
-          <div className="text-sm font-medium text-slate-900">{inv.user.name}</div>
+          <div className="text-sm font-medium text-slate-900">{getDisplayName(inv.user)}</div>
           <div className="text-sm text-slate-500">{inv.user.email}</div>
         </div>
       ),

@@ -27,6 +27,16 @@ export class UserRepository extends BaseRepository<User> {
     })
   }
 
+  // Bu metot kullanıcı adına göre kullanıcı getirir.
+  // Girdi: Kullanıcı adı
+  // Çıktı: Bulunan kullanıcı veya null
+  // Hata: Prisma hataları
+  async findByUsername(username: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { username },
+    })
+  }
+
   // Bu metot kullanıcıyı subscriptions ile birlikte getirir.
   // Girdi: Kullanıcı ID'si
   // Çıktı: Kullanıcı ve aktif subscription'ları

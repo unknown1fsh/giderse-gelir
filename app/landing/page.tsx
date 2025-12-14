@@ -1,7 +1,19 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { BrainCircuit, Play, Rocket, ShieldCheck, Sparkles, Target, TrendingUp } from 'lucide-react'
+import {
+  BrainCircuit,
+  Play,
+  Rocket,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  TrendingUp,
+  Lock,
+  EyeOff,
+  Database,
+  CheckCircle2,
+} from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import BrandLogo from '@/components/brand-logo'
@@ -126,6 +138,144 @@ export default function LandingPage() {
                   <span className="text-slate-200 font-medium">veri + AI</span> birleşimi.
                 </span>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Veri Gizliliği ve Güvenlik Bölümü */}
+      <div className="relative py-16 sm:py-20 border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center mb-4">
+              <div className="p-3 rounded-full bg-gradient-to-br from-emerald-500/20 to-blue-500/20 border border-emerald-400/30">
+                <ShieldCheck className="h-8 w-8 text-emerald-400" />
+              </div>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
+              <span className="bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Verileriniz Sadece Sizindir
+              </span>
+            </h2>
+            <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto">
+              Finansal verilerinizin gizliliği ve güvenliği bizim için en önemli önceliktir.
+              Verileriniz şifrelenir, korunur ve yalnızca sizin kontrolünüzdedir.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {/* Şifreleme */}
+            <div className="bg-gradient-to-br from-emerald-500/10 via-blue-500/10 to-purple-500/10 backdrop-blur-sm rounded-2xl border-2 border-emerald-400/30 p-6 sm:p-8 hover:border-emerald-400/50 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 rounded-lg bg-emerald-500/20 border border-emerald-400/30">
+                  <Lock className="h-6 w-6 text-emerald-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white">End-to-End Şifreleme</h3>
+              </div>
+              <p className="text-slate-300 leading-relaxed">
+                Tüm finansal verileriniz endüstri standardı şifreleme ile korunur. Verileriniz
+                sadece sizin erişebileceğiniz şekilde saklanır.
+              </p>
+            </div>
+
+            {/* Veri Sahipliği */}
+            <div className="bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border-2 border-blue-400/30 p-6 sm:p-8 hover:border-blue-400/50 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-400/30">
+                  <Database className="h-6 w-6 text-blue-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Tam Veri Sahipliği</h3>
+              </div>
+              <p className="text-slate-300 leading-relaxed">
+                Verileriniz size aittir. İstediğiniz zaman verilerinizi silebilir, dışa aktarabilir
+                veya gizlilik ayarlarınızı değiştirebilirsiniz.
+              </p>
+            </div>
+
+            {/* Gizlilik Kontrolü */}
+            <div className="bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-red-500/10 backdrop-blur-sm rounded-2xl border-2 border-purple-400/30 p-6 sm:p-8 hover:border-purple-400/50 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 rounded-lg bg-purple-500/20 border border-purple-400/30">
+                  <EyeOff className="h-6 w-6 text-purple-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Gizlilik Kontrolü</h3>
+              </div>
+              <p className="text-slate-300 leading-relaxed">
+                Verileriniz üçüncü taraflarla paylaşılmaz. Reklam verileri toplanmaz. Sadece size
+                hizmet etmek için gerekli minimum veri işlenir.
+              </p>
+            </div>
+          </div>
+
+          {/* Güvenlik Özellikleri Listesi */}
+          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-3xl border-2 border-white/10 p-8 sm:p-12">
+            <h3 className="text-2xl sm:text-3xl font-bold text-white text-center mb-8">
+              Güvenlik ve Gizlilik Taahhütlerimiz
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-1 flex-shrink-0" />
+                <div>
+                  <p className="text-white font-semibold mb-1">KVKK ve GDPR Uyumlu</p>
+                  <p className="text-slate-300 text-sm">
+                    Kişisel Verilerin Korunması Kanunu ve GDPR standartlarına tam uyumluluk
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-1 flex-shrink-0" />
+                <div>
+                  <p className="text-white font-semibold mb-1">Güvenli Sunucular</p>
+                  <p className="text-slate-300 text-sm">
+                    Verileriniz güvenli, şifrelenmiş sunucularda saklanır ve düzenli yedeklenir
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-1 flex-shrink-0" />
+                <div>
+                  <p className="text-white font-semibold mb-1">İki Faktörlü Doğrulama</p>
+                  <p className="text-slate-300 text-sm">
+                    Hesabınızı ekstra güvenlik katmanı ile koruyun (isteğe bağlı)
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-1 flex-shrink-0" />
+                <div>
+                  <p className="text-white font-semibold mb-1">Veri Dışa Aktarma</p>
+                  <p className="text-slate-300 text-sm">
+                    İstediğiniz zaman tüm verilerinizi standart formatta dışa aktarabilirsiniz
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-1 flex-shrink-0" />
+                <div>
+                  <p className="text-white font-semibold mb-1">Anonim Kullanım</p>
+                  <p className="text-slate-300 text-sm">
+                    İsim-soyisim vermeden, sadece kullanıcı adı ile uygulamayı kullanabilirsiniz
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-1 flex-shrink-0" />
+                <div>
+                  <p className="text-white font-semibold mb-1">Şeffaf Gizlilik Politikası</p>
+                  <p className="text-slate-300 text-sm">
+                    Verilerinizin nasıl kullanıldığını açık ve net bir şekilde paylaşıyoruz
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-8 text-center">
+              <Link
+                href="/privacy"
+                className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 font-semibold transition-colors underline"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                Detaylı Gizlilik Politikamızı İnceleyin
+              </Link>
             </div>
           </div>
         </div>

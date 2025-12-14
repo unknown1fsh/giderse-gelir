@@ -22,6 +22,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { CheckCircle2, XCircle, Clock, Eye, Loader2 } from 'lucide-react'
+import { getDisplayName } from '@/lib/utils'
 
 interface PaymentRequest {
   id: number
@@ -34,7 +35,8 @@ interface PaymentRequest {
   adminNotes: string | null
   createdAt: string
   user: {
-    name: string
+    username?: string
+    name?: string
     email: string
   }
 }
@@ -210,7 +212,7 @@ export default function AdminPaymentRequests() {
                   <TableRow key={request.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{request.user.name}</div>
+                        <div className="font-medium">{getDisplayName(request.user)}</div>
                         <div className="text-sm text-gray-500">{request.user.email}</div>
                       </div>
                     </TableCell>
@@ -254,7 +256,7 @@ export default function AdminPaymentRequests() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700">Kullanıcı</label>
-                  <p className="text-sm">{selectedRequest.user.name}</p>
+                  <p className="text-sm">{getDisplayName(selectedRequest.user)}</p>
                   <p className="text-sm text-gray-500">{selectedRequest.user.email}</p>
                 </div>
                 <div>

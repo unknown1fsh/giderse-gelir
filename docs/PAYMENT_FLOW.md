@@ -56,9 +56,7 @@ Kullanıcı `/premium` sayfasından plan seçer:
 ```typescript
 // app/premium/page.tsx
 const handleUpgrade = (planId: string, amount: number) => {
-  router.push(
-    `/payment?planId=${planId}&productType=${planId}&amount=${amount}&description=...`
-  )
+  router.push(`/payment?planId=${planId}&productType=${planId}&amount=${amount}&description=...`)
 }
 ```
 
@@ -96,9 +94,9 @@ const handlePayment = async () => {
       description,
     }),
   })
-  
+
   const data = await response.json()
-  
+
   // PayTR sayfasına yönlendir
   if (data.paymentUrl) {
     window.location.href = data.paymentUrl
@@ -114,7 +112,7 @@ const handlePayment = async () => {
 export async function POST(request: NextRequest) {
   const user = await getCurrentUser(request)
   const body = await request.json()
-  
+
   // PayTR ödeme linki oluştur
   const result = await createPaymentLink({
     email: user.email,
@@ -127,7 +125,7 @@ export async function POST(request: NextRequest) {
     successUrl: `${APP_URL}/premium/payment-success`,
     failUrl: `${APP_URL}/premium/payment-failed`,
   })
-  
+
   return NextResponse.json({
     success: result.success,
     paymentUrl: result.paymentUrl,
@@ -138,6 +136,7 @@ export async function POST(request: NextRequest) {
 ### 5. PayTR Ödeme Sayfası
 
 Kullanıcı PayTR sayfasına yönlendirilir:
+
 - Kart bilgilerini girer
 - 3D Secure doğrulaması yapar
 - Ödemeyi tamamlar
@@ -156,30 +155,30 @@ export async function POST(request: NextRequest) {
   for (const [key, value] of formData.entries()) {
     webhookData[key] = String(value)
   }
-  
+
   // Signature doğrula
   const isValid = verifyPaytrWebhook(webhookData)
   if (!isValid) {
     return NextResponse.json({ success: false }, { status: 400 })
   }
-  
+
   const { merchant_oid, status, total_amount } = webhookData
-  
+
   // Ödeme başarılı mı?
   if (status !== 'success') {
     return NextResponse.json({ success: false }, { status: 200 })
   }
-  
+
   // merchant_oid'den user ID ve plan ID parse et
   // Format: pay_{userId}_{productType}_{timestamp}
   const [, userId, planId] = merchant_oid.split('_')
-  
+
   // Mevcut subscription'ı iptal et
   await prisma.userSubscription.updateMany({
     where: { userId: parseInt(userId), status: 'active' },
     data: { status: 'cancelled', cancelledAt: new Date() },
   })
-  
+
   // Yeni subscription oluştur
   await prisma.userSubscription.create({
     data: {
@@ -195,10 +194,10 @@ export async function POST(request: NextRequest) {
       autoRenew: true,
     },
   })
-  
+
   // Email bildirimi gönder
   await sendPlanUpgradeEmail(user.email, user.name, planName, features)
-  
+
   return NextResponse.json({ success: true })
 }
 ```
@@ -208,12 +207,14 @@ export async function POST(request: NextRequest) {
 Kullanıcı otomatik olarak yönlendirilir:
 
 **Başarılı:** `/premium/payment-success?merchant_oid=...`
+
 - Ödeme onay mesajı
 - Plan özellikleri gösterilir
 - Dashboard linki
 - Bonus bilgisi
 
 **Başarısız:** `/premium/payment-failed`
+
 - Hata nedenleri
 - Alternatif çözümler
 - Tekrar deneme butonu
@@ -237,7 +238,7 @@ Kullanıcı `/enterprise-premium` sayfasından "İletişime Geç" butonuna tıkl
 
 ```typescript
 // components/enterprise-premium-contact-modal.tsx
-const handleSubmit = async (e) => {
+const handleSubmit = async e => {
   const response = await fetch('/api/payment-request/create', {
     method: 'POST',
     body: JSON.stringify({
@@ -257,7 +258,7 @@ const handleSubmit = async (e) => {
 export async function POST(request: NextRequest) {
   const user = await getCurrentUser(request)
   const { planId, amount, description } = await request.json()
-  
+
   // PaymentRequest oluştur
   const paymentRequest = await prisma.paymentRequest.create({
     data: {
@@ -269,7 +270,7 @@ export async function POST(request: NextRequest) {
       status: 'pending',
     },
   })
-  
+
   // Admin'e email gönder
   await sendAdminPaymentRequestNotification(
     'admin@giderse.com',
@@ -277,10 +278,10 @@ export async function POST(request: NextRequest) {
     user.email,
     'Enterprise Premium'
   )
-  
+
   // Kullanıcıya email gönder
   await sendEnterprisePremiumRequestEmail(user.email, user.name)
-  
+
   return NextResponse.json({ success: true })
 }
 ```
@@ -308,7 +309,7 @@ PUT /api/admin/payment-requests/{id}
 ```typescript
 export async function PUT(request, { params }) {
   const { status, adminNotes } = await request.json()
-  
+
   // PaymentRequest güncelle
   await prisma.paymentRequest.update({
     where: { id: parseInt(params.id) },
@@ -319,14 +320,14 @@ export async function PUT(request, { params }) {
       approvedAt: status === 'approved' ? new Date() : null,
     },
   })
-  
+
   if (status === 'approved') {
     // Mevcut subscription iptal et
     await prisma.userSubscription.updateMany({
       where: { userId: paymentRequest.userId, status: 'active' },
       data: { status: 'cancelled' },
     })
-    
+
     // Yeni subscription oluştur
     await prisma.userSubscription.create({
       data: {
@@ -340,11 +341,11 @@ export async function PUT(request, { params }) {
         paymentMethod: 'manual',
       },
     })
-    
+
     // Email bildirimi
     await sendPlanUpgradeEmail(user.email, user.name, 'Enterprise Premium', features)
   }
-  
+
   return NextResponse.json({ success: true })
 }
 ```
@@ -356,11 +357,11 @@ export async function PUT(request, { params }) {
 ```typescript
 export function verifyPaytrWebhook(data: Record<string, string>): boolean {
   const { merchant_oid, status, total_amount, hash } = data
-  
+
   // Hash oluştur
   const hashString = `${MERCHANT_ID}${merchant_oid}${MERCHANT_SALT}${status}${total_amount}`
   const calculatedHash = crypto.createHash('sha256').update(hashString).digest('base64')
-  
+
   // Hash karşılaştır
   return calculatedHash === hash
 }
@@ -383,6 +384,7 @@ test_mode: process.env.NODE_ENV !== 'production' ? '1' : '0'
 ```
 
 Test kartları:
+
 - **Başarılı:** 4506341010205499
 - **CVV:** 000
 - **Tarih:** 12/30
@@ -392,12 +394,14 @@ Test kartları:
 ### Ödeme Başarısız
 
 Olası nedenler:
+
 1. Yetersiz bakiye
 2. Kart limiti aşıldı
 3. 3D Secure başarısız
 4. Banka reddi
 
 Kullanıcıya gösterilen:
+
 - Hata mesajı
 - Alternatif çözümler
 - Destek bilgileri
@@ -405,6 +409,7 @@ Kullanıcıya gösterilen:
 ### Webhook Hatası
 
 Webhook başarısız olursa:
+
 1. PayTR otomatik olarak retry yapar (5 kez)
 2. Admin panel'den manuel kontrol
 3. `checkPaymentStatus()` fonksiyonu ile sorgulama
@@ -556,4 +561,3 @@ Response:
 
 **Son Güncelleme:** 2025-01-19
 **Versiyon:** 2.1.1
-

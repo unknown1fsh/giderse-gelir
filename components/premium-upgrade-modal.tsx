@@ -55,9 +55,15 @@ export default function PremiumUpgradeModal({
   }
 
   const getFeatureIcon = () => {
-    if (limitInfo?.type === 'transaction') {return Infinity}
-    if (limitInfo?.type === 'analysis') {return BarChart3}
-    if (limitInfo?.type === 'export') {return Download}
+    if (limitInfo?.type === 'transaction') {
+      return Infinity
+    }
+    if (limitInfo?.type === 'analysis') {
+      return BarChart3
+    }
+    if (limitInfo?.type === 'export') {
+      return Download
+    }
     return Crown
   }
 

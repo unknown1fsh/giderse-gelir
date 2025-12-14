@@ -37,7 +37,14 @@ describe('Reference Data API Endpoint', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('referans verilerini getirmeli', '/reference-data', 'GET', response.status, duration, response.status === 200)
+      logTestResult(
+        'referans verilerini getirmeli',
+        '/reference-data',
+        'GET',
+        response.status,
+        duration,
+        response.status === 200
+      )
       expect(response.status).toBe(200)
       const data = await response.json()
       expect(data).toHaveProperty('txTypes')
@@ -48,7 +55,14 @@ describe('Reference Data API Endpoint', () => {
       const response = await testFetch(`${BASE_URL}/reference-data`)
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan da çalışabilmeli', '/reference-data', 'GET', response.status, duration, [200, 401].includes(response.status))
+      logTestResult(
+        'token olmadan da çalışabilmeli',
+        '/reference-data',
+        'GET',
+        response.status,
+        duration,
+        [200, 401].includes(response.status)
+      )
       expect([200, 401]).toContain(response.status)
     })
   })

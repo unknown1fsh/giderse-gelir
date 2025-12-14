@@ -37,7 +37,14 @@ describe('Help API Endpoints', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('kategorileri getirmeli', '/help/categories', 'GET', response.status, duration, response.status === 200)
+      logTestResult(
+        'kategorileri getirmeli',
+        '/help/categories',
+        'GET',
+        response.status,
+        duration,
+        response.status === 200
+      )
       expect(response.status).toBe(200)
     })
 
@@ -46,7 +53,14 @@ describe('Help API Endpoints', () => {
       const response = await testFetch(`${BASE_URL}/help/categories`)
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/help/categories', 'GET', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/help/categories',
+        'GET',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })
@@ -60,7 +74,15 @@ describe('Help API Endpoints', () => {
       const duration = Date.now() - startTime
 
       const success = [200, 401].includes(response.status)
-      logTestResult('SSS listesini getirmeli', '/help/faq', 'GET', response.status, duration, success, success ? undefined : `Beklenen 200/401, alınan ${response.status}`)
+      logTestResult(
+        'SSS listesini getirmeli',
+        '/help/faq',
+        'GET',
+        response.status,
+        duration,
+        success,
+        success ? undefined : `Beklenen 200/401, alınan ${response.status}`
+      )
       expect([200, 401]).toContain(response.status)
     })
 
@@ -69,7 +91,14 @@ describe('Help API Endpoints', () => {
       const response = await testFetch(`${BASE_URL}/help/faq`)
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/help/faq', 'GET', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/help/faq',
+        'GET',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })

@@ -37,7 +37,14 @@ describe('Market API Endpoints', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('hisse araması yapmalı', '/market/stocks/search', 'GET', response.status, duration, [200, 500].includes(response.status))
+      logTestResult(
+        'hisse araması yapmalı',
+        '/market/stocks/search',
+        'GET',
+        response.status,
+        duration,
+        [200, 500].includes(response.status)
+      )
       expect([200, 500]).toContain(response.status)
     })
   })
@@ -50,7 +57,14 @@ describe('Market API Endpoints', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('kripto verilerini getirmeli', '/market/crypto', 'GET', response.status, duration, [200, 500].includes(response.status))
+      logTestResult(
+        'kripto verilerini getirmeli',
+        '/market/crypto',
+        'GET',
+        response.status,
+        duration,
+        [200, 500].includes(response.status)
+      )
       expect([200, 500]).toContain(response.status)
     })
   })

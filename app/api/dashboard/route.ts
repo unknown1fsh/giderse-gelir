@@ -12,8 +12,12 @@ export async function GET(request: NextRequest) {
     }
 
     const activePeriod = await getActivePeriod(request)
-    const txPeriodFilter = activePeriod ? Prisma.sql`AND t.period_id = ${activePeriod.id}` : Prisma.empty
-    const cardPeriodFilter = activePeriod ? Prisma.sql`AND cc.period_id = ${activePeriod.id}` : Prisma.empty
+    const txPeriodFilter = activePeriod
+      ? Prisma.sql`AND t.period_id = ${activePeriod.id}`
+      : Prisma.empty
+    const cardPeriodFilter = activePeriod
+      ? Prisma.sql`AND cc.period_id = ${activePeriod.id}`
+      : Prisma.empty
 
     // Son 30 gün KPI'larını al (kullanıcı bazlı)
     const kpiData = await prisma.$queryRaw`
@@ -92,7 +96,10 @@ export async function GET(request: NextRequest) {
       where: accountWhere,
       select: { balance: true },
     })
-    const totalAccountBalance = accountsData.reduce((sum, acc) => sum + parseFloat(acc.balance.toString()), 0)
+    const totalAccountBalance = accountsData.reduce(
+      (sum, acc) => sum + parseFloat(acc.balance.toString()),
+      0
+    )
 
     // Kredi kartı borçları toplamı
     const cardsData = await prisma.creditCard.findMany({
@@ -100,7 +107,8 @@ export async function GET(request: NextRequest) {
       select: { limitAmount: true, availableLimit: true },
     })
     const totalCardDebt = cardsData.reduce((sum, card) => {
-      const debt = parseFloat(card.limitAmount.toString()) - parseFloat(card.availableLimit.toString())
+      const debt =
+        parseFloat(card.limitAmount.toString()) - parseFloat(card.availableLimit.toString())
       return sum + debt
     }, 0)
 
@@ -110,7 +118,9 @@ export async function GET(request: NextRequest) {
       select: { currentValueTry: true, purchasePrice: true },
     })
     const totalGoldValue = goldData.reduce((sum, gold) => {
-      const value = gold.currentValueTry ? parseFloat(gold.currentValueTry.toString()) : parseFloat(gold.purchasePrice.toString())
+      const value = gold.currentValueTry
+        ? parseFloat(gold.currentValueTry.toString())
+        : parseFloat(gold.purchasePrice.toString())
       return sum + value
     }, 0)
 

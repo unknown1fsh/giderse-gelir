@@ -43,7 +43,15 @@ describe('Credit Cards API Endpoints', () => {
       const duration = Date.now() - startTime
 
       const success = [200, 401].includes(response.status)
-      logTestResult('kullanıcının kartlarını getirmeli', '/cards', 'GET', response.status, duration, success, success ? undefined : `Beklenen 200/401, alınan ${response.status}`)
+      logTestResult(
+        'kullanıcının kartlarını getirmeli',
+        '/cards',
+        'GET',
+        response.status,
+        duration,
+        success,
+        success ? undefined : `Beklenen 200/401, alınan ${response.status}`
+      )
       expect([200, 401]).toContain(response.status)
       const data = await response.json()
       expect(Array.isArray(data)).toBe(true)
@@ -54,7 +62,14 @@ describe('Credit Cards API Endpoints', () => {
       const response = await testFetch(`${BASE_URL}/cards`)
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/cards', 'GET', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/cards',
+        'GET',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })
@@ -75,7 +90,15 @@ describe('Credit Cards API Endpoints', () => {
       const duration = Date.now() - startTime
 
       const success = [200, 401, 404].includes(response.status)
-      logTestResult('kart adını güncellemeli', `/cards/${cardId}`, 'PATCH', response.status, duration, success, success ? undefined : `Beklenen 200/401/404, alınan ${response.status}`)
+      logTestResult(
+        'kart adını güncellemeli',
+        `/cards/${cardId}`,
+        'PATCH',
+        response.status,
+        duration,
+        success,
+        success ? undefined : `Beklenen 200/401/404, alınan ${response.status}`
+      )
       expect([200, 401, 404]).toContain(response.status)
     })
 
@@ -88,7 +111,14 @@ describe('Credit Cards API Endpoints', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', `/cards/${cardId}`, 'PATCH', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        `/cards/${cardId}`,
+        'PATCH',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })

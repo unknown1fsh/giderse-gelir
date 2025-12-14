@@ -23,6 +23,7 @@ import {
   HelpCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import BrandLogo from '@/components/brand-logo'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading: userLoading } = useUser()
@@ -91,6 +92,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
+              <div className="hidden md:flex">
+                <BrandLogo size={28} withText={false} variant="light" priority />
+              </div>
               <Link
                 href="/dashboard"
                 className="hidden sm:flex items-center space-x-2 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors text-slate-700"
@@ -128,7 +132,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Sidebar */}
         <aside
           className={cn(
-            'fixed lg:sticky top-[88px] left-0 h-[calc(100vh-88px)] w-64 bg-white/80 backdrop-blur-sm border-r border-slate-200/60 z-10 transition-transform duration-300',
+            'fixed lg:sticky top-[88px] left-0 h-[calc(100vh-88px)] h-[calc(100dvh-88px)] w-64 bg-white/80 backdrop-blur-sm border-r border-slate-200/60 z-10 transition-transform duration-300',
             sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
           )}
         >

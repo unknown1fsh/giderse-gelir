@@ -287,7 +287,7 @@ async function main() {
 
   // 7. Sistem Parametreleri (En Kritik Olanlar)
   console.log('⚙️ Sistem parametreleri ekleniyor...')
-  
+
   // BANK parametreleri
   for (const bank of banks) {
     await prisma.systemParameter.upsert({
@@ -360,4 +360,3 @@ main()
   .finally(() => {
     void prisma.$disconnect()
   })
-

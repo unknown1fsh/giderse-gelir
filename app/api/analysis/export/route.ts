@@ -206,7 +206,8 @@ export async function POST(request: NextRequest) {
     if (!premiumCheck.allowed) {
       return NextResponse.json(
         {
-          error: 'Veri dışa aktarma özelliği Premium üyelik gerektirir. Premium plana geçerek gelişmiş raporları export edebilirsiniz.',
+          error:
+            'Veri dışa aktarma özelliği Premium üyelik gerektirir. Premium plana geçerek gelişmiş raporları export edebilirsiniz.',
           requiresPremium: true,
           requiredPlan: premiumCheck.requiredPlan,
           currentPlan: premiumCheck.currentPlan,

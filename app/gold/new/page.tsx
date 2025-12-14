@@ -126,7 +126,7 @@ export default function NewGoldItemPage() {
           <CardDescription>Altın veya ziynet eşyasının detaylarını girin</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-6">
+          <form onSubmit={e => void handleSubmit(e)} className="space-y-6">
             <div>
               <label className="block text-sm font-medium mb-2">Eşya Adı *</label>
               <input

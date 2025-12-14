@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import BrandLogo from '@/components/brand-logo'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -74,11 +75,13 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center space-x-3 mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
-              <span className="text-3xl font-bold text-white">₺</span>
-            </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">GiderSE-Gelir</h1>
+              <BrandLogo
+                size={48}
+                priority
+                variant="dark"
+                textClassName="text-2xl font-bold text-white"
+              />
               <p className="text-sm text-slate-400">Finans Yönetimi</p>
             </div>
           </div>

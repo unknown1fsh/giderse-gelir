@@ -49,7 +49,15 @@ describe('Admin API Endpoints', () => {
       const duration = Date.now() - startTime
 
       const success = [200, 401, 500].includes(response.status)
-      logTestResult('admin kullanıcıları listeleme yapabilmeli', '/admin/users', 'GET', response.status, duration, success, success ? undefined : `Beklenen 200/401/500, alınan ${response.status}`)
+      logTestResult(
+        'admin kullanıcıları listeleme yapabilmeli',
+        '/admin/users',
+        'GET',
+        response.status,
+        duration,
+        success,
+        success ? undefined : `Beklenen 200/401/500, alınan ${response.status}`
+      )
       expect([200, 401, 500]).toContain(response.status)
     })
 
@@ -60,7 +68,14 @@ describe('Admin API Endpoints', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('normal kullanıcı erişememeli', '/admin/users', 'GET', response.status, duration, [403, 401].includes(response.status))
+      logTestResult(
+        'normal kullanıcı erişememeli',
+        '/admin/users',
+        'GET',
+        response.status,
+        duration,
+        [403, 401].includes(response.status)
+      )
       expect([403, 401]).toContain(response.status)
     })
 
@@ -69,7 +84,14 @@ describe('Admin API Endpoints', () => {
       const response = await testFetch(`${BASE_URL}/admin/users`)
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/admin/users', 'GET', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/admin/users',
+        'GET',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })
@@ -83,7 +105,15 @@ describe('Admin API Endpoints', () => {
       const duration = Date.now() - startTime
 
       const success = [200, 401, 500].includes(response.status)
-      logTestResult('admin dashboard verilerini getirmeli', '/admin/dashboard', 'GET', response.status, duration, success, success ? undefined : `Beklenen 200/401/500, alınan ${response.status}`)
+      logTestResult(
+        'admin dashboard verilerini getirmeli',
+        '/admin/dashboard',
+        'GET',
+        response.status,
+        duration,
+        success,
+        success ? undefined : `Beklenen 200/401/500, alınan ${response.status}`
+      )
       expect([200, 401, 500]).toContain(response.status)
     })
   })

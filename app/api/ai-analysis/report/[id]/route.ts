@@ -9,14 +9,15 @@ import { BadRequestError, NotFoundError } from '@/server/errors'
  * GET /api/ai-analysis/report/[id]
  */
 export const GET = ExceptionMapper.asyncHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     // Kullanıcı doğrulama
     const user = await getCurrentUser(request)
     if (!user) {
       throw new BadRequestError('Oturum bulunamadı')
     }
 
-    const reportId = parseInt(params.id)
+    const { id } = await params
+    const reportId = parseInt(id)
 
     if (isNaN(reportId)) {
       throw new BadRequestError('Geçersiz rapor ID')

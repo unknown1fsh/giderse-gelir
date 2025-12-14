@@ -17,7 +17,7 @@ async function main() {
 
   for (const category of categories) {
     const metadata = (category.metadata || {}) as Record<string, unknown>
-    
+
     // Eğer zaten txTypeCode varsa atla
     if (metadata.txTypeCode) {
       skipped++
@@ -57,7 +57,9 @@ async function main() {
     })
 
     updated++
-    console.log(`✅ Kategori ${category.id} (${category.paramCode}) güncellendi: txTypeCode = ${refTxType.code}`)
+    console.log(
+      `✅ Kategori ${category.id} (${category.paramCode}) güncellendi: txTypeCode = ${refTxType.code}`
+    )
   }
 
   console.log(`\n🎉 Güncelleme tamamlandı!`)
@@ -75,4 +77,3 @@ void (async () => {
     await prisma.$disconnect()
   }
 })()
-

@@ -7,10 +7,14 @@ const inputVariants = cva(
   {
     variants: {
       variant: {
-        default: 'border-slate-200 bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none hover:border-slate-300',
-        error: 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none',
-        success: 'border-green-300 bg-green-50/50 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none',
-        ghost: 'border-transparent bg-slate-50 focus:bg-white focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none',
+        default:
+          'border-slate-200 bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none hover:border-slate-300',
+        error:
+          'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none',
+        success:
+          'border-green-300 bg-green-50/50 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none',
+        ghost:
+          'border-transparent bg-slate-50 focus:bg-white focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none',
       },
     },
     defaultVariants: {
@@ -21,11 +25,18 @@ const inputVariants = cva(
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement>,
-  VariantProps<typeof inputVariants> { }
+    VariantProps<typeof inputVariants> {}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, variant, type, ...props }, ref) => {
-    return <input type={type} className={cn(inputVariants({ variant, className }))} ref={ref} {...props} />
+    return (
+      <input
+        type={type}
+        className={cn(inputVariants({ variant, className }))}
+        ref={ref}
+        {...props}
+      />
+    )
   }
 )
 Input.displayName = 'Input'

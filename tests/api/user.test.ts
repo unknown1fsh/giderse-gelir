@@ -44,7 +44,14 @@ describe('User API Endpoints', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('profil güncellemeli', '/user/update', 'PUT', response.status, duration, [200, 400].includes(response.status))
+      logTestResult(
+        'profil güncellemeli',
+        '/user/update',
+        'PUT',
+        response.status,
+        duration,
+        [200, 400].includes(response.status)
+      )
       expect([200, 400]).toContain(response.status)
     })
 
@@ -57,7 +64,14 @@ describe('User API Endpoints', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/user/update', 'PUT', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/user/update',
+        'PUT',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })
@@ -79,7 +93,15 @@ describe('User API Endpoints', () => {
       const duration = Date.now() - startTime
 
       const success = [200, 400, 401].includes(response.status)
-      logTestResult('şifre değiştirmeli', '/user/change-password', 'POST', response.status, duration, success, success ? undefined : `Beklenen 200/400/401, alınan ${response.status}`)
+      logTestResult(
+        'şifre değiştirmeli',
+        '/user/change-password',
+        'POST',
+        response.status,
+        duration,
+        success,
+        success ? undefined : `Beklenen 200/400/401, alınan ${response.status}`
+      )
       expect([200, 400, 401]).toContain(response.status)
     })
 
@@ -92,7 +114,14 @@ describe('User API Endpoints', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/user/change-password', 'POST', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/user/change-password',
+        'POST',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })

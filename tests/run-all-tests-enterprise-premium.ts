@@ -25,8 +25,12 @@ async function main() {
     logger.logToConsole('\n✅ Enterprise + Premium testler tamamlandı!\n')
   } catch (error: any) {
     logger.logToConsole(`\n❌ Test hatası: ${error.message}`)
-    if (error.stdout) logger.logToConsole(`\nÇıktı:\n${error.stdout}`)
-    if (error.stderr) logger.logToConsole(`\nHata:\n${error.stderr}`)
+    if (error.stdout) {
+      logger.logToConsole(`\nÇıktı:\n${error.stdout}`)
+    }
+    if (error.stderr) {
+      logger.logToConsole(`\nHata:\n${error.stderr}`)
+    }
     process.exit(1)
   } finally {
     logger.writeSummary()

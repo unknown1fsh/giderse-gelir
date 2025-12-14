@@ -55,7 +55,7 @@ export default function NewCryptoInvestmentPage() {
         const refResponse = await fetch('/api/reference-data')
         if (refResponse.ok) {
           const refData = await refResponse.json()
-          
+
           // TRY'yi varsayılan yap
           const tryCurrency = refData.currencies.find((c: Currency) => c.code === 'TRY')
           if (tryCurrency) {
@@ -140,13 +140,15 @@ export default function NewCryptoInvestmentPage() {
     }
   }
 
-  const totalValue = selectedCrypto && formData.quantity
-    ? parseFloat(formData.quantity) * selectedCrypto.currentPrice
-    : 0
+  const totalValue =
+    selectedCrypto && formData.quantity
+      ? parseFloat(formData.quantity) * selectedCrypto.currentPrice
+      : 0
 
-  const purchaseTotal = selectedCrypto && formData.quantity && formData.purchasePrice
-    ? parseFloat(formData.quantity) * parseCurrencyInput(formData.purchasePrice)
-    : 0
+  const purchaseTotal =
+    selectedCrypto && formData.quantity && formData.purchasePrice
+      ? parseFloat(formData.quantity) * parseCurrencyInput(formData.purchasePrice)
+      : 0
 
   if (loading) {
     return <div className="p-6">Yükleniyor...</div>
@@ -217,7 +219,10 @@ export default function NewCryptoInvestmentPage() {
                       </div>
                       <div className="text-right">
                         <div className="font-semibold">
-                          ₺{crypto.currentPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                          ₺
+                          {crypto.currentPrice.toLocaleString('tr-TR', {
+                            minimumFractionDigits: 2,
+                          })}
                         </div>
                         <div
                           className={`text-sm flex items-center justify-end gap-1 ${
@@ -273,7 +278,9 @@ export default function NewCryptoInvestmentPage() {
                     <input
                       type="text"
                       value={formData.purchasePrice}
-                      onChange={e => setFormData(prev => ({ ...prev, purchasePrice: e.target.value }))}
+                      onChange={e =>
+                        setFormData(prev => ({ ...prev, purchasePrice: e.target.value }))
+                      }
                       placeholder="0,00"
                       className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500"
                       required
@@ -288,7 +295,9 @@ export default function NewCryptoInvestmentPage() {
                     <input
                       type="date"
                       value={formData.purchaseDate}
-                      onChange={e => setFormData(prev => ({ ...prev, purchaseDate: e.target.value }))}
+                      onChange={e =>
+                        setFormData(prev => ({ ...prev, purchaseDate: e.target.value }))
+                      }
                       className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500"
                       required
                     />
@@ -310,7 +319,9 @@ export default function NewCryptoInvestmentPage() {
                     <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>Alış Toplamı:</span>
-                        <span className="font-semibold">₺{purchaseTotal.toLocaleString('tr-TR')}</span>
+                        <span className="font-semibold">
+                          ₺{purchaseTotal.toLocaleString('tr-TR')}
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>Güncel Değer:</span>
@@ -318,9 +329,14 @@ export default function NewCryptoInvestmentPage() {
                       </div>
                       <div className="flex justify-between text-sm font-bold pt-2 border-t border-orange-300">
                         <span>Kar/Zarar:</span>
-                        <span className={totalValue >= purchaseTotal ? 'text-green-600' : 'text-red-600'}>
-                          {totalValue >= purchaseTotal ? '+' : ''}₺{(totalValue - purchaseTotal).toLocaleString('tr-TR')}
-                          ({((totalValue / purchaseTotal - 1) * 100).toFixed(2)}%)
+                        <span
+                          className={
+                            totalValue >= purchaseTotal ? 'text-green-600' : 'text-red-600'
+                          }
+                        >
+                          {totalValue >= purchaseTotal ? '+' : ''}₺
+                          {(totalValue - purchaseTotal).toLocaleString('tr-TR')}(
+                          {((totalValue / purchaseTotal - 1) * 100).toFixed(2)}%)
                         </span>
                       </div>
                     </div>
@@ -368,4 +384,3 @@ export default function NewCryptoInvestmentPage() {
     </div>
   )
 }
-

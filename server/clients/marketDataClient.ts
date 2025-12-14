@@ -41,20 +41,26 @@ export class MarketDataClient extends BaseHttpClient {
   async searchStocks(query: string, region?: string) {
     const params = new URLSearchParams()
     params.set('q', query)
-    if (region) { params.set('region', region) }
+    if (region) {
+      params.set('region', region)
+    }
     params.set('lang', 'en-US')
     const data = await this.get<YahooSearchResponse>(`/v1/finance/search?${params.toString()}`)
-    return (data.quotes || []).filter(q => q.quoteType === 'EQUITY').map(q => ({
-      symbol: q.symbol,
-      name: q.longname || q.shortname || q.symbol,
-      exchange: q.exchDisp || '',
-      type: q.quoteType || 'EQUITY',
-    }))
+    return (data.quotes || [])
+      .filter(q => q.quoteType === 'EQUITY')
+      .map(q => ({
+        symbol: q.symbol,
+        name: q.longname || q.shortname || q.symbol,
+        exchange: q.exchDisp || '',
+        type: q.quoteType || 'EQUITY',
+      }))
   }
 
   async getStockQuote(symbolOrSymbols: string | string[]) {
     const symbols = Array.isArray(symbolOrSymbols) ? symbolOrSymbols.join(',') : symbolOrSymbols
-    const data = await this.get<YahooQuoteResponse>(`/v7/finance/quote?symbols=${encodeURIComponent(symbols)}`)
+    const data = await this.get<YahooQuoteResponse>(
+      `/v7/finance/quote?symbols=${encodeURIComponent(symbols)}`
+    )
     return (data.quoteResponse?.result || []).map(q => ({
       symbol: q.symbol,
       name: q.longName || q.shortName || q.symbol,
@@ -67,7 +73,9 @@ export class MarketDataClient extends BaseHttpClient {
   async searchFunds(query: string, region?: string) {
     const params = new URLSearchParams()
     params.set('q', query)
-    if (region) { params.set('region', region) }
+    if (region) {
+      params.set('region', region)
+    }
     params.set('lang', 'en-US')
     const data = await this.get<YahooSearchResponse>(`/v1/finance/search?${params.toString()}`)
     return (data.quotes || [])
@@ -96,5 +104,3 @@ export class MarketDataClient extends BaseHttpClient {
 }
 
 export const marketDataClient = new MarketDataClient()
-
-

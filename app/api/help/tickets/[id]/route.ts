@@ -9,23 +9,25 @@ import { UnauthorizedError, NotFoundError } from '@/server/errors'
  * GET /api/help/tickets/[id]
  */
 export const GET = ExceptionMapper.asyncHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const user = await getCurrentUser(request)
 
     if (!user) {
       throw new UnauthorizedError('Oturum bulunamadı')
     }
 
+    const { id } = await params
+
     // ID veya ticket number ile arama yap
-    const ticketId = parseInt(params.id)
-    const isTicketNumber = params.id.startsWith('SUP-')
+    const ticketId = parseInt(id)
+    const isTicketNumber = id.startsWith('SUP-')
 
     const where: { userId: number; ticketNumber?: string; id?: number } = {
       userId: user.id, // Kullanıcı sadece kendi taleplerini görebilir
     }
 
     if (isTicketNumber) {
-      where.ticketNumber = params.id
+      where.ticketNumber = id
     } else if (!isNaN(ticketId)) {
       where.id = ticketId
     } else {
@@ -79,4 +81,3 @@ export const GET = ExceptionMapper.asyncHandler(
     })
   }
 )
-

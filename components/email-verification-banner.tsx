@@ -17,7 +17,9 @@ export default function EmailVerificationBanner() {
   }
 
   const handleResend = async () => {
-    if (!user?.email) return
+    if (!user?.email) {
+      return
+    }
 
     setResending(true)
     setResendSuccess(false)
@@ -53,8 +55,8 @@ export default function EmailVerificationBanner() {
         <div className="flex-1">
           <strong className="text-yellow-800">E-posta adresiniz doğrulanmadı.</strong>
           <p className="text-sm text-yellow-700 mt-1">
-            Lütfen e-posta kutunuzu kontrol edin ve doğrulama linkine tıklayın. E-postayı görmediyseniz
-            yeniden gönderebilirsiniz.
+            Lütfen e-posta kutunuzu kontrol edin ve doğrulama linkine tıklayın. E-postayı
+            görmediyseniz yeniden gönderebilirsiniz.
           </p>
         </div>
         <div className="ml-4 flex items-center gap-2">
@@ -88,4 +90,3 @@ export default function EmailVerificationBanner() {
     </Alert>
   )
 }
-

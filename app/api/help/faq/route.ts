@@ -28,10 +28,7 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
 
   const faqs = await prisma.fAQ.findMany({
     where,
-    orderBy: [
-      { displayOrder: 'asc' },
-      { createdAt: 'desc' },
-    ],
+    orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
   })
 
   return NextResponse.json({
@@ -39,4 +36,3 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
     data: faqs,
   })
 })
-

@@ -5,14 +5,15 @@ import { ExceptionMapper } from '@/server/errors'
 import { BadRequestError } from '@/server/errors'
 
 export const PUT = ExceptionMapper.asyncHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const adminCheck = await requireAdmin(request)
     if (adminCheck.error) {
       return adminCheck.error
     }
 
     const adminUser = adminCheck.user as { id: number } | null
-    const paymentRequestId = parseInt(params.id)
+    const { id } = await params
+    const paymentRequestId = parseInt(id)
 
     if (isNaN(paymentRequestId)) {
       throw new BadRequestError('Geçersiz ödeme talebi ID')

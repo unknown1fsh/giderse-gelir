@@ -46,10 +46,7 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
       where,
       skip,
       take: limit,
-      orderBy: [
-        { displayOrder: 'asc' },
-        { createdAt: 'desc' },
-      ],
+      orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
     }),
     prisma.fAQ.count({ where }),
   ])
@@ -99,4 +96,3 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     message: 'SSS başarıyla oluşturuldu',
   })
 })
-

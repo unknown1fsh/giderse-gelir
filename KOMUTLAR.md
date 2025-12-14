@@ -23,6 +23,7 @@ npm run lint:check
 Bu komut ESLint kurallarına göre hataları tespit eder (düzeltme yapmaz).
 
 **Not:** Eğer otomatik düzeltme isterseniz:
+
 ```bash
 npm run lint
 ```
@@ -40,6 +41,7 @@ npm run format:check
 Bu komut Prettier kurallarına göre formatlamayı kontrol eder.
 
 **Not:** Eğer otomatik formatlamak isterseniz:
+
 ```bash
 npm run format
 ```
@@ -67,6 +69,7 @@ npm run build
 ```
 
 **Önemli:** `next.config.js` dosyasında şu an TypeScript ve ESLint hataları build sırasında ignore ediliyor:
+
 - `typescript: { ignoreBuildErrors: true }`
 - `eslint: { ignoreDuringBuilds: true }`
 
@@ -89,11 +92,13 @@ Bu komut önce Prisma client'ı generate eder, sonra build yapar.
 ## ÖNEMLİ NOTLAR:
 
 1. **İlk Çalıştırma:** Eğer `node_modules` yoksa:
+
    ```bash
    npm install
    ```
 
 2. **Prisma Client:** Eğer Prisma schema değiştiyse:
+
    ```bash
    npx prisma generate
    ```
@@ -114,5 +119,3 @@ Bu komut önce Prisma client'ı generate eder, sonra build yapar.
 4. Son olarak build yap: `npm run build`
 
 Veya hepsini birden: `npm run validate && npm run build`
-
-

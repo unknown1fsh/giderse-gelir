@@ -44,10 +44,10 @@ export async function GET(request: NextRequest) {
     // Merkezi konfigürasyondan plan bilgilerini al
     const currentPlan = subscription?.planId || PLAN_IDS.FREE
     const planConfig = getPlanById(currentPlan)
-    
+
     // Plan özelliklerini düzleştir
     const features = planConfig?.categories.flatMap(cat => cat.features) || []
-    
+
     // Transaction limitini merkezi konfigürasyondan al
     const transactionLimit = getPlanLimits(currentPlan).transactions
 

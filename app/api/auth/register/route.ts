@@ -73,7 +73,7 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
   })
 
   // Verification email gönder (async, hata olsa bile kayıt devam eder)
-  sendVerificationEmail(user.email, user.name, verificationToken).catch((error) => {
+  sendVerificationEmail(user.email, user.name, verificationToken).catch(error => {
     console.error('Email gönderme hatası (kayıt sonrası):', error)
     // Email gönderilemese bile kayıt başarılı, kullanıcıya bilgi verilecek
   })
@@ -102,14 +102,16 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
         },
       })
 
-      const category = membershipCategory || await prisma.supportTicketCategory.findFirst({
-        where: {
-          isActive: true,
-        },
-        orderBy: {
-          name: 'asc',
-        },
-      })
+      const category =
+        membershipCategory ||
+        (await prisma.supportTicketCategory.findFirst({
+          where: {
+            isActive: true,
+          },
+          orderBy: {
+            name: 'asc',
+          },
+        }))
 
       if (category) {
         // Benzersiz ticket number oluştur
@@ -178,7 +180,7 @@ Not: Kullanıcı şu anda Free üye olarak kaydedilmiştir. Premium üyeliği ad
             email,
             subject,
             category.name
-          ).catch((error) => {
+          ).catch(error => {
             console.error('Admin bildirim email hatası:', error)
           })
         }

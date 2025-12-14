@@ -60,7 +60,9 @@ export default function CardsPage() {
   }, [])
 
   const handleEditName = async (newName: string) => {
-    if (!selectedCard) {return}
+    if (!selectedCard) {
+      return
+    }
 
     try {
       const response = await fetch(`/api/cards/${selectedCard.id}`, {
@@ -73,9 +75,7 @@ export default function CardsPage() {
       if (response.ok) {
         // Listeyi güncelle
         setCreditCards(prev =>
-          prev.map(card =>
-            card.id === selectedCard.id ? { ...card, name: newName } : card
-          )
+          prev.map(card => (card.id === selectedCard.id ? { ...card, name: newName } : card))
         )
         alert('Kart adı başarıyla güncellendi')
       } else {
@@ -88,7 +88,9 @@ export default function CardsPage() {
   }
 
   const handleDelete = async () => {
-    if (!selectedCard) {return}
+    if (!selectedCard) {
+      return
+    }
 
     try {
       const response = await fetch(`/api/cards/${selectedCard.id}`, {

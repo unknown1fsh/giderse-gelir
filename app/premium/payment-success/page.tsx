@@ -28,7 +28,7 @@ function PaymentSuccessContent() {
       void refreshUser().then(() => {
         setLoading(false)
         setSuccess(true)
-        
+
         // Plan bilgilerini ayarla
         const planId = merchantOid.split('_')[2] // pay_{userId}_{planId}_{timestamp}
         if (planId === 'premium') {
@@ -103,8 +103,8 @@ function PaymentSuccessContent() {
                   <div>
                     <h3 className="font-semibold text-green-800 mb-1">Hoş Geldiniz!</h3>
                     <p className="text-green-700 text-sm">
-                      Ödemeniz başarıyla tamamlandı. {planInfo?.name || 'Premium'} aboneliğiniz aktif
-                      edildi!
+                      Ödemeniz başarıyla tamamlandı. {planInfo?.name || 'Premium'} aboneliğiniz
+                      aktif edildi!
                     </p>
                   </div>
                 </div>

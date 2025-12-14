@@ -83,8 +83,12 @@ function formatDate(dateString: string) {
 }
 
 function formatFileSize(bytes: number) {
-  if (bytes < 1024) return bytes + ' B'
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB'
+  if (bytes < 1024) {
+    return bytes + ' B'
+  }
+  if (bytes < 1024 * 1024) {
+    return (bytes / 1024).toFixed(2) + ' KB'
+  }
   return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
 }
 
@@ -209,15 +213,19 @@ export default function AdminTicketDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <Link href="/admin/support-tickets">
-          <Button variant="outline" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{ticket.subject}</h1>
-          <p className="text-gray-600 mt-1">Talep No: {ticket.ticketNumber}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="shrink-0">
+          <Link href="/admin/support-tickets">
+            <Button variant="outline" size="icon" aria-label="Geri">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-900 break-words">
+            {ticket.subject}
+          </h1>
+          <p className="text-gray-600 mt-1 break-words">Talep No: {ticket.ticketNumber}</p>
         </div>
       </div>
 
@@ -227,9 +235,7 @@ export default function AdminTicketDetailPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Talep Detayları</CardTitle>
-                <Badge className={statusColors[ticket.status]}>
-                  {statusLabels[ticket.status]}
-                </Badge>
+                <Badge className={statusColors[ticket.status]}>{statusLabels[ticket.status]}</Badge>
               </div>
               <CardDescription>
                 {ticket.category.name} • {formatDate(ticket.createdAt)}
@@ -250,17 +256,19 @@ export default function AdminTicketDetailPage() {
                   {ticket.attachments.map(attachment => (
                     <div
                       key={attachment.id}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 bg-gray-50 rounded-lg"
                     >
-                      <div>
-                        <p className="text-sm font-medium">{attachment.fileName}</p>
-                        <p className="text-xs text-gray-500">{formatFileSize(attachment.fileSize)}</p>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium break-words">{attachment.fileName}</p>
+                        <p className="text-xs text-gray-500">
+                          {formatFileSize(attachment.fileSize)}
+                        </p>
                       </div>
                       <a
                         href={attachment.filePath}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
+                        className="self-start sm:self-auto text-blue-600 hover:underline"
                       >
                         <Download className="h-4 w-4" />
                       </a>
@@ -274,9 +282,7 @@ export default function AdminTicketDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle>Yanıt Yaz</CardTitle>
-              <CardDescription>
-                Kullanıcıya yanıt yazın veya iç not ekleyin
-              </CardDescription>
+              <CardDescription>Kullanıcıya yanıt yazın veya iç not ekleyin</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -380,9 +386,7 @@ export default function AdminTicketDetailPage() {
                 <p className="text-sm text-gray-500">Kullanıcı</p>
                 <p className="text-sm font-medium">{ticket.user.name}</p>
                 <p className="text-xs text-gray-500">{ticket.user.email}</p>
-                {ticket.user.phone && (
-                  <p className="text-xs text-gray-500">{ticket.user.phone}</p>
-                )}
+                {ticket.user.phone && <p className="text-xs text-gray-500">{ticket.user.phone}</p>}
               </div>
 
               <div>
@@ -414,4 +418,3 @@ export default function AdminTicketDetailPage() {
     </div>
   )
 }
-

@@ -1,9 +1,7 @@
 import { Resend } from 'resend'
 
 // Resend client instance
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@giderse.com'
@@ -119,7 +117,7 @@ export async function sendWelcomeEmail(
     const { error } = await resend.emails.send({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: email,
-      subject: 'GiderSe Gelir\'e Hoş Geldiniz! 🎉',
+      subject: "GiderSe Gelir'e Hoş Geldiniz! 🎉",
       html: `
         <!DOCTYPE html>
         <html>
@@ -680,4 +678,3 @@ Talebi incelemek için: ${ticketUrl}
     }
   }
 }
-

@@ -59,6 +59,11 @@ export default function DataTable<T extends { id: number | string }>({
     onSearch?.(value)
   }
 
+  const renderCell = (column: Column<T>, item: T) =>
+    column.render
+      ? column.render(item)
+      : String((item as Record<string, unknown>)[column.key] ?? '')
+
   return (
     <div className={cn('space-y-4', className)}>
       {(searchable || exportable) && (
@@ -84,7 +89,48 @@ export default function DataTable<T extends { id: number | string }>({
         </div>
       )}
 
-      <div className="border rounded-lg overflow-hidden bg-white">
+      {/* Mobil kart görünümü */}
+      <div className="sm:hidden">
+        {loading ? (
+          <div className="border rounded-lg bg-white p-4">
+            <div className="flex items-center gap-2 text-slate-600">
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500" />
+              <span>Yükleniyor...</span>
+            </div>
+          </div>
+        ) : data.length === 0 ? (
+          <div className="border rounded-lg bg-white p-4 text-center text-slate-500">
+            {emptyMessage}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {data.map(item => {
+              const primary = columns[0]
+              const rest = columns.slice(1)
+              return (
+                <div key={item.id} className="border rounded-lg bg-white p-4 space-y-3">
+                  {primary && <div className="min-w-0">{renderCell(primary, item)}</div>}
+                  {rest.length > 0 && (
+                    <div className="space-y-3">
+                      {rest.map(column => (
+                        <div key={column.key} className="min-w-0">
+                          <div className="text-xs text-slate-500">{column.header}</div>
+                          <div className="text-sm text-slate-900 break-words">
+                            {renderCell(column, item)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Masaüstü tablo görünümü */}
+      <div className="hidden sm:block border rounded-lg overflow-hidden bg-white">
         <Table>
           <TableHeader>
             <TableRow>
@@ -113,11 +159,7 @@ export default function DataTable<T extends { id: number | string }>({
               data.map(item => (
                 <TableRow key={item.id} className="hover:bg-slate-50">
                   {columns.map(column => (
-                    <TableCell key={column.key}>
-                      {column.render
-                        ? column.render(item)
-                        : String((item as Record<string, unknown>)[column.key] ?? '')}
-                    </TableCell>
+                    <TableCell key={column.key}>{renderCell(column, item)}</TableCell>
                   ))}
                 </TableRow>
               ))

@@ -22,23 +22,25 @@ const ALLOWED_MIME_TYPES = [
  * POST /api/help/tickets/[id]/attachments
  */
 export const POST = ExceptionMapper.asyncHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const user = await getCurrentUser(request)
 
     if (!user) {
       throw new UnauthorizedError('Oturum bulunamadı')
     }
 
+    const { id } = await params
+
     // ID veya ticket number ile arama yap
-    const ticketId = parseInt(params.id)
-    const isTicketNumber = params.id.startsWith('SUP-')
+    const ticketId = parseInt(id)
+    const isTicketNumber = id.startsWith('SUP-')
 
     const where: any = {
       userId: user.id, // Kullanıcı sadece kendi taleplerini görebilir
     }
 
     if (isTicketNumber) {
-      where.ticketNumber = params.id
+      where.ticketNumber = id
     } else if (!isNaN(ticketId)) {
       where.id = ticketId
     } else {
@@ -68,7 +70,9 @@ export const POST = ExceptionMapper.asyncHandler(
 
     // Dosya tipi kontrolü
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      throw new BadRequestError('Geçersiz dosya tipi. İzin verilen formatlar: JPG, PNG, PDF, DOC, DOCX')
+      throw new BadRequestError(
+        'Geçersiz dosya tipi. İzin verilen formatlar: JPG, PNG, PDF, DOC, DOCX'
+      )
     }
 
     // Uploads klasörünü oluştur
@@ -106,4 +110,3 @@ export const POST = ExceptionMapper.asyncHandler(
     })
   }
 )
-

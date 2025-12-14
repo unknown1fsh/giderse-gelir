@@ -45,7 +45,15 @@ describe('AI Analysis API Endpoints', () => {
       const duration = Date.now() - startTime
 
       const success = [200, 201, 400, 403, 500].includes(response.status)
-      logTestResult('AI rapor oluşturma isteği göndermeli', '/ai-analysis/report/generate', 'POST', response.status, duration, success, success ? undefined : `Beklenen 200/201/400/403/500, alınan ${response.status}`)
+      logTestResult(
+        'AI rapor oluşturma isteği göndermeli',
+        '/ai-analysis/report/generate',
+        'POST',
+        response.status,
+        duration,
+        success,
+        success ? undefined : `Beklenen 200/201/400/403/500, alınan ${response.status}`
+      )
       expect([200, 201, 400, 403, 500]).toContain(response.status)
     })
 
@@ -59,7 +67,15 @@ describe('AI Analysis API Endpoints', () => {
       const duration = Date.now() - startTime
 
       const success = [401, 400].includes(response.status)
-      logTestResult('token olmadan 401 dönmeli', '/ai-analysis/report/generate', 'POST', response.status, duration, success, success ? undefined : `Beklenen 401/400, alınan ${response.status}`)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/ai-analysis/report/generate',
+        'POST',
+        response.status,
+        duration,
+        success,
+        success ? undefined : `Beklenen 401/400, alınan ${response.status}`
+      )
       expect([401, 400]).toContain(response.status)
     })
   })
@@ -73,7 +89,15 @@ describe('AI Analysis API Endpoints', () => {
       const duration = Date.now() - startTime
 
       const success = [200, 400, 500].includes(response.status)
-      logTestResult('rapor durumunu getirmeli', '/ai-analysis/report/status', 'GET', response.status, duration, success, success ? undefined : `Beklenen 200/400/500, alınan ${response.status}`)
+      logTestResult(
+        'rapor durumunu getirmeli',
+        '/ai-analysis/report/status',
+        'GET',
+        response.status,
+        duration,
+        success,
+        success ? undefined : `Beklenen 200/400/500, alınan ${response.status}`
+      )
       expect([200, 400, 500]).toContain(response.status)
     })
   })

@@ -198,7 +198,9 @@ export default function PremiumFeaturesPage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </div>
                 </div>
-                <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity`}></div>
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity`}
+                ></div>
               </Link>
             ))}
           </div>
@@ -231,7 +233,9 @@ export default function PremiumFeaturesPage() {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </div>
                   </div>
-                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity`}></div>
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity`}
+                  ></div>
                 </Link>
               ))}
             </div>
@@ -263,4 +267,3 @@ export default function PremiumFeaturesPage() {
     </div>
   )
 }
-

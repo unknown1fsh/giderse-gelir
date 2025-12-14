@@ -202,13 +202,13 @@ export default function AdminUsers() {
       key: 'user',
       header: 'Kullanıcı',
       render: (user: User) => (
-        <div className="flex items-center">
+        <div className="flex items-center min-w-0">
           <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
             {user.name.charAt(0).toUpperCase()}
           </div>
-          <div className="ml-4">
-            <div className="text-sm font-medium text-slate-900">{user.name}</div>
-            <div className="text-sm text-slate-500">{user.email}</div>
+          <div className="ml-4 min-w-0">
+            <div className="text-sm font-medium text-slate-900 truncate">{user.name}</div>
+            <div className="text-sm text-slate-500 truncate">{user.email}</div>
           </div>
         </div>
       ),
@@ -223,7 +223,7 @@ export default function AdminUsers() {
             void handleUpdateUser(user.id, { planId: value })
           }}
         >
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-full sm:w-40">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -245,7 +245,7 @@ export default function AdminUsers() {
             void handleUpdateUser(user.id, { role: value })
           }}
         >
-          <SelectTrigger className="w-32">
+          <SelectTrigger className="w-full sm:w-32">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

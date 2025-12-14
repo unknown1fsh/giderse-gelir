@@ -3,9 +3,11 @@ import { getCurrentUser } from './auth-refactored'
 import { UserRole } from '@/server/enums/UserRole'
 
 // Admin rolü kontrolü yapar
-export async function requireAdmin(request: NextRequest): Promise<{ user: any; error: null } | { user: null; error: NextResponse }> {
+export async function requireAdmin(
+  request: NextRequest
+): Promise<{ user: any; error: null } | { user: null; error: NextResponse }> {
   const user = await getCurrentUser(request)
-  
+
   if (!user) {
     return {
       user: null,
@@ -22,4 +24,3 @@ export async function requireAdmin(request: NextRequest): Promise<{ user: any; e
 
   return { user, error: null }
 }
-

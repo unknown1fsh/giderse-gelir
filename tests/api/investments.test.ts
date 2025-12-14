@@ -38,7 +38,15 @@ describe('Investments API Endpoints', () => {
       const duration = Date.now() - startTime
 
       const success = [200, 403, 500].includes(response.status)
-      logTestResult('yatırımları getirmeli', '/investments', 'GET', response.status, duration, success, success ? undefined : `Beklenen 200/403/500, alınan ${response.status}`)
+      logTestResult(
+        'yatırımları getirmeli',
+        '/investments',
+        'GET',
+        response.status,
+        duration,
+        success,
+        success ? undefined : `Beklenen 200/403/500, alınan ${response.status}`
+      )
       expect([200, 403, 500]).toContain(response.status)
     })
 
@@ -47,7 +55,14 @@ describe('Investments API Endpoints', () => {
       const response = await testFetch(`${BASE_URL}/investments`)
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/investments', 'GET', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/investments',
+        'GET',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })
@@ -60,7 +75,14 @@ describe('Investments API Endpoints', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('yatırım türlerini getirmeli', '/investments/types', 'GET', response.status, duration, [200, 500].includes(response.status))
+      logTestResult(
+        'yatırım türlerini getirmeli',
+        '/investments/types',
+        'GET',
+        response.status,
+        duration,
+        [200, 500].includes(response.status)
+      )
       expect([200, 500]).toContain(response.status)
     })
   })

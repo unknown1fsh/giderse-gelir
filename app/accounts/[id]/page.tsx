@@ -2,12 +2,21 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Home, TrendingUp, TrendingDown, Calendar, DollarSign, Edit, Trash2 } from 'lucide-react'
+import {
+  ArrowLeft,
+  Home,
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+  DollarSign,
+  Edit,
+  Trash2,
+} from 'lucide-react'
 import { formatCurrency } from '@/lib/validators'
 import { EditNameModal } from '@/components/ui/edit-name-modal'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import PageHeader from '@/components/page-header'
 
 interface Transaction {
   id: number
@@ -96,7 +105,7 @@ export default function AccountDetailPage() {
 
       if (response.ok) {
         await response.json()
-        setAccount(prev => prev ? { ...prev, name: newName } : null)
+        setAccount(prev => (prev ? { ...prev, name: newName } : null))
         alert('Hesap adı başarıyla güncellendi')
       } else {
         alert('Hesap adı güncellenemedi')
@@ -162,44 +171,43 @@ export default function AccountDetailPage() {
 
   const netChange = totalIncome - totalExpense
   const currentBalance = parseFloat(account.balance)
-  
+
   // Açılış bakiyesi = Mevcut bakiye - (İşlemlerden gelen net değişim)
   const openingBalance = currentBalance - netChange
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => router.back()}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <Link href="/dashboard" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <Home className="h-5 w-5" />
-        </Link>
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold">{account.name}</h1>
-          <p className="text-muted-foreground">
+    <div className="p-4 sm:p-6 space-y-6 max-w-6xl mx-auto">
+      <PageHeader
+        title={<h1 className="text-2xl sm:text-3xl font-bold break-words">{account.name}</h1>}
+        subtitle={
+          <span className="break-words">
             {account.bank.name} - {account.accountType.name}
-          </p>
-        </div>
-        <button
-          onClick={() => setShowEditModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          <Edit className="h-4 w-4" />
-          Düzenle
-        </button>
-        <button
-          onClick={() => setShowDeleteConfirm(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-        >
-          <Trash2 className="h-4 w-4" />
-          Sil
-        </button>
-      </div>
+          </span>
+        }
+        onBack={() => router.back()}
+        backIcon={<ArrowLeft className="h-5 w-5" />}
+        leadingActions={[
+          { href: '/dashboard', ariaLabel: 'Dashboard', icon: <Home className="h-5 w-5" /> },
+        ]}
+        trailing={
+          <>
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              <Edit className="h-4 w-4" />
+              Düzenle
+            </button>
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            >
+              <Trash2 className="h-4 w-4" />
+              Sil
+            </button>
+          </>
+        }
+      />
 
       {/* Hesap Bilgileri */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -295,7 +303,9 @@ export default function AccountDetailPage() {
           {account.iban && (
             <div>
               <div className="text-sm text-muted-foreground">IBAN</div>
-              <div className="font-medium font-mono text-sm">{account.iban}</div>
+              <div className="font-medium font-mono text-xs sm:text-sm break-all">
+                {account.iban}
+              </div>
             </div>
           )}
           <div>
@@ -326,19 +336,19 @@ export default function AccountDetailPage() {
             <div className="space-y-2">
               {/* Açılış Bakiyesi Göster */}
               {openingBalance !== 0 && (
-                <div className="flex items-center justify-between p-4 rounded-lg border bg-slate-50">
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 rounded-lg border bg-slate-50">
+                  <div className="min-w-0 flex items-center gap-4">
                     <div className="p-2 rounded-full bg-slate-100 text-slate-600">
                       <DollarSign className="h-5 w-5" />
                     </div>
-                    <div>
-                      <div className="font-medium">Açılış Bakiyesi</div>
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">Açılış Bakiyesi</div>
                       <div className="text-sm text-muted-foreground">
                         {new Date(account.createdAt).toLocaleDateString('tr-TR')} · Başlangıç
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-left sm:text-right">
                     <div className="text-lg font-semibold text-slate-700">
                       {formatCurrency(openingBalance, account.currency.code)}
                     </div>
@@ -347,69 +357,72 @@ export default function AccountDetailPage() {
                 </div>
               )}
 
-              {account.transactions
-                .sort(
-                  (a, b) =>
-                    new Date(a.transactionDate).getTime() - new Date(b.transactionDate).getTime()
-                )
-                .reduce((acc, tx, index) => {
-                  const isIncome = tx.txType.code === 'GELIR'
-                  const amount = parseFloat(tx.amount)
-                  
-                  // Kümülatif bakiye hesapla
-                  const previousBalance = index === 0 
-                    ? openingBalance 
-                    : acc.balances[index - 1]
-                  const runningBalance = isIncome 
-                    ? previousBalance + amount 
-                    : previousBalance - amount
-                  
-                  acc.balances.push(runningBalance)
-                  
-                  acc.elements.push(
-                    <div
-                      key={tx.id}
-                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={`p-2 rounded-full ${isIncome ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}
-                        >
-                          {isIncome ? (
-                            <TrendingUp className="h-5 w-5" />
-                          ) : (
-                            <TrendingDown className="h-5 w-5" />
-                          )}
-                        </div>
-                        <div>
-                          <div className="font-medium">{tx.category.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {new Date(tx.transactionDate).toLocaleDateString('tr-TR')} ·{' '}
-                            {tx.paymentMethod.name}
-                          </div>
-                          {tx.description && (
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {tx.description}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div
-                          className={`text-lg font-semibold ${isIncome ? 'text-green-600' : 'text-red-600'}`}
-                        >
-                          {isIncome ? '+' : '-'}
-                          {formatCurrency(amount, tx.currency.code)}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Bakiye: {formatCurrency(runningBalance, account.currency.code)}
-                        </div>
-                      </div>
-                    </div>
+              {
+                account.transactions
+                  .sort(
+                    (a, b) =>
+                      new Date(a.transactionDate).getTime() - new Date(b.transactionDate).getTime()
                   )
-                  
-                  return acc
-                }, { elements: [] as JSX.Element[], balances: [] as number[] }).elements}
+                  .reduce(
+                    (acc, tx, index) => {
+                      const isIncome = tx.txType.code === 'GELIR'
+                      const amount = parseFloat(tx.amount)
+
+                      // Kümülatif bakiye hesapla
+                      const previousBalance = index === 0 ? openingBalance : acc.balances[index - 1]
+                      const runningBalance = isIncome
+                        ? previousBalance + amount
+                        : previousBalance - amount
+
+                      acc.balances.push(runningBalance)
+
+                      acc.elements.push(
+                        <div
+                          key={tx.id}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 rounded-lg border hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="min-w-0 flex items-center gap-4">
+                            <div
+                              className={`p-2 rounded-full ${isIncome ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}
+                            >
+                              {isIncome ? (
+                                <TrendingUp className="h-5 w-5" />
+                              ) : (
+                                <TrendingDown className="h-5 w-5" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-medium truncate">{tx.category.name}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {new Date(tx.transactionDate).toLocaleDateString('tr-TR')} ·{' '}
+                                {tx.paymentMethod.name}
+                              </div>
+                              {tx.description && (
+                                <div className="text-xs text-muted-foreground mt-1 break-words">
+                                  {tx.description}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-left sm:text-right">
+                            <div
+                              className={`text-lg font-semibold ${isIncome ? 'text-green-600' : 'text-red-600'}`}
+                            >
+                              {isIncome ? '+' : '-'}
+                              {formatCurrency(amount, tx.currency.code)}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Bakiye: {formatCurrency(runningBalance, account.currency.code)}
+                            </div>
+                          </div>
+                        </div>
+                      )
+
+                      return acc
+                    },
+                    { elements: [] as JSX.Element[], balances: [] as number[] }
+                  ).elements
+              }
             </div>
           )}
         </CardContent>

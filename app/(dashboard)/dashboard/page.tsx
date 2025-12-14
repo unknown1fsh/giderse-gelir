@@ -137,7 +137,9 @@ export default function DashboardPage() {
           <div className="inline-flex p-4 rounded-full bg-red-100 mb-4">
             <AlertCircle className="h-16 w-16 text-red-500" />
           </div>
-          <p className="text-red-600 font-semibold text-lg">{error || 'Dashboard verileri yüklenemedi'}</p>
+          <p className="text-red-600 font-semibold text-lg">
+            {error || 'Dashboard verileri yüklenemedi'}
+          </p>
           <p className="text-slate-500 mt-2">Lütfen sayfayı yenilemeyi deneyin</p>
         </div>
       </div>
@@ -171,12 +173,13 @@ export default function DashboardPage() {
               {/* Premium Badge */}
               {user && user.plan !== 'free' && (
                 <div
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-full ${user.plan === 'enterprise_premium'
-                    ? 'bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-200'
-                    : user.plan === 'enterprise'
-                      ? 'bg-gradient-to-r from-emerald-100 to-teal-100 border border-emerald-200'
-                      : 'bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-200'
-                    }`}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-full ${
+                    user.plan === 'enterprise_premium'
+                      ? 'bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-200'
+                      : user.plan === 'enterprise'
+                        ? 'bg-gradient-to-r from-emerald-100 to-teal-100 border border-emerald-200'
+                        : 'bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-200'
+                  }`}
                 >
                   {user.plan === 'enterprise_premium' ? (
                     <>
@@ -210,7 +213,10 @@ export default function DashboardPage() {
       <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
         {/* KPI Kartları */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <Card variant="premium" className="group border-0 bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100">
+          <Card
+            variant="premium"
+            className="group border-0 bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100"
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-700">Toplam Gelir</CardTitle>
               <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg group-hover:scale-110 group-hover:shadow-glow transition-all duration-300">
@@ -227,7 +233,10 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card variant="premium" className="group border-0 bg-gradient-to-br from-red-50 to-rose-50 hover:from-red-100 hover:to-rose-100">
+          <Card
+            variant="premium"
+            className="group border-0 bg-gradient-to-br from-red-50 to-rose-50 hover:from-red-100 hover:to-rose-100"
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-700">Toplam Gider</CardTitle>
               <div className="p-2 rounded-lg bg-gradient-to-br from-red-500 to-rose-600 shadow-lg group-hover:scale-110 group-hover:shadow-glow transition-all duration-300">
@@ -244,7 +253,10 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card variant="premium" className="group border-0 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100">
+          <Card
+            variant="premium"
+            className="group border-0 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100"
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-700">Net Durum</CardTitle>
               <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg group-hover:scale-110 group-hover:shadow-glow transition-all duration-300 flex items-center justify-center">
@@ -253,10 +265,11 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div
-                className={`text-2xl sm:text-3xl font-bold bg-clip-text text-transparent ${parseFloat(data.kpi.net_amount) >= 0
-                  ? 'bg-gradient-to-r from-green-600 to-emerald-600'
-                  : 'bg-gradient-to-r from-red-600 to-rose-600'
-                  }`}
+                className={`text-2xl sm:text-3xl font-bold bg-clip-text text-transparent ${
+                  parseFloat(data.kpi.net_amount) >= 0
+                    ? 'bg-gradient-to-r from-green-600 to-emerald-600'
+                    : 'bg-gradient-to-r from-red-600 to-rose-600'
+                }`}
               >
                 {formatCurrency(parseFloat(data.kpi.net_amount), 'TRY')}
               </div>
@@ -264,7 +277,10 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card variant="premium" className="group border-0 bg-gradient-to-br from-purple-50 to-violet-50 hover:from-purple-100 hover:to-violet-100">
+          <Card
+            variant="premium"
+            className="group border-0 bg-gradient-to-br from-purple-50 to-violet-50 hover:from-purple-100 hover:to-violet-100"
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-700">Toplam İşlem</CardTitle>
               <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 shadow-lg group-hover:scale-110 group-hover:shadow-glow transition-all duration-300">
@@ -422,10 +438,11 @@ export default function DashboardPage() {
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className={`w-4 h-4 rounded-full shadow-sm ${category.tx_type_name === 'Gelir'
-                            ? 'bg-gradient-to-br from-green-400 to-emerald-500'
-                            : 'bg-gradient-to-br from-red-400 to-rose-500'
-                            }`}
+                          className={`w-4 h-4 rounded-full shadow-sm ${
+                            category.tx_type_name === 'Gelir'
+                              ? 'bg-gradient-to-br from-green-400 to-emerald-500'
+                              : 'bg-gradient-to-br from-red-400 to-rose-500'
+                          }`}
                         />
                         <span className="text-sm font-medium text-slate-700">
                           {category.category_name}
@@ -433,8 +450,9 @@ export default function DashboardPage() {
                       </div>
                       <div className="text-right">
                         <p
-                          className={`text-sm font-bold ${category.tx_type_name === 'Gelir' ? 'text-green-600' : 'text-red-600'
-                            }`}
+                          className={`text-sm font-bold ${
+                            category.tx_type_name === 'Gelir' ? 'text-green-600' : 'text-red-600'
+                          }`}
                         >
                           {formatCurrency(parseFloat(category.total_amount), 'TRY')}
                         </p>

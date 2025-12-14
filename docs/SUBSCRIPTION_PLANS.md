@@ -3,6 +3,7 @@
 ## Genel Bakış
 
 GiderSe Gelir uygulaması 4 farklı abonelik planı sunar:
+
 - **FREE**: Temel özellikler
 - **PREMIUM**: Bireysel kullanıcılar için gelişmiş özellikler
 - **ENTERPRISE**: KOBİ ve şirketler için kurumsal çözümler
@@ -29,12 +30,12 @@ export const PLAN_IDS = {
 
 ### Plan Fiyatları
 
-| Plan | Aylık Fiyat | Para Birimi |
-|------|-------------|-------------|
-| FREE | ₺0 | TRY |
-| PREMIUM | ₺250 | TRY |
-| ENTERPRISE | ₺450 | TRY |
-| ENTERPRISE_PREMIUM | Özel Fiyat | TRY |
+| Plan               | Aylık Fiyat | Para Birimi |
+| ------------------ | ----------- | ----------- |
+| FREE               | ₺0          | TRY         |
+| PREMIUM            | ₺250        | TRY         |
+| ENTERPRISE         | ₺450        | TRY         |
+| ENTERPRISE_PREMIUM | Özel Fiyat  | TRY         |
 
 ## Plan Özellikleri
 
@@ -43,12 +44,14 @@ export const PLAN_IDS = {
 **Hedef Kitle:** Yeni kullanıcılar, bireysel kullanım
 
 **Limitler:**
+
 - Aylık 50 işlem
 - Maksimum 3 hesap
 - Maksimum 2 kredi kartı
 - 10 analiz limiti
 
 **Özellikler:**
+
 - Temel finansal yönetim
 - Temel raporlar
 - Mobil erişim
@@ -65,30 +68,35 @@ export const PLAN_IDS = {
 **Özellikler:**
 
 #### 🧠 AI & Akıllı Analizler
+
 - AI Finansal Asistan
 - Otomatik Kategorileme
 - Tahmin Modelleri
 - Akıllı Öneriler
 
 #### 📊 Gelişmiş Raporlama
+
 - İnteraktif Grafikler
 - Harcama Dağılımı
 - Trend Analizleri
 - PDF/Excel Raporları
 
 #### 🎯 Akıllı Hedefleme
+
 - Kişisel Hedefler
 - Mevsimsel Analiz
 - Akıllı Bildirimler
 - Başarı Takibi
 
 #### ⚡ Otomasyon & Verimlilik
+
 - Otomatik Takip
 - Akıllı Tekrarlar
 - Zaman Tasarrufu
 - Özelleştirilebilir
 
 #### 🛡️ Premium Destek
+
 - 7/24 Premium Destek
 - Gelişmiş Güvenlik
 - Premium Tema
@@ -105,24 +113,28 @@ export const PLAN_IDS = {
 **Özellikler:**
 
 #### 🏢 Kurumsal Yönetim
+
 - Tüm Premium Özellikler
 - Çoklu Kullanıcı Desteği
 - Departman Yönetimi
 - Rol Bazlı Erişim Kontrolü
 
 #### 🔧 Entegrasyonlar
+
 - API Erişimi
 - Webhook Desteği
 - Özel Entegrasyonlar
 - ERP/CRM Entegrasyonu
 
 #### 📈 Gelişmiş Analizler
+
 - Departman Bazlı Raporlar
 - Bütçe Takibi
 - Nakit Akış Tahminleri
 - Özel Dashboard'lar
 
 #### 🎯 Premium Destek
+
 - Dedicated Hesap Yöneticisi
 - Öncelikli 7/24 Destek
 - Özel Eğitim
@@ -139,36 +151,42 @@ export const PLAN_IDS = {
 **Özellikler:**
 
 #### 🏢 Kurumsal Yönetim
+
 - Çoklu Şirket Konsolidasyonu
 - Sınırsız Departman Yönetimi
 - Hiyerarşik Yetki Sistemi
 - Global Şube Ağı
 
 #### 🔒 Enterprise Güvenlik
+
 - Kurumsal Quantum Şifreleme
 - Enterprise Sıfır Güven
 - Siber Tehdit İzleme
 - Uyumluluk Yönetimi (GDPR, KVKK, SOX, PCI DSS)
 
 #### 🤖 AI Süper Zeka
+
 - Kurumsal AI Süper Zeka
 - Kurumsal Gelir Optimizasyonu
 - Operasyonel Verimlilik
 - Kurumsal Süreç Otomasyonu
 
 #### 🌐 Global Altyapı
+
 - Global İş Ağı
 - Enterprise Bulut Altyapısı
 - Çoklu Para Birimi Yönetimi (150+ para birimi)
 - VIP Kurumsal Destek
 
 #### 💰 Kurumsal Gelir Artırma
+
 - Pazar Genişletme Stratejileri
 - Müşteri Segmentasyonu
 - Ürün Portföy Optimizasyonu
 - Kurumsal Ortaklıklar
 
 #### 📈 İş Zekası & Analytics
+
 - Kurumsal Dashboard
 - Enterprise API
 - Özel Sistem Entegrasyonları (SAP, Oracle, Microsoft Dynamics)
@@ -180,10 +198,10 @@ export const PLAN_IDS = {
 
 ```typescript
 // Tüm planları getir
-GET /api/subscription/plans
+GET / api / subscription / plans
 
 // Kullanıcının aktif planını getir
-GET /api/subscription/status
+GET / api / subscription / status
 ```
 
 ### Plan Yükseltme
@@ -215,7 +233,7 @@ import { usePremium } from '@/lib/use-premium'
 
 function MyComponent() {
   const { isPremium, isEnterprise, requirePremium } = usePremium()
-  
+
   const handlePremiumFeature = () => {
     requirePremium(() => {
       // Premium özellik kodu
@@ -277,7 +295,7 @@ CREATE TABLE user_subscription (
 ### Plan İndirme/İptal
 
 ```typescript
-POST /api/subscription/cancel
+POST / api / subscription / cancel
 ```
 
 - Subscription status 'cancelled' olarak güncellenir
@@ -313,6 +331,7 @@ npm run test:api:enterprise-premium
 ### API Rate Limiting
 
 Premium planlar için rate limit yok, FREE plan için:
+
 - API calls: 100/hour
 - Transactions: 50/month
 
@@ -347,4 +366,3 @@ Premium planlar için rate limit yok, FREE plan için:
 
 **Son Güncelleme:** 2025-01-19
 **Versiyon:** 2.1.1
-

@@ -165,12 +165,10 @@ export function EnterprisePremiumContactModal({
             </div>
             <DialogTitle className="text-2xl font-bold text-center">Talebiniz Alındı!</DialogTitle>
             <DialogDescription className="text-center text-lg">
-              {planLabel} talebiniz destek kaydı olarak alındı. Ekibimiz en kısa sürede sizinle iletişime
-              geçecektir.
+              {planLabel} talebiniz destek kaydı olarak alındı. Ekibimiz en kısa sürede sizinle
+              iletişime geçecektir.
             </DialogDescription>
-            <p className="text-sm text-slate-600 text-center">
-              Yönlendiriliyorsunuz...
-            </p>
+            <p className="text-sm text-slate-600 text-center">Yönlendiriliyorsunuz...</p>
           </div>
         </DialogContent>
       </Dialog>
@@ -189,7 +187,7 @@ export function EnterprisePremiumContactModal({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4 py-4">
+        <form onSubmit={e => void handleSubmit(e)} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="name">Ad Soyad *</Label>
             <Input
@@ -279,7 +277,7 @@ export function EnterprisePremiumContactModal({
               ) : (
                 <>
                   <Send className="mr-2 h-4 w-4" />
-                Destek Talebi Gönder
+                  Destek Talebi Gönder
                 </>
               )}
             </Button>
@@ -289,4 +287,3 @@ export function EnterprisePremiumContactModal({
     </Dialog>
   )
 }
-

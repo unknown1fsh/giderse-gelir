@@ -72,17 +72,17 @@ describe('Transaction API Endpoints', () => {
       txTypeGelir
 
     categoryMaas = txTypeGelir
-      ? (await prisma.refTxCategory.findFirst({
+      ? await prisma.refTxCategory.findFirst({
           where: { txTypeId: txTypeGelir.id, active: true },
           orderBy: { id: 'asc' },
-        }))
+        })
       : null
 
     categoryMarket = txTypeGider
-      ? (await prisma.refTxCategory.findFirst({
+      ? await prisma.refTxCategory.findFirst({
           where: { txTypeId: txTypeGider.id, active: true },
           orderBy: { id: 'asc' },
-        }))
+        })
       : null
 
     // UI paymentMethodId SystemParameter'dan gelir
@@ -117,7 +117,15 @@ describe('Transaction API Endpoints', () => {
       const duration = Date.now() - startTime
 
       const success = [200, 401].includes(response.status)
-      logTestResult('kullanıcının işlemlerini getirmeli', '/transactions', 'GET', response.status, duration, success, success ? undefined : `Beklenen 200/401, alınan ${response.status}`)
+      logTestResult(
+        'kullanıcının işlemlerini getirmeli',
+        '/transactions',
+        'GET',
+        response.status,
+        duration,
+        success,
+        success ? undefined : `Beklenen 200/401, alınan ${response.status}`
+      )
       expect([200, 401]).toContain(response.status)
       const data = await response.json()
       expect(Array.isArray(data)).toBe(true)
@@ -128,7 +136,14 @@ describe('Transaction API Endpoints', () => {
       const response = await testFetch(`${BASE_URL}/transactions`)
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/transactions', 'GET', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/transactions',
+        'GET',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })
@@ -136,7 +151,9 @@ describe('Transaction API Endpoints', () => {
   describe('POST /api/transactions', () => {
     it('gelir işlemi başarılı oluşturmalı', async () => {
       // Referans veriler yoksa testi atla
-      if (!txTypeGelir || !categoryMaas || !paymentMethod || !currency) return
+      if (!txTypeGelir || !categoryMaas || !paymentMethod || !currency) {
+        return
+      }
 
       const startTime = Date.now()
       const response = await testFetch(`${BASE_URL}/transactions`, {
@@ -179,7 +196,9 @@ describe('Transaction API Endpoints', () => {
 
     it('gider işlemi başarılı oluşturmalı', async () => {
       // Referans veriler yoksa testi atla
-      if (!txTypeGider || !categoryMarket || !paymentMethod || !currency) return
+      if (!txTypeGider || !categoryMarket || !paymentMethod || !currency) {
+        return
+      }
 
       const startTime = Date.now()
       const response = await testFetch(`${BASE_URL}/transactions`, {
@@ -223,7 +242,14 @@ describe('Transaction API Endpoints', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/transactions', 'POST', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/transactions',
+        'POST',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })

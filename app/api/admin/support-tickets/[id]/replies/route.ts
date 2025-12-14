@@ -10,15 +10,17 @@ import { sendSupportTicketReplyEmail } from '@/lib/email'
  * POST /api/admin/support-tickets/[id]/replies
  */
 export const POST = ExceptionMapper.asyncHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const adminCheck = await requireAdmin(request)
     if (adminCheck.error) {
       return adminCheck.error
     }
 
+    const { id } = await params
+
     // ID veya ticket number ile arama yap
-    const ticketId = parseInt(params.id)
-    const isTicketNumber = params.id.startsWith('SUP-')
+    const ticketId = parseInt(id)
+    const isTicketNumber = id.startsWith('SUP-')
 
     const body = (await request.json()) as { message?: string; isInternal?: boolean }
     const { message, isInternal } = body
@@ -45,8 +47,8 @@ export const POST = ExceptionMapper.asyncHandler(
     let ticket: TicketWithRelations | null = null
 
     if (isTicketNumber) {
-      ticket = await prisma.supportTicket.findUnique({
-        where: { ticketNumber: params.id },
+      ticket = (await prisma.supportTicket.findUnique({
+        where: { ticketNumber: id },
         include: {
           user: {
             select: {
@@ -57,9 +59,9 @@ export const POST = ExceptionMapper.asyncHandler(
           },
           category: true,
         },
-      }) as TicketWithRelations | null
+      })) as TicketWithRelations | null
     } else if (!isNaN(ticketId)) {
-      ticket = await prisma.supportTicket.findUnique({
+      ticket = (await prisma.supportTicket.findUnique({
         where: { id: ticketId },
         include: {
           user: {
@@ -71,7 +73,7 @@ export const POST = ExceptionMapper.asyncHandler(
           },
           category: true,
         },
-      }) as TicketWithRelations | null
+      })) as TicketWithRelations | null
     } else {
       throw new BadRequestError('Geçersiz talep ID veya numarası')
     }

@@ -114,12 +114,12 @@ export default function NewExpensePage() {
           const giderType = data.txTypes.find(
             t => t.code === 'GIDER' || t.code === 'gider' || t.name?.toLowerCase().includes('gider')
           )
-          
+
           // GELIR tipini de bul (gelir kategorilerini hariç tutmak için)
           const gelirType = data.txTypes.find(
             t => t.code === 'GELIR' || t.code === 'gelir' || t.name?.toLowerCase().includes('gelir')
           )
-          
+
           if (giderType) {
             console.log('✅ GIDER tipi bulundu:', giderType)
             setGiderTxTypeId(giderType.id)
@@ -134,7 +134,7 @@ export default function NewExpensePage() {
               setFormData(prev => ({ ...prev, txTypeId: secondType.id }))
             }
           }
-          
+
           if (gelirType) {
             setGelirTxTypeId(gelirType.id)
           }
@@ -166,9 +166,11 @@ export default function NewExpensePage() {
           return isGider && !isGelir
         })
       : // Eğer giderTxTypeId bulunamadıysa, gelir olmayan kategorileri göster (fallback)
-        referenceData.categories.filter(cat => gelirTxTypeId > 0 ? cat.txTypeId !== gelirTxTypeId : true)
+        referenceData.categories.filter(cat =>
+          gelirTxTypeId > 0 ? cat.txTypeId !== gelirTxTypeId : true
+        )
     : []
-  
+
   // Debug log - sadece geliştirme ortamında
   useEffect(() => {
     if (referenceData && process.env.NODE_ENV === 'development') {
@@ -177,7 +179,8 @@ export default function NewExpensePage() {
         gelirTxTypeId,
         totalCategories: referenceData.categories.length,
         giderCategoriesCount: giderCategories.length,
-        gelirCategoriesCount: referenceData.categories.filter(c => c.txTypeId === gelirTxTypeId).length,
+        gelirCategoriesCount: referenceData.categories.filter(c => c.txTypeId === gelirTxTypeId)
+          .length,
         txTypes: referenceData.txTypes.map(t => ({ id: t.id, code: t.code, name: t.name })),
         sampleCategories: referenceData.categories.slice(0, 10).map(c => ({
           id: c.id,
@@ -187,11 +190,11 @@ export default function NewExpensePage() {
           isGider: c.txTypeId === giderTxTypeId,
         })),
       })
-      
+
       if (giderCategories.length === 0 && referenceData.categories.length > 0) {
         console.warn('⚠️ Gider kategorileri bulunamadı!')
       }
-      
+
       // Gelir kategorilerinin gider listesinde olup olmadığını kontrol et
       const gelirInGider = giderCategories.some(c => c.txTypeId === gelirTxTypeId)
       if (gelirInGider && gelirTxTypeId > 0) {
@@ -648,22 +651,24 @@ export default function NewExpensePage() {
                   required
                 >
                   <option value={0}>Gider kategorisi seçiniz</option>
-                  {giderCategories.length > 0 ? (
-                    giderCategories.map(category => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))
-                  ) : referenceData && referenceData.categories.length > 0 ? (
-                    // Fallback: Eğer gider kategorileri yoksa, gelir olmayan kategorileri göster
-                    referenceData.categories
-                      .filter(cat => gelirTxTypeId > 0 ? cat.txTypeId !== gelirTxTypeId : true)
-                      .map(category => (
+                  {giderCategories.length > 0
+                    ? giderCategories.map(category => (
                         <option key={category.id} value={category.id}>
                           {category.name}
                         </option>
                       ))
-                  ) : null}
+                    : referenceData && referenceData.categories.length > 0
+                      ? // Fallback: Eğer gider kategorileri yoksa, gelir olmayan kategorileri göster
+                        referenceData.categories
+                          .filter(cat =>
+                            gelirTxTypeId > 0 ? cat.txTypeId !== gelirTxTypeId : true
+                          )
+                          .map(category => (
+                            <option key={category.id} value={category.id}>
+                              {category.name}
+                            </option>
+                          ))
+                      : null}
                 </select>
                 {!referenceData || referenceData.categories.length === 0 ? (
                   <p className="text-xs text-red-600 mt-1">

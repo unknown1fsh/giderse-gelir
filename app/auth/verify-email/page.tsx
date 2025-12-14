@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle2, XCircle, Mail, Loader2, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import BrandLogo from '@/components/brand-logo'
 
 function VerifyEmailContent() {
   const router = useRouter()
@@ -107,6 +108,9 @@ function VerifyEmailContent() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <BrandLogo size={36} variant="light" priority textClassName="text-slate-800" />
+          </div>
           <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
             <Mail className="h-8 w-8 text-white" />
           </div>

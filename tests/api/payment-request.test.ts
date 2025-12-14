@@ -45,7 +45,14 @@ describe('Payment Request API Endpoints', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('ödeme talebi oluşturmalı', '/payment-request/create', 'POST', response.status, duration, [200, 201, 400, 500].includes(response.status))
+      logTestResult(
+        'ödeme talebi oluşturmalı',
+        '/payment-request/create',
+        'POST',
+        response.status,
+        duration,
+        [200, 201, 400, 500].includes(response.status)
+      )
       expect([200, 201, 400, 500]).toContain(response.status)
     })
 

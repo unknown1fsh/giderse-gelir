@@ -8,6 +8,31 @@ import { Badge } from '@/components/ui/badge'
 import { usePremium } from '@/lib/use-premium'
 import { useUser } from '@/lib/user-context'
 import {
+  Activity,
+  ArrowLeft,
+  ArrowRight,
+  BarChart3,
+  Bell,
+  Brain,
+  Crown,
+  Download,
+  Eye,
+  FileText,
+  Gift,
+  Home,
+  Lightbulb,
+  PieChart,
+  Play,
+  Settings,
+  Share2,
+  Sparkles,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  X,
+} from 'lucide-react'
+/*
+import {
   PieChart,
   TrendingUp,
   TrendingDown,
@@ -232,6 +257,7 @@ import {
   CalendarShekel as CalendarShekelIcon2,
   CalendarRiyal as CalendarRiyalIcon2,
 } from 'lucide-react'
+*/
 
 interface CategoryData {
   name: string
@@ -241,6 +267,9 @@ interface CategoryData {
   budget: number
   color: string
 }
+
+type CategoryStatus = 'over' | 'under' | 'on'
+type CategoryDataItem = CategoryData & { status: CategoryStatus }
 
 interface PremiumFeature {
   id: string
@@ -258,13 +287,12 @@ export default function CategoriesAnalysis() {
   const { user } = useUser()
   const [isLoading, setIsLoading] = useState(true)
   const [selectedFeature, setSelectedFeature] = useState<string | null>(null)
-  const [categoryData, setCategoryData] = useState<any[]>([])
+  const [categoryData, setCategoryData] = useState<CategoryDataItem[]>([])
   const { handlePremiumFeature } = usePremium()
 
   // Kullanıcı tipi tespiti
   const isEnterpriseUser =
     user?.email?.includes('enterprise') || user?.plan === 'enterprise_premium'
-  const isIndividualUser = user?.email?.includes('demo') || user?.plan === 'premium'
 
   const handleBack = () => {
     router.back()
@@ -278,7 +306,7 @@ export default function CategoriesAnalysis() {
   useEffect(() => {
     const loadCategoryData = () => {
       // Kullanıcı planına göre farklı veriler
-      let data = []
+      let data: CategoryDataItem[] = []
 
       if (user?.plan === 'free') {
         data = [
@@ -622,10 +650,14 @@ export default function CategoriesAnalysis() {
 
   // Modal render fonksiyonu
   const renderModal = () => {
-    if (!selectedFeature) {return null}
+    if (!selectedFeature) {
+      return null
+    }
 
     const feature = premiumFeatures.find(f => f.id === selectedFeature)
-    if (!feature) {return null}
+    if (!feature) {
+      return null
+    }
 
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">

@@ -13,19 +13,15 @@ import {
   ArrowLeft,
   Home,
   Calendar,
-  Target,
   AlertTriangle,
   CheckCircle,
   TrendingDown,
   Wallet,
-  CreditCard,
-  Coins,
   Download,
   Brain,
   Lightbulb,
   Zap,
   Eye,
-  Filter,
   RefreshCw,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/validators'
@@ -186,9 +182,7 @@ export default function AnalysisPage() {
             <Home className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gradient">
-              Finansal Analiz Merkezi
-            </h1>
+            <h1 className="text-3xl font-bold text-gradient">Finansal Analiz Merkezi</h1>
             <p className="text-slate-600">AI destekli finansal analiz ve akıllı öneriler</p>
           </div>
         </div>
@@ -218,7 +212,10 @@ export default function AnalysisPage() {
 
       {/* Ana KPI'lar */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card variant="premium" className="group border-0 bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-xl hover:shadow-glow-lg transition-all duration-300">
+        <Card
+          variant="premium"
+          className="group border-0 bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-xl hover:shadow-glow-lg transition-all duration-300"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium opacity-90">Toplam Gelir</CardTitle>
             <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm group-hover:scale-110 group-hover:shadow-glow transition-all duration-300">
@@ -240,7 +237,10 @@ export default function AnalysisPage() {
           </CardContent>
         </Card>
 
-        <Card variant="premium" className="group border-0 bg-gradient-to-br from-red-500 to-pink-600 text-white shadow-xl hover:shadow-glow-lg transition-all duration-300">
+        <Card
+          variant="premium"
+          className="group border-0 bg-gradient-to-br from-red-500 to-pink-600 text-white shadow-xl hover:shadow-glow-lg transition-all duration-300"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium opacity-90">Toplam Gider</CardTitle>
             <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm group-hover:scale-110 group-hover:shadow-glow transition-all duration-300">
@@ -262,7 +262,10 @@ export default function AnalysisPage() {
           </CardContent>
         </Card>
 
-        <Card variant="premium" className="group border-0 bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-xl hover:shadow-glow-lg transition-all duration-300">
+        <Card
+          variant="premium"
+          className="group border-0 bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-xl hover:shadow-glow-lg transition-all duration-300"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium opacity-90">Net Değer</CardTitle>
             <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm group-hover:scale-110 group-hover:shadow-glow transition-all duration-300">
@@ -279,7 +282,10 @@ export default function AnalysisPage() {
           </CardContent>
         </Card>
 
-        <Card variant="premium" className="group border-0 bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-xl hover:shadow-glow-lg transition-all duration-300">
+        <Card
+          variant="premium"
+          className="group border-0 bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-xl hover:shadow-glow-lg transition-all duration-300"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium opacity-90">Toplam Varlık</CardTitle>
             <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm group-hover:scale-110 group-hover:shadow-glow transition-all duration-300">
@@ -296,7 +302,10 @@ export default function AnalysisPage() {
       </div>
 
       {/* AI Önerileri */}
-      <Card variant="glass" className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 hover:shadow-glow transition-all duration-300">
+      <Card
+        variant="glass"
+        className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 hover:shadow-glow transition-all duration-300"
+      >
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gradient-premium">
             <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 shadow-glow">
@@ -344,7 +353,10 @@ export default function AnalysisPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Kategori Analizi */}
-        <Card variant="glass" className="border-0 shadow-lg hover:shadow-glow-lg transition-all duration-300">
+        <Card
+          variant="glass"
+          className="border-0 shadow-lg hover:shadow-glow-lg transition-all duration-300"
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 shadow-glow">
@@ -376,7 +388,10 @@ export default function AnalysisPage() {
         </Card>
 
         {/* Son İşlemler */}
-        <Card variant="glass" className="border-0 shadow-lg hover:shadow-glow-lg transition-all duration-300">
+        <Card
+          variant="glass"
+          className="border-0 shadow-lg hover:shadow-glow-lg transition-all duration-300"
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-glow">
@@ -425,7 +440,10 @@ export default function AnalysisPage() {
       </div>
 
       {/* Hızlı Aksiyonlar */}
-      <Card variant="glass" className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 hover:shadow-glow transition-all duration-300">
+      <Card
+        variant="glass"
+        className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 hover:shadow-glow transition-all duration-300"
+      >
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gradient">
             <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 shadow-glow">
@@ -438,7 +456,10 @@ export default function AnalysisPage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link href="/transactions/new">
-              <Button variant="success" className="w-full hover:shadow-glow transition-all duration-300">
+              <Button
+                variant="success"
+                className="w-full hover:shadow-glow transition-all duration-300"
+              >
                 <span className="text-lg font-bold mr-2">₺</span>
                 Gelir Ekle
               </Button>
@@ -450,13 +471,19 @@ export default function AnalysisPage() {
               </Button>
             </Link>
             <Link href="/analysis/export">
-              <Button variant="outline" className="w-full glass hover:shadow-glow transition-all duration-300">
+              <Button
+                variant="outline"
+                className="w-full glass hover:shadow-glow transition-all duration-300"
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Rapor İndir
               </Button>
             </Link>
             <Link href="/portfolio">
-              <Button variant="outline" className="w-full glass hover:shadow-glow transition-all duration-300">
+              <Button
+                variant="outline"
+                className="w-full glass hover:shadow-glow transition-all duration-300"
+              >
                 <Eye className="h-4 w-4 mr-2" />
                 Portföy Görüntüle
               </Button>
@@ -468,7 +495,10 @@ export default function AnalysisPage() {
       {/* Detaylı Analiz Linkleri */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Link href="/analysis/cashflow">
-          <Card variant="glass" className="hover:shadow-glow-lg transition-all duration-300 cursor-pointer group border-0 hover:scale-[1.02]">
+          <Card
+            variant="glass"
+            className="hover:shadow-glow-lg transition-all duration-300 cursor-pointer group border-0 hover:scale-[1.02]"
+          >
             <CardHeader className="text-center">
               <div className="mx-auto w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:shadow-glow transition-all duration-300">
                 <BarChart3 className="h-6 w-6 text-white" />
@@ -480,7 +510,10 @@ export default function AnalysisPage() {
         </Link>
 
         <Link href="/analysis/categories">
-          <Card variant="glass" className="hover:shadow-glow-lg transition-all duration-300 cursor-pointer group border-0 hover:scale-[1.02]">
+          <Card
+            variant="glass"
+            className="hover:shadow-glow-lg transition-all duration-300 cursor-pointer group border-0 hover:scale-[1.02]"
+          >
             <CardHeader className="text-center">
               <div className="mx-auto w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:shadow-glow transition-all duration-300">
                 <PieChart className="h-6 w-6 text-white" />
@@ -492,7 +525,10 @@ export default function AnalysisPage() {
         </Link>
 
         <Link href="/analysis/trends">
-          <Card variant="glass" className="hover:shadow-glow-lg transition-all duration-300 cursor-pointer group border-0 hover:scale-[1.02]">
+          <Card
+            variant="glass"
+            className="hover:shadow-glow-lg transition-all duration-300 cursor-pointer group border-0 hover:scale-[1.02]"
+          >
             <CardHeader className="text-center">
               <div className="mx-auto w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:shadow-glow transition-all duration-300">
                 <TrendingUp className="h-6 w-6 text-white" />
@@ -504,7 +540,10 @@ export default function AnalysisPage() {
         </Link>
 
         <Link href="/analysis/export">
-          <Card variant="glass" className="hover:shadow-glow-lg transition-all duration-300 cursor-pointer group border-0 hover:scale-[1.02]">
+          <Card
+            variant="glass"
+            className="hover:shadow-glow-lg transition-all duration-300 cursor-pointer group border-0 hover:scale-[1.02]"
+          >
             <CardHeader className="text-center">
               <div className="mx-auto w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:shadow-glow transition-all duration-300">
                 <FileText className="h-6 w-6 text-white" />

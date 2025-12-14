@@ -128,7 +128,9 @@ export class TransactionValidationService {
       throw new ValidationError('Hesap, kredi kartı veya e-cüzdandan birini seçmelisiniz')
     }
     if (sources.length > 1) {
-      throw new ValidationError('Aynı anda sadece 1 ödeme kaynağı seçebilirsiniz (hesap/kart/e-cüzdan)')
+      throw new ValidationError(
+        'Aynı anda sadece 1 ödeme kaynağı seçebilirsiniz (hesap/kart/e-cüzdan)'
+      )
     }
   }
 

@@ -24,7 +24,7 @@ export async function checkPremiumAccess(
 ): Promise<PremiumCheckResult> {
   // Kullanıcı authentication kontrolü
   const user = await getCurrentUser(request)
-  
+
   if (!user) {
     return {
       allowed: false,
@@ -89,7 +89,7 @@ export async function checkPremiumAccess(
 
 /**
  * Premium API route'ları için middleware wrapper
- * 
+ *
  * Kullanım:
  * ```typescript
  * export const GET = withPremium(async (request: NextRequest) => {
@@ -149,21 +149,21 @@ export function getPremiumFeatureAccess(currentPlan: string) {
     hasAutoCategorization: isPremium,
     hasInvestmentTracking: isPremium,
     hasGoalTracking: isPremium,
-    
+
     // Enterprise özellikleri
     hasMultiUser: isEnterprise,
     hasAPIAccess: isEnterprise,
     hasDepartmentManagement: isEnterprise,
     hasCustomIntegrations: isEnterprise,
     hasDedicatedSupport: isEnterprise,
-    
+
     // Enterprise Premium özellikleri
     hasConsolidation: isEnterprisePremium,
     hasGlobalNetwork: isEnterprisePremium,
     hasQuantumSecurity: isEnterprisePremium,
     hasWhiteLabel: isEnterprisePremium,
     hasVIPSupport: isEnterprisePremium,
-    
+
     // Plan bilgileri
     currentPlan,
     isPremium,
@@ -208,4 +208,3 @@ export async function checkFeatureLimit(
     current: currentCount,
   }
 }
-

@@ -9,13 +9,14 @@ import { BadRequestError, NotFoundError } from '@/server/errors'
  * PUT /api/admin/faq/[id]
  */
 export const PUT = ExceptionMapper.asyncHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const adminCheck = await requireAdmin(request)
     if (adminCheck.error) {
       return adminCheck.error
     }
 
-    const faqId = parseInt(params.id)
+    const { id } = await params
+    const faqId = parseInt(id)
 
     if (isNaN(faqId)) {
       throw new BadRequestError('Geçersiz FAQ ID')
@@ -35,11 +36,21 @@ export const PUT = ExceptionMapper.asyncHandler(
 
     const updateData: any = {}
 
-    if (question !== undefined) updateData.question = question
-    if (answer !== undefined) updateData.answer = answer
-    if (category !== undefined) updateData.category = category
-    if (displayOrder !== undefined) updateData.displayOrder = displayOrder
-    if (isActive !== undefined) updateData.isActive = isActive
+    if (question !== undefined) {
+      updateData.question = question
+    }
+    if (answer !== undefined) {
+      updateData.answer = answer
+    }
+    if (category !== undefined) {
+      updateData.category = category
+    }
+    if (displayOrder !== undefined) {
+      updateData.displayOrder = displayOrder
+    }
+    if (isActive !== undefined) {
+      updateData.isActive = isActive
+    }
 
     const faq = await prisma.fAQ.update({
       where: { id: faqId },
@@ -59,13 +70,14 @@ export const PUT = ExceptionMapper.asyncHandler(
  * DELETE /api/admin/faq/[id]
  */
 export const DELETE = ExceptionMapper.asyncHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const adminCheck = await requireAdmin(request)
     if (adminCheck.error) {
       return adminCheck.error
     }
 
-    const faqId = parseInt(params.id)
+    const { id } = await params
+    const faqId = parseInt(id)
 
     if (isNaN(faqId)) {
       throw new BadRequestError('Geçersiz FAQ ID')
@@ -89,4 +101,3 @@ export const DELETE = ExceptionMapper.asyncHandler(
     })
   }
 )
-

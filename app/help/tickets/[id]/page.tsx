@@ -138,15 +138,17 @@ export default function TicketDetailPage() {
       <NavigationButtons backHref="/help/tickets" backLabel="Destek Taleplerine Dön" />
 
       {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 p-8 md:p-12 text-white shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 p-6 sm:p-8 md:p-12 text-white shadow-2xl">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20" />
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center items-start gap-3 mb-4">
             <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
               <MessageSquare className="h-8 w-8" />
             </div>
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-2">{ticket.subject}</h1>
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-2 break-words">
+                {ticket.subject}
+              </h1>
               <p className="text-lg md:text-xl text-white/90">Talep No: {ticket.ticketNumber}</p>
             </div>
           </div>
@@ -180,10 +182,10 @@ export default function TicketDetailPage() {
                   {ticket.attachments.map(attachment => (
                     <div
                       key={attachment.id}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 bg-gray-50 rounded-lg"
                     >
-                      <div>
-                        <p className="text-sm font-medium">{attachment.fileName}</p>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium break-words">{attachment.fileName}</p>
                         <p className="text-xs text-gray-500">
                           {formatFileSize(attachment.fileSize)}
                         </p>
@@ -192,7 +194,7 @@ export default function TicketDetailPage() {
                         href={attachment.filePath}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
+                        className="self-start sm:self-auto text-blue-600 hover:underline"
                       >
                         <Download className="h-4 w-4" />
                       </a>

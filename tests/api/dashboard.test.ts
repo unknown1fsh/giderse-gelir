@@ -40,7 +40,14 @@ describe('Dashboard API Endpoint', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('dashboard KPI verilerini getirmeli', '/dashboard', 'GET', response.status, duration, response.status === 200)
+      logTestResult(
+        'dashboard KPI verilerini getirmeli',
+        '/dashboard',
+        'GET',
+        response.status,
+        duration,
+        response.status === 200
+      )
       expect(response.status).toBe(200)
       const data = await response.json()
       expect(data).toHaveProperty('kpi')
@@ -51,7 +58,14 @@ describe('Dashboard API Endpoint', () => {
       const response = await testFetch(`${BASE_URL}/dashboard`)
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/dashboard', 'GET', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/dashboard',
+        'GET',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })

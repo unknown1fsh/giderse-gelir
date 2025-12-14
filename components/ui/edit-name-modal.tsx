@@ -22,7 +22,9 @@ export function EditNameModal({
   const [name, setName] = useState(currentName)
   const [saving, setSaving] = useState(false)
 
-  if (!isOpen) {return null}
+  if (!isOpen) {
+    return null
+  }
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -101,4 +103,3 @@ export function EditNameModal({
     </div>
   )
 }
-

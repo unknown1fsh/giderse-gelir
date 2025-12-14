@@ -10,12 +10,17 @@ export default function PaymentFailedPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-4">
-      <Card variant="glass" className="w-full max-w-md hover:shadow-glow-lg transition-all duration-300">
+      <Card
+        variant="glass"
+        className="w-full max-w-md hover:shadow-glow-lg transition-all duration-300"
+      >
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center shadow-glow">
             <XCircle className="h-8 w-8 text-white" />
           </div>
-          <CardTitle className="text-2xl font-bold text-gradient-expense">Ödeme Başarısız</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gradient-expense">
+            Ödeme Başarısız
+          </CardTitle>
           <CardDescription>Ödeme işlemi tamamlanamadı</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -78,7 +83,8 @@ export default function PaymentFailedPage() {
               <div className="flex items-start">
                 <div className="w-2 h-2 bg-blue-600 rounded-full mt-1.5 mr-3 flex-shrink-0" />
                 <div>
-                  <span className="font-medium">Telefon:</span> Destek ekibimiz size yardımcı olabilir
+                  <span className="font-medium">Telefon:</span> Destek ekibimiz size yardımcı
+                  olabilir
                 </div>
               </div>
             </div>
@@ -126,8 +132,8 @@ export default function PaymentFailedPage() {
                 <span>+90 (850) 123 45 67</span>
               </div>
               <p className="text-purple-700 text-xs mt-3">
-                Destek ekibimiz size en kısa sürede yardımcı olacaktır. Çalışma saatleri: 09:00 - 18:00
-                (Hafta içi)
+                Destek ekibimiz size en kısa sürede yardımcı olacaktır. Çalışma saatleri: 09:00 -
+                18:00 (Hafta içi)
               </p>
             </div>
           </div>
@@ -136,4 +142,3 @@ export default function PaymentFailedPage() {
     </div>
   )
 }
-

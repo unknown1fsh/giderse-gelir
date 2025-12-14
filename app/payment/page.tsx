@@ -18,8 +18,7 @@ function PaymentPageContent() {
     // Ücretli üyelik ödeme linkleri artık destek talebine yönlenir (legacy fallback)
     const productTypeOrPlan = searchParams.get('productType') || searchParams.get('planId') || ''
     const productId = searchParams.get('productId') || ''
-    const legacyPlanId =
-      productTypeOrPlan === 'subscription' ? productId : productTypeOrPlan
+    const legacyPlanId = productTypeOrPlan === 'subscription' ? productId : productTypeOrPlan
 
     if (legacyPlanId === 'premium' || legacyPlanId === 'enterprise') {
       setIsRedirecting(true)

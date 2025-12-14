@@ -326,7 +326,10 @@ export default function InvestmentsPage() {
 
             {/* Portfolio Summary */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <Card variant="glass" className="bg-white/10 backdrop-blur-sm border-white/20 hover:shadow-glow transition-all duration-300 group">
+              <Card
+                variant="glass"
+                className="bg-white/10 backdrop-blur-sm border-white/20 hover:shadow-glow transition-all duration-300 group"
+              >
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">
                     ₺{totalValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
@@ -335,7 +338,10 @@ export default function InvestmentsPage() {
                 </CardContent>
               </Card>
 
-              <Card variant="glass" className="bg-white/10 backdrop-blur-sm border-white/20 hover:shadow-glow transition-all duration-300 group">
+              <Card
+                variant="glass"
+                className="bg-white/10 backdrop-blur-sm border-white/20 hover:shadow-glow transition-all duration-300 group"
+              >
                 <CardContent className="p-6 text-center">
                   <div
                     className={`text-3xl font-bold mb-2 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ${
@@ -356,7 +362,10 @@ export default function InvestmentsPage() {
                 </CardContent>
               </Card>
 
-              <Card variant="glass" className="bg-white/10 backdrop-blur-sm border-white/20 hover:shadow-glow transition-all duration-300 group">
+              <Card
+                variant="glass"
+                className="bg-white/10 backdrop-blur-sm border-white/20 hover:shadow-glow transition-all duration-300 group"
+              >
                 <CardContent className="p-6 text-center">
                   <div
                     className={`text-3xl font-bold mb-2 group-hover:scale-110 transition-transform duration-300 ${
@@ -400,7 +409,9 @@ export default function InvestmentsPage() {
                     >
                       <Icon className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-gradient transition-all duration-300">{type.name}</h3>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-gradient transition-all duration-300">
+                      {type.name}
+                    </h3>
                     <p className="text-gray-600 mb-4">{type.description}</p>
 
                     <div className="flex items-center justify-between mb-4">
@@ -677,7 +688,9 @@ export default function InvestmentsPage() {
                   <div className="p-4 rounded-full bg-gradient-to-br from-orange-500 to-red-600 shadow-glow mx-auto mb-4 w-20 h-20 flex items-center justify-center">
                     <Bell className="h-10 w-10 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gradient-expense mb-2">📰 Yatırım Haberleri</h3>
+                  <h3 className="text-2xl font-bold text-gradient-expense mb-2">
+                    📰 Yatırım Haberleri
+                  </h3>
                   <p className="text-gray-600 mb-6">
                     Kişiselleştirilmiş haber akışı, piyasa analizleri ve yatırım önerileri
                   </p>

@@ -17,6 +17,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import Link from 'next/link'
+import PageHeader from '@/components/page-header'
 
 interface PeriodDetail {
   id: number
@@ -124,15 +125,15 @@ export default function PeriodDetailPage() {
     period._count.goldItems
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link href="/periods" className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold">{formatPeriodName(period)}</h1>
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
+      <PageHeader
+        onBack={() => router.push('/periods')}
+        backIcon={<ArrowLeft className="h-5 w-5" />}
+        title={
+          <div className="flex flex-wrap items-center gap-3 min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold break-words">
+              {formatPeriodName(period)}
+            </h1>
             {period.isClosed ? (
               <span className="flex items-center gap-1 px-3 py-1 bg-slate-200 text-slate-700 rounded-full text-sm font-medium">
                 <Lock className="h-4 w-4" />
@@ -150,15 +151,17 @@ export default function PeriodDetailPage() {
               </span>
             )}
           </div>
-          <p className="text-muted-foreground">
+        }
+        subtitle={
+          <span className="break-words">
             {getPeriodTypeLabel(
               period.periodType as 'YEARLY' | 'FISCAL_YEAR' | 'MONTHLY' | 'CUSTOM'
             )}{' '}
             • {new Date(period.startDate).toLocaleDateString('tr-TR')} -{' '}
             {new Date(period.endDate).toLocaleDateString('tr-TR')}
-          </p>
-        </div>
-      </div>
+          </span>
+        }
+      />
 
       {/* İstatistikler */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -346,10 +349,10 @@ export default function PeriodDetailPage() {
 
       {/* Actions */}
       {!period.isClosed && (
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Link
             href="/periods"
-            className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-center font-medium"
+            className="w-full sm:flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-center font-medium"
           >
             Geri Dön
           </Link>
@@ -372,7 +375,7 @@ export default function PeriodDetailPage() {
                   }
                 })()
               }}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+              className="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
             >
               <Trash2 className="h-4 w-4 inline mr-2" />
               Dönemi Sil

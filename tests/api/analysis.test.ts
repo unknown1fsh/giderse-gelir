@@ -37,7 +37,14 @@ describe('Analysis API Endpoints', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('analiz verilerini getirmeli', '/analysis', 'GET', response.status, duration, response.status === 200)
+      logTestResult(
+        'analiz verilerini getirmeli',
+        '/analysis',
+        'GET',
+        response.status,
+        duration,
+        response.status === 200
+      )
       expect([200, 500]).toContain(response.status)
     })
 
@@ -46,7 +53,14 @@ describe('Analysis API Endpoints', () => {
       const response = await testFetch(`${BASE_URL}/analysis`)
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/analysis', 'GET', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/analysis',
+        'GET',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })

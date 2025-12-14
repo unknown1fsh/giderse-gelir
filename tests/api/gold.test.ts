@@ -38,7 +38,15 @@ describe('Gold API Endpoints', () => {
       const duration = Date.now() - startTime
 
       const success = [200, 401, 500].includes(response.status)
-      logTestResult('altın kayıtlarını getirmeli', '/gold', 'GET', response.status, duration, success, success ? undefined : `Beklenen 200/401/500, alınan ${response.status}`)
+      logTestResult(
+        'altın kayıtlarını getirmeli',
+        '/gold',
+        'GET',
+        response.status,
+        duration,
+        success,
+        success ? undefined : `Beklenen 200/401/500, alınan ${response.status}`
+      )
       expect([200, 401, 500]).toContain(response.status)
     })
 
@@ -47,7 +55,14 @@ describe('Gold API Endpoints', () => {
       const response = await testFetch(`${BASE_URL}/gold`)
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/gold', 'GET', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/gold',
+        'GET',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })

@@ -10,21 +10,23 @@ import { sendSupportTicketStatusChangedEmail } from '@/lib/email'
  * GET /api/admin/support-tickets/[id]
  */
 export const GET = ExceptionMapper.asyncHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const adminCheck = await requireAdmin(request)
     if (adminCheck.error) {
       return adminCheck.error
     }
 
+    const { id } = await params
+
     // ID veya ticket number ile arama yap
-    const ticketId = parseInt(params.id)
-    const isTicketNumber = params.id.startsWith('SUP-')
+    const ticketId = parseInt(id)
+    const isTicketNumber = id.startsWith('SUP-')
 
     let ticket
 
     if (isTicketNumber) {
       ticket = await prisma.supportTicket.findUnique({
-        where: { ticketNumber: params.id },
+        where: { ticketNumber: id },
         include: {
           category: true,
           user: {
@@ -112,15 +114,17 @@ export const GET = ExceptionMapper.asyncHandler(
  * PUT /api/admin/support-tickets/[id]
  */
 export const PUT = ExceptionMapper.asyncHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const adminCheck = await requireAdmin(request)
     if (adminCheck.error) {
       return adminCheck.error
     }
 
+    const { id } = await params
+
     // ID veya ticket number ile arama yap
-    const ticketId = parseInt(params.id)
-    const isTicketNumber = params.id.startsWith('SUP-')
+    const ticketId = parseInt(id)
+    const isTicketNumber = id.startsWith('SUP-')
 
     const body = await request.json()
     const { status, priority, resolvedBy } = body
@@ -129,7 +133,7 @@ export const PUT = ExceptionMapper.asyncHandler(
 
     if (isTicketNumber) {
       existingTicket = await prisma.supportTicket.findUnique({
-        where: { ticketNumber: params.id },
+        where: { ticketNumber: id },
       })
     } else if (!isNaN(ticketId)) {
       existingTicket = await prisma.supportTicket.findUnique({
@@ -162,9 +166,7 @@ export const PUT = ExceptionMapper.asyncHandler(
       updateData.resolvedBy = resolvedBy
     }
 
-    const updateWhere = isTicketNumber
-      ? { ticketNumber: params.id }
-      : { id: ticketId }
+    const updateWhere = isTicketNumber ? { ticketNumber: id } : { id: ticketId }
 
     const ticket = await prisma.supportTicket.update({
       where: updateWhere,
@@ -204,4 +206,3 @@ export const PUT = ExceptionMapper.asyncHandler(
     })
   }
 )
-

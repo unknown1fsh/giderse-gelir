@@ -100,7 +100,9 @@ export async function createTestAccount(userId: number) {
   })
 
   if (!user) {
-    throw new Error(`Kullanıcı bulunamadı: userId=${userId}. Önce createTestUser() ile kullanıcı oluşturun.`)
+    throw new Error(
+      `Kullanıcı bulunamadı: userId=${userId}. Önce createTestUser() ile kullanıcı oluşturun.`
+    )
   }
 
   // Referans verileri al
@@ -136,7 +138,9 @@ export async function createTestCreditCard(userId: number) {
   })
 
   if (!user) {
-    throw new Error(`Kullanıcı bulunamadı: userId=${userId}. Önce createTestUser() ile kullanıcı oluşturun.`)
+    throw new Error(
+      `Kullanıcı bulunamadı: userId=${userId}. Önce createTestUser() ile kullanıcı oluşturun.`
+    )
   }
 
   const bank = await prisma.refBank.findFirst()
@@ -173,7 +177,9 @@ export async function createTestPeriod(userId: number, periodType = 'monthly') {
   })
 
   if (!user) {
-    throw new Error(`Kullanıcı bulunamadı: userId=${userId}. Önce createTestUser() ile kullanıcı oluşturun.`)
+    throw new Error(
+      `Kullanıcı bulunamadı: userId=${userId}. Önce createTestUser() ile kullanıcı oluşturun.`
+    )
   }
 
   const startDate = new Date()
@@ -239,7 +245,9 @@ export async function createTestBeneficiary(userId: number) {
   })
 
   if (!user) {
-    throw new Error(`Kullanıcı bulunamadı: userId=${userId}. Önce createTestUser() ile kullanıcı oluşturun.`)
+    throw new Error(
+      `Kullanıcı bulunamadı: userId=${userId}. Önce createTestUser() ile kullanıcı oluşturun.`
+    )
   }
 
   const bank = await prisma.refBank.findFirst()
@@ -272,7 +280,9 @@ export async function createTestEwallet(userId: number) {
   })
 
   if (!user) {
-    throw new Error(`Kullanıcı bulunamadı: userId=${userId}. Önce createTestUser() ile kullanıcı oluşturun.`)
+    throw new Error(
+      `Kullanıcı bulunamadı: userId=${userId}. Önce createTestUser() ile kullanıcı oluşturun.`
+    )
   }
 
   const currency = await prisma.refCurrency.findFirst({ where: { code: 'TRY' } })

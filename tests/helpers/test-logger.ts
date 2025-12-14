@@ -125,7 +125,9 @@ class TestLogger {
       this.writeToFile(`HATA DETAYLARI\n`)
       this.writeToFile(`========================================\n\n`)
       failedResults.forEach((result, index) => {
-        this.writeToFile(`[${index + 1}] ${result.testName} - ${result.method} ${result.endpoint}\n`)
+        this.writeToFile(
+          `[${index + 1}] ${result.testName} - ${result.method} ${result.endpoint}\n`
+        )
         if (result.error) {
           this.writeToFile(`Hata Mesajı: ${result.error}\n`)
         }

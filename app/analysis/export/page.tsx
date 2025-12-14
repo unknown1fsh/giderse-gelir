@@ -7,7 +7,27 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { usePremium } from '@/lib/use-premium'
 import { useUser } from '@/lib/user-context'
-import PremiumUpgradeModal from '@/components/premium-upgrade-modal'
+import {
+  ArrowLeft,
+  ArrowRight,
+  BarChart3,
+  Calendar,
+  Clock,
+  Crown,
+  Download,
+  Eye,
+  FileText,
+  Globe,
+  Home,
+  Lock,
+  Plus,
+  Settings,
+  Share2,
+  Shield,
+  X,
+  Zap,
+} from 'lucide-react'
+/*
 import {
   Download,
   FileText,
@@ -233,14 +253,7 @@ import {
   CalendarShekel as CalendarShekelIcon2,
   CalendarRiyal as CalendarRiyalIcon2,
 } from 'lucide-react'
-
-interface ExportData {
-  type: string
-  format: string
-  size: string
-  lastGenerated: string
-  status: 'ready' | 'generating' | 'error'
-}
+*/
 
 interface PremiumFeature {
   id: string
@@ -255,7 +268,6 @@ interface PremiumFeature {
 
 export default function ExportAnalysis() {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(true)
   const [selectedFeature, setSelectedFeature] = useState<string | null>(null)
   const { handlePremiumFeature } = usePremium()
   const { user } = useUser()
@@ -263,7 +275,6 @@ export default function ExportAnalysis() {
   // Kullanıcı tipi tespiti
   const isEnterpriseUser =
     user?.email?.includes('enterprise') || user?.plan === 'enterprise_premium'
-  const isIndividualUser = user?.email?.includes('demo') || user?.plan === 'premium'
 
   const handleBack = () => {
     router.back()
@@ -435,10 +446,14 @@ export default function ExportAnalysis() {
 
   // Modal render fonksiyonu
   const renderModal = () => {
-    if (!selectedFeature) {return null}
+    if (!selectedFeature) {
+      return null
+    }
 
     const feature = premiumFeatures.find(f => f.id === selectedFeature)
-    if (!feature) {return null}
+    if (!feature) {
+      return null
+    }
 
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">

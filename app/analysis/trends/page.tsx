@@ -8,6 +8,28 @@ import { Badge } from '@/components/ui/badge'
 import { usePremium } from '@/lib/use-premium'
 import { useUser } from '@/lib/user-context'
 import {
+  ArrowLeft,
+  ArrowRight,
+  BarChart3,
+  Bell,
+  Brain,
+  Calendar,
+  Crown,
+  Download,
+  Eye,
+  FileText,
+  Home,
+  Minus,
+  Share2,
+  Shield,
+  Sparkles,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  X,
+} from 'lucide-react'
+/*
+import {
   TrendingUp,
   TrendingDown,
   Minus,
@@ -232,6 +254,7 @@ import {
   CalendarShekel as CalendarShekelIcon2,
   CalendarRiyal as CalendarRiyalIcon2,
 } from 'lucide-react'
+*/
 
 interface TrendData {
   period: string
@@ -438,10 +461,14 @@ export default function TrendsAnalysis() {
 
   // Modal render fonksiyonu
   const renderModal = () => {
-    if (!selectedFeature) {return null}
+    if (!selectedFeature) {
+      return null
+    }
 
     const feature = premiumFeatures.find(f => f.id === selectedFeature)
-    if (!feature) {return null}
+    if (!feature) {
+      return null
+    }
 
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">

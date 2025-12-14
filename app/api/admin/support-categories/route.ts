@@ -59,4 +59,3 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     message: 'Kategori başarıyla oluşturuldu',
   })
 })
-

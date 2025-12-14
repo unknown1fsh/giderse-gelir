@@ -11,7 +11,7 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
   const { token } = await request.json()
 
   if (!token) {
-    throw new BadRequestError('Doğrulama token\'ı gerekli')
+    throw new BadRequestError("Doğrulama token'ı gerekli")
   }
 
   // Kullanıcıyı token ile bul
@@ -25,7 +25,7 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
   })
 
   if (!user) {
-    throw new NotFoundError('Geçersiz veya süresi dolmuş doğrulama token\'ı')
+    throw new NotFoundError("Geçersiz veya süresi dolmuş doğrulama token'ı")
   }
 
   // Email zaten doğrulanmış mı kontrol et
@@ -78,16 +78,12 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
   })
 
   if (!user) {
-    return NextResponse.redirect(
-      new URL('/auth/verify-email?error=invalid-token', request.url)
-    )
+    return NextResponse.redirect(new URL('/auth/verify-email?error=invalid-token', request.url))
   }
 
   // Email zaten doğrulanmış mı kontrol et
   if (user.emailVerified) {
-    return NextResponse.redirect(
-      new URL('/auth/verify-email?error=already-verified', request.url)
-    )
+    return NextResponse.redirect(new URL('/auth/verify-email?error=already-verified', request.url))
   }
 
   // Email'i doğrula
@@ -102,4 +98,3 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
 
   return NextResponse.redirect(new URL('/auth/verify-email?success=true', request.url))
 })
-

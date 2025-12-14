@@ -24,4 +24,3 @@ export interface MarketQuote {
   currency: string
   exchange: string
 }
-

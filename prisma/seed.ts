@@ -798,7 +798,7 @@ async function main() {
   for (const category of categories) {
     // txTypeCode'u refTxType'ın code'undan al
     const txTypeCode = category.txType?.code || ''
-    
+
     await prisma.systemParameter.upsert({
       where: {
         paramGroup_paramCode: {

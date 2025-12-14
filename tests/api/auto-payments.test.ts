@@ -38,7 +38,15 @@ describe('Auto Payments API Endpoints', () => {
       const duration = Date.now() - startTime
 
       const success = response.status === 200
-      logTestResult('otomatik ödemeleri getirmeli', '/auto-payments', 'GET', response.status, duration, success, success ? undefined : `Beklenen 200, alınan ${response.status}`)
+      logTestResult(
+        'otomatik ödemeleri getirmeli',
+        '/auto-payments',
+        'GET',
+        response.status,
+        duration,
+        success,
+        success ? undefined : `Beklenen 200, alınan ${response.status}`
+      )
       expect(response.status).toBe(200)
     })
 
@@ -47,7 +55,14 @@ describe('Auto Payments API Endpoints', () => {
       const response = await testFetch(`${BASE_URL}/auto-payments`)
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/auto-payments', 'GET', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/auto-payments',
+        'GET',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })

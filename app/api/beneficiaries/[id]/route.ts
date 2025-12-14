@@ -39,7 +39,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 }
 
 // Alıcı sil (cascade delete - ilişkili transaction'lar da silinir)
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const user = await getCurrentUser(request)
     if (!user) {
@@ -65,13 +68,10 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     return NextResponse.json({
       success: true,
       deletedTransactions: txCount,
-      message: txCount > 0
-        ? `Alıcı ve ${txCount} işlem kaydı silindi`
-        : 'Alıcı silindi',
+      message: txCount > 0 ? `Alıcı ve ${txCount} işlem kaydı silindi` : 'Alıcı silindi',
     })
   } catch (error) {
     console.error('Beneficiary delete error:', error)
     return NextResponse.json({ error: 'Alıcı silinemedi' }, { status: 500 })
   }
 }
-

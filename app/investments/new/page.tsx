@@ -16,14 +16,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import PremiumUpgradeModal from '@/components/premium-upgrade-modal'
-import {
-  ArrowLeft,
-  Save,
-  Building2,
-  CheckCircle,
-  Calculator,
-  FileText,
-} from 'lucide-react'
+import { ArrowLeft, Save, Building2, CheckCircle, Calculator, FileText } from 'lucide-react'
 
 interface InvestmentType {
   id: string
@@ -135,7 +128,9 @@ export default function NewInvestmentPage() {
   const calculateProfitLossPercentage = () => {
     const purchasePrice = parseFloat(formData.purchasePrice) || 0
     const currentPrice = parseFloat(formData.currentPrice) || 0
-    if (purchasePrice === 0) {return 0}
+    if (purchasePrice === 0) {
+      return 0
+    }
     return ((currentPrice - purchasePrice) / purchasePrice) * 100
   }
 

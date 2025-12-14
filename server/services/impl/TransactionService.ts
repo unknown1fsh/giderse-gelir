@@ -90,7 +90,11 @@ export class TransactionService extends BaseService<TransactionDTO> {
     // Mapping SONRASI refPaymentMethodId kullan
     let effectiveAccountId = data.accountId
     if (!data.accountId && !data.creditCardId && !data.eWalletId) {
-      effectiveAccountId = await this.ensureCashAccount(data.userId, refPaymentMethodId, data.periodId)
+      effectiveAccountId = await this.ensureCashAccount(
+        data.userId,
+        refPaymentMethodId,
+        data.periodId
+      )
     }
 
     const createData: Prisma.TransactionCreateInput = {
@@ -116,11 +120,11 @@ export class TransactionService extends BaseService<TransactionDTO> {
     } else if (data.creditCardId) {
       createData.creditCard = { connect: { id: data.creditCardId } }
     }
-    
+
     if (data.eWalletId) {
       createData.eWallet = { connect: { id: data.eWalletId } }
     }
-    
+
     if (data.beneficiaryId) {
       createData.beneficiary = { connect: { id: data.beneficiaryId } }
     }
@@ -129,10 +133,10 @@ export class TransactionService extends BaseService<TransactionDTO> {
     const transaction = await this.transactionRepository.createWithRelations(createData)
 
     // ✅ İŞ MANTIĞI: Hesap/Kart/E-Cüzdan bakiyesini güncelle
-    const balanceUpdateData = { 
-      ...data, 
+    const balanceUpdateData = {
+      ...data,
       accountId: effectiveAccountId,
-      eWalletId: data.eWalletId
+      eWalletId: data.eWalletId,
     }
     await this.updateAccountBalance(balanceUpdateData, txType.code)
 

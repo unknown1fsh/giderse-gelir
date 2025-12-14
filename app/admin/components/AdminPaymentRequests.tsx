@@ -137,7 +137,9 @@ export default function AdminPaymentRequests() {
   }
 
   const filteredRequests = requests.filter(req => {
-    if (filter === 'all') return true
+    if (filter === 'all') {
+      return true
+    }
     return req.status === filter
   })
 
@@ -146,9 +148,7 @@ export default function AdminPaymentRequests() {
       <Card>
         <CardHeader>
           <CardTitle>Ödeme Talepleri</CardTitle>
-          <CardDescription>
-            Kullanıcıların plan yükseltme taleplerini yönetin
-          </CardDescription>
+          <CardDescription>Kullanıcıların plan yükseltme taleplerini yönetin</CardDescription>
         </CardHeader>
         <CardContent>
           {/* Filtreler */}
@@ -189,7 +189,9 @@ export default function AdminPaymentRequests() {
             </div>
           ) : filteredRequests.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              {filter === 'all' ? 'Henüz ödeme talebi yok' : `${filter === 'pending' ? 'Bekleyen' : filter === 'approved' ? 'Onaylı' : 'Reddedilen'} talep yok`}
+              {filter === 'all'
+                ? 'Henüz ödeme talebi yok'
+                : `${filter === 'pending' ? 'Bekleyen' : filter === 'approved' ? 'Onaylı' : 'Reddedilen'} talep yok`}
             </div>
           ) : (
             <Table>
@@ -214,9 +216,7 @@ export default function AdminPaymentRequests() {
                     </TableCell>
                     <TableCell>{getPlanName(request.planId)}</TableCell>
                     <TableCell>
-                      {request.amount > 0
-                        ? `${request.amount} ${request.currency}`
-                        : 'Özel Fiyat'}
+                      {request.amount > 0 ? `${request.amount} ${request.currency}` : 'Özel Fiyat'}
                     </TableCell>
                     <TableCell>{getStatusBadge(request.status)}</TableCell>
                     <TableCell>{new Date(request.createdAt).toLocaleDateString('tr-TR')}</TableCell>
@@ -340,4 +340,3 @@ export default function AdminPaymentRequests() {
     </div>
   )
 }
-

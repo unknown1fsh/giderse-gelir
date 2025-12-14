@@ -57,7 +57,9 @@ export default function EWalletsPage() {
   }
 
   const handleEditName = async (newName: string) => {
-    if (!selectedWallet) {return}
+    if (!selectedWallet) {
+      return
+    }
 
     try {
       const response = await fetch(`/api/ewallets/${selectedWallet.id}`, {
@@ -84,7 +86,9 @@ export default function EWalletsPage() {
   }
 
   const handleDelete = async () => {
-    if (!selectedWallet) {return}
+    if (!selectedWallet) {
+      return
+    }
 
     try {
       const response = await fetch(`/api/ewallets/${selectedWallet.id}`, {
@@ -257,4 +261,3 @@ export default function EWalletsPage() {
     </div>
   )
 }
-

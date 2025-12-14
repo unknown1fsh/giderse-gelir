@@ -145,7 +145,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 }
 
 // Hesap sil (cascade delete - ilişkili transaction'lar da silinir)
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const user = await getCurrentUser(request)
     if (!user) {
@@ -171,9 +174,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     return NextResponse.json({
       success: true,
       deletedTransactions: txCount,
-      message: txCount > 0 
-        ? `Hesap ve ${txCount} işlem kaydı silindi` 
-        : 'Hesap silindi',
+      message: txCount > 0 ? `Hesap ve ${txCount} işlem kaydı silindi` : 'Hesap silindi',
     })
   } catch (error) {
     console.error('Account delete error:', error)

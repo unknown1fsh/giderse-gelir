@@ -85,37 +85,37 @@ async function main() {
         // Accounts
         prisma.account.updateMany({
           where: { userId: user.id, periodId: null },
-          data: { periodId: period!.id },
+          data: { periodId: period.id },
         }),
         // Credit Cards
         prisma.creditCard.updateMany({
           where: { userId: user.id, periodId: null },
-          data: { periodId: period!.id },
+          data: { periodId: period.id },
         }),
         // E-Wallets
         prisma.eWallet.updateMany({
           where: { userId: user.id, periodId: null },
-          data: { periodId: period!.id },
+          data: { periodId: period.id },
         }),
         // Transactions
         prisma.transaction.updateMany({
           where: { userId: user.id, periodId: null },
-          data: { periodId: period!.id },
+          data: { periodId: period.id },
         }),
         // Auto Payments
         prisma.autoPayment.updateMany({
           where: { userId: user.id, periodId: null },
-          data: { periodId: period!.id },
+          data: { periodId: period.id },
         }),
         // Gold Items
         prisma.goldItem.updateMany({
           where: { userId: user.id, periodId: null },
-          data: { periodId: period!.id },
+          data: { periodId: period.id },
         }),
         // Investments
         prisma.investment.updateMany({
           where: { userId: user.id, periodId: null },
-          data: { periodId: period!.id },
+          data: { periodId: period.id },
         }),
       ])
 
@@ -154,7 +154,7 @@ async function main() {
           activePeriodId: null,
         },
         data: {
-          activePeriodId: period!.id,
+          activePeriodId: period.id,
         },
       })
 

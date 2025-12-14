@@ -130,9 +130,7 @@ export default function NewBeneficiaryPage() {
               </h3>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Alıcı Adı / Ünvanı *
-                </label>
+                <label className="block text-sm font-medium mb-2">Alıcı Adı / Ünvanı *</label>
                 <input
                   type="text"
                   value={formData.name}
@@ -168,7 +166,9 @@ export default function NewBeneficiaryPage() {
                   <label className="block text-sm font-medium mb-2">Banka</label>
                   <select
                     value={formData.bankId}
-                    onChange={e => setFormData(prev => ({ ...prev, bankId: parseInt(e.target.value) }))}
+                    onChange={e =>
+                      setFormData(prev => ({ ...prev, bankId: parseInt(e.target.value) }))
+                    }
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
                     <option value={0}>Banka seçiniz (opsiyonel)</option>
@@ -257,8 +257,8 @@ export default function NewBeneficiaryPage() {
             {/* Bilgilendirme */}
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
-                ℹ️ <strong>Not:</strong> Alıcı adı zorunludur. Ayrıca en az bir iletişim bilgisi (IBAN,
-                Hesap No, Telefon veya E-posta) girilmelidir.
+                ℹ️ <strong>Not:</strong> Alıcı adı zorunludur. Ayrıca en az bir iletişim bilgisi
+                (IBAN, Hesap No, Telefon veya E-posta) girilmelidir.
               </p>
             </div>
 
@@ -293,4 +293,3 @@ export default function NewBeneficiaryPage() {
     </div>
   )
 }
-

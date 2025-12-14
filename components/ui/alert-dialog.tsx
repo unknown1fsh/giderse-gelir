@@ -21,7 +21,9 @@ const AlertDialog = React.forwardRef<
     onOpenChange?.(newOpen)
   }
 
-  if (!isOpen) {return null}
+  if (!isOpen) {
+    return null
+  }
 
   return (
     <div

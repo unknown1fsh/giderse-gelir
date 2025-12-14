@@ -93,4 +93,3 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
     },
   })
 })
-

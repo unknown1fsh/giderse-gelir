@@ -65,9 +65,9 @@ export default function PortfolioPage() {
       try {
         const [accountsRes, investmentsRes] = await Promise.all([
           fetch('/api/accounts'),
-          fetch('/api/investments').catch(() => ({ ok: false }))
+          fetch('/api/investments').catch(() => ({ ok: false })),
         ])
-        
+
         if (accountsRes.ok) {
           const data = await accountsRes.json()
           setAllAccounts(data)
@@ -134,7 +134,7 @@ export default function PortfolioPage() {
   const totalInvestmentValue = investments.reduce((sum, inv) => {
     const quantity = parseFloat(inv.quantity || '0')
     const currentPrice = parseFloat(inv.currentPrice || inv.purchasePrice || '0')
-    return sum + (quantity * currentPrice)
+    return sum + quantity * currentPrice
   }, 0)
 
   const totalAssets = totalBankBalance + totalGoldValue + totalInvestmentValue
@@ -174,7 +174,9 @@ export default function PortfolioPage() {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
                 Toplam Varlık
               </h1>
-              <p className="text-slate-600">Portföy değerinizi ve varlık dağılımınızı görüntüleyin</p>
+              <p className="text-slate-600">
+                Portföy değerinizi ve varlık dağılımınızı görüntüleyin
+              </p>
             </div>
           </div>
         </div>
@@ -219,7 +221,9 @@ export default function PortfolioPage() {
 
           <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700">Kredi Kartı Borcu</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-700">
+                Kredi Kartı Borcu
+              </CardTitle>
               <div className="p-2 rounded-lg bg-gradient-to-br from-rose-500 to-pink-600 shadow-lg group-hover:scale-110 transition-transform">
                 <CreditCard className="h-4 w-4 text-white" />
               </div>
@@ -338,7 +342,10 @@ export default function PortfolioPage() {
                   <div className="text-sm text-slate-600">Toplam Limit</div>
                   <div className="text-lg font-semibold text-slate-700 mt-1">
                     {formatCurrency(
-                      creditCards.reduce((sum, card) => sum + parseFloat(card.limitAmount || '0'), 0),
+                      creditCards.reduce(
+                        (sum, card) => sum + parseFloat(card.limitAmount || '0'),
+                        0
+                      ),
                       'TRY'
                     )}
                   </div>
@@ -346,7 +353,8 @@ export default function PortfolioPage() {
               </div>
 
               {creditCards.map(card => {
-                const debt = parseFloat(card.limitAmount || '0') - parseFloat(card.availableLimit || '0')
+                const debt =
+                  parseFloat(card.limitAmount || '0') - parseFloat(card.availableLimit || '0')
                 const usagePercent = (debt / parseFloat(card.limitAmount || '1')) * 100
 
                 return (
@@ -357,7 +365,8 @@ export default function PortfolioPage() {
                         <span className="text-sm font-medium">{card.name}</span>
                       </div>
                       <div className="text-sm font-semibold text-rose-600">
-                        {formatCurrency(debt, card.currency?.code || 'TRY')} ({usagePercent.toFixed(0)}%)
+                        {formatCurrency(debt, card.currency?.code || 'TRY')} (
+                        {usagePercent.toFixed(0)}%)
                       </div>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -396,9 +405,7 @@ export default function PortfolioPage() {
             <div className="grid grid-cols-3 gap-4">
               <div className="bg-white/10 rounded-lg p-4">
                 <div className="text-xs text-white/70">Toplam Varlık</div>
-                <div className="text-2xl font-bold mt-1">
-                  {formatCurrency(totalAssets, 'TRY')}
-                </div>
+                <div className="text-2xl font-bold mt-1">{formatCurrency(totalAssets, 'TRY')}</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4">
                 <div className="text-xs text-white/70">Toplam Borç</div>
@@ -408,9 +415,7 @@ export default function PortfolioPage() {
               </div>
               <div className="bg-white/10 rounded-lg p-4">
                 <div className="text-xs text-white/70">Net Değer</div>
-                <div className="text-2xl font-bold mt-1">
-                  {formatCurrency(netWorth, 'TRY')}
-                </div>
+                <div className="text-2xl font-bold mt-1">{formatCurrency(netWorth, 'TRY')}</div>
               </div>
             </div>
 
@@ -521,10 +526,18 @@ export default function PortfolioPage() {
                         ></div>
                       </div>
                       <div className="flex justify-between mt-1">
-                        <span className="text-xs text-slate-500">Müsait: {formatCurrency(available, 'TRY')}</span>
-                        <span className={`text-xs font-medium ${
-                          usagePercent > 80 ? 'text-red-600' : usagePercent > 50 ? 'text-orange-600' : 'text-green-600'
-                        }`}>
+                        <span className="text-xs text-slate-500">
+                          Müsait: {formatCurrency(available, 'TRY')}
+                        </span>
+                        <span
+                          className={`text-xs font-medium ${
+                            usagePercent > 80
+                              ? 'text-red-600'
+                              : usagePercent > 50
+                                ? 'text-orange-600'
+                                : 'text-green-600'
+                          }`}
+                        >
                           %{usagePercent.toFixed(0)} kullanılmış
                         </span>
                       </div>
@@ -594,10 +607,18 @@ export default function PortfolioPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">Kategori</th>
-                    <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">Adet</th>
-                    <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">Değer</th>
-                    <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">Oran</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">
+                      Kategori
+                    </th>
+                    <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">
+                      Adet
+                    </th>
+                    <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">
+                      Değer
+                    </th>
+                    <th className="text-right py-3 px-4 text-sm font-medium text-slate-600">
+                      Oran
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -642,7 +663,9 @@ export default function PortfolioPage() {
                         <div className="w-2 h-2 rounded-full bg-rose-500"></div>
                         <span className="text-sm font-bold">Toplam Borç</span>
                       </td>
-                      <td className="text-right py-3 px-4 text-sm font-bold">{creditCards.length}</td>
+                      <td className="text-right py-3 px-4 text-sm font-bold">
+                        {creditCards.length}
+                      </td>
                       <td className="text-right py-3 px-4 text-lg font-bold text-rose-600">
                         -{formatCurrency(totalCreditCardDebt, 'TRY')}
                       </td>
@@ -684,8 +707,7 @@ export default function PortfolioPage() {
                     ✅ Gider → Hesap bakiyesi azalır → Toplam varlık azalır
                     <br />
                     ✅ Kart harcama → Müsait limit azalır → Borç artar
-                    <br />
-                    ✅ Kart ödeme → Müsait limit artar → Borç azalır
+                    <br />✅ Kart ödeme → Müsait limit artar → Borç azalır
                   </div>
                 </div>
               </div>

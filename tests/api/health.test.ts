@@ -18,7 +18,14 @@ describe('Health Check API Endpoint', () => {
       const response = await testFetch(`${BASE_URL}/health`)
       const duration = Date.now() - startTime
 
-      logTestResult('sağlık kontrolü başarılı olmalı', '/health', 'GET', response.status, duration, response.status === 200)
+      logTestResult(
+        'sağlık kontrolü başarılı olmalı',
+        '/health',
+        'GET',
+        response.status,
+        duration,
+        response.status === 200
+      )
       expect(response.status).toBe(200)
       const data = await response.json()
       expect(data).toHaveProperty('status')

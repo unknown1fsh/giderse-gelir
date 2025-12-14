@@ -12,14 +12,14 @@ export async function GET(request: NextRequest) {
       // Kripto ara
       const response = await fetch(`${COINGECKO_BASE}/search?query=${encodeURIComponent(search)}`)
       const data = await response.json()
-      
+
       return NextResponse.json({
         coins: data.coins.slice(0, 10).map((coin: any) => ({
           id: coin.id,
           symbol: coin.symbol.toUpperCase(),
           name: coin.name,
           thumb: coin.thumb,
-        }))
+        })),
       })
     }
 
@@ -27,13 +27,13 @@ export async function GET(request: NextRequest) {
     const response = await fetch(
       `${COINGECKO_BASE}/coins/markets?vs_currency=try&order=market_cap_desc&per_page=100&page=1&sparkline=false`
     )
-    
+
     if (!response.ok) {
       throw new Error('CoinGecko API hatası')
     }
 
     const data = await response.json()
-    
+
     // Formatla
     const cryptos = data.map((coin: any) => ({
       id: coin.id,
@@ -66,11 +66,10 @@ export async function POST(request: NextRequest) {
     )
 
     const data = await response.json()
-    
+
     return NextResponse.json(data[coinId] || {})
   } catch (error) {
     console.error('Kripto fiyat hatası:', error)
     return NextResponse.json({ error: 'Fiyat alınamadı' }, { status: 500 })
   }
 }
-

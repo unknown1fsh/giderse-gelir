@@ -43,7 +43,15 @@ describe('Periods API Endpoints', () => {
       const duration = Date.now() - startTime
 
       const success = response.status === 200
-      logTestResult('dönemleri getirmeli', '/periods', 'GET', response.status, duration, success, success ? undefined : `Beklenen 200, alınan ${response.status}`)
+      logTestResult(
+        'dönemleri getirmeli',
+        '/periods',
+        'GET',
+        response.status,
+        duration,
+        success,
+        success ? undefined : `Beklenen 200, alınan ${response.status}`
+      )
       expect(response.status).toBe(200)
     })
 
@@ -52,7 +60,14 @@ describe('Periods API Endpoints', () => {
       const response = await testFetch(`${BASE_URL}/periods`)
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/periods', 'GET', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/periods',
+        'GET',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })

@@ -137,12 +137,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       },
       {
         name: '🛡️ Premium Destek',
-        features: [
-          '7/24 Premium Destek',
-          'Gelişmiş Güvenlik',
-          'Premium Tema',
-          'Bulut Yedekleme',
-        ],
+        features: ['7/24 Premium Destek', 'Gelişmiş Güvenlik', 'Premium Tema', 'Bulut Yedekleme'],
       },
     ],
     limitations: [],
@@ -169,12 +164,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       },
       {
         name: '🔧 Entegrasyonlar',
-        features: [
-          'API Erişimi',
-          'Webhook Desteği',
-          'Özel Entegrasyonlar',
-          'ERP/CRM Entegrasyonu',
-        ],
+        features: ['API Erişimi', 'Webhook Desteği', 'Özel Entegrasyonlar', 'ERP/CRM Entegrasyonu'],
       },
       {
         name: '📈 Gelişmiş Analizler',
@@ -182,7 +172,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
           'Departman Bazlı Raporlar',
           'Bütçe Takibi',
           'Nakit Akış Tahminleri',
-          'Özel Dashboard\'lar',
+          "Özel Dashboard'lar",
         ],
       },
       {
@@ -299,4 +289,3 @@ export function isPremiumPlan(planId: string): boolean {
 export function isEnterprisePlan(planId: string): boolean {
   return [PLAN_IDS.ENTERPRISE, PLAN_IDS.ENTERPRISE_PREMIUM].includes(planId as PlanId)
 }
-

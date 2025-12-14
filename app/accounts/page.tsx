@@ -235,7 +235,9 @@ export default function AccountsPage() {
         </Link>
         <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold">Hesaplar</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Tüm finansal hesaplarınızı tek yerden yönetin</p>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Tüm finansal hesaplarınızı tek yerden yönetin
+          </p>
         </div>
       </div>
 

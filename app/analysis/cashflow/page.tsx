@@ -35,19 +35,6 @@ import {
   Share2,
 } from 'lucide-react'
 
-interface CashFlowData {
-  totalIncome: number
-  totalExpenses: number
-  netCashFlow: number
-  monthlyTrend: number
-  categories: {
-    name: string
-    amount: number
-    percentage: number
-    trend: number
-  }[]
-}
-
 interface PremiumFeature {
   id: string
   title: string
@@ -62,7 +49,6 @@ interface PremiumFeature {
 export default function CashFlowAnalysis() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
-  const [_cashFlowData, setCashFlowData] = useState<CashFlowData | null>(null)
   const [selectedFeature, setSelectedFeature] = useState<string | null>(null)
   const [showPremiumModal, setShowPremiumModal] = useState(false)
   const [premiumFeatureName, setPremiumFeatureName] = useState('')
@@ -72,21 +58,6 @@ export default function CashFlowAnalysis() {
   // Kullanıcı tipi tespiti
   const isEnterpriseUser =
     user?.email?.includes('enterprise') || user?.plan === 'enterprise_premium'
-  const _isIndividualUser = user?.email?.includes('demo') || user?.plan === 'premium'
-
-  function isCashFlowData(value: unknown): value is CashFlowData {
-    if (typeof value !== 'object' || value === null) {
-      return false
-    }
-    const v = value as Record<string, unknown>
-    return (
-      typeof v.totalIncome === 'number' &&
-      typeof v.totalExpenses === 'number' &&
-      typeof v.netCashFlow === 'number' &&
-      typeof v.monthlyTrend === 'number' &&
-      Array.isArray(v.categories)
-    )
-  }
 
   // Veri yükleme
   useEffect(() => {
@@ -94,16 +65,12 @@ export default function CashFlowAnalysis() {
       try {
         const response = await fetch('/api/analysis/cashflow')
         if (response.ok) {
-          const raw = (await response.json()) as unknown
-          if (isCashFlowData(raw)) {
-            setCashFlowData(raw)
-          } else {
-            console.warn('Beklenmeyen cashflow response formatı')
-            setCashFlowData(null)
-          }
+          // Bu sayfa şu an premium modaller/feature kartları odaklı.
+          // API response'u ileride UI'da kullanılabilir; şimdilik sadece tüketip geçiyoruz.
+          await response.json()
         } else if (response.status === 403) {
           // Premium gerektiriyor
-          const _error = (await response.json()) as unknown
+          await response.json()
           setPremiumFeatureName('Gelişmiş Nakit Akışı Analizi')
           setShowPremiumModal(true)
         }

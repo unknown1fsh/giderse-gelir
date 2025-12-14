@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useUser } from '@/lib/user-context'
 import PeriodSelector from '@/components/period-selector'
 import { isPremiumPlan } from '@/lib/plan-config'
+import BrandLogo from '@/components/brand-logo'
 import {
   Wallet,
   Settings,
@@ -86,7 +87,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
       <div
         className={`
           fixed lg:static inset-y-0 left-0 z-50
-          flex h-screen w-72 flex-col 
+          flex h-screen h-[100dvh] w-72 flex-col 
           bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white shadow-2xl
           transform transition-transform duration-300 ease-smooth
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -112,13 +113,13 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               className="flex h-20 items-center justify-center bg-gradient-to-r from-blue-600/20 to-purple-600/20 hover:from-blue-600/30 hover:to-purple-600/30 transition-all duration-300 group cursor-pointer"
             >
               <div className="flex items-center space-x-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-glow group-hover:shadow-glow-lg group-hover:scale-110 transition-all duration-300">
-                  <span className="text-3xl font-bold text-white">₺</span>
-                </div>
                 <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent group-hover:from-blue-300 group-hover:to-purple-300 transition-all duration-300">
-                    GiderSE-Gelir
-                  </h1>
+                  <BrandLogo
+                    size={40}
+                    priority
+                    variant="dark"
+                    textClassName="text-xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent group-hover:from-blue-300 group-hover:to-purple-300 transition-all duration-300"
+                  />
                   <p className="text-xs text-slate-400 group-hover:text-slate-300 transition-colors duration-300">
                     Finans Yönetimi
                   </p>
@@ -131,8 +132,8 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           {user && (
             <div className="flex items-center justify-center py-3 px-6">
               {user.plan === 'premium' ||
-                user.plan === 'enterprise' ||
-                user.plan === 'enterprise_premium' ? (
+              user.plan === 'enterprise' ||
+              user.plan === 'enterprise_premium' ? (
                 <Link
                   href="/premium-features"
                   onClick={handleLinkClick}
@@ -210,16 +211,18 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                 key={item.name}
                 href={item.href}
                 onClick={handleLinkClick}
-                className={`group flex items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${isActive
+                className={`group flex items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
+                  isActive
                     ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white shadow-lg border border-blue-500/30 scale-[1.02]'
                     : 'text-slate-300 hover:bg-slate-700/50 hover:text-white hover:shadow-md hover:scale-[1.01]'
-                  }`}
+                }`}
               >
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 ${isActive
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 ${
+                    isActive
                       ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-md scale-110'
                       : 'bg-slate-700/50 group-hover:bg-slate-600/50 group-hover:scale-110'
-                    }`}
+                  }`}
                 >
                   <item.icon className={`h-4 w-4 ${isActive ? 'text-white' : item.color}`} />
                 </div>
@@ -240,16 +243,18 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               <Link
                 href="/admin"
                 onClick={handleLinkClick}
-                className={`flex items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${pathname === '/admin'
+                className={`flex items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
+                  pathname === '/admin'
                     ? 'bg-gradient-to-r from-red-600/20 to-pink-600/20 text-white shadow-lg border border-red-500/30'
                     : 'text-slate-300 hover:bg-red-600/20 hover:text-red-400'
-                  }`}
+                }`}
               >
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 ${pathname === '/admin'
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 ${
+                    pathname === '/admin'
                       ? 'bg-gradient-to-br from-red-500 to-pink-600 text-white shadow-md'
                       : 'bg-slate-700/50 group-hover:scale-110'
-                    }`}
+                  }`}
                 >
                   <Shield className="h-4 w-4" />
                 </div>

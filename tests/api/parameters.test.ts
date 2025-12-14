@@ -37,7 +37,14 @@ describe('Parameters API Endpoints', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('parametreleri getirmeli', '/parameters', 'GET', response.status, duration, [200, 500].includes(response.status))
+      logTestResult(
+        'parametreleri getirmeli',
+        '/parameters',
+        'GET',
+        response.status,
+        duration,
+        [200, 500].includes(response.status)
+      )
       expect([200, 500]).toContain(response.status)
     })
   })

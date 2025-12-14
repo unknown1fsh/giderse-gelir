@@ -60,11 +60,11 @@ module.exports = {
         '7xl': ['4.5rem', { lineHeight: '4.875rem' }],
       },
       spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
-        '100': '25rem',
-        '112': '28rem',
-        '128': '32rem',
+        18: '4.5rem',
+        88: '22rem',
+        100: '25rem',
+        112: '28rem',
+        128: '32rem',
       },
       borderRadius: {
         '4xl': '2rem',
@@ -72,25 +72,25 @@ module.exports = {
       },
       boxShadow: {
         'glow-sm': '0 0 10px rgba(168, 85, 247, 0.4)',
-        'glow': '0 0 20px rgba(168, 85, 247, 0.5)',
+        glow: '0 0 20px rgba(168, 85, 247, 0.5)',
         'glow-lg': '0 0 30px rgba(168, 85, 247, 0.6)',
         'inner-glow': 'inset 0 0 20px rgba(168, 85, 247, 0.3)',
-        'premium': '0 10px 40px rgba(168, 85, 247, 0.3)',
-        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        premium: '0 10px 40px rgba(168, 85, 247, 0.3)',
+        card: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
         'card-hover': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+        glass: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
         'gradient-mesh': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'shimmer': 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+        shimmer: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
       },
       animation: {
-        'float': 'float 6s ease-in-out infinite',
+        float: 'float 6s ease-in-out infinite',
         'float-delayed': 'float 6s ease-in-out 2s infinite',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'shimmer': 'shimmer 2s linear infinite',
+        shimmer: 'shimmer 2s linear infinite',
         'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
         'bounce-slow': 'bounce 2s infinite',
         'spin-slow': 'spin 3s linear infinite',
@@ -108,11 +108,11 @@ module.exports = {
           '100%': { transform: 'translateX(100%)' },
         },
         'glow-pulse': {
-          '0%, 100%': { 
+          '0%, 100%': {
             boxShadow: '0 0 20px rgba(168, 85, 247, 0.5)',
             opacity: '1',
           },
-          '50%': { 
+          '50%': {
             boxShadow: '0 0 30px rgba(168, 85, 247, 0.8)',
             opacity: '0.8',
           },
@@ -120,21 +120,21 @@ module.exports = {
         'gradient-x': {
           '0%, 100%': {
             'background-size': '200% 200%',
-            'background-position': 'left center'
+            'background-position': 'left center',
           },
           '50%': {
             'background-size': '200% 200%',
-            'background-position': 'right center'
+            'background-position': 'right center',
           },
         },
         'gradient-y': {
           '0%, 100%': {
             'background-size': '200% 200%',
-            'background-position': 'center top'
+            'background-position': 'center top',
           },
           '50%': {
             'background-size': '200% 200%',
-            'background-position': 'center bottom'
+            'background-position': 'center bottom',
           },
         },
         'scale-up': {
@@ -146,11 +146,11 @@ module.exports = {
         xs: '2px',
       },
       transitionDuration: {
-        '400': '400ms',
-        '600': '600ms',
+        400: '400ms',
+        600: '600ms',
       },
       transitionTimingFunction: {
-        'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        smooth: 'cubic-bezier(0.4, 0, 0.2, 1)',
         'bounce-in': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
       },
     },

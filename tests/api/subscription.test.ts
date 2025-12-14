@@ -38,7 +38,14 @@ describe('Subscription API Endpoints', () => {
       })
       const duration = Date.now() - startTime
 
-      logTestResult('abonelik durumunu getirmeli', '/subscription/status', 'GET', response.status, duration, response.status === 200)
+      logTestResult(
+        'abonelik durumunu getirmeli',
+        '/subscription/status',
+        'GET',
+        response.status,
+        duration,
+        response.status === 200
+      )
       expect(response.status).toBe(200)
 
       const data = await response.json()
@@ -51,7 +58,14 @@ describe('Subscription API Endpoints', () => {
       const response = await testFetch(`${BASE_URL}/subscription/status`)
       const duration = Date.now() - startTime
 
-      logTestResult('token olmadan 401 dönmeli', '/subscription/status', 'GET', response.status, duration, response.status === 401)
+      logTestResult(
+        'token olmadan 401 dönmeli',
+        '/subscription/status',
+        'GET',
+        response.status,
+        duration,
+        response.status === 401
+      )
       expect(response.status).toBe(401)
     })
   })
@@ -62,7 +76,14 @@ describe('Subscription API Endpoints', () => {
       const response = await testFetch(`${BASE_URL}/subscription/plans`)
       const duration = Date.now() - startTime
 
-      logTestResult('planları getirmeli', '/subscription/plans', 'GET', response.status, duration, response.status === 200)
+      logTestResult(
+        'planları getirmeli',
+        '/subscription/plans',
+        'GET',
+        response.status,
+        duration,
+        response.status === 200
+      )
       expect(response.status).toBe(200)
     })
   })

@@ -4,7 +4,17 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Coins, TrendingUp, AlertCircle, ArrowLeft, Home, Tag, Calendar, Edit, Trash2 } from 'lucide-react'
+import {
+  Coins,
+  TrendingUp,
+  AlertCircle,
+  ArrowLeft,
+  Home,
+  Tag,
+  Calendar,
+  Edit,
+  Trash2,
+} from 'lucide-react'
 import { formatCurrency } from '@/lib/validators'
 import { EditNameModal } from '@/components/ui/edit-name-modal'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
@@ -61,7 +71,9 @@ export default function GoldPage() {
   }, [])
 
   const handleEditName = async (newName: string) => {
-    if (!selectedGold) {return}
+    if (!selectedGold) {
+      return
+    }
 
     try {
       const response = await fetch(`/api/gold/${selectedGold.id}`, {
@@ -74,9 +86,7 @@ export default function GoldPage() {
       if (response.ok) {
         // Listeyi güncelle
         setGoldItems(prev =>
-          prev.map(gold =>
-            gold.id === selectedGold.id ? { ...gold, name: newName } : gold
-          )
+          prev.map(gold => (gold.id === selectedGold.id ? { ...gold, name: newName } : gold))
         )
         alert('Altın adı başarıyla güncellendi')
       } else {
@@ -89,7 +99,9 @@ export default function GoldPage() {
   }
 
   const handleDelete = async () => {
-    if (!selectedGold) {return}
+    if (!selectedGold) {
+      return
+    }
 
     try {
       const response = await fetch(`/api/gold/${selectedGold.id}`, {
@@ -283,7 +295,8 @@ export default function GoldPage() {
                             : '↘'}
                           {formatCurrency(
                             Math.abs(
-                              parseFloat(item.currentValueTry || '0') - parseFloat(item.purchasePrice)
+                              parseFloat(item.currentValueTry || '0') -
+                                parseFloat(item.purchasePrice)
                             ),
                             'TRY'
                           )}

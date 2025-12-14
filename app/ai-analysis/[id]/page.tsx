@@ -279,14 +279,16 @@ export default function AIReportDetailPage() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Badge variant={report.status === 'completed' ? 'default' : 'secondary'}>
-                {report.status === 'completed' ? 'Tamamlandı' : report.status}
-              </Badge>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                PDF İndir
-              </Button>
+            <div className="w-full sm:w-auto">
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
+                <Badge variant={report.status === 'completed' ? 'default' : 'secondary'}>
+                  {report.status === 'completed' ? 'Tamamlandı' : report.status}
+                </Badge>
+                <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                  <Download className="h-4 w-4 mr-2" />
+                  PDF İndir
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -366,14 +368,16 @@ export default function AIReportDetailPage() {
                 )
                 return (
                   <div key={category.category} className="p-4 bg-slate-50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                      <div className="min-w-0 flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold">
                           {index + 1}
                         </div>
-                        <span className="font-semibold text-slate-900">{category.category}</span>
+                        <span className="min-w-0 font-semibold text-slate-900 truncate">
+                          {category.category}
+                        </span>
                       </div>
-                      <div className="text-right">
+                      <div className="text-left sm:text-right">
                         <div className="font-bold text-slate-900">
                           {formatCurrency(category.amount, 'TRY')}
                         </div>
@@ -418,8 +422,10 @@ export default function AIReportDetailPage() {
                   <div className="flex items-start gap-3 mb-3">
                     <div className="p-2 rounded-lg bg-white">{getInsightIcon(insight.type)}</div>
                     <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold text-slate-900">{insight.title}</h3>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                        <h3 className="font-semibold text-slate-900 break-words">
+                          {insight.title}
+                        </h3>
                         {getPriorityBadge(insight.priority)}
                       </div>
                       <p className="text-sm text-slate-700 mb-2">{insight.description}</p>
@@ -449,8 +455,8 @@ export default function AIReportDetailPage() {
               <div className="space-y-3">
                 {reportData.cashFlow.map((flow, index) => (
                   <div key={index} className="p-4 bg-slate-50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-semibold text-slate-900">{flow.month}</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                      <span className="font-semibold text-slate-900 break-words">{flow.month}</span>
                       <Badge
                         variant={flow.balance >= 0 ? 'default' : 'destructive'}
                         className="text-sm"

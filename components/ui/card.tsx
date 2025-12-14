@@ -19,22 +19,16 @@ const cardVariants = cva(
   }
 )
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof cardVariants> {
+interface CardProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof cardVariants> {
   className?: string
   children: React.ReactNode
 }
 
-export function Card({
-  className,
-  variant,
-  children,
-  ...props
-}: CardProps) {
+export function Card({ className, variant, children, ...props }: CardProps) {
   return (
-    <div
-      className={cn(cardVariants({ variant }), className)}
-      {...props}
-    >
+    <div className={cn(cardVariants({ variant }), className)} {...props}>
       {children}
     </div>
   )

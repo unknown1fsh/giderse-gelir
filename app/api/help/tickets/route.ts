@@ -64,7 +64,12 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     throw new UnauthorizedError('Oturum bulunamadı')
   }
 
-  const body = await request.json() as { categoryId?: number | string; subject?: string; description?: string; priority?: string }
+  const body = (await request.json()) as {
+    categoryId?: number | string
+    subject?: string
+    description?: string
+    priority?: string
+  }
   const { categoryId: rawCategoryId, subject, description, priority } = body
 
   if (!rawCategoryId || !subject || !description) {
@@ -128,7 +133,7 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
 
   // Email bildirimleri gönder
   try {
-    await sendSupportTicketCreatedEmail(user.email, user.name, ticketNumber, subject as string)
+    await sendSupportTicketCreatedEmail(user.email, user.name, ticketNumber, subject)
 
     // Admin'lere bildirim gönder
     const admins = await prisma.user.findMany({
@@ -147,7 +152,7 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
         ticketNumber,
         user.name,
         user.email,
-        subject as string,
+        subject,
         category.name
       )
     }
@@ -162,4 +167,3 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     message: 'Destek talebi başarıyla oluşturuldu',
   })
 })
-

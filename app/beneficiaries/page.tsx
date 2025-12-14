@@ -55,7 +55,9 @@ export default function BeneficiariesPage() {
   }
 
   const handleEditName = async (newName: string) => {
-    if (!selectedBeneficiary) {return}
+    if (!selectedBeneficiary) {
+      return
+    }
 
     try {
       const response = await fetch(`/api/beneficiaries/${selectedBeneficiary.id}`, {
@@ -68,7 +70,9 @@ export default function BeneficiariesPage() {
       if (response.ok) {
         setBeneficiaries(prev =>
           prev.map(beneficiary =>
-            beneficiary.id === selectedBeneficiary.id ? { ...beneficiary, name: newName } : beneficiary
+            beneficiary.id === selectedBeneficiary.id
+              ? { ...beneficiary, name: newName }
+              : beneficiary
           )
         )
         alert('Alıcı adı başarıyla güncellendi')
@@ -82,7 +86,9 @@ export default function BeneficiariesPage() {
   }
 
   const handleDelete = async () => {
-    if (!selectedBeneficiary) {return}
+    if (!selectedBeneficiary) {
+      return
+    }
 
     try {
       const response = await fetch(`/api/beneficiaries/${selectedBeneficiary.id}`, {
@@ -93,7 +99,9 @@ export default function BeneficiariesPage() {
       if (response.ok) {
         const result = await response.json()
         alert(result.message)
-        setBeneficiaries(prev => prev.filter(beneficiary => beneficiary.id !== selectedBeneficiary.id))
+        setBeneficiaries(prev =>
+          prev.filter(beneficiary => beneficiary.id !== selectedBeneficiary.id)
+        )
       } else {
         alert('Alıcı silinemedi')
       }
@@ -259,4 +267,3 @@ export default function BeneficiariesPage() {
     </div>
   )
 }
-

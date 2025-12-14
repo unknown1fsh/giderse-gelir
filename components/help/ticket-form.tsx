@@ -38,10 +38,7 @@ interface TicketFormProps {
 }
 
 function normalize(text: string) {
-  return text
-    .toLocaleLowerCase('tr-TR')
-    .replace(/\s+/g, ' ')
-    .trim()
+  return text.toLocaleLowerCase('tr-TR').replace(/\s+/g, ' ').trim()
 }
 
 export default function TicketForm({ onSuccess, prefill }: TicketFormProps) {
@@ -56,7 +53,10 @@ export default function TicketForm({ onSuccess, prefill }: TicketFormProps) {
     priority: (prefill?.priority || 'medium') as TicketPriority,
   })
 
-  const categoryHint = useMemo(() => normalize(prefill?.categoryHint || ''), [prefill?.categoryHint])
+  const categoryHint = useMemo(
+    () => normalize(prefill?.categoryHint || ''),
+    [prefill?.categoryHint]
+  )
   const [categoriesLoading, setCategoriesLoading] = useState(true)
   const [categoriesError, setCategoriesError] = useState<string | null>(null)
 
@@ -66,7 +66,7 @@ export default function TicketForm({ onSuccess, prefill }: TicketFormProps) {
       setCategoriesError(null)
       try {
         const response = await fetch('/api/help/categories')
-        
+
         if (!response.ok) {
           const errorData = (await response.json()) as { error?: string }
           throw new Error(errorData.error || `HTTP ${response.status}`)
@@ -135,7 +135,7 @@ export default function TicketForm({ onSuccess, prefill }: TicketFormProps) {
       if (!selected) {
         // Önce tam eşleşme ara
         selected = categories.find(c => normalize(c.name) === categoryHint)
-        
+
         // Tam eşleşme yoksa içeriyor mu kontrol et
         if (!selected) {
           selected = categories.find(c => {
@@ -159,7 +159,7 @@ export default function TicketForm({ onSuccess, prefill }: TicketFormProps) {
     }
 
     if (selected) {
-      setFormData(prev => ({ ...prev, categoryId: selected!.id.toString() }))
+      setFormData(prev => ({ ...prev, categoryId: selected.id.toString() }))
     }
   }, [categories, categoryHint, formData.categoryId, prefill?.categoryHint, categoriesLoading])
 
@@ -238,7 +238,9 @@ export default function TicketForm({ onSuccess, prefill }: TicketFormProps) {
               disabled={categories.length === 0}
             >
               <SelectTrigger id="category">
-                <SelectValue placeholder={categories.length === 0 ? 'Kategori bulunamadı' : 'Kategori seçin'} />
+                <SelectValue
+                  placeholder={categories.length === 0 ? 'Kategori bulunamadı' : 'Kategori seçin'}
+                />
               </SelectTrigger>
               <SelectContent>
                 {categories.length > 0 ? (
@@ -254,12 +256,11 @@ export default function TicketForm({ onSuccess, prefill }: TicketFormProps) {
             </Select>
           )}
           {autoCategoryNote && <p className="text-xs text-slate-500">{autoCategoryNote}</p>}
-          {categoriesError && (
-            <p className="text-xs text-red-600">{categoriesError}</p>
-          )}
+          {categoriesError && <p className="text-xs text-red-600">{categoriesError}</p>}
           {!categoriesLoading && categories.length === 0 && !categoriesError && (
             <p className="text-xs text-red-600">
-              Destek kategorisi bulunamadı. Lütfen admin panelinden en az bir destek kategorisi ekleyin.
+              Destek kategorisi bulunamadı. Lütfen admin panelinden en az bir destek kategorisi
+              ekleyin.
             </p>
           )}
         </div>
@@ -325,7 +326,8 @@ export default function TicketForm({ onSuccess, prefill }: TicketFormProps) {
         </Button>
         {categories.length === 0 && (
           <p className="text-xs text-red-600">
-            Destek kategorisi bulunamadı. Lütfen admin panelinden en az bir destek kategorisi ekleyin.
+            Destek kategorisi bulunamadı. Lütfen admin panelinden en az bir destek kategorisi
+            ekleyin.
           </p>
         )}
       </form>

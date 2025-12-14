@@ -21,7 +21,9 @@ const Popover = React.forwardRef<
     onOpenChange?.(newOpen)
   }
 
-  if (!isOpen) {return null}
+  if (!isOpen) {
+    return null
+  }
 
   return <div ref={ref} className={cn('relative', className)} {...props} />
 })

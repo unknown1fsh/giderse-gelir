@@ -12,17 +12,26 @@ import path from 'path'
 // Vitest ortamında Next.js'in env yüklemesi otomatik gelmeyebilir.
 // Sunucu ile aynı DB/JWT ayarlarını kullanmak için .env/.env.local dosyalarını burada yüklüyoruz.
 function loadEnvFile(filePath: string) {
-  if (!fs.existsSync(filePath)) return
+  if (!fs.existsSync(filePath)) {
+    return
+  }
   const content = fs.readFileSync(filePath, 'utf-8')
   for (const rawLine of content.split(/\r?\n/)) {
     const line = rawLine.trim()
-    if (!line || line.startsWith('#')) continue
+    if (!line || line.startsWith('#')) {
+      continue
+    }
     const eq = line.indexOf('=')
-    if (eq === -1) continue
+    if (eq === -1) {
+      continue
+    }
     const key = line.slice(0, eq).trim()
     let value = line.slice(eq + 1).trim()
     // basit tırnak temizleme
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
       value = value.slice(1, -1)
     }
     if (!(key in process.env)) {

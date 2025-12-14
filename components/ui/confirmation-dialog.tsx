@@ -24,7 +24,9 @@ export function ConfirmationDialog({
   cancelText = 'İptal',
   confirmButtonClass = 'bg-red-600 hover:bg-red-700',
 }: ConfirmationDialogProps) {
-  if (!isOpen) {return null}
+  if (!isOpen) {
+    return null
+  }
 
   const handleConfirm = async () => {
     try {
@@ -54,7 +56,7 @@ export function ConfirmationDialog({
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-gray-700">{message}</p>
-          
+
           {warningMessage && (
             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
               <p className="text-sm text-yellow-800">⚠️ {warningMessage}</p>
@@ -82,4 +84,3 @@ export function ConfirmationDialog({
     </div>
   )
 }
-

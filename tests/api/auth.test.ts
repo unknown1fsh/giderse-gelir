@@ -36,7 +36,7 @@ describe('Auth API Endpoints', () => {
     it('yeni kullanıcı kaydı başarılı olmalı', async () => {
       // Rate limiting için bekle
       await new Promise(resolve => setTimeout(resolve, 2000))
-      
+
       const startTime = Date.now()
       const response = await testFetch(`${BASE_URL}/auth/register`, {
         method: 'POST',
@@ -146,7 +146,7 @@ describe('Auth API Endpoints', () => {
     it('kısa şifre ile kayıt hata vermeli', async () => {
       // Rate limiting için bekle
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
+
       const startTime = Date.now()
       const response = await testFetch(`${BASE_URL}/auth/register`, {
         method: 'POST',
@@ -177,7 +177,7 @@ describe('Auth API Endpoints', () => {
     it('geçersiz email formatı ile kayıt hata vermeli', async () => {
       // Rate limiting için bekle
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
+
       const startTime = Date.now()
       const response = await testFetch(`${BASE_URL}/auth/register`, {
         method: 'POST',
@@ -225,7 +225,7 @@ describe('Auth API Endpoints', () => {
           authToken = registerData.session.token
         }
       }
-      
+
       const startTime = Date.now()
       const response = await testFetch(`${BASE_URL}/auth/login`, {
         method: 'POST',
@@ -357,7 +357,7 @@ describe('Auth API Endpoints', () => {
           authToken = loginData.session.token
         }
       }
-      
+
       const startTime = Date.now()
       const response = await testFetch(`${BASE_URL}/auth/me`, {
         headers: {

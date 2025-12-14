@@ -42,7 +42,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 }
 
 // E-cüzdan sil (cascade delete - ilişkili transaction'lar da silinir)
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const user = await getCurrentUser(request)
     if (!user) {
@@ -68,13 +71,10 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     return NextResponse.json({
       success: true,
       deletedTransactions: txCount,
-      message: txCount > 0
-        ? `E-cüzdan ve ${txCount} işlem kaydı silindi`
-        : 'E-cüzdan silindi',
+      message: txCount > 0 ? `E-cüzdan ve ${txCount} işlem kaydı silindi` : 'E-cüzdan silindi',
     })
   } catch (error) {
     console.error('E-wallet delete error:', error)
     return NextResponse.json({ error: 'E-cüzdan silinemedi' }, { status: 500 })
   }
 }
-

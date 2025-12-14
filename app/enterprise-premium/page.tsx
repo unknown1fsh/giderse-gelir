@@ -39,7 +39,6 @@ export default function EnterprisePremiumPage() {
   const { user } = useUser()
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
 
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-purple-900 to-indigo-900 relative overflow-hidden">
       {/* Ultra Animated Background */}

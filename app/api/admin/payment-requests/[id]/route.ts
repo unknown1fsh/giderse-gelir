@@ -6,13 +6,14 @@ import { BadRequestError } from '@/server/errors'
 
 // Ödeme talebi güncelleme (onay/red)
 export const PUT = ExceptionMapper.asyncHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const adminCheck = await requireAdmin(request)
     if (adminCheck.error) {
       return adminCheck.error
     }
 
-    const id = parseInt(params.id)
+    const { id: paramId } = await params
+    const id = parseInt(paramId)
     if (isNaN(id)) {
       throw new BadRequestError('Geçersiz ID')
     }
@@ -91,4 +92,3 @@ export const PUT = ExceptionMapper.asyncHandler(
     })
   }
 )
-

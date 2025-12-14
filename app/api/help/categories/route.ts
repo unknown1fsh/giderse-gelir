@@ -27,11 +27,36 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
   // Eğer hiç kategori yoksa varsayılan kategorileri oluştur
   if (categories.length === 0) {
     const defaultCategories = [
-      { name: 'Üyelik', description: 'Üyelik ve abonelik talepleri', icon: 'Crown', color: 'purple' },
-      { name: 'Teknik Destek', description: 'Teknik sorunlar ve yardım', icon: 'Settings', color: 'blue' },
-      { name: 'Hesap Yönetimi', description: 'Hesap ayarları ve yönetimi', icon: 'User', color: 'green' },
-      { name: 'Ödeme', description: 'Ödeme ve faturalama sorunları', icon: 'CreditCard', color: 'orange' },
-      { name: 'Öneri ve Şikayet', description: 'Öneriler ve şikayetler', icon: 'MessageSquare', color: 'pink' },
+      {
+        name: 'Üyelik',
+        description: 'Üyelik ve abonelik talepleri',
+        icon: 'Crown',
+        color: 'purple',
+      },
+      {
+        name: 'Teknik Destek',
+        description: 'Teknik sorunlar ve yardım',
+        icon: 'Settings',
+        color: 'blue',
+      },
+      {
+        name: 'Hesap Yönetimi',
+        description: 'Hesap ayarları ve yönetimi',
+        icon: 'User',
+        color: 'green',
+      },
+      {
+        name: 'Ödeme',
+        description: 'Ödeme ve faturalama sorunları',
+        icon: 'CreditCard',
+        color: 'orange',
+      },
+      {
+        name: 'Öneri ve Şikayet',
+        description: 'Öneriler ve şikayetler',
+        icon: 'MessageSquare',
+        color: 'pink',
+      },
       { name: 'Diğer', description: 'Diğer konular', icon: 'HelpCircle', color: 'gray' },
     ]
 
@@ -58,4 +83,3 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
     data: categories,
   })
 })
-

@@ -43,7 +43,9 @@ export default function FileUpload({ ticketId, onUploadSuccess }: FileUploadProp
       }
 
       if (!allowedTypes.includes(file.type)) {
-        alert(`${file.name} dosyası desteklenmiyor. İzin verilen formatlar: JPG, PNG, PDF, DOC, DOCX`)
+        alert(
+          `${file.name} dosyası desteklenmiyor. İzin verilen formatlar: JPG, PNG, PDF, DOC, DOCX`
+        )
         return false
       }
 
@@ -58,13 +60,19 @@ export default function FileUpload({ ticketId, onUploadSuccess }: FileUploadProp
   }
 
   const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B'
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB'
+    if (bytes < 1024) {
+      return bytes + ' B'
+    }
+    if (bytes < 1024 * 1024) {
+      return (bytes / 1024).toFixed(2) + ' KB'
+    }
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
   }
 
   const handleUpload = async () => {
-    if (files.length === 0) return
+    if (files.length === 0) {
+      return
+    }
 
     setUploading(true)
 
@@ -78,7 +86,11 @@ export default function FileUpload({ ticketId, onUploadSuccess }: FileUploadProp
           body: formData,
         })
 
-        const result = await response.json() as { success: boolean; data?: { id: number; fileName: string; filePath: string }; error?: string }
+        const result = (await response.json()) as {
+          success: boolean
+          data?: { id: number; fileName: string; filePath: string }
+          error?: string
+        }
 
         if (result.success && result.data) {
           setUploadedFiles(prev => [...prev, result.data!])
@@ -112,9 +124,7 @@ export default function FileUpload({ ticketId, onUploadSuccess }: FileUploadProp
                 <p className="text-sm text-gray-600 mb-2">
                   Dosyaları buraya sürükleyin veya tıklayarak seçin
                 </p>
-                <p className="text-xs text-gray-500">
-                  Maksimum 10MB • JPG, PNG, PDF, DOC, DOCX
-                </p>
+                <p className="text-xs text-gray-500">Maksimum 10MB • JPG, PNG, PDF, DOC, DOCX</p>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -151,7 +161,13 @@ export default function FileUpload({ ticketId, onUploadSuccess }: FileUploadProp
                     </Button>
                   </div>
                 ))}
-                <Button onClick={() => { void handleUpload() }} disabled={uploading} className="w-full">
+                <Button
+                  onClick={() => {
+                    void handleUpload()
+                  }}
+                  disabled={uploading}
+                  className="w-full"
+                >
                   {uploading ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -197,4 +213,3 @@ export default function FileUpload({ ticketId, onUploadSuccess }: FileUploadProp
     </div>
   )
 }
-

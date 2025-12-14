@@ -50,6 +50,9 @@ Thumbs.db
 
 # Misc
 *.log
+log.txt
+test-output.txt
+*.test-output.*
 .cache
 .temp
 .tmp

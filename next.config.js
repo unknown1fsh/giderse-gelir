@@ -72,7 +72,7 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://*.googleadservices.com https://*.doubleclick.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: https://*.googleadservices.com https://*.doubleclick.net https://*.google-analytics.com; font-src 'self' data:; connect-src 'self' https: https://www.googletagmanager.com https://www.google-analytics.com https://*.googleadservices.com https://*.doubleclick.net; frame-src 'self' https://www.googletagmanager.com https://*.doubleclick.net; object-src 'none'; base-uri 'self';",
+              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://*.googleadservices.com https://*.doubleclick.net; script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://*.googleadservices.com https://*.doubleclick.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: https://*.googleadservices.com https://*.doubleclick.net https://*.google-analytics.com; font-src 'self' data:; connect-src 'self' https: https://www.googletagmanager.com https://www.google-analytics.com https://*.googleadservices.com https://*.doubleclick.net; frame-src 'self' https://www.googletagmanager.com https://*.doubleclick.net; object-src 'none'; base-uri 'self';",
           },
         ],
       },

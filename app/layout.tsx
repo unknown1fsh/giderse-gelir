@@ -50,7 +50,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   gtag('js', new Date());
                   gtag('config', '${googleTagId}', {
                     'send_page_view': true,
-                    'allow_enhanced_conversions': true
+                    'allow_enhanced_conversions': true,
+                    'transport_type': 'beacon'
                   });
                 `,
               }}

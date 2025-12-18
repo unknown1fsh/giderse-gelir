@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { CheckCircle, XCircle, Clock, MessageSquare } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils'
+import { trackGoogleAdsConversion } from '@/lib/google-ads'
 
 interface PaymentRequest {
   id: number
@@ -115,9 +116,19 @@ export default function AdminPayments() {
         }),
       })
 
-      const data = (await response.json()) as { success: boolean; message?: string }
+      const data = (await response.json()) as {
+        success: boolean
+        message?: string
+        subscription?: { id: number; planId: string }
+      }
 
       if (response.ok && data.success) {
+        // Ödeme onaylandıysa ve plan free değilse Google Ads conversion event'ini tetikle
+        if (actionType === 'approve' && selectedRequest.planId !== 'free') {
+          const transactionId = `payment_${selectedRequest.id}`
+          trackGoogleAdsConversion(transactionId, selectedRequest.amount)
+        }
+
         alert(data.message || 'İşlem başarılı')
         setShowActionModal(false)
         setSelectedRequest(null)

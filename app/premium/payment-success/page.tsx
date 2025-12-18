@@ -61,19 +61,6 @@ function PaymentSuccessContent() {
     }
   }, [merchantOid, refreshUser])
 
-  // Google Ads conversion event - Ödeme başarılı olduğunda tetikle
-  useEffect(() => {
-    if (success && merchantOid && typeof window !== 'undefined' && window.gtag) {
-      // Google Ads conversion event
-      window.gtag('event', 'conversion', {
-        send_to: 'AW-17814901017/oE9rCJeF09MbEJmi565C',
-        value: 1.0,
-        currency: 'TRY',
-        transaction_id: merchantOid,
-      })
-    }
-  }, [success, merchantOid])
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-4">
       <Card className="w-full max-w-md">

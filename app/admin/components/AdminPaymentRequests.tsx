@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dialog'
 import { CheckCircle2, XCircle, Clock, Eye, Loader2 } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils'
+import { trackGoogleAdsConversion } from '@/lib/google-ads'
 
 interface PaymentRequest {
   id: number
@@ -85,6 +86,12 @@ export default function AdminPaymentRequests() {
       })
 
       if (response.ok) {
+        // Ödeme onaylandıysa ve plan free değilse Google Ads conversion event'ini tetikle
+        if (action === 'approve' && selectedRequest && selectedRequest.planId !== 'free') {
+          const transactionId = `manual_${selectedRequest.id}_${Date.now()}`
+          trackGoogleAdsConversion(transactionId, selectedRequest.amount)
+        }
+
         // Liste'yi yenile
         await fetchRequests()
         setSelectedRequest(null)

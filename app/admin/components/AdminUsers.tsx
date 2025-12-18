@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/select'
 import { Eye, Trash2 } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils'
+import { trackGoogleAdsConversion } from '@/lib/google-ads'
+import { getPlanPrice } from '@/lib/plan-config'
 
 interface User {
   id: number
@@ -109,6 +111,13 @@ export default function AdminUsers() {
       if (updates.planId) {
         // Plan değişikliği event'i gönder
         window.dispatchEvent(new CustomEvent('plan-changed'))
+
+        // Plan free değilse Google Ads conversion event'ini tetikle
+        if (updates.planId && updates.planId !== 'free') {
+          const transactionId = `admin_${Date.now()}_${userId}`
+          const planPrice = getPlanPrice(updates.planId)
+          trackGoogleAdsConversion(transactionId, planPrice)
+        }
       }
 
       alert('Kullanıcı başarıyla güncellendi')

@@ -105,6 +105,8 @@ export const PUT = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
     updateData.isActive = isActive
   }
 
+  let subscriptionCreated = false
+
   // Plan değiştirme işlemi
   if (planId !== undefined) {
     if (!planId || !isValidPlanId(planId)) {
@@ -123,6 +125,7 @@ export const PUT = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
     // Eğer kullanıcı zaten bu plandaysa, hata döndürme (sessizce başarılı sayalım)
     if (existingSubscription && existingSubscription.planId === planId) {
       // Plan değişikliği yok, sadece user bilgilerini güncelle
+      subscriptionCreated = false
     } else {
       // Eski aboneliği iptal et (eğer varsa)
       if (existingSubscription) {
@@ -155,6 +158,7 @@ export const PUT = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
           autoRenew: planId !== PLAN_IDS.FREE,
         },
       })
+      subscriptionCreated = true
     }
   }
 
@@ -175,5 +179,6 @@ export const PUT = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
   return NextResponse.json({
     success: true,
     data: userDTO,
+    subscriptionCreated,
   })
 })

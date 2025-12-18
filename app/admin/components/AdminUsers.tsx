@@ -99,9 +99,15 @@ export default function AdminUsers() {
         body: JSON.stringify({ userId, ...updates }),
       })
 
-      if (!response.ok) {
-        const errorData = (await response.json()) as { error?: string }
-        throw new Error(errorData.error || 'Kullanıcı güncellenemedi')
+      const result = (await response.json()) as {
+        success: boolean
+        data: unknown
+        subscriptionCreated?: boolean
+        error?: string
+      }
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Kullanıcı güncellenemedi')
       }
 
       // Kullanıcı listesini yenile
@@ -112,8 +118,8 @@ export default function AdminUsers() {
         // Plan değişikliği event'i gönder
         window.dispatchEvent(new CustomEvent('plan-changed'))
 
-        // Plan free değilse Google Ads conversion event'ini tetikle
-        if (updates.planId && updates.planId !== 'free') {
+        // Yeni abonelik oluşturulduysa ve plan free değilse Google Ads conversion event'ini tetikle
+        if (result.subscriptionCreated && updates.planId !== 'free') {
           const transactionId = `admin_${Date.now()}_${userId}`
           const planPrice = getPlanPrice(updates.planId)
           trackGoogleAdsConversion(transactionId, planPrice)

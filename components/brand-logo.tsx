@@ -34,6 +34,7 @@ export default function BrandLogo({
           width={size}
           height={size}
           priority={priority}
+          unoptimized
           className="rounded-lg"
         />
       </div>

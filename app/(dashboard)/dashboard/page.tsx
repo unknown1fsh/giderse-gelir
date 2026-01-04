@@ -34,7 +34,6 @@ import {
   Building2,
   Coins,
   Receipt,
-  Eye,
   RefreshCw,
 } from 'lucide-react'
 

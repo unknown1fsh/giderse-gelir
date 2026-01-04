@@ -31,6 +31,45 @@ export async function GET(request: NextRequest) {
       goldWhere.periodId = activePeriod.id
     }
 
+    // Default Nakit hesabı kontrolü ve oluşturma
+    // accountNumber='CASH' veya ismi 'nakit' içeren hesap varsa oluşturma
+    const existingCashAccount = await prisma.account.findFirst({
+      where: {
+        userId: user.id,
+        active: true,
+        OR: [
+          { accountNumber: 'CASH' },
+          { name: { contains: 'nakit', mode: 'insensitive' } },
+        ],
+      },
+    })
+
+    if (!existingCashAccount) {
+      // TRY para birimini ve varsayılan banka/hesap türünü bul
+      const [tryCurrency, defaultBank, defaultAccountType] = await Promise.all([
+        prisma.refCurrency.findFirst({ where: { code: 'TRY', active: true } }),
+        prisma.refBank.findFirst({ where: { active: true } }),
+        prisma.refAccountType.findFirst({ where: { code: 'VADESIZ', active: true } }),
+      ])
+
+      if (tryCurrency && defaultBank && defaultAccountType) {
+        await prisma.account.create({
+          data: {
+            userId: user.id,
+            name: 'Nakit',
+            bankId: defaultBank.id,
+            accountTypeId: defaultAccountType.id,
+            currencyId: tryCurrency.id,
+            balance: 0,
+            accountNumber: 'CASH',
+            iban: null,
+            active: true,
+            periodId: activePeriod?.id,
+          },
+        })
+      }
+    }
+
     // Tüm hesap türlerini paralel olarak çek
     const [accounts, creditCards, goldItems] = await Promise.all([
       prisma.account.findMany({
@@ -121,7 +160,39 @@ export async function POST(request: NextRequest) {
     const activePeriod = await getActivePeriod(request)
 
     // Hesap türüne göre farklı işlemler
+    // eslint-disable-next-line no-console
+    console.log('[DEBUG] Account creation request body:', JSON.stringify(body, null, 2))
     if (body.accountType === 'bank') {
+      // Validasyon: Zorunlu alanları kontrol et
+      if (!body.bankId || body.bankId === 0) {
+        return NextResponse.json({ error: 'Lütfen bir banka seçin' }, { status: 400 })
+      }
+      if (!body.accountTypeId || body.accountTypeId === 0) {
+        return NextResponse.json({ error: 'Lütfen bir hesap türü seçin' }, { status: 400 })
+      }
+      if (!body.currencyId || body.currencyId === 0) {
+        return NextResponse.json({ error: 'Lütfen bir para birimi seçin' }, { status: 400 })
+      }
+
+      // Veritabanı validasyonu: Referans verilerinin var olduğunu kontrol et
+      const [currency, bank, accountType] = await Promise.all([
+        prisma.refCurrency.findUnique({ where: { id: body.currencyId } }),
+        prisma.refBank.findUnique({ where: { id: body.bankId } }),
+        prisma.refAccountType.findUnique({ where: { id: body.accountTypeId } }),
+      ])
+
+      if (!currency) {
+        console.error('Currency not found:', body.currencyId)
+        return NextResponse.json({ error: 'Seçilen para birimi bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.' }, { status: 400 })
+      }
+      if (!bank) {
+        console.error('Bank not found:', body.bankId)
+        return NextResponse.json({ error: 'Seçilen banka bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.' }, { status: 400 })
+      }
+      if (!accountType) {
+        console.error('Account type not found:', body.accountTypeId)
+        return NextResponse.json({ error: 'Seçilen hesap türü bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.' }, { status: 400 })
+      }
       const accountData: {
         userId: number
         name: string
@@ -161,6 +232,13 @@ export async function POST(request: NextRequest) {
     }
 
     if (body.accountType === 'credit_card') {
+      // Validasyon: Zorunlu alanları kontrol et
+      if (!body.bankId || body.bankId === 0) {
+        return NextResponse.json({ error: 'Lütfen bir banka seçin' }, { status: 400 })
+      }
+      if (!body.currencyId || body.currencyId === 0) {
+        return NextResponse.json({ error: 'Lütfen bir para birimi seçin' }, { status: 400 })
+      }
       const cardData: {
         userId: number
         name: string
@@ -199,6 +277,13 @@ export async function POST(request: NextRequest) {
     }
 
     if (body.accountType === 'gold') {
+      // Validasyon: Zorunlu alanları kontrol et
+      if (!body.goldTypeId || body.goldTypeId === 0) {
+        return NextResponse.json({ error: 'Lütfen bir altın türü seçin' }, { status: 400 })
+      }
+      if (!body.goldPurityId || body.goldPurityId === 0) {
+        return NextResponse.json({ error: 'Lütfen bir ayar seçin' }, { status: 400 })
+      }
       const goldData: {
         userId: number
         name: string

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useToast } from '@/lib/use-toast'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -104,6 +105,7 @@ export default function AdminTicketDetailPage() {
   const [isInternal, setIsInternal] = useState(false)
   const [sendingReply, setSendingReply] = useState(false)
   const [updatingStatus, setUpdatingStatus] = useState(false)
+  const { success: toastSuccess, error: toastError, warning: toastWarning } = useToast()
 
   useEffect(() => {
     if (params.id) {
@@ -146,11 +148,11 @@ export default function AdminTicketDetailPage() {
       if (data.success) {
         await fetchTicket()
       } else {
-        alert(data.error || 'Durum güncellenemedi')
+        toastError('Hata', data.error || 'Durum güncellenemedi')
       }
     } catch (error) {
       console.error('Durum güncelleme hatası:', error)
-      alert('Durum güncellenirken bir hata oluştu')
+      toastError('Hata', 'Durum güncellenirken bir hata oluştu')
     } finally {
       setUpdatingStatus(false)
     }
@@ -158,7 +160,7 @@ export default function AdminTicketDetailPage() {
 
   async function handleSendReply() {
     if (!replyMessage.trim()) {
-      alert('Lütfen bir mesaj yazın')
+      toastWarning('Uyarı', 'Lütfen bir mesaj yazın')
       return
     }
 
@@ -181,12 +183,13 @@ export default function AdminTicketDetailPage() {
         setReplyMessage('')
         setIsInternal(false)
         await fetchTicket()
+        toastSuccess('Başarılı', 'Yanıt gönderildi')
       } else {
-        alert(data.error || 'Yanıt gönderilemedi')
+        toastError('Hata', data.error || 'Yanıt gönderilemedi')
       }
     } catch (error) {
       console.error('Yanıt gönderme hatası:', error)
-      alert('Yanıt gönderilirken bir hata oluştu')
+      toastError('Hata', 'Yanıt gönderilirken bir hata oluştu')
     } finally {
       setSendingReply(false)
     }
@@ -335,9 +338,8 @@ export default function AdminTicketDetailPage() {
                 {ticket.replies.map(reply => (
                   <div
                     key={reply.id}
-                    className={`border-l-4 pl-4 ${
-                      reply.isInternal ? 'border-gray-400 bg-gray-50' : 'border-blue-500'
-                    }`}
+                    className={`border-l-4 pl-4 ${reply.isInternal ? 'border-gray-400 bg-gray-50' : 'border-blue-500'
+                      }`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div>

@@ -35,7 +35,7 @@ export default function BrandLogo({
           height={size}
           priority={priority}
           unoptimized
-          className="rounded-lg"
+          className="rounded-lg object-contain"
         />
       </div>
       {withText && (

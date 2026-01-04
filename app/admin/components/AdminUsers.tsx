@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useToast } from '@/lib/use-toast'
 import DataTable from './DataTable'
 import UserDetailModal from './UserDetailModal'
 import { Button } from '@/components/ui/button'
@@ -35,6 +36,7 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true)
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null)
   const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const { success: toastSuccess, error: toastError } = useToast()
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
@@ -126,10 +128,10 @@ export default function AdminUsers() {
         }
       }
 
-      alert('Kullanıcı başarıyla güncellendi')
+      toastSuccess('Başarılı', 'Kullanıcı başarıyla güncellendi')
     } catch (err) {
       console.error('Update user error:', err)
-      alert(err instanceof Error ? err.message : 'Kullanıcı güncellenirken hata oluştu')
+      toastError('Hata', err instanceof Error ? err.message : 'Kullanıcı güncellenirken hata oluştu')
     }
   }
 
@@ -165,7 +167,7 @@ export default function AdminUsers() {
       }
     } catch (err) {
       console.error('User detail fetch error:', err)
-      alert('Kullanıcı detayı yüklenirken hata oluştu')
+      toastError('Hata', 'Kullanıcı detayı yüklenirken hata oluştu')
     }
   }
 
@@ -185,10 +187,10 @@ export default function AdminUsers() {
       }
 
       await fetchUsers()
-      alert('Kullanıcı başarıyla silindi')
+      toastSuccess('Başarılı', 'Kullanıcı başarıyla silindi')
     } catch (err) {
       console.error('Delete user error:', err)
-      alert('Kullanıcı silinirken hata oluştu')
+      toastError('Hata', 'Kullanıcı silinirken hata oluştu')
     }
   }
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useToast } from '@/lib/use-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -49,6 +50,7 @@ export default function AdminPaymentRequests() {
   const [adminNotes, setAdminNotes] = useState('')
   const [processing, setProcessing] = useState(false)
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending')
+  const { error: toastError } = useToast()
 
   // Payment request'leri yükle
   const fetchRequests = async () => {
@@ -97,11 +99,11 @@ export default function AdminPaymentRequests() {
         setSelectedRequest(null)
         setAdminNotes('')
       } else {
-        alert('Bir hata oluştu')
+        toastError('Hata', 'Bir hata oluştu')
       }
     } catch (error) {
       console.error('Payment request action error:', error)
-      alert('Bir hata oluştu')
+      toastError('Hata', 'Bir hata oluştu')
     } finally {
       setProcessing(false)
     }

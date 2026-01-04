@@ -3,8 +3,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Download, FileText, BarChart3, TrendingUp } from 'lucide-react'
+import { useToast } from '@/lib/use-toast'
 
 export default function AdminReports() {
+  const { error: toastError } = useToast()
+
   const handleExportReport = (reportType: string) => {
     void (async () => {
       try {
@@ -24,7 +27,7 @@ export default function AdminReports() {
         link.click()
       } catch (err) {
         console.error('Report export error:', err)
-        alert('Rapor oluşturulurken hata oluştu')
+        toastError('Hata', 'Rapor oluşturulurken hata oluştu')
       }
     })()
   }

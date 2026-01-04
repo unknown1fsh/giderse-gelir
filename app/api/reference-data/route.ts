@@ -61,31 +61,31 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
   const [accounts, creditCards, eWallets, beneficiaries] = await Promise.all([
     user
       ? prisma.account.findMany({
-          include: { bank: true, currency: true, accountType: true },
-          where: { userId: user.id, active: true },
-          orderBy: { name: 'asc' },
-        })
+        include: { bank: true, currency: true, accountType: true },
+        where: { userId: user.id, active: true },
+        orderBy: { name: 'asc' },
+      })
       : Promise.resolve([]),
     user
       ? prisma.creditCard.findMany({
-          include: { bank: true, currency: true },
-          where: { userId: user.id, active: true },
-          orderBy: { name: 'asc' },
-        })
+        include: { bank: true, currency: true },
+        where: { userId: user.id, active: true },
+        orderBy: { name: 'asc' },
+      })
       : Promise.resolve([]),
     user
       ? prisma.eWallet.findMany({
-          include: { currency: true },
-          where: { userId: user.id, active: true },
-          orderBy: { name: 'asc' },
-        })
+        include: { currency: true },
+        where: { userId: user.id, active: true },
+        orderBy: { name: 'asc' },
+      })
       : Promise.resolve([]),
     user
       ? prisma.beneficiary.findMany({
-          include: { bank: true },
-          where: { userId: user.id, active: true },
-          orderBy: { name: 'asc' },
-        })
+        include: { bank: true },
+        where: { userId: user.id, active: true },
+        orderBy: { name: 'asc' },
+      })
       : Promise.resolve([]),
   ])
 
@@ -132,21 +132,14 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
       name: a.name,
       description: a.description,
     })),
-    // Para birimleri: SystemParameter'dan geliyorsa onu kullan, yoksa refCurrency'dan fallback
-    currencies:
-      currencyParams.length > 0
-        ? currencyParams.map(c => ({
-            id: c.id,
-            code: c.paramCode,
-            name: c.displayName.split('(')[0].trim(),
-            symbol: (c.metadata?.symbol as string | undefined) || c.paramCode,
-          }))
-        : refCurrencies.map(c => ({
-            id: c.id,
-            code: c.code,
-            name: c.name,
-            symbol: c.symbol,
-          })),
+    // Para birimleri: HER ZAMAN refCurrency tablosundan al (Account/CreditCard foreign key uyumu için)
+    // SystemParameter'daki CURRENCY verileri sadece display için kullanılabilir, ID'leri farklı
+    currencies: refCurrencies.map(c => ({
+      id: c.id,
+      code: c.code,
+      name: c.name,
+      symbol: c.symbol,
+    })),
     goldTypes: refGoldTypes.map(g => ({
       id: g.id,
       code: g.code,
@@ -214,5 +207,11 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
     accounts: response.accounts.length,
   })
 
-  return NextResponse.json(response)
+  return NextResponse.json(response, {
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  })
 })

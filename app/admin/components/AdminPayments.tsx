@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useToast } from '@/lib/use-toast'
 import DataTable from './DataTable'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -49,6 +50,7 @@ export default function AdminPayments() {
   const [actionType, setActionType] = useState<'approve' | 'reject'>('approve')
   const [adminNotes, setAdminNotes] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
+  const { success: toastSuccess, error: toastError } = useToast()
 
   useEffect(() => {
     void fetchPaymentRequests()
@@ -129,17 +131,17 @@ export default function AdminPayments() {
           trackGoogleAdsConversion(transactionId, selectedRequest.amount)
         }
 
-        alert(data.message || 'İşlem başarılı')
+        toastSuccess('Başarılı', data.message || 'İşlem başarılı')
         setShowActionModal(false)
         setSelectedRequest(null)
         setAdminNotes('')
         void fetchPaymentRequests()
       } else {
-        alert(data.message || 'Bir hata oluştu')
+        toastError('Hata', data.message || 'Bir hata oluştu')
       }
     } catch (err) {
       console.error('Action error:', err)
-      alert('Bir hata oluştu')
+      toastError('Hata', 'Bir hata oluştu')
     } finally {
       setIsProcessing(false)
     }

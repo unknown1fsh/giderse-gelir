@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useToast } from '@/lib/use-toast'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -51,6 +52,7 @@ export default function UserDetailModal({
 }: UserDetailModalProps) {
   const [updatingPlan, setUpdatingPlan] = useState(false)
   const [currentPlan, setCurrentPlan] = useState(user?.plan || 'free')
+  const { success: toastSuccess, error: toastError } = useToast()
 
   // user değiştiğinde currentPlan'i güncelle
   useEffect(() => {
@@ -87,13 +89,13 @@ export default function UserDetailModal({
       // Plan değişikliği event'i gönder
       window.dispatchEvent(new CustomEvent('plan-changed'))
 
-      alert('Plan başarıyla güncellendi')
+      toastSuccess('Başarılı', 'Plan başarıyla güncellendi')
       if (onUserUpdate) {
         onUserUpdate()
       }
     } catch (err) {
       console.error('Plan update error:', err)
-      alert(err instanceof Error ? err.message : 'Plan güncellenirken hata oluştu')
+      toastError('Hata', err instanceof Error ? err.message : 'Plan güncellenirken hata oluştu')
       // Hata durumunda eski plana geri dön
       setCurrentPlan(user.plan)
     } finally {

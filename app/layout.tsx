@@ -5,6 +5,7 @@ import './globals.css'
 import { UserProvider } from '@/lib/user-context'
 import { PeriodProvider } from '@/lib/period-context'
 import { GlobalErrorHandler } from '@/lib/error-handler'
+import { ToastProvider } from '@/lib/use-toast'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -31,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const googleTagId = process.env.NEXT_PUBLIC_GOOGLE_TAG_ID || 'AW-17814901017'
 
   return (
-    <html lang="tr" className={`${inter.variable} ${jakarta.variable} scroll-smooth`}>
+    <html lang="tr" className={`${inter.variable} ${jakarta.variable} scroll-smooth`} data-scroll-behavior="smooth">
       <body className={`${inter.className} antialiased`}>
         {/* Google tag (gtag.js) */}
         {googleTagId && (
@@ -59,9 +60,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </>
         )}
         <GlobalErrorHandler />
-        <UserProvider>
-          <PeriodProvider>{children}</PeriodProvider>
-        </UserProvider>
+        <ToastProvider>
+          <UserProvider>
+            <PeriodProvider>{children}</PeriodProvider>
+          </UserProvider>
+        </ToastProvider>
       </body>
     </html>
   )

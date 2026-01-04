@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Save, Wallet, CreditCard, Coins } from 'lucide-react'
+import { useToast } from '@/lib/use-toast'
 
 interface ReferenceData {
   banks: Array<{
@@ -37,6 +38,7 @@ interface ReferenceData {
 
 export default function NewAccountPage() {
   const router = useRouter()
+  const { error: toastError, success: toastSuccess } = useToast()
   const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -63,7 +65,12 @@ export default function NewAccountPage() {
   useEffect(() => {
     async function fetchReferenceData() {
       try {
-        const response = await fetch('/api/reference-data')
+        const response = await fetch(`/api/reference-data?_t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        })
         if (response.ok) {
           const data = (await response.json()) as ReferenceData
           setReferenceData(data)
@@ -103,6 +110,9 @@ export default function NewAccountPage() {
         accountType,
       }
 
+      // eslint-disable-next-line no-console
+      console.log('[DEBUG] Submitting account data:', submitData)
+
       const response = await fetch('/api/accounts', {
         method: 'POST',
         headers: {
@@ -112,14 +122,15 @@ export default function NewAccountPage() {
       })
 
       if (response.ok) {
+        toastSuccess('Hesap başarıyla kaydedildi')
         router.push('/accounts')
       } else {
         const error = (await response.json()) as { error?: string }
-        alert(`Hata: ${error.error || 'Hesap kaydedilemedi'}`)
+        toastError('Hata', error.error || 'Hesap kaydedilemedi')
       }
     } catch (error) {
       console.error('Hesap kaydedilemedi:', error)
-      alert('Hesap kaydedilemedi')
+      toastError('Hata', 'Hesap kaydedilemedi')
     } finally {
       setSaving(false)
     }
@@ -176,11 +187,10 @@ export default function NewAccountPage() {
             <button
               type="button"
               onClick={() => setAccountType('bank')}
-              className={`p-4 border-2 rounded-lg text-center transition-all ${
-                accountType === 'bank'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
+              className={`p-4 border-2 rounded-lg text-center transition-all ${accountType === 'bank'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-200 hover:border-gray-300'
+                }`}
             >
               <Wallet className="h-8 w-8 mx-auto mb-2" />
               <div className="font-medium">Banka Hesabı</div>
@@ -190,11 +200,10 @@ export default function NewAccountPage() {
             <button
               type="button"
               onClick={() => setAccountType('credit_card')}
-              className={`p-4 border-2 rounded-lg text-center transition-all ${
-                accountType === 'credit_card'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
+              className={`p-4 border-2 rounded-lg text-center transition-all ${accountType === 'credit_card'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-200 hover:border-gray-300'
+                }`}
             >
               <CreditCard className="h-8 w-8 mx-auto mb-2" />
               <div className="font-medium">Kredi Kartı</div>
@@ -204,11 +213,10 @@ export default function NewAccountPage() {
             <button
               type="button"
               onClick={() => setAccountType('gold')}
-              className={`p-4 border-2 rounded-lg text-center transition-all ${
-                accountType === 'gold'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
+              className={`p-4 border-2 rounded-lg text-center transition-all ${accountType === 'gold'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-200 hover:border-gray-300'
+                }`}
             >
               <Coins className="h-8 w-8 mx-auto mb-2" />
               <div className="font-medium">Altın/Ziynet</div>
@@ -274,10 +282,11 @@ export default function NewAccountPage() {
                       required
                     >
                       <option value={0}>Seçiniz</option>
-                      <option value={1}>Vadesiz</option>
-                      <option value={2}>Vadeli</option>
-                      <option value={3}>Döviz</option>
-                      <option value={4}>Altın</option>
+                      {referenceData?.accountTypes.map(type => (
+                        <option key={type.id} value={type.id}>
+                          {type.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>

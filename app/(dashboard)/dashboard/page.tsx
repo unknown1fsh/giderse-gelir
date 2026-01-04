@@ -251,27 +251,29 @@ export default function DashboardPage() {
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-500/20 to-cyan-500/20 rounded-full blur-3xl" />
 
           <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg">
-                  <User className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <p className="text-slate-400 text-sm">{greeting.emoji} {greeting.text}</p>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-white">
-                    {user ? getDisplayName(user) : 'Kullanıcı'}
-                  </h1>
+            <div className="flex-1 w-full min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <div className="p-2.5 sm:p-3 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg">
+                    <User className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-slate-400 text-xs sm:text-sm whitespace-nowrap">{greeting.emoji} {greeting.text}</p>
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white truncate">
+                      {user ? getDisplayName(user) : 'Kullanıcı'}
+                    </h1>
+                  </div>
                 </div>
                 {/* Premium Badge */}
                 {user && user.plan !== 'free' && (
-                  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${user.plan === 'enterprise_premium' ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30' :
+                  <div className={`flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-full flex-shrink-0 ${user.plan === 'enterprise_premium' ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30' :
                       user.plan === 'enterprise' ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30' :
                         'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30'
                     }`}>
-                    {user.plan === 'enterprise_premium' ? <Award className="h-4 w-4 text-amber-400" /> :
-                      user.plan === 'enterprise' ? <Star className="h-4 w-4 text-emerald-400" /> :
-                        <Crown className="h-4 w-4 text-purple-400" />}
-                    <span className="text-xs font-semibold text-white">
+                    {user.plan === 'enterprise_premium' ? <Award className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-400" /> :
+                      user.plan === 'enterprise' ? <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400" /> :
+                        <Crown className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-400" />}
+                    <span className="text-xs font-semibold text-white whitespace-nowrap">
                       {user.plan === 'enterprise_premium' ? 'Kurumsal Premium' :
                         user.plan === 'enterprise' ? 'Kurumsal' : 'Premium'}
                     </span>

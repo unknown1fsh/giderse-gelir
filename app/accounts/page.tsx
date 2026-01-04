@@ -97,7 +97,9 @@ export default function AccountsPage() {
 
   useEffect(() => {
     // React StrictMode'da çift çağrıyı önle
-    if (fetchedRef.current) return
+    if (fetchedRef.current) {
+      return
+    }
     fetchedRef.current = true
     void fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -163,7 +165,9 @@ export default function AccountsPage() {
   }
 
   const confirmDelete = async () => {
-    if (!selectedItem) return
+    if (!selectedItem) {
+      return
+    }
 
     try {
       const endpoint =
@@ -194,7 +198,9 @@ export default function AccountsPage() {
   }
 
   const handleSaveEdit = async (newName: string) => {
-    if (!selectedItem) return
+    if (!selectedItem) {
+      return
+    }
 
     const endpoint =
       selectedItem.type === 'account'

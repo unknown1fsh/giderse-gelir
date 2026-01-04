@@ -92,7 +92,9 @@ export default function TransactionsPage() {
   const fetchedRef = useRef(false)
 
   useEffect(() => {
-    if (fetchedRef.current) return
+    if (fetchedRef.current) {
+      return
+    }
     fetchedRef.current = true
     void fetchTransactions()
   }, [])
@@ -150,11 +152,17 @@ export default function TransactionsPage() {
   const filteredTransactions = useMemo(() => {
     return transactions.filter(t => {
       // Tip filtresi
-      if (filterType === 'income' && t.txType.code !== 'GELIR') return false
-      if (filterType === 'expense' && t.txType.code !== 'GIDER') return false
+      if (filterType === 'income' && t.txType.code !== 'GELIR') {
+        return false
+      }
+      if (filterType === 'expense' && t.txType.code !== 'GIDER') {
+        return false
+      }
 
       // Kategori filtresi
-      if (selectedCategory !== 'all' && t.category.name !== selectedCategory) return false
+      if (selectedCategory !== 'all' && t.category.name !== selectedCategory) {
+        return false
+      }
 
       // Arama filtresi
       if (searchTerm) {
@@ -180,7 +188,9 @@ export default function TransactionsPage() {
         month: 'long',
         year: 'numeric',
       })
-      if (!groups[date]) groups[date] = []
+      if (!groups[date]) {
+        groups[date] = []
+      }
       groups[date].push(t)
     })
 

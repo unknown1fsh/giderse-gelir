@@ -79,7 +79,9 @@ export default function InvestmentsPage() {
   }, [refreshUser])
 
   useEffect(() => {
-    if (fetchedRef.current || userLoading) return
+    if (fetchedRef.current || userLoading) {
+      return
+    }
     fetchedRef.current = true
     void fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -144,7 +146,9 @@ export default function InvestmentsPage() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Bu yatırımı silmek istediğinizden emin misiniz?')) return
+    if (!confirm('Bu yatırımı silmek istediğinizden emin misiniz?')) {
+      return
+    }
 
     try {
       const response = await fetch(`/api/investments/${id}`, {

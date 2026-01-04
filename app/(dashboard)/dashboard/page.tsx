@@ -97,7 +97,9 @@ export default function DashboardPage() {
   }, [refreshUser])
 
   useEffect(() => {
-    if (fetchedRef.current || loading || !user) return
+    if (fetchedRef.current || loading || !user) {
+      return
+    }
     fetchedRef.current = true
     void fetchDashboardData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,7 +110,9 @@ export default function DashboardPage() {
       setError(null)
       const response = await fetch('/api/dashboard', { credentials: 'include' })
       if (!response.ok) {
-        if (response.status === 401) return
+        if (response.status === 401) {
+          return
+        }
         throw new Error('Dashboard verileri alınamadı')
       }
       const dashboardData = (await response.json()) as DashboardData
@@ -128,9 +132,15 @@ export default function DashboardPage() {
   // Karşılama mesajı
   const getGreeting = () => {
     const hour = currentTime.getHours()
-    if (hour < 6) return { text: 'İyi geceler', emoji: '🌙' }
-    if (hour < 12) return { text: 'Günaydın', emoji: '☀️' }
-    if (hour < 18) return { text: 'İyi günler', emoji: '🌤️' }
+    if (hour < 6) {
+      return { text: 'İyi geceler', emoji: '🌙' }
+    }
+    if (hour < 12) {
+      return { text: 'Günaydın', emoji: '☀️' }
+    }
+    if (hour < 18) {
+      return { text: 'İyi günler', emoji: '🌤️' }
+    }
     return { text: 'İyi akşamlar', emoji: '🌆' }
   }
 
@@ -138,7 +148,9 @@ export default function DashboardPage() {
 
   // Finansal sağlık skoru hesaplama
   const calculateHealthScore = () => {
-    if (!data) return 0
+    if (!data) {
+      return 0
+    }
     const income = parseFloat(data.kpi.total_income) || 0
     const expense = parseFloat(data.kpi.total_expense) || 0
     const netWorth = parseFloat(data.assets.netWorth) || 0
@@ -148,21 +160,31 @@ export default function DashboardPage() {
     // Gelir-gider dengesi
     if (income > expense) {
       const savingsRate = ((income - expense) / income) * 100
-      if (savingsRate >= 20) score += 25
-      else if (savingsRate >= 10) score += 15
-      else score += 5
+      if (savingsRate >= 20) {
+        score += 25
+      } else if (savingsRate >= 10) {
+        score += 15
+      } else {
+        score += 5
+      }
     } else if (income < expense) {
       score -= 20
     }
 
     // Net varlık
-    if (netWorth > 0) score += 15
-    else if (netWorth < 0) score -= 10
+    if (netWorth > 0) {
+      score += 15
+    } else if (netWorth < 0) {
+      score -= 10
+    }
 
     // Kart borcu kontrolü
     const cardDebt = parseFloat(data.assets.totalCardDebt) || 0
-    if (cardDebt === 0) score += 10
-    else if (cardDebt > income * 0.5) score -= 15
+    if (cardDebt === 0) {
+      score += 10
+    } else if (cardDebt > income * 0.5) {
+      score -= 15
+    }
 
     return Math.min(100, Math.max(0, score))
   }
@@ -170,9 +192,15 @@ export default function DashboardPage() {
   const healthScore = calculateHealthScore()
 
   const getHealthInfo = (score: number) => {
-    if (score >= 80) return { color: 'from-green-500 to-emerald-600', label: 'Mükemmel', textColor: 'text-green-600' }
-    if (score >= 60) return { color: 'from-blue-500 to-cyan-600', label: 'İyi', textColor: 'text-blue-600' }
-    if (score >= 40) return { color: 'from-yellow-500 to-orange-600', label: 'Orta', textColor: 'text-yellow-600' }
+    if (score >= 80) {
+      return { color: 'from-green-500 to-emerald-600', label: 'Mükemmel', textColor: 'text-green-600' }
+    }
+    if (score >= 60) {
+      return { color: 'from-blue-500 to-cyan-600', label: 'İyi', textColor: 'text-blue-600' }
+    }
+    if (score >= 40) {
+      return { color: 'from-yellow-500 to-orange-600', label: 'Orta', textColor: 'text-yellow-600' }
+    }
     return { color: 'from-red-500 to-rose-600', label: 'Dikkat', textColor: 'text-red-600' }
   }
 
@@ -186,7 +214,9 @@ export default function DashboardPage() {
     { icon: Brain, label: 'Analiz', href: '/analysis', color: 'from-purple-500 to-pink-600' },
   ]
 
-  if (loading) return <DashboardSkeleton />
+  if (loading) {
+    return <DashboardSkeleton />
+  }
 
   if (error) {
     return (
@@ -204,7 +234,9 @@ export default function DashboardPage() {
     )
   }
 
-  if (!data) return <DashboardSkeleton />
+  if (!data) {
+    return <DashboardSkeleton />
+  }
 
   const netAmount = parseFloat(data.kpi.net_amount) || 0
   const totalIncome = parseFloat(data.kpi.total_income) || 0

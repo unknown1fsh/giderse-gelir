@@ -97,7 +97,9 @@ export default function AnalysisPage() {
   const fetchedRef = useRef(false)
 
   useEffect(() => {
-    if (fetchedRef.current) return
+    if (fetchedRef.current) {
+      return
+    }
     fetchedRef.current = true
     void fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,25 +138,40 @@ export default function AnalysisPage() {
 
   // Finansal sağlık skoru hesaplama
   const calculateHealthScore = () => {
-    if (!analysisData) return 0
+    if (!analysisData) {
+      return 0
+    }
     let score = 50 // Başlangıç
 
     // Tasarruf oranına göre puan
-    if (analysisData.savingsRate >= 20) score += 25
-    else if (analysisData.savingsRate >= 10) score += 15
-    else if (analysisData.savingsRate >= 5) score += 10
-    else if (analysisData.savingsRate < 0) score -= 15
+    if (analysisData.savingsRate >= 20) {
+      score += 25
+    } else if (analysisData.savingsRate >= 10) {
+      score += 15
+    } else if (analysisData.savingsRate >= 5) {
+      score += 10
+    } else if (analysisData.savingsRate < 0) {
+      score -= 15
+    }
 
     // Gelir büyümesine göre puan
-    if (analysisData.incomeGrowth > 0) score += 10
-    else if (analysisData.incomeGrowth < -10) score -= 10
+    if (analysisData.incomeGrowth > 0) {
+      score += 10
+    } else if (analysisData.incomeGrowth < -10) {
+      score -= 10
+    }
 
     // Gider büyümesine göre puan
-    if (analysisData.expenseGrowth < 0) score += 10
-    else if (analysisData.expenseGrowth > 20) score -= 15
+    if (analysisData.expenseGrowth < 0) {
+      score += 10
+    } else if (analysisData.expenseGrowth > 20) {
+      score -= 15
+    }
 
     // Net değere göre puan
-    if (analysisData.netWorth > 0) score += 5
+    if (analysisData.netWorth > 0) {
+      score += 5
+    }
 
     return Math.min(100, Math.max(0, score))
   }
@@ -162,9 +179,15 @@ export default function AnalysisPage() {
   const healthScore = calculateHealthScore()
 
   const getHealthColor = (score: number) => {
-    if (score >= 80) return { bg: 'from-green-500 to-emerald-600', text: 'text-green-600', label: 'Mükemmel' }
-    if (score >= 60) return { bg: 'from-blue-500 to-cyan-600', text: 'text-blue-600', label: 'İyi' }
-    if (score >= 40) return { bg: 'from-yellow-500 to-orange-600', text: 'text-yellow-600', label: 'Orta' }
+    if (score >= 80) {
+      return { bg: 'from-green-500 to-emerald-600', text: 'text-green-600', label: 'Mükemmel' }
+    }
+    if (score >= 60) {
+      return { bg: 'from-blue-500 to-cyan-600', text: 'text-blue-600', label: 'İyi' }
+    }
+    if (score >= 40) {
+      return { bg: 'from-yellow-500 to-orange-600', text: 'text-yellow-600', label: 'Orta' }
+    }
     return { bg: 'from-red-500 to-rose-600', text: 'text-red-600', label: 'Dikkat' }
   }
 
@@ -172,7 +195,9 @@ export default function AnalysisPage() {
 
   // Akıllı öneriler oluşturma
   const generateSmartInsights = () => {
-    if (!analysisData) return []
+    if (!analysisData) {
+      return []
+    }
 
     const insights: Array<{
       type: 'success' | 'warning' | 'tip' | 'goal'

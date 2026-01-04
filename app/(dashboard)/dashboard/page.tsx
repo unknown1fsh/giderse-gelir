@@ -23,7 +23,6 @@ import {
   Wallet,
   PiggyBank,
   Target,
-  Zap,
   Plus,
   ArrowUpRight,
   ArrowDownRight,

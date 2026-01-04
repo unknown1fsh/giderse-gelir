@@ -489,11 +489,6 @@ export default function InvestmentsPage() {
         isOpen={showPremiumModal}
         onClose={() => setShowPremiumModal(false)}
         featureName="Yatırım Araçları"
-        limitInfo={{
-          current: 0,
-          limit: 0,
-          type: 'investments',
-        }}
       />
     </div>
   )

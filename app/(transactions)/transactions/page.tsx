@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/lib/use-toast'
 import { formatCurrency } from '@/lib/validators'
 import {
@@ -17,17 +17,14 @@ import {
   ArrowLeft,
   Home,
   Search,
-  Filter,
   ChevronRight,
   ArrowUpRight,
   ArrowDownRight,
   Receipt,
   Sparkles,
-  Clock,
   RefreshCw,
   Trash2,
   Edit3,
-  MoreHorizontal,
   X,
   DollarSign,
   PiggyBank,

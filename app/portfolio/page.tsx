@@ -171,10 +171,10 @@ export default function PortfolioPage() {
               <Home className="h-5 w-5" />
             </Link>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
                 Toplam Varlık
               </h1>
-              <p className="text-slate-600">
+              <p className="text-sm sm:text-base text-slate-600">
                 Portföy değerinizi ve varlık dağılımınızı görüntüleyin
               </p>
             </div>
@@ -182,7 +182,7 @@ export default function PortfolioPage() {
         </div>
       </div>
 
-      <div className="p-8 space-y-8">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
         {/* Özet Kartları */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100">
@@ -193,7 +193,7 @@ export default function PortfolioPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                 {formatCurrency(totalBankBalance, 'TRY')}
               </div>
               <p className="text-xs text-slate-600 mt-2">
@@ -402,7 +402,7 @@ export default function PortfolioPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div className="bg-white/10 rounded-lg p-4">
                 <div className="text-xs text-white/70">Toplam Varlık</div>
                 <div className="text-2xl font-bold mt-1">{formatCurrency(totalAssets, 'TRY')}</div>

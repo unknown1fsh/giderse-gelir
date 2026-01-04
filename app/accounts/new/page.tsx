@@ -164,20 +164,20 @@ export default function NewAccountPage() {
   }
 
   return (
-    <div>
-      <div className="flex items-center gap-4 mb-6">
-        <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-lg">
+    <div className="p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+        <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-lg w-fit">
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-3xl font-bold">Yeni Hesap</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold">Yeni Hesap</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Banka hesabı, kredi kartı veya altın eşyası ekleyin
           </p>
         </div>
       </div>
 
-      <Card className="max-w-2xl">
+      <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle>Hesap Türü Seçin</CardTitle>
           <CardDescription>Eklemek istediğiniz hesap türünü seçin</CardDescription>
@@ -549,18 +549,18 @@ export default function NewAccountPage() {
               </>
             )}
 
-            <div className="flex justify-end gap-4">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                className="w-full sm:w-auto px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
               >
                 İptal
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 transition-colors"
               >
                 {saving ? (
                   <>

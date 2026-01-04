@@ -146,24 +146,24 @@ export default function NewInvestmentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 sm:mb-8">
           <Button
             onClick={() => router.back()}
             variant="outline"
             size="sm"
-            className="hover:bg-white/80"
+            className="hover:bg-white/80 w-fit"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Geri
           </Button>
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               🚀 Yeni Yatırım Ekle
             </h1>
-            <p className="text-gray-600 mt-2">Portföyünüze yeni bir yatırım aracı ekleyin</p>
+            <p className="text-sm sm:text-base text-gray-600 mt-2">Portföyünüze yeni bir yatırım aracı ekleyin</p>
           </div>
         </div>
 

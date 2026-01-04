@@ -255,15 +255,15 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-10">
-        <div className="px-8 py-6">
-          <div className="flex items-center justify-between">
+        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
                 Ayarlar
               </h1>
-              <p className="text-slate-600 mt-1">Uygulama ve hesap ayarlarınızı yönetin</p>
+              <p className="text-sm sm:text-base text-slate-600 mt-1">Uygulama ve hesap ayarlarınızı yönetin</p>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <Button
                 onClick={handleGoBack}
                 variant="outline"
@@ -306,7 +306,7 @@ export default function SettingsPage() {
 
       {/* Save Message */}
       {saveMessage && (
-        <div className="px-8">
+        <div className="px-4 sm:px-6 lg:px-8">
           <div
             className={`p-4 rounded-lg ${
               saveMessage.includes('başarıyla')
@@ -326,10 +326,10 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-80 bg-white/60 backdrop-blur-sm border-r border-slate-200/60 min-h-screen">
-          <div className="p-6">
+      <div className="flex flex-col lg:flex-row">
+        {/* Sidebar - Mobilde üstte, desktop'ta solda */}
+        <div className="w-full lg:w-80 bg-white/60 backdrop-blur-sm border-b lg:border-b-0 lg:border-r border-slate-200/60 lg:min-h-screen">
+          <div className="p-4 sm:p-6">
             {/* User Info */}
             {user && (
               <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200/50">
@@ -363,14 +363,14 @@ export default function SettingsPage() {
               </div>
             )}
 
-            <nav className="space-y-2">
+            <nav className="grid grid-cols-2 lg:grid-cols-1 gap-2 lg:space-y-2">
               {tabs.map(tab => {
                 const Icon = tab.icon
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
+                    className={`w-full flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2.5 lg:py-3 rounded-xl text-left transition-all duration-200 ${
                       activeTab === tab.id
                         ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-blue-700 border border-blue-500/30 shadow-md'
                         : 'text-slate-600 hover:bg-slate-100/50 hover:text-slate-800'
@@ -394,7 +394,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4 sm:p-6 lg:p-8">
           {activeTab === 'profile' && (
             <div className="space-y-6">
               <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">

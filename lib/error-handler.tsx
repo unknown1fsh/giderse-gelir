@@ -35,14 +35,33 @@ export function GlobalErrorHandler() {
       }
 
       // String hatalar (örn: "HTTP error! status: 401")
-      if (typeof error === 'string' && (error.includes('401') || error.includes('403'))) {
-        event.preventDefault()
-        return
+      if (typeof error === 'string') {
+        if (
+          error.includes('401') ||
+          error.includes('403') ||
+          error.includes('cloudflareinsights.com') ||
+          error.includes('doubleclick.net') ||
+          error.includes('CORS') ||
+          error.includes('499')
+        ) {
+          event.preventDefault()
+          return
+        }
       }
 
       // Error instance kontrolü
       if (error instanceof Error) {
-        if (error.message.includes('401') || error.message.includes('403')) {
+        if (
+          error.message.includes('401') ||
+          error.message.includes('403') ||
+          error.message.includes('cloudflareinsights.com') ||
+          error.message.includes('doubleclick.net') ||
+          error.message.includes('CORS') ||
+          error.message.includes('499') ||
+          error.message.includes('MIME type') ||
+          error.message.includes('ERR_FAILED') ||
+          error.message.includes('ERR_ABORTED')
+        ) {
           event.preventDefault()
           return
         }
@@ -51,6 +70,34 @@ export function GlobalErrorHandler() {
 
     // Global error handler
     const handleError = (event: ErrorEvent) => {
+      // Cloudflare Insights hatalarını suppress et
+      if (
+        event.filename?.includes('cloudflareinsights.com') ||
+        event.message?.includes('cloudflareinsights.com') ||
+        event.message?.includes('beacon.min.js') ||
+        event.message?.includes('Access-Control-Allow-Origin') ||
+        event.message?.includes('ERR_FAILED') ||
+        (event.target && (event.target as HTMLElement).tagName === 'SCRIPT' && (event.target as HTMLScriptElement).src?.includes('cloudflareinsights.com'))
+      ) {
+        event.preventDefault()
+        return
+      }
+
+      // Google Ads/DoubleClick hatalarını suppress et
+      if (
+        event.filename?.includes('doubleclick.net') ||
+        event.filename?.includes('googleads.g.doubleclick.net') ||
+        event.message?.includes('doubleclick.net') ||
+        event.message?.includes('googleads.g.doubleclick.net') ||
+        event.message?.includes('MIME type') ||
+        event.message?.includes('is not executable') ||
+        event.message?.includes('ERR_ABORTED') ||
+        (event.target && (event.target as HTMLElement).tagName === 'SCRIPT' && (event.target as HTMLScriptElement).src?.includes('doubleclick.net'))
+      ) {
+        event.preventDefault()
+        return
+      }
+
       // content.js, main.js ve browser extension hatalarını suppress et
       if (
         event.filename?.includes('content.js') ||
@@ -67,10 +114,21 @@ export function GlobalErrorHandler() {
       // Script tag içindeki hataları filtrele
       if (event.target && (event.target as HTMLElement).tagName === 'SCRIPT') {
         const scriptSrc = (event.target as HTMLScriptElement).src
-        if (scriptSrc?.includes('extension') || scriptSrc?.includes('content')) {
+        if (
+          scriptSrc?.includes('extension') ||
+          scriptSrc?.includes('content') ||
+          scriptSrc?.includes('cloudflareinsights.com') ||
+          scriptSrc?.includes('doubleclick.net')
+        ) {
           event.preventDefault()
           return
         }
+      }
+
+      // Network hataları (499, CORS vb.)
+      if (event.message?.includes('499') || event.message?.includes('CORS')) {
+        event.preventDefault()
+        return
       }
     }
 
@@ -84,7 +142,18 @@ export function GlobalErrorHandler() {
           message.includes('401') ||
           message.includes('403') ||
           message.includes('Unauthorized') ||
-          message.includes('code: 403')
+          message.includes('code: 403') ||
+          message.includes('cloudflareinsights.com') ||
+          message.includes('beacon.min.js') ||
+          message.includes('Access-Control-Allow-Origin') ||
+          message.includes('doubleclick.net') ||
+          message.includes('googleads.g.doubleclick.net') ||
+          message.includes('MIME type') ||
+          message.includes('is not executable') ||
+          message.includes('ERR_FAILED') ||
+          message.includes('ERR_ABORTED') ||
+          message.includes('499') ||
+          message.includes('CORS')
         ) {
           // Sessizce geç
           return

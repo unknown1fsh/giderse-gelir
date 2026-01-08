@@ -71,8 +71,18 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value:
-              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://*.googleadservices.com https://*.doubleclick.net https://static.cloudflareinsights.com; script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://*.googleadservices.com https://*.doubleclick.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: https://*.googleadservices.com https://*.doubleclick.net https://*.google-analytics.com; font-src 'self' data:; connect-src 'self' https: https://www.googletagmanager.com https://www.google-analytics.com https://*.googleadservices.com https://*.doubleclick.net https://static.cloudflareinsights.com; frame-src 'self' https://www.googletagmanager.com https://*.doubleclick.net; object-src 'none'; base-uri 'self';",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://*.googleadservices.com https://*.doubleclick.net https://googleads.g.doubleclick.net https://static.cloudflareinsights.com",
+              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://*.googleadservices.com https://*.doubleclick.net https://googleads.g.doubleclick.net https://static.cloudflareinsights.com",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: https: https://*.googleadservices.com https://*.doubleclick.net https://googleads.g.doubleclick.net https://*.google-analytics.com",
+              "font-src 'self' data:",
+              "connect-src 'self' https: https://www.googletagmanager.com https://www.google-analytics.com https://*.googleadservices.com https://*.doubleclick.net https://googleads.g.doubleclick.net https://static.cloudflareinsights.com https://cloudflareinsights.com",
+              "frame-src 'self' https://www.googletagmanager.com https://*.doubleclick.net",
+              "object-src 'none'",
+              "base-uri 'self'",
+            ].join('; '),
           },
         ],
       },

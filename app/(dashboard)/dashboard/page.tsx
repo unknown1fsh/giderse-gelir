@@ -95,9 +95,13 @@ export default function DashboardPage() {
   }, [refreshUser])
 
   useEffect(() => {
-    if (fetchedRef.current || loading || !user) {
+    // Loading durumunda veya zaten fetch edilmişse, tekrar fetch etme
+    if (fetchedRef.current || loading) {
       return
     }
+    
+    // Kullanıcı yoksa, 401 hatası beklenebilir, ama yine de fetch deneyelim
+    // Eğer gerçekten giriş yapmamışsa, middleware zaten yönlendirecek
     fetchedRef.current = true
     void fetchDashboardData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -109,6 +113,9 @@ export default function DashboardPage() {
       const response = await fetch('/api/dashboard', { credentials: 'include' })
       if (!response.ok) {
         if (response.status === 401) {
+          // 401 hatası - kullanıcı giriş yapmamış, middleware zaten yönlendirecek
+          // Sayfanın boş kalmasını önlemek için loading'i false yap
+          setData(null)
           return
         }
         throw new Error('Dashboard verileri alınamadı')
@@ -116,9 +123,12 @@ export default function DashboardPage() {
       const dashboardData = (await response.json()) as DashboardData
       setData(dashboardData)
     } catch (err) {
-      console.error('Dashboard data fetch error:', err)
-      setError('Dashboard verileri yüklenirken bir hata oluştu')
-      toastError('Hata', 'Dashboard verileri yüklenemedi')
+      // Sadece gerçek network hataları için log (401 hariç)
+      if (err instanceof Error && !err.message.includes('401')) {
+        console.error('Dashboard data fetch error:', err)
+        setError('Dashboard verileri yüklenirken bir hata oluştu')
+        toastError('Hata', 'Dashboard verileri yüklenemedi')
+      }
     }
   }
 
@@ -212,10 +222,17 @@ export default function DashboardPage() {
     { icon: Brain, label: 'Analiz', href: '/analysis', color: 'from-purple-500 to-pink-600' },
   ]
 
+  // Loading durumunda skeleton göster
   if (loading) {
     return <DashboardSkeleton />
   }
 
+  // Kullanıcı yoksa, middleware zaten yönlendirecek ama yine de skeleton göster
+  if (!user) {
+    return <DashboardSkeleton />
+  }
+
+  // Hata durumunda hata mesajı göster
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 flex items-center justify-center">
@@ -232,6 +249,7 @@ export default function DashboardPage() {
     )
   }
 
+  // Veri yükleniyor veya henüz yüklenmediyse skeleton göster
   if (!data) {
     return <DashboardSkeleton />
   }

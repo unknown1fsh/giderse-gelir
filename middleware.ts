@@ -26,10 +26,8 @@ const authRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password', '/
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Health check endpoint'i middleware'den geçmeden direkt dönsün
-  if (pathname === '/api/health') {
-    return NextResponse.next()
-  }
+  // API route'ları matcher config'te zaten exclude edilmiş,
+  // bu yüzden /api/health middleware'den geçmez
 
   // Production'da HTTPS kontrolü
   if (process.env.NODE_ENV === 'production') {

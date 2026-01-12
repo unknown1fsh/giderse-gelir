@@ -177,14 +177,14 @@ export default function UserDetailModal({
                   </Badge>
                 </div>
               </div>
-              <div>
+              {/* <div>
                 <label className="text-sm font-medium text-slate-600">E-posta Doğrulandı</label>
                 <div className="mt-1">
                   <Badge variant={user.emailVerified ? 'default' : 'secondary'}>
                     {user.emailVerified ? 'Evet' : 'Hayır'}
                   </Badge>
                 </div>
-              </div>
+              </div> */}
               <div>
                 <label className="text-sm font-medium text-slate-600">Kayıt Tarihi</label>
                 <p className="text-sm text-slate-900 mt-1">

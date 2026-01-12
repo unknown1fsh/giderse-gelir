@@ -196,13 +196,13 @@ export default function SettingsPage() {
     // Kullanıcıdan onay al
     const confirmed = window.confirm(
       '⚠️ UYARI: Bu işlem tüm verilerinizi kalıcı olarak silecektir!\n\n' +
-        '• Tüm işlem geçmişi\n' +
-        '• Tüm hesaplar\n' +
-        '• Tüm kredi kartları\n' +
-        '• Otomatik ödemeler\n' +
-        '• Altın ve yatırım verileri\n\n' +
-        'Bu işlem geri alınamaz!\n\n' +
-        'Devam etmek istediğinizden emin misiniz?'
+      '• Tüm işlem geçmişi\n' +
+      '• Tüm hesaplar\n' +
+      '• Tüm kredi kartları\n' +
+      '• Otomatik ödemeler\n' +
+      '• Altın ve yatırım verileri\n\n' +
+      'Bu işlem geri alınamaz!\n\n' +
+      'Devam etmek istediğinizden emin misiniz?'
     )
 
     if (!confirmed) {
@@ -212,8 +212,8 @@ export default function SettingsPage() {
     // İkinci onay
     const doubleConfirmed = window.confirm(
       'Son uyarı: Tüm verileriniz silinecek!\n\n' +
-        'Bu işlem geri alınamaz!\n\n' +
-        'Kesinlikle devam etmek istiyor musunuz?'
+      'Bu işlem geri alınamaz!\n\n' +
+      'Kesinlikle devam etmek istiyor musunuz?'
     )
 
     if (!doubleConfirmed) {
@@ -308,11 +308,10 @@ export default function SettingsPage() {
       {saveMessage && (
         <div className="px-4 sm:px-6 lg:px-8">
           <div
-            className={`p-4 rounded-lg ${
-              saveMessage.includes('başarıyla')
+            className={`p-4 rounded-lg ${saveMessage.includes('başarıyla')
                 ? 'bg-green-100 border border-green-200 text-green-800'
                 : 'bg-red-100 border border-red-200 text-red-800'
-            }`}
+              }`}
           >
             <div className="flex items-center space-x-2">
               {saveMessage.includes('başarıyla') ? (
@@ -335,11 +334,10 @@ export default function SettingsPage() {
               <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200/50">
                 <div className="flex items-center space-x-3">
                   <div
-                    className={`p-2 rounded-lg ${
-                      user.plan === 'premium'
+                    className={`p-2 rounded-lg ${user.plan === 'premium'
                         ? 'bg-gradient-to-br from-purple-500 to-pink-600'
                         : 'bg-gradient-to-br from-blue-500 to-indigo-600'
-                    }`}
+                      }`}
                   >
                     <User className="h-4 w-4 text-white" />
                   </div>
@@ -370,18 +368,16 @@ export default function SettingsPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2.5 lg:py-3 rounded-xl text-left transition-all duration-200 ${
-                      activeTab === tab.id
+                    className={`w-full flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2.5 lg:py-3 rounded-xl text-left transition-all duration-200 ${activeTab === tab.id
                         ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-blue-700 border border-blue-500/30 shadow-md'
                         : 'text-slate-600 hover:bg-slate-100/50 hover:text-slate-800'
-                    }`}
+                      }`}
                   >
                     <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                        activeTab === tab.id
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg ${activeTab === tab.id
                           ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md'
                           : 'bg-slate-200/50 text-slate-600'
-                      }`}
+                        }`}
                     >
                       <Icon className="h-4 w-4" />
                     </div>
@@ -430,7 +426,7 @@ export default function SettingsPage() {
                           placeholder="E-posta adresinizi girin"
                           className="border-slate-200 focus:border-blue-500"
                         />
-                        {user && (
+                        {/* {user && (
                           <div className="flex items-center gap-2">
                             {user.emailVerified ? (
                               <div className="flex items-center gap-1 text-sm text-green-600">
@@ -480,7 +476,7 @@ export default function SettingsPage() {
                               </div>
                             )}
                           </div>
-                        )}
+                        )} */}
                       </div>
                     </div>
                     <div className="space-y-2">

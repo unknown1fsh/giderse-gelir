@@ -53,6 +53,7 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState({
     // Profil Ayarları
     name: '',
+    username: '',
     email: '',
     phone: '',
 
@@ -118,6 +119,7 @@ export default function SettingsPage() {
       setSettings(prev => ({
         ...prev,
         name: user.name || '',
+        username: user.username || '',
         email: user.email || '',
         phone: user.phone || '',
         theme: 'light', // Varsayılan değerler
@@ -149,6 +151,7 @@ export default function SettingsPage() {
     try {
       const success = await updateUser({
         name: settings.name,
+        username: settings.username,
         phone: settings.phone,
         // theme: settings.theme, // TODO: Prisma User modelinde yok, settings JSON içinde tutulabilir
         // language: settings.language, // TODO: Prisma User modelinde yok
@@ -309,8 +312,8 @@ export default function SettingsPage() {
         <div className="px-4 sm:px-6 lg:px-8">
           <div
             className={`p-4 rounded-lg ${saveMessage.includes('başarıyla')
-                ? 'bg-green-100 border border-green-200 text-green-800'
-                : 'bg-red-100 border border-red-200 text-red-800'
+              ? 'bg-green-100 border border-green-200 text-green-800'
+              : 'bg-red-100 border border-red-200 text-red-800'
               }`}
           >
             <div className="flex items-center space-x-2">
@@ -335,8 +338,8 @@ export default function SettingsPage() {
                 <div className="flex items-center space-x-3">
                   <div
                     className={`p-2 rounded-lg ${user.plan === 'premium'
-                        ? 'bg-gradient-to-br from-purple-500 to-pink-600'
-                        : 'bg-gradient-to-br from-blue-500 to-indigo-600'
+                      ? 'bg-gradient-to-br from-purple-500 to-pink-600'
+                      : 'bg-gradient-to-br from-blue-500 to-indigo-600'
                       }`}
                   >
                     <User className="h-4 w-4 text-white" />
@@ -369,14 +372,14 @@ export default function SettingsPage() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2.5 lg:py-3 rounded-xl text-left transition-all duration-200 ${activeTab === tab.id
-                        ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-blue-700 border border-blue-500/30 shadow-md'
-                        : 'text-slate-600 hover:bg-slate-100/50 hover:text-slate-800'
+                      ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-blue-700 border border-blue-500/30 shadow-md'
+                      : 'text-slate-600 hover:bg-slate-100/50 hover:text-slate-800'
                       }`}
                   >
                     <div
                       className={`flex h-8 w-8 items-center justify-center rounded-lg ${activeTab === tab.id
-                          ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md'
-                          : 'bg-slate-200/50 text-slate-600'
+                        ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md'
+                        : 'bg-slate-200/50 text-slate-600'
                         }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -417,6 +420,26 @@ export default function SettingsPage() {
                       />
                     </div>
                     <div className="space-y-2">
+                      <label className="text-sm font-medium text-slate-700">Kullanıcı Adı</label>
+                      <div className="space-y-1">
+                        <Input
+                          value={settings.username}
+                          onChange={e => setSettings({ ...settings, username: e.target.value })}
+                          placeholder="Kullanıcı adınızı girin"
+                          disabled={!!(user && user.usernameChangeCount >= 1)}
+                          className={`border-slate-200 focus:border-blue-500 ${user && user.usernameChangeCount >= 1 ? 'bg-slate-50 cursor-not-allowed' : ''
+                            }`}
+                        />
+                        {user && (
+                          <p className={`text-xs ${user.usernameChangeCount >= 1 ? 'text-slate-500' : 'text-blue-600'}`}>
+                            {user.usernameChangeCount >= 1
+                              ? 'Kullanıcı adınızı daha önce değiştirdiğiniz için tekrar değiştiremezsiniz.'
+                              : 'Kullanıcı adınızı sadece 1 kez değiştirebilirsiniz.'}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
                       <label className="text-sm font-medium text-slate-700">E-posta</label>
                       <div className="space-y-2">
                         <Input
@@ -425,6 +448,7 @@ export default function SettingsPage() {
                           onChange={e => setSettings({ ...settings, email: e.target.value })}
                           placeholder="E-posta adresinizi girin"
                           className="border-slate-200 focus:border-blue-500"
+                          disabled
                         />
                         {/* {user && (
                           <div className="flex items-center gap-2">

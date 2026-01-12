@@ -7,6 +7,8 @@ interface User {
   id: number
   name: string
   email: string
+  username: string
+  usernameChangeCount: number
   phone?: string
   avatar?: string
   plan: string

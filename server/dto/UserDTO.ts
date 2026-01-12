@@ -13,6 +13,7 @@ export class UserDTO extends BaseDTO {
   avatar?: string
   plan: string
   role: string
+  usernameChangeCount: number
   isActive: boolean
   createdAt: Date
   lastLoginAt?: Date
@@ -26,6 +27,7 @@ export class UserDTO extends BaseDTO {
     avatar?: string
     plan: string
     role: string
+    usernameChangeCount: number
     isActive: boolean
     createdAt: Date
     lastLoginAt?: Date
@@ -39,6 +41,7 @@ export class UserDTO extends BaseDTO {
     this.avatar = data.avatar
     this.plan = data.plan
     this.role = data.role
+    this.usernameChangeCount = data.usernameChangeCount
     this.isActive = data.isActive
     this.createdAt = data.createdAt
     this.lastLoginAt = data.lastLoginAt
@@ -94,6 +97,7 @@ export class LoginUserDTO {
 // Hata: -
 export class UpdateUserDTO {
   name?: string
+  username?: string
   phone?: string
   avatar?: string
   timezone?: string
@@ -107,6 +111,7 @@ export class UpdateUserDTO {
 
   constructor(data: {
     name?: string
+    username?: string
     phone?: string
     avatar?: string
     timezone?: string
@@ -119,6 +124,7 @@ export class UpdateUserDTO {
     settings?: Record<string, unknown>
   }) {
     this.name = data.name
+    this.username = data.username
     this.phone = data.phone
     this.avatar = data.avatar
     this.timezone = data.timezone

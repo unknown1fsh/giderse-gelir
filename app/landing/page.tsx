@@ -55,6 +55,13 @@ export default function LandingPage() {
               <span className="text-white">Özgürlüğünüz</span>
             </h1>
 
+            {/* Slogan */}
+            <div className="mb-6 animate-scale-up" style={{ animationDelay: '200ms' }}>
+              <p className="inline-block px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 text-purple-200 font-medium text-lg sm:text-xl">
+                &quot;GiderSE-Gelir Üzülme...&quot; 🚀
+              </p>
+            </div>
+
             {/* Subtitle */}
             <p className="text-lg sm:text-xl md:text-2xl text-slate-300 mb-6 sm:mb-8 max-w-2xl mx-auto px-4 animate-scale-up">
               Gelir–gider alışkanlıklarınızı anlayan yapay zekâ ile harcamalarınızı netleştirin,
@@ -81,6 +88,15 @@ export default function LandingPage() {
                 <Play className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Giriş Yap
               </Button>
+            </div>
+            {/* Privacy Note */}
+            <div className="max-w-2xl mx-auto mb-8 sm:mb-12 animate-scale-up" style={{ animationDelay: '300ms' }}>
+              <div className="flex items-center justify-center gap-3 px-4 py-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-200">
+                <ShieldCheck className="h-5 w-5 flex-shrink-0" />
+                <p className="text-sm sm:text-base text-left">
+                  <span className="font-bold">Gizliliğiniz Önceliğimiz:</span> Kayıt olurken ad-soyad girişi <span className="text-white underline underline-offset-4 decoration-emerald-400">opsiyoneldir</span>. Sadece kullanıcı adı ve e-posta ile hemen başlayabilirsiniz.
+                </p>
+              </div>
             </div>
 
             {/* AI Highlights */}
@@ -119,14 +135,14 @@ export default function LandingPage() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-4 sm:p-5 text-left">
+                <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-4 sm:p-5 text-left border-emerald-500/30">
                   <div className="flex items-center gap-2 text-white mb-2">
                     <ShieldCheck className="h-5 w-5 text-emerald-300" />
-                    <span className="font-semibold">Kontrol Sizde</span>
+                    <span className="font-semibold text-emerald-300">İsimsiz Kayıt</span>
                   </div>
                   <p className="text-sm sm:text-[15px] text-slate-300 leading-relaxed">
-                    Tavsiyeler, yalnızca uygulamadaki verileriniz ve tercihleriniz doğrultusunda
-                    üretilir. Ne paylaştığınıza siz karar verirsiniz.
+                    Gizliliğiniz bizim için her şeyden önemli. İsterseniz adınızı soyadınızı
+                    paylaşmadan, sadece kullanıcı adı ile anonim olarak kayıt olabilirsiniz.
                   </p>
                 </div>
               </div>
@@ -325,6 +341,9 @@ export default function LandingPage() {
                 textClassName="text-xl sm:text-2xl font-bold text-white"
               />
             </div>
+            <p className="text-slate-400 mb-2 text-xs sm:text-sm">
+              * Kayıt olurken ad-soyad girişi opsiyoneldir, anonim kalabilirsiniz.
+            </p>
             <p className="text-slate-400 mb-3 sm:mb-4 text-sm sm:text-base">
               Finansal özgürlüğünüz için güvenilir partneriniz
             </p>

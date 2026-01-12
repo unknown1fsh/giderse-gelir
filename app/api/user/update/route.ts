@@ -15,6 +15,7 @@ export async function PUT(request: NextRequest) {
     // Güncellenebilir alanlar
     const allowedFields = [
       'name',
+      'username',
       'phone',
       'avatar',
       'timezone',

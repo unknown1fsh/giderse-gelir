@@ -7,6 +7,7 @@ import { BaseEntity } from './BaseEntity'
 export class UserEntity extends BaseEntity {
   email: string
   username: string
+  usernameChangeCount: number
   name?: string
   phone?: string
   passwordHash: string
@@ -29,6 +30,7 @@ export class UserEntity extends BaseEntity {
     id: number
     email: string
     username: string
+    usernameChangeCount: number
     name?: string
     phone?: string
     passwordHash: string
@@ -52,6 +54,7 @@ export class UserEntity extends BaseEntity {
     super(data.id, data.createdAt, data.updatedAt)
     this.email = data.email
     this.username = data.username
+    this.usernameChangeCount = data.usernameChangeCount
     this.name = data.name
     this.phone = data.phone
     this.passwordHash = data.passwordHash

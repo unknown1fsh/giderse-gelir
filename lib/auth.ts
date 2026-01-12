@@ -9,6 +9,8 @@ const prisma = new PrismaClient()
 export interface User {
   id: number
   email: string
+  username: string
+  usernameChangeCount: number
   name?: string | null
   phone?: string
   avatar?: string
@@ -121,6 +123,8 @@ export class AuthService {
           id: user.id,
           name: user.name ?? undefined,
           email: user.email,
+          username: user.username,
+          usernameChangeCount: user.usernameChangeCount,
           phone: user.phone ?? undefined,
           avatar: user.avatar ?? undefined,
           // plan: data.plan || 'free', // TODO: User modelinde yok, UserSubscription'da tutuluyor
@@ -201,6 +205,8 @@ export class AuthService {
           id: user.id,
           name: user.name ?? undefined,
           email: user.email,
+          username: user.username,
+          usernameChangeCount: user.usernameChangeCount,
           phone: user.phone ?? undefined,
           avatar: user.avatar ?? undefined,
           plan: user.subscriptions[0]?.planId || 'free',
@@ -257,6 +263,8 @@ export class AuthService {
         id: session.user.id,
         name: session.user.name ?? undefined,
         email: session.user.email,
+        username: session.user.username,
+        usernameChangeCount: session.user.usernameChangeCount,
         phone: session.user.phone ?? undefined,
         avatar: session.user.avatar ?? undefined,
         plan: session.user.subscriptions[0]?.planId || 'free',
@@ -305,6 +313,7 @@ export class AuthService {
     userId: number,
     data: {
       name?: string
+      username?: string
       phone?: string
       avatar?: string
       timezone?: string
@@ -313,6 +322,40 @@ export class AuthService {
     }
   ) {
     try {
+      // Eğer username güncellenmek isteniyorsa ek kontroller yap
+      if (data.username) {
+        const currentUser = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { username: true, usernameChangeCount: true },
+        })
+
+        if (!currentUser) {
+          throw new Error('Kullanıcı bulunamadı')
+        }
+
+        // Eğer username mevcut olandan farklıysa
+        if (data.username !== currentUser.username) {
+          if (currentUser.usernameChangeCount >= 1) {
+            throw new Error('Kullanıcı adınızı sadece 1 kez değiştirebilirsiniz.')
+          }
+
+          // Username benzersizlik kontrolü
+          const existingUser = await prisma.user.findUnique({
+            where: { username: data.username },
+          })
+
+          if (existingUser) {
+            throw new Error('Bu kullanıcı adı zaten alınmış.')
+          }
+
+          // usernameChangeCount'ı artır
+          ; (data as any).usernameChangeCount = { increment: 1 }
+        } else {
+          // Aynı username ise güncellemeye gerek yok
+          delete data.username
+        }
+      }
+
       const user = await prisma.user.update({
         where: { id: userId },
         data,
@@ -324,6 +367,8 @@ export class AuthService {
           id: user.id,
           name: user.name ?? undefined,
           email: user.email,
+          username: user.username,
+          usernameChangeCount: user.usernameChangeCount,
           phone: user.phone ?? undefined,
           avatar: user.avatar ?? undefined,
           plan: 'free', // Bu bilgi subscription'dan alınmalı

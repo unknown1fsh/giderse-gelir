@@ -1,6 +1,6 @@
 'use client'
 
-import { ShieldCheck, Info, Database, Lock, ArrowLeft, Mail, Phone, MapPin } from 'lucide-react'
+import { ShieldCheck, Info, Database, Lock, ArrowLeft, Mail, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 

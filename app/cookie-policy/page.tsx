@@ -1,6 +1,6 @@
 'use client'
 
-import { Cookie, Shield, Eye, Settings, ArrowLeft, Mail, Phone, MapPin } from 'lucide-react'
+import { Cookie, Shield, Eye, Settings, ArrowLeft, Mail, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
@@ -106,9 +106,9 @@ export default function CookiePolicyPage() {
                             Çoğu web tarayıcısı çerezleri otomatik olarak kabul eder, ancak tarayıcı ayarlarınızı değiştirerek çerezleri reddedebilir veya bir çerez gönderildiğinde sizi uyaracak şekilde ayarlayabilirsiniz.
                         </p>
                         <div className="space-y-2 text-slate-300 text-sm">
-                            <p>• Google Chrome: Ayarlar > Gizlilik ve Güvenlik > Çerezler</p>
-                            <p>• Mozilla Firefox: Seçenekler > Gizlilik ve Güvenlik > Çerezler</p>
-                            <p>• Safari: Tercihler > Gizlilik > Çerezler</p>
+                            <p>• Google Chrome: Ayarlar &gt; Gizlilik ve Güvenlik &gt; Çerezler</p>
+                            <p>• Mozilla Firefox: Seçenekler &gt; Gizlilik ve Güvenlik &gt; Çerezler</p>
+                            <p>• Safari: Tercihler &gt; Gizlilik &gt; Çerezler</p>
                         </div>
                         <p className="text-red-300 mt-4 text-sm font-medium">
                             Not: Zorunlu çerezleri devre dışı bırakmanız halinde web sitemizin bazı fonksiyonları düzgün çalışmayabilir.

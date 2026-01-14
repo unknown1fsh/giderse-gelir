@@ -27,7 +27,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       {/* Animated Background Mesh */}
-      <div className="absolute inset-0 bg-gradient-mesh opacity-50"></div>
+      <div className="absolute inset-0 bg-gradient-mesh opacity-50 pointer-events-none"></div>
 
       {/* Hero Section */}
       <div className="relative overflow-hidden">
@@ -330,7 +330,7 @@ export default function LandingPage() {
       <FeedbackForm />
 
       {/* Footer */}
-      <div className="py-8 sm:py-12 border-t border-white/10">
+      <div className="relative z-10 py-8 sm:py-12 border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">

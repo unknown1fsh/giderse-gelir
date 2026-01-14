@@ -71,15 +71,15 @@ export default function PrivacyPolicyPage() {
                   <div className="space-y-1 text-slate-300 text-sm">
                     <p className="flex items-center">
                       <MapPin className="h-4 w-4 mr-2 text-purple-400" />
-                      Adres: [Şirket Adresi - Güncellenecek]
+                      Adres: Türkiye
                     </p>
                     <p className="flex items-center">
                       <Phone className="h-4 w-4 mr-2 text-purple-400" />
-                      Telefon: [Telefon Numarası - Güncellenecek]
+                      Telefon: +90 (5xx) xxx xx xx
                     </p>
                     <p className="flex items-center">
                       <Mail className="h-4 w-4 mr-2 text-purple-400" />
-                      E-posta: [E-posta Adresi - Güncellenecek]
+                      E-posta: info@giderse-gelir.com
                     </p>
                   </div>
                 </div>
@@ -157,7 +157,7 @@ export default function PrivacyPolicyPage() {
               <li>Yasal yükümlülüklerin yerine getirilmesi</li>
               <li>Müşteri hizmetleri ve destek süreçlerinin yürütülmesi</li>
               <li>Hizmet kalitesinin iyileştirilmesi ve kullanıcı deneyiminin geliştirilmesi</li>
-              <li>Pazarlama ve iletişim faaliyetleri (izin verilmesi halinde)</li>
+              <li>Pazarlama ve iletişim faaliyetleri (izniniz dahilinde)</li>
               <li>Yasal uyuşmazlıkların çözümü</li>
             </ul>
           </div>
@@ -347,8 +347,8 @@ export default function PrivacyPolicyPage() {
             <div className="mt-4 p-4 bg-blue-500/20 rounded-lg border border-blue-500/30">
               <p className="text-blue-200 text-sm">
                 <strong>Haklarınızı Kullanma:</strong> Yukarıdaki haklarınızı kullanmak için{' '}
-                <a href="mailto:[E-posta Adresi]" className="underline">
-                  [E-posta Adresi]
+                <a href="mailto:info@giderse-gelir.com" className="underline">
+                  info@giderse-gelir.com
                 </a>{' '}
                 adresine yazılı başvuru yapabilir veya hesap ayarlarınızdan bazı işlemleri
                 gerçekleştirebilirsiniz. Başvurularınız en geç 30 gün içinde yanıtlanacaktır.
@@ -423,15 +423,15 @@ export default function PrivacyPolicyPage() {
               <div className="space-y-1 text-slate-300 text-sm">
                 <p className="flex items-center">
                   <Mail className="h-4 w-4 mr-2 text-purple-400" />
-                  E-posta: [E-posta Adresi - Güncellenecek]
+                  E-posta: info@giderse-gelir.com
                 </p>
                 <p className="flex items-center">
                   <Phone className="h-4 w-4 mr-2 text-purple-400" />
-                  Telefon: [Telefon Numarası - Güncellenecek]
+                  Telefon: +90 (5xx) xxx xx xx
                 </p>
                 <p className="flex items-center">
                   <MapPin className="h-4 w-4 mr-2 text-purple-400" />
-                  Adres: [Şirket Adresi - Güncellenecek]
+                  Adres: Türkiye
                 </p>
               </div>
             </div>

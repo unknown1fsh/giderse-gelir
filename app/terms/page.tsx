@@ -249,10 +249,10 @@ export default function TermsOfServicePage() {
                 <p className="text-slate-300">
                   İade talepleri,{' '}
                   <a
-                    href="mailto:[E-posta Adresi]"
+                    href="mailto:info@giderse-gelir.com"
                     className="text-purple-400 hover:text-purple-300 underline"
                   >
-                    [E-posta Adresi]
+                    info@giderse-gelir.com
                   </a>{' '}
                   adresine yapılmalıdır. Geçerli iade talepleri 14 iş günü içinde değerlendirilir ve
                   ödeme yapılan yönteme göre iade edilir.
@@ -382,10 +382,10 @@ export default function TermsOfServicePage() {
                   Herhangi bir uyuşmazlık durumunda, öncelikle müzakere yoluyla çözüm aranır.
                   Uyuşmazlıklar,{' '}
                   <a
-                    href="mailto:[E-posta Adresi]"
+                    href="mailto:info@giderse-gelir.com"
                     className="text-purple-400 hover:text-purple-300 underline"
                   >
-                    [E-posta Adresi]
+                    info@giderse-gelir.com
                   </a>{' '}
                   adresine yazılı başvuru ile iletilmelidir.
                 </p>
@@ -459,16 +459,17 @@ export default function TermsOfServicePage() {
               <div className="space-y-1 text-slate-300 text-sm">
                 <p className="flex items-center">
                   <Mail className="h-4 w-4 mr-2 text-blue-400" />
-                  E-posta: [E-posta Adresi - Güncellenecek]
+                  E-posta: info@giderse-gelir.com
                 </p>
                 <p className="flex items-center">
                   <Phone className="h-4 w-4 mr-2 text-blue-400" />
-                  Telefon: [Telefon Numarası - Güncellenecek]
+                  Telefon: +90 (5xx) xxx xx xx
                 </p>
                 <p className="flex items-center">
                   <MapPin className="h-4 w-4 mr-2 text-blue-400" />
-                  Adres: [Şirket Adresi - Güncellenecek]
+                  Adres: Türkiye
                 </p>
+                Broadway, NY 10013, United States
               </div>
             </div>
             <p className="text-slate-300 mt-4 text-sm">

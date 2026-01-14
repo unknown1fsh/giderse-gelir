@@ -341,27 +341,34 @@ export default function LandingPage() {
                 textClassName="text-xl sm:text-2xl font-bold text-white"
               />
             </div>
-            <p className="text-slate-400 mb-2 text-xs sm:text-sm">
-              * Kayıt olurken ad-soyad girişi opsiyoneldir, anonim kalabilirsiniz.
-            </p>
             <p className="text-slate-400 mb-3 sm:mb-4 text-sm sm:text-base">
               Finansal özgürlüğünüz için güvenilir partneriniz
             </p>
-            <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-6 text-xs sm:text-sm text-slate-400">
-              <span>© 2024 GiderSE-Gelir</span>
-              <span className="hidden sm:inline">•</span>
+            <div className="flex flex-wrap justify-center items-center gap-y-2 gap-x-4 sm:gap-x-6 text-xs sm:text-sm text-slate-400">
+              <span>© 2025 GiderSE-Gelir</span>
               <Link
                 href="/privacy"
                 className="text-purple-400 hover:text-purple-300 transition-colors underline"
               >
                 Gizlilik Politikası
               </Link>
-              <span className="hidden sm:inline">•</span>
               <Link
                 href="/terms"
                 className="text-purple-400 hover:text-purple-300 transition-colors underline"
               >
                 Kullanım Şartları
+              </Link>
+              <Link
+                href="/cookie-policy"
+                className="text-purple-400 hover:text-purple-300 transition-colors underline"
+              >
+                Çerez Politikası
+              </Link>
+              <Link
+                href="/kvkk"
+                className="text-purple-400 hover:text-purple-300 transition-colors underline"
+              >
+                KVKK
               </Link>
             </div>
           </div>

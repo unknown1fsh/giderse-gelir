@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   title: 'GiderSE-Gelir - Kişisel Finans Yönetimi',
   description:
     'Gelir-gider takibi, analizler ve kullanıcı verilerinize dayalı AI tavsiyeleriyle bütçenizi daha akıllı yönetin.',
+  other: {
+    'google-adsense-account': 'ca-pub-9291172027532317',
+  },
   icons: {
     icon: '/logo.png',
   },
@@ -34,6 +37,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="tr" className={`${inter.variable} ${jakarta.variable} scroll-smooth`} data-scroll-behavior="smooth">
       <body className={`${inter.className} antialiased`}>
+        {/* AdSense Verification */}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9291172027532317"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         {/* Google tag (gtag.js) */}
         {googleTagId && (
           <>

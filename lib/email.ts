@@ -4,7 +4,7 @@ import { Resend } from 'resend'
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@giderse.com'
+const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev'
 const FROM_NAME = process.env.FROM_NAME || 'GiderSe Gelir'
 
 /**

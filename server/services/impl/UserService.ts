@@ -108,7 +108,7 @@ export class UserService extends BaseService<UserDTO> {
       notifications: {},
       settings: {},
       role: 'USER',
-      isActive: true,
+      isActive: false,
     })
 
     return UserMapper.prismaToDTO(user)

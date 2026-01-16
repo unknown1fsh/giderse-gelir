@@ -19,9 +19,13 @@ import {
   Sparkles,
 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import BrandLogo from '@/components/brand-logo'
+import { useToast } from '@/lib/use-toast'
 
 export default function RegisterPage() {
+  const router = useRouter()
+  const { success } = useToast()
   const [formData, setFormData] = useState({
     username: '',
     name: '',
@@ -116,8 +120,13 @@ export default function RegisterPage() {
       }
 
       if (data.success) {
-        // Otomatik yönlendirme yerine başarılı mesajı göster
-        alert(data.message || 'İlginize teşekkürler. Şimdilik sadece sınırlı sayıda üyelik alıyoruz. Talebiniz onaylandıktan sonra işlemlerinize devam edebilirsiniz.')
+        // success(title, description, duration, dismissLabel)
+        success(
+          'Kayıt Başarılı',
+          data.message || 'İlginize teşekkürler. Şimdilik sadece sınırlı sayıda üyelik alıyoruz. Talebiniz onaylandıktan sonra işlemlerinize devam edebilirsiniz.',
+          Infinity,
+          'Tamam'
+        )
 
         // Formu temizle ve Login sayfasına yönlendir (veya anasayfaya)
         setFormData({
@@ -129,7 +138,9 @@ export default function RegisterPage() {
           confirmPassword: '',
           plan: 'free',
         })
-        window.location.href = '/auth/login'
+
+        // Toast'ın görünmesi için client-side redirect kullanıyoruz (state korunur)
+        router.push('/auth/login')
       } else {
         setError(data.message || data.error || 'Kayıt olurken bir hata oluştu')
       }
@@ -224,8 +235,8 @@ export default function RegisterPage() {
                     <div
                       key={plan.id}
                       className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all ${formData.plan === plan.id
-                          ? 'border-purple-500 bg-purple-500/20'
-                          : 'border-white/20 bg-white/5 hover:border-white/40'
+                        ? 'border-purple-500 bg-purple-500/20'
+                        : 'border-white/20 bg-white/5 hover:border-white/40'
                         }`}
                       onClick={() => setFormData(prev => ({ ...prev, plan: plan.id }))}
                     >

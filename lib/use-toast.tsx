@@ -9,6 +9,8 @@ interface Toast {
     title?: string
     description?: string
     type?: ToastType
+    duration?: number
+    dismissLabel?: string
 }
 
 interface ToastContextType {
@@ -26,10 +28,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         const id = Math.random().toString(36).substring(7)
         setToasts(prev => [...prev, { ...toast, id }])
 
-        // Auto-remove after 5 seconds
-        setTimeout(() => {
-            setToasts(prev => prev.filter(t => t.id !== id))
-        }, 5000)
+        // Auto-remove if currently duration is not Infinity
+        if (toast.duration !== Infinity) {
+            setTimeout(() => {
+                setToasts(prev => prev.filter(t => t.id !== id))
+            }, toast.duration || 5000)
+        }
     }, [])
 
     const removeToast = React.useCallback((id: string) => {
@@ -70,6 +74,14 @@ function ToastContainer({ toasts, removeToast }: { toasts: Toast[]; removeToast:
                             {toast.description && (
                                 <div className="text-sm opacity-90 mt-1">{toast.description}</div>
                             )}
+                            {toast.dismissLabel && (
+                                <button
+                                    onClick={() => removeToast(toast.id)}
+                                    className="mt-3 text-sm font-medium bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded transition-colors border border-current"
+                                >
+                                    {toast.dismissLabel}
+                                </button>
+                            )}
                         </div>
                         <button
                             onClick={() => removeToast(toast.id)}
@@ -94,12 +106,12 @@ export function useToast() {
 
     return {
         toast: context.addToast,
-        success: (title: string, description?: string) =>
-            context.addToast({ title, description, type: 'success' }),
-        error: (title: string, description?: string) =>
-            context.addToast({ title, description, type: 'error' }),
-        warning: (title: string, description?: string) =>
-            context.addToast({ title, description, type: 'warning' }),
+        success: (title: string, description?: string, duration?: number, dismissLabel?: string) =>
+            context.addToast({ title, description, type: 'success', duration, dismissLabel }),
+        error: (title: string, description?: string, duration?: number, dismissLabel?: string) =>
+            context.addToast({ title, description, type: 'error', duration, dismissLabel }),
+        warning: (title: string, description?: string, duration?: number, dismissLabel?: string) =>
+            context.addToast({ title, description, type: 'warning', duration, dismissLabel }),
         dismiss: context.removeToast,
     }
 }

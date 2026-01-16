@@ -116,14 +116,20 @@ export default function RegisterPage() {
       }
 
       if (data.success) {
-        // Premium isteği varsa kullanıcıya bilgi ver
-        if (data.premiumRequestCreated) {
-          alert(
-            'Kayıt başarılı! Premium üyelik talebiniz admin onayına gönderildi. Onaylandıktan sonra premium özelliklere erişebileceksiniz.'
-          )
-        }
-        // Başarılı kayıt sonrası dashboard'a yönlendir (full page reload ile context'leri yenile)
-        window.location.href = '/dashboard'
+        // Otomatik yönlendirme yerine başarılı mesajı göster
+        alert(data.message || 'İlginize teşekkürler. Şimdilik sadece sınırlı sayıda üyelik alıyoruz. Talebiniz onaylandıktan sonra işlemlerinize devam edebilirsiniz.')
+
+        // Formu temizle ve Login sayfasına yönlendir (veya anasayfaya)
+        setFormData({
+          username: '',
+          name: '',
+          email: '',
+          phone: '',
+          password: '',
+          confirmPassword: '',
+          plan: 'free',
+        })
+        window.location.href = '/auth/login'
       } else {
         setError(data.message || data.error || 'Kayıt olurken bir hata oluştu')
       }
@@ -217,11 +223,10 @@ export default function RegisterPage() {
                   {plans.map(plan => (
                     <div
                       key={plan.id}
-                      className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                        formData.plan === plan.id
+                      className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all ${formData.plan === plan.id
                           ? 'border-purple-500 bg-purple-500/20'
                           : 'border-white/20 bg-white/5 hover:border-white/40'
-                      }`}
+                        }`}
                       onClick={() => setFormData(prev => ({ ...prev, plan: plan.id }))}
                     >
                       {plan.popular && (

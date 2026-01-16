@@ -98,7 +98,7 @@ export class AuthService {
           email: data.email,
           phone: data.phone,
           passwordHash,
-          // plan: data.plan || 'free', // TODO: User modelinde yok, UserSubscription'da tutuluyor
+          isActive: false, // Admin onayı gerektirir
         },
       })
 

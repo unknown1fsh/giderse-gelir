@@ -175,6 +175,8 @@ model User {
   updatedAt               DateTime             @updatedAt @map("updated_at")
   emailVerificationToken  String?              @map("email_verification_token") @db.VarChar(255)
   emailVerificationExpiry DateTime?            @map("email_verification_expiry")
+  resetPasswordToken      String?              @map("reset_password_token") @db.VarChar(255)
+  resetPasswordExpiry     DateTime?            @map("reset_password_expiry")
   role                    String               @default("USER") @db.VarChar(20)
   accounts                Account[]
   aiReportUsages          AIReportUsage[]

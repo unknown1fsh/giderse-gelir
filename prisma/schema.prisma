@@ -40,6 +40,7 @@ model RefCurrency {
   fxRatesFrom  FxRate[]      @relation("FromCurrency")
   fxRatesTo    FxRate[]      @relation("ToCurrency")
   investments  Investment[]
+  goals        Goal[]
   transactions Transaction[]
 
   @@map("ref_currency")
@@ -186,6 +187,7 @@ model User {
   eWallets                EWallet[]
   goldItems               GoldItem[]
   investments             Investment[]
+  goals                   Goal[]
   paymentRequests         PaymentRequest[]
   periods                 Period[]
   portfolioSnapshots      PortfolioSnapshot[]
@@ -692,4 +694,26 @@ model Feedback {
   @@index([type])
   @@index([createdAt])
   @@map("feedback")
+}
+
+model Goal {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @map("user_id")
+  name          String   @db.VarChar(100)
+  targetAmount  Decimal  @map("target_amount") @db.Decimal(15, 2)
+  currentAmount Decimal  @default(0) @map("current_amount") @db.Decimal(15, 2)
+  currencyId    Int      @map("currency_id")
+  targetDate    DateTime? @map("target_date") @db.Date
+  category      String?  @db.VarChar(50)
+  status        String   @default("active") @db.VarChar(20) // 'active', 'completed', 'cancelled'
+  icon          String?  @db.VarChar(50)
+  color         String?  @db.VarChar(20)
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currency      RefCurrency @relation(fields: [currencyId], references: [id])
+
+  @@index([userId, status])
+  @@map("goal")
 }

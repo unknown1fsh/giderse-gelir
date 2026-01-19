@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Eye, Trash2 } from 'lucide-react'
+import { Eye, Trash2, AlertCircle, CheckCircle } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils'
 import { trackGoogleAdsConversion } from '@/lib/google-ads'
 import { getPlanPrice } from '@/lib/plan-config'
@@ -45,11 +45,21 @@ export default function AdminUsers() {
   const [showActiveOnly, setShowActiveOnly] = useState<boolean | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [userToDelete, setUserToDelete] = useState<number | null>(null)
+  const [pendingUsers, setPendingUsers] = useState<User[]>([])
+  const [loadingPending, setLoadingPending] = useState(true)
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false)
+  const [showRejectConfirm, setShowRejectConfirm] = useState(false)
+  const [userToApprove, setUserToApprove] = useState<number | null>(null)
+  const [userToReject, setUserToReject] = useState<number | null>(null)
 
   useEffect(() => {
     void fetchUsers()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, searchTerm, selectedRole, showActiveOnly])
+
+  useEffect(() => {
+    void fetchPendingUsers()
+  }, [])
 
   const fetchUsers = async () => {
     try {
@@ -89,6 +99,85 @@ export default function AdminUsers() {
       console.error('Users fetch error:', err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchPendingUsers = async () => {
+    try {
+      setLoadingPending(true)
+      const response = await fetch('/api/admin/users?isActive=false&limit=100', {
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        throw new Error('Bekleyen kullanıcılar alınamadı')
+      }
+
+      const result = (await response.json()) as {
+        success: boolean
+        data: { users: User[] }
+      }
+      if (result.success) {
+        setPendingUsers(result.data.users)
+      }
+    } catch (err) {
+      console.error('Pending users fetch error:', err)
+    } finally {
+      setLoadingPending(false)
+    }
+  }
+
+  const handleApproveUser = (userId: number) => {
+    setUserToApprove(userId)
+    setShowApproveConfirm(true)
+  }
+
+  const confirmApproveUser = async () => {
+    if (!userToApprove) {
+      return
+    }
+
+    try {
+      await handleUpdateUser(userToApprove, { isActive: true })
+      await fetchPendingUsers()
+      toastSuccess('Başarılı', 'Kullanıcı başarıyla onaylandı')
+    } catch (err) {
+      console.error('Approve user error:', err)
+      toastError('Hata', 'Kullanıcı onaylanırken hata oluştu')
+    } finally {
+      setShowApproveConfirm(false)
+      setUserToApprove(null)
+    }
+  }
+
+  const handleRejectUser = (userId: number) => {
+    setUserToReject(userId)
+    setShowRejectConfirm(true)
+  }
+
+  const confirmRejectUser = async () => {
+    if (!userToReject) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/admin/users/${userToReject}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        throw new Error('Kullanıcı reddedilemedi')
+      }
+
+      await fetchPendingUsers()
+      toastSuccess('Başarılı', 'Kullanıcı kaydı reddedildi ve silindi')
+    } catch (err) {
+      console.error('Reject user error:', err)
+      toastError('Hata', 'Kullanıcı reddedilirken hata oluştu')
+    } finally {
+      setShowRejectConfirm(false)
+      setUserToReject(null)
     }
   }
 
@@ -344,6 +433,71 @@ export default function AdminUsers() {
 
   return (
     <div className="space-y-6">
+      {/* Pending Users Section */}
+      {!loadingPending && pendingUsers.length > 0 && (
+        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-400 rounded-2xl p-6 shadow-lg">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-10 w-10 rounded-full bg-yellow-500 flex items-center justify-center">
+              <AlertCircle className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Onay Bekleyen Kullanıcılar</h3>
+              <p className="text-sm text-slate-600">
+                {pendingUsers.length} kullanıcı admin onayı bekliyor
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {pendingUsers.map(user => (
+              <div
+                key={user.id}
+                className="bg-white rounded-lg p-4 flex items-center justify-between shadow-sm border border-yellow-200"
+              >
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="flex-shrink-0 h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                    {getDisplayName(user).charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-slate-900 truncate">
+                      {getDisplayName(user)}
+                    </div>
+                    <div className="text-sm text-slate-600 truncate">{user.email}</div>
+                    <div className="text-xs text-slate-500">
+                      Kayıt: {new Date(user.createdAt).toLocaleString('tr-TR')}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => {
+                      handleApproveUser(user.id)
+                    }}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-1" />
+                    Onayla
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      handleRejectUser(user.id)
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Reddet
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Filtreler */}
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200/60">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -432,6 +586,34 @@ export default function AdminUsers() {
         message="Bu kullanıcıyı silmek istediğinizden emin misiniz?"
         warningMessage="Bu işlem geri alınamaz ve kullanıcının tüm verileri silinecektir."
         confirmText="Evet, Sil"
+        cancelText="İptal"
+      />
+
+      <ConfirmationDialog
+        isOpen={showApproveConfirm}
+        onClose={() => {
+          setShowApproveConfirm(false)
+          setUserToApprove(null)
+        }}
+        onConfirm={confirmApproveUser}
+        title="Kullanıcıyı Onayla"
+        message="Bu kullanıcının kaydını onaylamak istediğinizden emin misiniz?"
+        warningMessage="Kullanıcı onaylandıktan sonra sisteme giriş yapabilecektir."
+        confirmText="Evet, Onayla"
+        cancelText="İptal"
+      />
+
+      <ConfirmationDialog
+        isOpen={showRejectConfirm}
+        onClose={() => {
+          setShowRejectConfirm(false)
+          setUserToReject(null)
+        }}
+        onConfirm={confirmRejectUser}
+        title="Kullanıcıyı Reddet"
+        message="Bu kullanıcının kaydını reddetmek istediğinizden emin misiniz?"
+        warningMessage="Kullanıcı kaydı reddedilecek ve sistemden silinecektir. Bu işlem geri alınamaz."
+        confirmText="Evet, Reddet"
         cancelText="İptal"
       />
     </div>

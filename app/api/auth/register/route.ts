@@ -111,7 +111,7 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     }
   }
 
-  const successMessage = 'İlginize teşekkürler. Şimdilik sadece sınırlı sayıda üyelik alıyoruz. Talebiniz onaylandıktan sonra işlemlerinize devam edebilirsiniz.'
+  const successMessage = 'İlginize teşekkür ederiz. Kaydınız admin onayından sonra aktif olacaktır. Genelde en fazla 1 saat sürmektedir.'
 
   return NextResponse.json(
     {

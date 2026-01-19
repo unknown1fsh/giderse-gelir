@@ -135,7 +135,7 @@ export default function RegisterPage() {
         // success(title, description, duration, dismissLabel)
         success(
           'Kayıt Başarılı',
-          data.message || 'İlginize teşekkürler. Şimdilik sadece sınırlı sayıda üyelik alıyoruz. Talebiniz onaylandıktan sonra işlemlerinize devam edebilirsiniz.',
+          data.message || 'İlginize teşekkür ederiz. Kaydınız admin onayından sonra aktif olacaktır. Genelde en fazla 1 saat sürmektedir.',
           Infinity,
           'Tamam'
         )

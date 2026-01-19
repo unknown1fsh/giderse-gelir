@@ -8,6 +8,7 @@ import { useToast } from '@/lib/use-toast'
 import { useUser } from '@/lib/user-context'
 import { isPremiumPlan } from '@/lib/plan-config'
 import PremiumUpgradeModal from '@/components/premium-upgrade-modal'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import {
   ArrowLeft,
   Home,
@@ -65,6 +66,8 @@ export default function InvestmentsPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabType>('all')
   const [showPremiumModal, setShowPremiumModal] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [investmentToDelete, setInvestmentToDelete] = useState<number | null>(null)
   const fetchedRef = useRef(false)
 
   const isPremium = isPremiumPlan(user?.plan || 'free')
@@ -145,26 +148,32 @@ export default function InvestmentsPage() {
     router.push(type ? `/investments/${type}/new` : '/investments/new')
   }
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Bu yatırımı silmek istediğinizden emin misiniz?')) {
-      return
-    }
+  const handleDelete = (id: number) => {
+    setInvestmentToDelete(id)
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!investmentToDelete) return
 
     try {
-      const response = await fetch(`/api/investments/${id}`, {
+      const response = await fetch(`/api/investments/${investmentToDelete}`, {
         method: 'DELETE',
         credentials: 'include',
       })
 
       if (response.ok) {
         toastSuccess('Başarılı', 'Yatırım silindi')
-        setInvestments(prev => prev.filter(inv => inv.id !== id))
+        setInvestments(prev => prev.filter(inv => inv.id !== investmentToDelete))
       } else {
         toastError('Hata', 'Yatırım silinemedi')
       }
     } catch (error) {
       console.error('Silme hatası:', error)
       toastError('Hata', 'Yatırım silinemedi')
+    } finally {
+      setShowDeleteConfirm(false)
+      setInvestmentToDelete(null)
     }
   }
 
@@ -323,8 +332,8 @@ export default function InvestmentsPage() {
               <button
                 onClick={() => setActiveTab('all')}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${activeTab === 'all'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                    : 'text-slate-600 hover:bg-white hover:shadow-sm'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                  : 'text-slate-600 hover:bg-white hover:shadow-sm'
                   }`}
               >
                 Tümü
@@ -342,8 +351,8 @@ export default function InvestmentsPage() {
                     key={category.id}
                     onClick={() => setActiveTab(category.id as TabType)}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${isActive
-                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                        : 'text-slate-600 hover:bg-white hover:shadow-sm'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                      : 'text-slate-600 hover:bg-white hover:shadow-sm'
                       }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -489,6 +498,20 @@ export default function InvestmentsPage() {
         isOpen={showPremiumModal}
         onClose={() => setShowPremiumModal(false)}
         featureName="Yatırım Araçları"
+      />
+
+      <ConfirmationDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false)
+          setInvestmentToDelete(null)
+        }}
+        onConfirm={confirmDelete}
+        title="Yatırımı Sil"
+        message="Bu yatırımı silmek istediğinizden emin misiniz?"
+        warningMessage="Yatırım silindiğinde portföy değerleriniz güncellenecektir. Bu işlem geri alınamaz."
+        confirmText="Evet, Sil"
+        cancelText="İptal"
       />
     </div>
   )

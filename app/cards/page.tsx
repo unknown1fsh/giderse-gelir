@@ -8,6 +8,7 @@ import { CreditCard, AlertCircle, Calendar, ArrowLeft, Home, Tag, Edit, Trash2 }
 import { formatCurrency } from '@/lib/validators'
 import { EditNameModal } from '@/components/ui/edit-name-modal'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import { useToast } from '@/lib/use-toast'
 
 interface CreditCardData {
   id: number
@@ -29,6 +30,7 @@ interface CreditCardData {
 
 export default function CardsPage() {
   const router = useRouter()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [creditCards, setCreditCards] = useState<CreditCardData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -77,13 +79,13 @@ export default function CardsPage() {
         setCreditCards(prev =>
           prev.map(card => (card.id === selectedCard.id ? { ...card, name: newName } : card))
         )
-        alert('Kart adı başarıyla güncellendi')
+        toastSuccess('Başarılı', 'Kart adı başarıyla güncellendi')
       } else {
-        alert('Kart adı güncellenemedi')
+        toastError('Hata', 'Kart adı güncellenemedi')
       }
     } catch (error) {
       console.error('Kart güncelleme hatası:', error)
-      alert('Kart güncellenirken hata oluştu')
+      toastError('Hata', 'Kart güncellenirken hata oluştu')
     }
   }
 
@@ -100,15 +102,15 @@ export default function CardsPage() {
 
       if (response.ok) {
         const result = await response.json()
-        alert(result.message)
+        toastSuccess('Başarılı', result.message)
         // Listeyi güncelle
         setCreditCards(prev => prev.filter(card => card.id !== selectedCard.id))
       } else {
-        alert('Kart silinemedi')
+        toastError('Hata', 'Kart silinemedi')
       }
     } catch (error) {
       console.error('Kart silme hatası:', error)
-      alert('Kart silinirken hata oluştu')
+      toastError('Hata', 'Kart silinirken hata oluştu')
     }
   }
 

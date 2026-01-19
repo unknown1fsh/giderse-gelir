@@ -8,10 +8,12 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle2, XCircle, Mail, Loader2, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import BrandLogo from '@/components/brand-logo'
+import { useToast } from '@/lib/use-toast'
 
 function VerifyEmailContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'idle'>('idle')
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [resending, setResending] = useState(false)
@@ -93,12 +95,12 @@ function VerifyEmailContent() {
       const data = (await response.json()) as { success?: boolean; message?: string }
 
       if (response.ok && data.success) {
-        alert('Doğrulama e-postası gönderildi. Lütfen e-posta kutunuzu kontrol edin.')
+        toastSuccess('Başarılı', 'Doğrulama e-postası gönderildi. Lütfen e-posta kutunuzu kontrol edin.')
       } else {
-        alert(data.message || 'E-posta gönderilemedi')
+        toastError('Hata', data.message || 'E-posta gönderilemedi')
       }
     } catch (error) {
-      alert('Bir hata oluştu. Lütfen tekrar deneyin.')
+      toastError('Hata', 'Bir hata oluştu. Lütfen tekrar deneyin.')
     } finally {
       setResending(false)
     }

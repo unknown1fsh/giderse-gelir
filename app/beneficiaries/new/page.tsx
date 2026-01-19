@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Save, Users, Building2, CreditCard, Phone, Mail } from 'lucide-react'
+import { useToast } from '@/lib/use-toast'
 
 interface ReferenceData {
   banks: Array<{ id: number; name: string }>
@@ -11,6 +12,7 @@ interface ReferenceData {
 
 export default function NewBeneficiaryPage() {
   const router = useRouter()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -48,13 +50,13 @@ export default function NewBeneficiaryPage() {
 
     // Validasyon
     if (!formData.name.trim()) {
-      alert('Alıcı adı zorunludur')
+      toastError('Hata', 'Alıcı adı zorunludur')
       return
     }
 
     // En az bir iletişim bilgisi olmalı
     if (!formData.iban && !formData.accountNo && !formData.phoneNumber && !formData.email) {
-      alert('En az bir iletişim bilgisi (IBAN, Hesap No, Telefon veya E-posta) girilmelidir')
+      toastError('Hata', 'En az bir iletişim bilgisi (IBAN, Hesap No, Telefon veya E-posta) girilmelidir')
       return
     }
 
@@ -79,15 +81,15 @@ export default function NewBeneficiaryPage() {
       })
 
       if (response.ok) {
-        alert('Alıcı başarıyla eklendi')
+        toastSuccess('Başarılı', 'Alıcı başarıyla eklendi')
         router.push('/beneficiaries')
       } else {
         const errorData = await response.json()
-        alert('Hata: ' + (errorData.error || 'Alıcı eklenemedi'))
+        toastError('Hata', errorData.error || 'Alıcı eklenemedi')
       }
     } catch (error) {
       console.error('Alıcı eklenirken hata:', error)
-      alert('Alıcı eklenirken hata oluştu')
+      toastError('Hata', 'Alıcı eklenirken hata oluştu')
     } finally {
       setSaving(false)
     }

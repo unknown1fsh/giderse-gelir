@@ -8,6 +8,7 @@ import BrandLogo from '@/components/brand-logo'
 import DemoDashboard from '@/components/demo/demo-dashboard'
 import DemoTransactions from '@/components/demo/demo-transactions'
 import DemoAccounts from '@/components/demo/demo-accounts'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import {
   demoAccounts as initialDemoAccounts,
   demoTransactions as initialDemoTransactions,
@@ -22,6 +23,7 @@ export default function DemoPage() {
   const [transactions, setTransactions] = useState<DemoTransaction[]>(initialDemoTransactions)
   const [accounts] = useState<DemoAccount[]>(initialDemoAccounts)
   const [summary, setSummary] = useState<DemoSummary>(initialDemoSummary)
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
 
   // İşlemler değiştiğinde özeti güncelle
   useEffect(() => {
@@ -57,12 +59,12 @@ export default function DemoPage() {
   }
 
   const handleReset = () => {
-    if (
-      confirm('Tüm demo verilerini temizlemek istediğinize emin misiniz? Bu işlem geri alınamaz.')
-    ) {
-      setTransactions([])
-      // Summary otomatik olarak useEffect tarafından güncellenecek
-    }
+    setShowResetConfirm(true)
+  }
+
+  const confirmReset = async () => {
+    setTransactions([])
+    setShowResetConfirm(false)
   }
 
   return (
@@ -152,6 +154,17 @@ export default function DemoPage() {
           </p>
         </div>
       </div>
+
+      <ConfirmationDialog
+        isOpen={showResetConfirm}
+        onClose={() => setShowResetConfirm(false)}
+        onConfirm={confirmReset}
+        title="Verileri Sıfırla"
+        message="Tüm demo verilerini temizlemek istediğinize emin misiniz?"
+        warningMessage="Bu işlem geri alınamaz ve tüm geçici işlemleriniz silinecektir."
+        confirmText="Evet, Sıfırla"
+        cancelText="İptal"
+      />
     </div>
   )
 }

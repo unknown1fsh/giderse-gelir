@@ -17,6 +17,7 @@ import { formatCurrency } from '@/lib/validators'
 import { EditNameModal } from '@/components/ui/edit-name-modal'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import PageHeader from '@/components/page-header'
+import { useToast } from '@/lib/use-toast'
 
 interface Transaction {
   id: number
@@ -63,6 +64,7 @@ interface AccountDetail {
 export default function AccountDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { success: toastSuccess, error: toastError } = useToast()
   const accountId = params.id as string
 
   const [account, setAccount] = useState<AccountDetail | null>(null)
@@ -106,13 +108,13 @@ export default function AccountDetailPage() {
       if (response.ok) {
         await response.json()
         setAccount(prev => (prev ? { ...prev, name: newName } : null))
-        alert('Hesap adı başarıyla güncellendi')
+        toastSuccess('Başarılı', 'Hesap adı başarıyla güncellendi')
       } else {
-        alert('Hesap adı güncellenemedi')
+        toastError('Hata', 'Hesap adı güncellenemedi')
       }
     } catch (error) {
       console.error('Hesap güncelleme hatası:', error)
-      alert('Hesap güncellenirken hata oluştu')
+      toastError('Hata', 'Hesap güncellenirken hata oluştu')
     }
   }
 
@@ -125,14 +127,14 @@ export default function AccountDetailPage() {
 
       if (response.ok) {
         const result = await response.json()
-        alert(result.message)
+        toastSuccess('Başarılı', result.message)
         router.push('/accounts')
       } else {
-        alert('Hesap silinemedi')
+        toastError('Hata', 'Hesap silinemedi')
       }
     } catch (error) {
       console.error('Hesap silme hatası:', error)
-      alert('Hesap silinirken hata oluştu')
+      toastError('Hata', 'Hesap silinirken hata oluştu')
     }
   }
 

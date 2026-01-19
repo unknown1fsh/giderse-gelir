@@ -7,6 +7,7 @@ import { EditNameModal } from '@/components/ui/edit-name-modal'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { usePremium } from '@/lib/use-premium'
 import { parseCurrencyInput } from '@/lib/validators'
+import { useToast } from '@/lib/use-toast'
 import {
   ArrowLeft,
   Save,
@@ -39,6 +40,7 @@ interface ReferenceData {
 
 export default function NewIncomePage() {
   const router = useRouter()
+  const { success: toastSuccess, error: toastError, warning: toastWarning } = useToast()
   const { isPremium, handlePremiumFeature } = usePremium()
   const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -157,16 +159,16 @@ export default function NewIncomePage() {
   const gelirCategories = referenceData?.categories
     ? gelirTxTypeId > 0
       ? referenceData.categories.filter(cat => {
-          // Sadece gelir kategorilerini göster
-          const isGelir = cat.txTypeId === gelirTxTypeId
-          // Gider kategorilerini kesinlikle hariç tut
-          const isGider = giderTxTypeId > 0 && cat.txTypeId === giderTxTypeId
-          return isGelir && !isGider
-        })
+        // Sadece gelir kategorilerini göster
+        const isGelir = cat.txTypeId === gelirTxTypeId
+        // Gider kategorilerini kesinlikle hariç tut
+        const isGider = giderTxTypeId > 0 && cat.txTypeId === giderTxTypeId
+        return isGelir && !isGider
+      })
       : // Eğer gelirTxTypeId bulunamadıysa, gider olmayan kategorileri göster (fallback)
-        referenceData.categories.filter(cat =>
-          giderTxTypeId > 0 ? cat.txTypeId !== giderTxTypeId : true
-        )
+      referenceData.categories.filter(cat =>
+        giderTxTypeId > 0 ? cat.txTypeId !== giderTxTypeId : true
+      )
     : []
 
   // Debug log - sadece geliştirme ortamında
@@ -236,7 +238,7 @@ export default function NewIncomePage() {
 
   const handleAddBeneficiary = async () => {
     if (!beneficiaryForm.name) {
-      alert('Alıcı adı zorunludur')
+      toastError('Hata', 'Alıcı adı zorunludur')
       return
     }
 
@@ -266,17 +268,17 @@ export default function NewIncomePage() {
           description: '',
         })
       } else {
-        alert('Alıcı eklenemedi')
+        toastError('Hata', 'Alıcı eklenemedi')
       }
     } catch (error) {
       console.error('Alıcı eklenirken hata:', error)
-      alert('Alıcı eklenirken hata oluştu')
+      toastError('Hata', 'Alıcı eklenirken hata oluştu')
     }
   }
 
   const handleAddEWallet = async () => {
     if (!eWalletForm.name || !eWalletForm.provider) {
-      alert('E-cüzdan adı ve sağlayıcı zorunludur')
+      toastError('Hata', 'E-cüzdan adı ve sağlayıcı zorunludur')
       return
     }
 
@@ -308,11 +310,11 @@ export default function NewIncomePage() {
           currencyId: eWalletForm.currencyId,
         })
       } else {
-        alert('E-cüzdan eklenemedi')
+        toastError('Hata', 'E-cüzdan eklenemedi')
       }
     } catch (error) {
       console.error('E-cüzdan eklenirken hata:', error)
-      alert('E-cüzdan eklenirken hata oluştu')
+      toastError('Hata', 'E-cüzdan eklenirken hata oluştu')
     }
   }
 
@@ -334,13 +336,13 @@ export default function NewIncomePage() {
           const data = (await refRes.json()) as ReferenceData
           setReferenceData(data)
         }
-        alert('Alıcı başarıyla silindi')
+        toastSuccess('Başarılı', 'Alıcı başarıyla silindi')
       } else {
-        alert('Alıcı silinemedi')
+        toastError('Hata', 'Alıcı silinemedi')
       }
     } catch (error) {
       console.error('Alıcı silme hatası:', error)
-      alert('Alıcı silinemedi')
+      toastError('Hata', 'Alıcı silinemedi')
     } finally {
       setDeletingBeneficiary(null)
     }
@@ -378,37 +380,37 @@ export default function NewIncomePage() {
     e.preventDefault()
 
     if (!formData.categoryId) {
-      alert('Lütfen kategori seçiniz')
+      toastError('Hata', 'Lütfen kategori seçiniz')
       return
     }
     if (!formData.paymentMethodId) {
-      alert('Lütfen ödeme yöntemi seçiniz')
+      toastError('Hata', 'Lütfen ödeme yöntemi seçiniz')
       return
     }
 
     if (paymentFieldType === 'account' && !formData.accountId) {
-      alert('Lütfen hesap seçiniz')
+      toastError('Hata', 'Lütfen hesap seçiniz')
       return
     }
     if (paymentFieldType === 'creditCard' && !formData.creditCardId) {
-      alert('Lütfen kredi kartı seçiniz')
+      toastError('Hata', 'Lütfen kredi kartı seçiniz')
       return
     }
     if (
       paymentFieldType === 'transferWithBeneficiary' &&
       (!formData.accountId || !formData.beneficiaryId)
     ) {
-      alert('Lütfen hem hesap hem de gönderici seçiniz')
+      toastError('Hata', 'Lütfen hem hesap hem de gönderici seçiniz')
       return
     }
     if (paymentFieldType === 'eWallet' && !formData.eWalletId) {
-      alert('Lütfen e-cüzdan seçiniz')
+      toastError('Hata', 'Lütfen e-cüzdan seçiniz')
       return
     }
 
     // Düzenli gelir validasyonu
     if (isRecurring && !recurringData.name) {
-      alert('Lütfen düzenli gelir için bir isim girin')
+      toastError('Hata', 'Lütfen düzenli gelir için bir isim girin')
       return
     }
 
@@ -417,9 +419,9 @@ export default function NewIncomePage() {
     try {
       const tagsArray = formData.tags
         ? formData.tags
-            .split(',')
-            .map(t => t.trim())
-            .filter(t => t)
+          .split(',')
+          .map(t => t.trim())
+          .filter(t => t)
         : []
 
       const submitData: Record<string, unknown> = {
@@ -457,7 +459,7 @@ export default function NewIncomePage() {
 
       if (!response.ok) {
         const errorData = (await response.json()) as { error?: string }
-        alert('Hata: ' + (errorData.error ?? 'Gelir eklenemedi'))
+        toastError('Hata', errorData.error ?? 'Gelir eklenemedi')
         setSaving(false)
         return
       }
@@ -501,14 +503,14 @@ export default function NewIncomePage() {
 
         if (!autoResponse.ok) {
           console.error('Düzenli gelir oluşturulamadı')
-          alert('İşlem eklendi ancak düzenli gelir oluşturulamadı')
+          toastWarning('Dikkat', 'İşlem eklendi ancak düzenli gelir oluşturulamadı')
         }
       }
 
       router.push('/transactions')
     } catch (error) {
       console.error('Gelir eklenirken hata:', error)
-      alert('Gelir eklenirken hata oluştu')
+      toastError('Hata', 'Gelir eklenirken hata oluştu')
     } finally {
       setSaving(false)
     }
@@ -631,21 +633,21 @@ export default function NewIncomePage() {
                   <option value={0}>Gelir kategorisi seçiniz</option>
                   {gelirCategories.length > 0
                     ? gelirCategories.map(category => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))
                     : referenceData && referenceData.categories.length > 0
                       ? // Fallback: Eğer gelir kategorileri yoksa, gider olmayan kategorileri göster
-                        referenceData.categories
-                          .filter(cat =>
-                            giderTxTypeId > 0 ? cat.txTypeId !== giderTxTypeId : true
-                          )
-                          .map(category => (
-                            <option key={category.id} value={category.id}>
-                              {category.name}
-                            </option>
-                          ))
+                      referenceData.categories
+                        .filter(cat =>
+                          giderTxTypeId > 0 ? cat.txTypeId !== giderTxTypeId : true
+                        )
+                        .map(category => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))
                       : null}
                 </select>
                 {!referenceData || referenceData.categories.length === 0 ? (

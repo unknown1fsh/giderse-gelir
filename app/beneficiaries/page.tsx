@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Users, ArrowLeft, Home, Edit, Trash2, Plus, Mail, Phone } from 'lucide-react'
 import { EditNameModal } from '@/components/ui/edit-name-modal'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import { useToast } from '@/lib/use-toast'
 
 interface Beneficiary {
   id: number
@@ -24,6 +25,7 @@ interface Beneficiary {
 
 export default function BeneficiariesPage() {
   const router = useRouter()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -75,13 +77,13 @@ export default function BeneficiariesPage() {
               : beneficiary
           )
         )
-        alert('Alıcı adı başarıyla güncellendi')
+        toastSuccess('Başarılı', 'Alıcı adı başarıyla güncellendi')
       } else {
-        alert('Alıcı adı güncellenemedi')
+        toastError('Hata', 'Alıcı adı güncellenemedi')
       }
     } catch (error) {
       console.error('Alıcı güncelleme hatası:', error)
-      alert('Alıcı güncellenirken hata oluştu')
+      toastError('Hata', 'Alıcı güncellenirken hata oluştu')
     }
   }
 
@@ -98,16 +100,16 @@ export default function BeneficiariesPage() {
 
       if (response.ok) {
         const result = await response.json()
-        alert(result.message)
+        toastSuccess('Başarılı', result.message)
         setBeneficiaries(prev =>
           prev.filter(beneficiary => beneficiary.id !== selectedBeneficiary.id)
         )
       } else {
-        alert('Alıcı silinemedi')
+        toastError('Hata', 'Alıcı silinemedi')
       }
     } catch (error) {
       console.error('Alıcı silme hatası:', error)
-      alert('Alıcı silinirken hata oluştu')
+      toastError('Hata', 'Alıcı silinirken hata oluştu')
     }
   }
 

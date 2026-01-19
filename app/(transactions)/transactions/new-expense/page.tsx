@@ -7,6 +7,7 @@ import { EditNameModal } from '@/components/ui/edit-name-modal'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { usePremium } from '@/lib/use-premium'
 import { parseCurrencyInput } from '@/lib/validators'
+import { useToast } from '@/lib/use-toast'
 import {
   ArrowLeft,
   Save,
@@ -39,6 +40,7 @@ interface ReferenceData {
 
 export default function NewExpensePage() {
   const router = useRouter()
+  const { success: toastSuccess, error: toastError, warning: toastWarning } = useToast()
   const { isPremium, handlePremiumFeature } = usePremium()
   const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -159,16 +161,16 @@ export default function NewExpensePage() {
   const giderCategories = referenceData?.categories
     ? giderTxTypeId > 0
       ? referenceData.categories.filter(cat => {
-          // Sadece gider kategorilerini göster
-          const isGider = cat.txTypeId === giderTxTypeId
-          // Gelir kategorilerini kesinlikle hariç tut
-          const isGelir = gelirTxTypeId > 0 && cat.txTypeId === gelirTxTypeId
-          return isGider && !isGelir
-        })
+        // Sadece gider kategorilerini göster
+        const isGider = cat.txTypeId === giderTxTypeId
+        // Gelir kategorilerini kesinlikle hariç tut
+        const isGelir = gelirTxTypeId > 0 && cat.txTypeId === gelirTxTypeId
+        return isGider && !isGelir
+      })
       : // Eğer giderTxTypeId bulunamadıysa, gelir olmayan kategorileri göster (fallback)
-        referenceData.categories.filter(cat =>
-          gelirTxTypeId > 0 ? cat.txTypeId !== gelirTxTypeId : true
-        )
+      referenceData.categories.filter(cat =>
+        gelirTxTypeId > 0 ? cat.txTypeId !== gelirTxTypeId : true
+      )
     : []
 
   // Debug log - sadece geliştirme ortamında
@@ -240,7 +242,7 @@ export default function NewExpensePage() {
   // Yeni alıcı ekle
   const handleAddBeneficiary = async () => {
     if (!beneficiaryForm.name) {
-      alert('Alıcı adı zorunludur')
+      toastError('Hata', 'Alıcı adı zorunludur')
       return
     }
 
@@ -276,18 +278,18 @@ export default function NewExpensePage() {
           description: '',
         })
       } else {
-        alert('Alıcı eklenemedi')
+        toastError('Hata', 'Alıcı eklenemedi')
       }
     } catch (error) {
       console.error('Alıcı eklenirken hata:', error)
-      alert('Alıcı eklenirken hata oluştu')
+      toastError('Hata', 'Alıcı eklenirken hata oluştu')
     }
   }
 
   // Yeni e-cüzdan ekle
   const handleAddEWallet = async () => {
     if (!eWalletForm.name || !eWalletForm.provider) {
-      alert('E-cüzdan adı ve sağlayıcı zorunludur')
+      toastError('Hata', 'E-cüzdan adı ve sağlayıcı zorunludur')
       return
     }
 
@@ -325,11 +327,11 @@ export default function NewExpensePage() {
           currencyId: eWalletForm.currencyId,
         })
       } else {
-        alert('E-cüzdan eklenemedi')
+        toastError('Hata', 'E-cüzdan eklenemedi')
       }
     } catch (error) {
       console.error('E-cüzdan eklenirken hata:', error)
-      alert('E-cüzdan eklenirken hata oluştu')
+      toastError('Hata', 'E-cüzdan eklenirken hata oluştu')
     }
   }
 
@@ -352,13 +354,13 @@ export default function NewExpensePage() {
           const data = (await refRes.json()) as ReferenceData
           setReferenceData(data)
         }
-        alert('Alıcı başarıyla silindi')
+        toastSuccess('Başarılı', 'Alıcı başarıyla silindi')
       } else {
-        alert('Alıcı silinemedi')
+        toastError('Hata', 'Alıcı silinemedi')
       }
     } catch (error) {
       console.error('Alıcı silme hatası:', error)
-      alert('Alıcı silinemedi')
+      toastError('Hata', 'Alıcı silinemedi')
     } finally {
       setDeletingBeneficiary(null)
     }
@@ -397,38 +399,38 @@ export default function NewExpensePage() {
     e.preventDefault()
 
     if (!formData.categoryId) {
-      alert('Lütfen kategori seçiniz')
+      toastError('Hata', 'Lütfen kategori seçiniz')
       return
     }
     if (!formData.paymentMethodId) {
-      alert('Lütfen ödeme yöntemi seçiniz')
+      toastError('Hata', 'Lütfen ödeme yöntemi seçiniz')
       return
     }
 
     // Ödeme yöntemine göre validasyon
     if (paymentFieldType === 'account' && !formData.accountId) {
-      alert('Lütfen hesap seçiniz')
+      toastError('Hata', 'Lütfen hesap seçiniz')
       return
     }
     if (paymentFieldType === 'creditCard' && !formData.creditCardId) {
-      alert('Lütfen kredi kartı seçiniz')
+      toastError('Hata', 'Lütfen kredi kartı seçiniz')
       return
     }
     if (
       paymentFieldType === 'transferWithBeneficiary' &&
       (!formData.accountId || !formData.beneficiaryId)
     ) {
-      alert('Lütfen hem hesap hem de alıcı seçiniz')
+      toastError('Hata', 'Lütfen hem hesap hem de alıcı seçiniz')
       return
     }
     if (paymentFieldType === 'eWallet' && !formData.eWalletId) {
-      alert('Lütfen e-cüzdan seçiniz')
+      toastError('Hata', 'Lütfen e-cüzdan seçiniz')
       return
     }
 
     // Tekrar eden gider validasyonu
     if (isRecurring && !recurringData.name) {
-      alert('Lütfen otomatik ödeme için bir isim girin')
+      toastError('Hata', 'Lütfen otomatik ödeme için bir isim girin')
       return
     }
 
@@ -437,9 +439,9 @@ export default function NewExpensePage() {
     try {
       const tagsArray = formData.tags
         ? formData.tags
-            .split(',')
-            .map(t => t.trim())
-            .filter(t => t)
+          .split(',')
+          .map(t => t.trim())
+          .filter(t => t)
         : []
 
       const submitData: Record<string, unknown> = {
@@ -479,7 +481,7 @@ export default function NewExpensePage() {
 
       if (!response.ok) {
         const errorData = (await response.json()) as { error?: string }
-        alert('Hata: ' + (errorData.error ?? 'Gider eklenemedi'))
+        toastError('Hata', errorData.error ?? 'Gider eklenemedi')
         setSaving(false)
         return
       }
@@ -523,14 +525,14 @@ export default function NewExpensePage() {
 
         if (!autoResponse.ok) {
           console.error('Otomatik ödeme oluşturulamadı')
-          alert('İşlem eklendi ancak otomatik ödeme oluşturulamadı')
+          toastWarning('Dikkat', 'İşlem eklendi ancak otomatik ödeme oluşturulamadı')
         }
       }
 
       router.push('/transactions')
     } catch (error) {
       console.error('Gider eklenirken hata:', error)
-      alert('Gider eklenirken hata oluştu')
+      toastError('Hata', 'Gider eklenirken hata oluştu')
     } finally {
       setSaving(false)
     }
@@ -653,21 +655,21 @@ export default function NewExpensePage() {
                   <option value={0}>Gider kategorisi seçiniz</option>
                   {giderCategories.length > 0
                     ? giderCategories.map(category => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))
                     : referenceData && referenceData.categories.length > 0
                       ? // Fallback: Eğer gider kategorileri yoksa, gelir olmayan kategorileri göster
-                        referenceData.categories
-                          .filter(cat =>
-                            gelirTxTypeId > 0 ? cat.txTypeId !== gelirTxTypeId : true
-                          )
-                          .map(category => (
-                            <option key={category.id} value={category.id}>
-                              {category.name}
-                            </option>
-                          ))
+                      referenceData.categories
+                        .filter(cat =>
+                          gelirTxTypeId > 0 ? cat.txTypeId !== gelirTxTypeId : true
+                        )
+                        .map(category => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))
                       : null}
                 </select>
                 {!referenceData || referenceData.categories.length === 0 ? (

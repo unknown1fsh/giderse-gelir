@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import PremiumUpgradeModal from '@/components/premium-upgrade-modal'
 import { ArrowLeft, Save, Building2, CheckCircle, Calculator, FileText } from 'lucide-react'
+import { useToast } from '@/lib/use-toast'
 
 interface InvestmentType {
   id: string
@@ -36,6 +37,7 @@ interface InvestmentType {
 
 export default function NewInvestmentPage() {
   const router = useRouter()
+  const { error: toastError } = useToast()
   const [investmentTypes, setInvestmentTypes] = useState<InvestmentType[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -101,12 +103,12 @@ export default function NewInvestmentPage() {
         if (error.requiresPremium) {
           setShowPremiumModal(true)
         } else {
-          alert(`Hata: ${error.error}`)
+          toastError('Hata', error.error || 'Yatırım kaydedilirken bir hata oluştu')
         }
       }
     } catch (error) {
       console.error('Yatırım kaydedilemedi:', error)
-      alert('Yatırım kaydedilemedi')
+      toastError('Hata', 'Yatırım kaydedilemedi')
     } finally {
       setSaving(false)
     }
@@ -392,9 +394,8 @@ export default function NewInvestmentPage() {
                         </div>
 
                         <div
-                          className={`text-center p-4 bg-white/50 rounded-lg ${
-                            calculateProfitLoss() >= 0 ? 'text-green-600' : 'text-red-600'
-                          }`}
+                          className={`text-center p-4 bg-white/50 rounded-lg ${calculateProfitLoss() >= 0 ? 'text-green-600' : 'text-red-600'
+                            }`}
                         >
                           <div className="text-2xl font-bold">
                             ₺
@@ -406,9 +407,8 @@ export default function NewInvestmentPage() {
                         </div>
 
                         <div
-                          className={`text-center p-4 bg-white/50 rounded-lg ${
-                            calculateProfitLossPercentage() >= 0 ? 'text-green-600' : 'text-red-600'
-                          }`}
+                          className={`text-center p-4 bg-white/50 rounded-lg ${calculateProfitLossPercentage() >= 0 ? 'text-green-600' : 'text-red-600'
+                            }`}
                         >
                           <div className="text-2xl font-bold">
                             {calculateProfitLossPercentage() >= 0 ? '+' : ''}

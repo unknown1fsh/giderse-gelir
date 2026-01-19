@@ -17,6 +17,7 @@ import { Eye, Trash2 } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils'
 import { trackGoogleAdsConversion } from '@/lib/google-ads'
 import { getPlanPrice } from '@/lib/plan-config'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 
 interface User {
   id: number
@@ -42,6 +43,8 @@ export default function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedRole, setSelectedRole] = useState('')
   const [showActiveOnly, setShowActiveOnly] = useState<boolean | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<number | null>(null)
 
   useEffect(() => {
     void fetchUsers()
@@ -172,12 +175,15 @@ export default function AdminUsers() {
   }
 
   const handleDeleteUser = async (userId: number) => {
-    if (!confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')) {
-      return
-    }
+    setUserToDelete(userId)
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return
 
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/admin/users/${userToDelete}`, {
         method: 'DELETE',
         credentials: 'include',
       })
@@ -191,6 +197,9 @@ export default function AdminUsers() {
     } catch (err) {
       console.error('Delete user error:', err)
       toastError('Hata', 'Kullanıcı silinirken hata oluştu')
+    } finally {
+      setShowDeleteConfirm(false)
+      setUserToDelete(null)
     }
   }
 
@@ -408,6 +417,20 @@ export default function AdminUsers() {
         onUserUpdate={() => {
           void fetchUsers()
         }}
+      />
+
+      <ConfirmationDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false)
+          setUserToDelete(null)
+        }}
+        onConfirm={confirmDeleteUser}
+        title="Kullanıcıyı Sil"
+        message="Bu kullanıcıyı silmek istediğinizden emin misiniz?"
+        warningMessage="Bu işlem geri alınamaz ve kullanıcının tüm verileri silinecektir."
+        confirmText="Evet, Sil"
+        cancelText="İptal"
       />
     </div>
   )

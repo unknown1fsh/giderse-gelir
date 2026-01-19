@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { parseCurrencyInput } from '@/lib/validators'
 import PremiumUpgradeModal from '@/components/premium-upgrade-modal'
 import { ArrowLeft, Save } from 'lucide-react'
+import { useToast } from '@/lib/use-toast'
 
 interface ReferenceData {
   txTypes: Array<{
@@ -49,6 +50,7 @@ interface ReferenceData {
 
 export default function NewTransactionPage() {
   const router = useRouter()
+  const { error: toastError } = useToast()
   const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -104,22 +106,22 @@ export default function NewTransactionPage() {
 
     // Validation kontrolü
     if (!formData.txTypeId || formData.txTypeId === 0) {
-      alert('Lütfen işlem türünü seçiniz (Gelir veya Gider)')
+      toastError('Hata', 'Lütfen işlem türünü seçiniz (Gelir veya Gider)')
       return
     }
 
     if (!formData.categoryId || formData.categoryId === 0) {
-      alert('Lütfen kategori seçiniz')
+      toastError('Hata', 'Lütfen kategori seçiniz')
       return
     }
 
     if (!formData.paymentMethodId || formData.paymentMethodId === 0) {
-      alert('Lütfen ödeme yöntemini seçiniz')
+      toastError('Hata', 'Lütfen ödeme yöntemini seçiniz')
       return
     }
 
     if (!formData.accountId && !formData.creditCardId) {
-      alert('Lütfen hesap veya kredi kartı seçiniz')
+      toastError('Hata', 'Lütfen hesap veya kredi kartı seçiniz')
       return
     }
 
@@ -173,12 +175,12 @@ export default function NewTransactionPage() {
           })
           setShowPremiumModal(true)
         } else {
-          alert(`Hata: ${error.error || 'İşlem eklenemedi'}`)
+          toastError('Hata', error.error || 'İşlem eklenemedi')
         }
       }
     } catch (error) {
       console.error('İşlem kaydedilemedi:', error)
-      alert('İşlem kaydedilemedi')
+      toastError('Hata', 'İşlem kaydedilemedi')
     } finally {
       setSaving(false)
     }

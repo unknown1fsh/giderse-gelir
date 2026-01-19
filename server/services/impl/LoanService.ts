@@ -3,7 +3,6 @@ import { BaseService } from '../BaseService'
 import { LoanRepository } from '../../repositories/LoanRepository'
 import { LoanMapper } from '../../mappers/LoanMapper'
 import { LoanDTO, CreateLoanDTO } from '../../dto/LoanDTO'
-import { ValidationError } from '../../errors'
 
 export class LoanService extends BaseService<LoanDTO> {
     private prisma: PrismaClient

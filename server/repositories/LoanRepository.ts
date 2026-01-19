@@ -1,9 +1,38 @@
-import { PrismaClient, Loan, Prisma } from '@prisma/client'
+import { PrismaClient, Loan } from '@prisma/client'
 import { BaseRepository } from './BaseRepository'
 
 export class LoanRepository extends BaseRepository<Loan> {
     constructor(prisma: PrismaClient) {
-        super(prisma, 'loan' as any)
+        super(prisma)
+    }
+
+    async findById(id: number): Promise<Loan | null> {
+        return this.prisma.loan.findUnique({
+            where: { id },
+        })
+    }
+
+    async findAll(): Promise<Loan[]> {
+        return this.prisma.loan.findMany()
+    }
+
+    async create(data: Partial<Loan>): Promise<Loan> {
+        return this.prisma.loan.create({
+            data: data as any,
+        })
+    }
+
+    async update(id: number, data: Partial<Loan>): Promise<Loan> {
+        return this.prisma.loan.update({
+            where: { id },
+            data: data as any,
+        })
+    }
+
+    async delete(id: number): Promise<Loan> {
+        return this.prisma.loan.delete({
+            where: { id },
+        })
     }
 
     async findByIdWithRelations(id: number): Promise<any> {

@@ -13,13 +13,16 @@ const BASE_URL = 'http://localhost:3000/api'
 
 // Bu test dosyası Auth API endpoint'lerini test eder.
 describe('Auth API Endpoints', () => {
+  let testUsername: string
   let testEmail: string
   let testPassword: string
   let authToken: string
 
   beforeAll(() => {
     logTestSuiteStart('Auth API Endpoints')
-    testEmail = `test-auth-${Date.now()}@test.com`
+    const timestamp = Date.now()
+    testUsername = `authuser${timestamp}`
+    testEmail = `test-auth-${timestamp}@test.com`
     testPassword = 'Test123456'
   })
 
@@ -42,11 +45,18 @@ describe('Auth API Endpoints', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          username: testUsername,
           name: 'Test User',
           email: testEmail,
           password: testPassword,
           phone: '+905551234567',
         }),
+      })
+
+      // Kayıt sonrası kullanıcıyı DB'de aktif et (yeni sistemde admin onayı gerekiyor)
+      await prisma.user.updateMany({
+        where: { email: testEmail },
+        data: { isActive: true },
       })
       const duration = Date.now() - startTime
 
@@ -63,15 +73,26 @@ describe('Auth API Endpoints', () => {
 
       if (response.status === 201) {
         const data = await response.json()
-        expect(data).toHaveProperty('user')
-        expect(data.user.email).toBe(testEmail)
-        expect(data.user.name).toBe('Test User')
-        expect(data).toHaveProperty('session')
-        expect(data.session).toHaveProperty('token')
+        expect(data.success).toBe(true)
+        expect(data).toHaveProperty('message')
+        expect(data.requiresApproval).toBe(true)
 
-        authToken = data.session.token
+        // Kayıt başarılı, şimdi login ile token al
+        const loginResponse = await testFetch(`${BASE_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: testEmail,
+            password: testPassword,
+          }),
+        })
+
+        if (loginResponse.status === 200) {
+          const loginData = await loginResponse.json()
+          authToken = loginData.session.token
+        }
       } else {
-        // Rate limiting veya başka bir hata - login ile token al
+        // Rate limiting veya başka bir hata - login ile token al (zaten yukarda denedik ama fallback)
         const loginResponse = await testFetch(`${BASE_URL}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -93,6 +114,7 @@ describe('Auth API Endpoints', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          username: testUsername + '_2',
           name: 'Test User 2',
           email: testEmail,
           password: 'Test123456',
@@ -152,6 +174,7 @@ describe('Auth API Endpoints', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          username: `shortpass${Date.now()}`,
           name: 'Test User',
           email: `test-short-password-${Date.now()}@test.com`,
           password: '12345', // 5 karakter, minimum 8 olmalı
@@ -183,6 +206,7 @@ describe('Auth API Endpoints', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          username: `invmail${Date.now()}`,
           name: 'Test User',
           email: 'gecersiz-email',
           password: testPassword,
@@ -214,6 +238,7 @@ describe('Auth API Endpoints', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            username: testUsername,
             name: 'Test User',
             email: testEmail,
             password: testPassword,
@@ -221,8 +246,26 @@ describe('Auth API Endpoints', () => {
           }),
         })
         if (registerResponse.status === 201) {
-          const registerData = await registerResponse.json()
-          authToken = registerData.session.token
+          // Kayıt sonrası kullanıcıyı DB'de aktif et
+          await prisma.user.updateMany({
+            where: { email: testEmail },
+            data: { isActive: true },
+          })
+
+          // Login ile token al
+          const loginResponse = await testFetch(`${BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: testEmail,
+              password: testPassword,
+            }),
+          })
+
+          if (loginResponse.status === 200) {
+            const loginData = await loginResponse.json()
+            authToken = loginData.session.token
+          }
         }
       }
 

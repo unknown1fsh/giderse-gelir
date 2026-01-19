@@ -11,7 +11,9 @@ const logger = getTestLogger()
 // Çıktı: { user, token, email, password }
 // Hata: -
 export async function createTestUser(emailSuffix = 'user') {
-  const email = `test-${emailSuffix}-${Date.now()}@test.com`
+  const timestamp = Date.now()
+  const email = `test-${emailSuffix}-${timestamp}@test.com`
+  const username = `test${emailSuffix}${timestamp}`
   const password = 'Test123456'
 
   // Sunucudaki auth mekanizmasını kullanarak (register/login) geçerli session token al.
@@ -28,6 +30,7 @@ export async function createTestUser(emailSuffix = 'user') {
       'user-agent': 'vitest',
     },
     body: JSON.stringify({
+      username,
       name: `Test ${emailSuffix}`,
       email,
       password,
@@ -36,30 +39,38 @@ export async function createTestUser(emailSuffix = 'user') {
     }),
   })
 
+  // Kayıt sonrası kullanıcıyı DB'de aktif et (yeni sistemde admin onayı gerekiyor)
+  await prisma.user.updateMany({
+    where: { email },
+    data: { isActive: true },
+  })
+
+  // Kayıt sonrası kullanıcıyı DB'de aktif et (yeni sistemde admin onayı gerekiyor)
+  await prisma.user.updateMany({
+    where: { email },
+    data: { isActive: true },
+  })
+
+  // Her durumda (201 veya 400/409 olsa bile) login deneyerek token al
+  const loginResponse = await testFetch(`${baseUrl}/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-forwarded-for': randomIp(),
+      'user-agent': 'vitest',
+    },
+    body: JSON.stringify({ email, password }),
+  })
+
   let token: string | undefined
-  if (registerResponse.status === 201) {
-    const data = await registerResponse.json()
+  if (loginResponse.status === 200) {
+    const data = await loginResponse.json()
     token = data?.session?.token
-  } else {
-    // Register başarısızsa (örn: 429) login ile devam et
-    const loginResponse = await testFetch(`${baseUrl}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-forwarded-for': randomIp(),
-        'user-agent': 'vitest',
-      },
-      body: JSON.stringify({ email, password }),
-    })
-    if (loginResponse.status === 200) {
-      const data = await loginResponse.json()
-      token = data?.session?.token
-    }
   }
 
   if (!token) {
     throw new Error(
-      `Test kullanıcısı için token alınamadı. register=${registerResponse.status}. Sunucu loglarını kontrol edin.`
+      `Test kullanıcısı için token alınamadı. register=${registerResponse.status}, login=${loginResponse.status}. Sunucu loglarını kontrol edin.`
     )
   }
 

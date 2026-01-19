@@ -74,13 +74,13 @@ export class TransactionService extends BaseService<TransactionDTO> {
       transactionDate: data.transactionDate,
     })
 
-    // PAYMENT_METHOD ve CURRENCY UI'dan SystemParameter ID olarak gelir
-    // Transaction tablosu RefPaymentMethod/RefCurrency'a bağlı olduğu için burada map ediyoruz
-    const [refPaymentMethodId, refCurrencyId, txType] = await Promise.all([
+    // PAYMENT_METHOD UI'dan SystemParameter ID olarak gelir, RefPaymentMethod ID'ye map edilir.
+    // CURRENCY UI'dan zaten RefCurrency ID (id: 4 gibi) olarak geliyor.
+    const [refPaymentMethodId, txType] = await Promise.all([
       this.mapSystemParameterToRefPaymentMethod(data.paymentMethodId),
-      this.mapSystemParameterToRefCurrency(data.currencyId),
       this.prisma.refTxType.findUnique({ where: { id: data.txTypeId }, select: { code: true } }),
     ])
+    const refCurrencyId = data.currencyId
 
     if (!txType) {
       throw new ValidationError(`Geçersiz işlem tipi ID: ${data.txTypeId}`)
@@ -311,29 +311,6 @@ export class TransactionService extends BaseService<TransactionDTO> {
     }
 
     return refPaymentMethod.id
-  }
-
-  // Bu metot SystemParameter CURRENCY ID'sini RefCurrency ID'sine map eder
-  // Girdi: SystemParameter currencyId
-  // Çıktı: RefCurrency ID
-  private async mapSystemParameterToRefCurrency(systemParamId: number): Promise<number> {
-    const systemParam = await this.prisma.systemParameter.findUnique({
-      where: { id: systemParamId },
-    })
-
-    if (!systemParam) {
-      throw new ValidationError(`Geçersiz para birimi ID: ${systemParamId}`)
-    }
-
-    const refCurrency = await this.prisma.refCurrency.findFirst({
-      where: { code: systemParam.paramCode },
-    })
-
-    if (!refCurrency) {
-      throw new ValidationError(`RefCurrency bulunamadı: ${systemParam.paramCode}`)
-    }
-
-    return refCurrency.id
   }
 
   // Bu metot işlem günceller.

@@ -4,6 +4,7 @@ import { TransactionRepository } from '../../repositories/TransactionRepository'
 import { TransactionMapper } from '../../mappers/TransactionMapper'
 import { TransactionDTO, CreateTransactionDTO } from '../../dto/TransactionDTO'
 import { TransactionValidationService } from './TransactionValidationService'
+import { LoanService } from './LoanService'
 import { ValidationError } from '../../errors'
 import { getPlanLimits } from '../../../lib/plan-config'
 
@@ -12,12 +13,14 @@ export class TransactionService extends BaseService<TransactionDTO> {
   private prisma: PrismaClient
   private transactionRepository: TransactionRepository
   private validationService: TransactionValidationService
+  private loanService: LoanService
 
   constructor(prisma: PrismaClient) {
     super()
     this.prisma = prisma
     this.transactionRepository = new TransactionRepository(prisma)
     this.validationService = new TransactionValidationService(prisma)
+    this.loanService = new LoanService(prisma)
   }
 
   // Bu metot ID'ye göre işlem getirir.
@@ -61,7 +64,7 @@ export class TransactionService extends BaseService<TransactionDTO> {
   // Girdi: CreateTransactionDTO ve kullanıcı ID'si
   // Çıktı: Oluşturulan işlem
   // Hata: ValidationError, BusinessRuleError
-  async create(data: CreateTransactionDTO & { userId: number; periodId?: number }) {
+  async create(data: CreateTransactionDTO & { userId: number; periodId?: number; loanId?: number }) {
     // ✅ ÖNEMLİ: Tüm validasyonları çalıştır
     await this.validationService.validateTransaction({
       txTypeId: data.txTypeId,
@@ -109,6 +112,11 @@ export class TransactionService extends BaseService<TransactionDTO> {
       tags: data.tags || [],
     }
 
+    // ✅ LOAN: loanId geldiyse transaction'ı krediyle ilişkilendir
+    if (data.loanId) {
+      createData.loan = { connect: { id: data.loanId } }
+    }
+
     // ✅ PERIOD: periodId geldiyse transaction'ı aktif döneme bağla
     if (data.periodId) {
       createData.period = { connect: { id: data.periodId } }
@@ -139,6 +147,11 @@ export class TransactionService extends BaseService<TransactionDTO> {
       eWalletId: data.eWalletId,
     }
     await this.updateAccountBalance(balanceUpdateData, txType.code)
+
+    // ✅ LOAN: Kalan taksit sayısını düş
+    if (data.loanId) {
+      await this.loanService.processPayment(data.loanId)
+    }
 
     return TransactionMapper.prismaToDTO(transaction)
   }
@@ -335,6 +348,7 @@ export class TransactionService extends BaseService<TransactionDTO> {
         account: true,
         creditCard: true,
         eWallet: true,
+        loan: true,
       },
     })
 
@@ -344,6 +358,11 @@ export class TransactionService extends BaseService<TransactionDTO> {
 
     // ✅ İŞ MANTIĞI: Silme öncesi bakiyeyi geri ekle
     await this.reverseAccountBalance(transaction)
+
+    // ✅ LOAN: Gider siliniyorsa ve krediye bağlıysa taksiti geri ekle
+    if (transaction.loanId && transaction.txType.code === 'GIDER') {
+      await this.loanService.reversePayment(transaction.loanId)
+    }
 
     // Transaction'ı sil
     const deletedTransaction = await this.transactionRepository.delete(id)

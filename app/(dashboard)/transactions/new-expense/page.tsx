@@ -36,6 +36,14 @@ interface ReferenceData {
   beneficiaries: Array<{ id: number; name: string; iban?: string; bank?: { name: string } }>
   banks: Array<{ id: number; name: string }>
   currencies: Array<{ id: number; code: string; name: string; symbol: string }>
+  loans: Array<{
+    id: number
+    name: string
+    bank: { name: string }
+    currency: { code: string }
+    remainingInstallments: number
+    totalAmount: number
+  }>
 }
 
 export default function NewExpensePage() {
@@ -49,6 +57,7 @@ export default function NewExpensePage() {
   const [gelirTxTypeId, setGelirTxTypeId] = useState<number>(0)
   const [showBeneficiaryModal, setShowBeneficiaryModal] = useState(false)
   const [showEWalletModal, setShowEWalletModal] = useState(false)
+  const [isLoanPayment, setIsLoanPayment] = useState(false)
 
   // Otomatik ödeme için state'ler
   const [isRecurring, setIsRecurring] = useState(false)
@@ -81,6 +90,7 @@ export default function NewExpensePage() {
     transactionDate: new Date().toISOString().split('T')[0],
     description: '',
     tags: '',
+    loanId: 0,
   })
 
   // Yeni alıcı formu
@@ -407,6 +417,11 @@ export default function NewExpensePage() {
       return
     }
 
+    if (isLoanPayment && !formData.loanId) {
+      toastError('Hata', 'Lütfen ödeme yapılacak krediyi seçiniz')
+      return
+    }
+
     // Ödeme yöntemine göre validasyon
     if (paymentFieldType === 'account' && !formData.accountId) {
       toastError('Hata', 'Lütfen hesap seçiniz')
@@ -452,6 +467,11 @@ export default function NewExpensePage() {
         currencyId: formData.currencyId,
         transactionDate: formData.transactionDate,
         tags: tagsArray,
+      }
+
+      // Kredi ödemesi ise loanId ekle
+      if (isLoanPayment && formData.loanId > 0) {
+        submitData.loanId = formData.loanId
       }
 
       // Seçili alanlara göre ekle
@@ -589,6 +609,51 @@ export default function NewExpensePage() {
                 {!isPremium && <Crown className="inline ml-2 h-4 w-4 text-purple-600" />}
               </label>
             </div>
+
+            {/* Kredi Ödemesi Checkbox */}
+            <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <input
+                type="checkbox"
+                id="loanPayment"
+                checked={isLoanPayment}
+                onChange={e => {
+                  setIsLoanPayment(e.target.checked)
+                  if (!e.target.checked) {
+                    setFormData(prev => ({ ...prev, loanId: 0 }))
+                  }
+                }}
+                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label htmlFor="loanPayment" className="flex-1 text-sm font-medium text-gray-900">
+                Bu bir kredi/borç taksit ödemesidir
+              </label>
+            </div>
+
+            {/* Kredi Seçimi */}
+            {isLoanPayment && (
+              <div className="space-y-4 p-4 bg-blue-50 border border-blue-200 rounded-lg animate-in slide-in-from-top duration-300">
+                <h3 className="font-semibold text-blue-900">Kredi Bilgileri</h3>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Ödenecek Kredi/Borç *</label>
+                  <select
+                    value={formData.loanId}
+                    onChange={e => setFormData(prev => ({ ...prev, loanId: parseInt(e.target.value) }))}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    required={isLoanPayment}
+                  >
+                    <option value={0}>Kredi seçiniz</option>
+                    {referenceData?.loans.map(loan => (
+                      <option key={loan.id} value={loan.id}>
+                        {loan.name} - {loan.bank.name} (Kalan: {loan.remainingInstallments} Taksit)
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-blue-600 mt-1">
+                    Ödeme sonrası kalan taksit sayısı otomatik olarak düşürülecektir.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Tekrar Eden Gider Formu */}
             {isRecurring && (

@@ -87,6 +87,13 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
         orderBy: { name: 'asc' },
       })
       : Promise.resolve([]),
+    user
+      ? prisma.loan.findMany({
+        include: { bank: true, currency: true },
+        where: { userId: user.id, isActive: true },
+        orderBy: { name: 'asc' },
+      })
+      : Promise.resolve([]),
   ])
 
   const response = {
@@ -182,6 +189,14 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
       bank: b.bank ? { id: b.bank.id, name: b.bank.name } : null,
       phoneNumber: b.phoneNumber,
       email: b.email,
+    })),
+    loans: loans.map(l => ({
+      id: l.id,
+      name: l.name,
+      bank: { id: l.bank.id, name: l.bank.name },
+      currency: { id: l.currency.id, code: l.currency.code, name: l.currency.name },
+      remainingInstallments: l.remainingInstallments,
+      totalAmount: l.totalAmount,
     })),
 
     // Meta bilgi

@@ -41,6 +41,7 @@ model RefCurrency {
   fxRatesTo    FxRate[]      @relation("ToCurrency")
   investments  Investment[]
   goals        Goal[]
+  loans        Loan[]
   transactions Transaction[]
 
   @@map("ref_currency")
@@ -147,6 +148,7 @@ model RefBank {
   accounts      Account[]
   beneficiaries Beneficiary[]
   creditCards   CreditCard[]
+  loans         Loan[]
 
   @@map("ref_bank")
 }
@@ -188,6 +190,7 @@ model User {
   goldItems               GoldItem[]
   investments             Investment[]
   goals                   Goal[]
+  loans                   Loan[]
   paymentRequests         PaymentRequest[]
   periods                 Period[]
   portfolioSnapshots      PortfolioSnapshot[]
@@ -436,6 +439,7 @@ model Transaction {
   beneficiaryId   Int?             @map("beneficiary_id")
   creditCardId    Int?             @map("credit_card_id")
   eWalletId       Int?             @map("e_wallet_id")
+  loanId          Int?             @map("loan_id")
   isRecurring     Boolean          @default(false) @map("is_recurring")
   notes           String?
   recurringType   String?          @map("recurring_type") @db.VarChar(20)
@@ -446,6 +450,7 @@ model Transaction {
   creditCard      CreditCard?      @relation(fields: [creditCardId], references: [id], onDelete: Cascade)
   currency        RefCurrency      @relation(fields: [currencyId], references: [id])
   eWallet         EWallet?         @relation(fields: [eWalletId], references: [id], onDelete: Cascade)
+  loan            Loan?            @relation(fields: [loanId], references: [id], onDelete: Cascade)
   paymentMethod   RefPaymentMethod @relation(fields: [paymentMethodId], references: [id])
   period          Period?          @relation(fields: [periodId], references: [id], onDelete: Cascade)
   txType          RefTxType        @relation(fields: [txTypeId], references: [id])
@@ -716,4 +721,31 @@ model Goal {
 
   @@index([userId, status])
   @@map("goal")
+}
+
+model Loan {
+  id                    Int           @id @default(autoincrement())
+  userId                Int           @map("user_id")
+  bankId                Int           @map("bank_id")
+  name                  String        @db.VarChar(100)
+  loanType              String        @map("loan_type") @db.VarChar(50) // e.g., 'HOUSING', 'VEHICLE', 'PERSONAL'
+  totalAmount           Decimal       @map("total_amount") @db.Decimal(15, 2)
+  installmentCount      Int           @map("installment_count")
+  remainingInstallments Int           @default(0) @map("remaining_installments")
+  interestRate          Decimal?      @map("interest_rate") @db.Decimal(5, 2)
+  paymentDay            Int           @map("payment_day")
+  currencyId            Int           @map("currency_id")
+  startDate             DateTime      @map("start_date") @db.Date
+  description           String?       @db.Text
+  isActive              Boolean       @default(true) @map("is_active")
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+
+  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bank                  RefBank       @relation(fields: [bankId], references: [id])
+  currency              RefCurrency    @relation(fields: [currencyId], references: [id])
+  transactions          Transaction[]
+
+  @@index([userId, isActive])
+  @@map("loan")
 }

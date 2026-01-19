@@ -62,6 +62,21 @@ export const goldItemSchema = z.object({
   description: z.string().optional(),
 })
 
+// Kredi validasyonu
+export const loanSchema = z.object({
+  name: z.string().min(1, 'Kredi adı gereklidir').max(100),
+  bankId: z.number().int().positive('Banka seçiniz'),
+  loanType: z.string().min(1),
+  totalAmount: z.number().positive('Tutar pozitif olmalıdır'),
+  installmentCount: z.number().int().positive('Taksit sayısı pozitif olmalıdır'),
+  remainingInstallments: z.number().int().min(0),
+  interestRate: z.number().min(0).optional().nullable(),
+  paymentDay: z.number().int().min(1).max(31),
+  currencyId: z.number().int().positive('Para birimi seçiniz'),
+  startDate: z.date(),
+  description: z.string().optional().nullable(),
+})
+
 // Otomatik ödeme validasyonu
 // NOT: Hesap/Kart kontrolü backend'de yapılır (nakit ödemeler için opsiyonel)
 export const autoPaymentSchema = z.object({

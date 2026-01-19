@@ -7,3 +7,4 @@ export {
   CreateSystemParameterDTO,
   SystemParameterGroupDTO,
 } from './SystemParameterDTO'
+export { LoanDTO, CreateLoanDTO } from './LoanDTO'

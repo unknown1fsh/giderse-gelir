@@ -2,3 +2,4 @@
 export { UserMapper } from './UserMapper'
 export { TransactionMapper } from './TransactionMapper'
 export { SystemParameterMapper } from './SystemParameterMapper'
+export { LoanMapper } from './LoanMapper'

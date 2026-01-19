@@ -18,6 +18,7 @@ import {
   Crown,
   LogOut,
   Building2,
+  CreditCard,
   X,
   Shield,
   Brain,
@@ -28,6 +29,7 @@ const navigation = [
   { name: 'Toplam Varlık', href: '/portfolio', icon: PieChart, color: 'text-emerald-500' },
   { name: 'İşlemler', href: '/transactions', icon: Plus, color: 'text-green-500' },
   { name: 'Hesaplar', href: '/accounts', icon: Wallet, color: 'text-purple-500' },
+  { name: 'Krediler', href: '/loans', icon: CreditCard, color: 'text-blue-400' },
   { name: 'Diğer Yatırım Araçları', href: '/investments', icon: Building2, color: 'text-cyan-500' },
   { name: 'Analiz ve Raporlar', href: '/analysis', icon: BarChart3, color: 'text-indigo-500' },
   {
@@ -132,8 +134,8 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           {user && (
             <div className="flex items-center justify-center py-3 px-6">
               {user.plan === 'premium' ||
-              user.plan === 'enterprise' ||
-              user.plan === 'enterprise_premium' ? (
+                user.plan === 'enterprise' ||
+                user.plan === 'enterprise_premium' ? (
                 <Link
                   href="/premium-features"
                   onClick={handleLinkClick}
@@ -211,18 +213,16 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                 key={item.name}
                 href={item.href}
                 onClick={handleLinkClick}
-                className={`group flex items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
-                  isActive
-                    ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white shadow-lg border border-blue-500/30 scale-[1.02]'
-                    : 'text-slate-300 hover:bg-slate-700/50 hover:text-white hover:shadow-md hover:scale-[1.01]'
-                }`}
+                className={`group flex items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${isActive
+                  ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white shadow-lg border border-blue-500/30 scale-[1.02]'
+                  : 'text-slate-300 hover:bg-slate-700/50 hover:text-white hover:shadow-md hover:scale-[1.01]'
+                  }`}
               >
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 ${
-                    isActive
-                      ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-md scale-110'
-                      : 'bg-slate-700/50 group-hover:bg-slate-600/50 group-hover:scale-110'
-                  }`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 ${isActive
+                    ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-md scale-110'
+                    : 'bg-slate-700/50 group-hover:bg-slate-600/50 group-hover:scale-110'
+                    }`}
                 >
                   <item.icon className={`h-4 w-4 ${isActive ? 'text-white' : item.color}`} />
                 </div>
@@ -243,18 +243,16 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               <Link
                 href="/admin"
                 onClick={handleLinkClick}
-                className={`flex items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
-                  pathname === '/admin'
-                    ? 'bg-gradient-to-r from-red-600/20 to-pink-600/20 text-white shadow-lg border border-red-500/30'
-                    : 'text-slate-300 hover:bg-red-600/20 hover:text-red-400'
-                }`}
+                className={`flex items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${pathname === '/admin'
+                  ? 'bg-gradient-to-r from-red-600/20 to-pink-600/20 text-white shadow-lg border border-red-500/30'
+                  : 'text-slate-300 hover:bg-red-600/20 hover:text-red-400'
+                  }`}
               >
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 ${
-                    pathname === '/admin'
-                      ? 'bg-gradient-to-br from-red-500 to-pink-600 text-white shadow-md'
-                      : 'bg-slate-700/50 group-hover:scale-110'
-                  }`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 ${pathname === '/admin'
+                    ? 'bg-gradient-to-br from-red-500 to-pink-600 text-white shadow-md'
+                    : 'bg-slate-700/50 group-hover:scale-110'
+                    }`}
                 >
                   <Shield className="h-4 w-4" />
                 </div>

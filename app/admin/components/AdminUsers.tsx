@@ -180,7 +180,9 @@ export default function AdminUsers() {
   }
 
   const confirmDeleteUser = async () => {
-    if (!userToDelete) return
+    if (!userToDelete) {
+      return
+    }
 
     try {
       const response = await fetch(`/api/admin/users/${userToDelete}`, {

@@ -154,7 +154,9 @@ export default function InvestmentsPage() {
   }
 
   const confirmDelete = async () => {
-    if (!investmentToDelete) return
+    if (!investmentToDelete) {
+      return
+    }
 
     try {
       const response = await fetch(`/api/investments/${investmentToDelete}`, {

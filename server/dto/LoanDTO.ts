@@ -14,6 +14,8 @@ export interface LoanDTO extends BaseDTO {
     startDate: Date
     description?: string
     isActive: boolean
+    isFictional: boolean
+    monthlyPayment?: number
     bankName?: string
     currencyCode?: string
 }
@@ -30,4 +32,6 @@ export interface CreateLoanDTO {
     currencyId: number
     startDate: Date
     description?: string
+    isFictional?: boolean
+    monthlyPayment?: number
 }

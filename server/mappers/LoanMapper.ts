@@ -17,6 +17,8 @@ export class LoanMapper {
             startDate: loan.startDate,
             description: loan.description || undefined,
             isActive: loan.isActive,
+            isFictional: loan.isFictional,
+            monthlyPayment: loan.monthlyPayment ? Number(loan.monthlyPayment) : undefined,
             bankName: loan.bank?.name,
             currencyCode: loan.currency?.code,
         }
@@ -37,6 +39,8 @@ export class LoanMapper {
             startDate: dto.startDate,
             description: dto.description || null,
             isActive: true,
+            isFictional: dto.isFictional ?? false,
+            monthlyPayment: dto.monthlyPayment ? new Prisma.Decimal(dto.monthlyPayment) : null,
         }
     }
 }

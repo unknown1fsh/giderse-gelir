@@ -28,6 +28,8 @@ interface Loan {
     startDate: string
     description?: string
     isActive: boolean
+    isFictional: boolean
+    monthlyPayment?: number
     bankName: string
     currencyCode: string
 }
@@ -101,8 +103,15 @@ export default function LoansPage() {
                                         <Building2 className="h-3 w-3 mr-1" /> {loan.bankName}
                                     </CardDescription>
                                 </div>
-                                <div className={`px-2 py-1 rounded text-xs font-medium ${loan.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-                                    {loan.isActive ? 'Aktif' : 'Tamamlandı'}
+                                <div className="flex gap-2">
+                                    <div className={`px-2 py-1 rounded text-xs font-medium ${loan.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                                        {loan.isActive ? 'Aktif' : 'Tamamlandı'}
+                                    </div>
+                                    {loan.isFictional && (
+                                        <div className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
+                                            📋 Kurgu
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </CardHeader>
@@ -119,6 +128,16 @@ export default function LoansPage() {
                                     <p className="text-lg font-semibold">{loan.remainingInstallments} / {loan.installmentCount}</p>
                                 </div>
                             </div>
+
+                            {/* Aylık Ödeme */}
+                            {loan.monthlyPayment && (
+                                <div className="p-3 bg-gray-50 rounded-lg">
+                                    <p className="text-xs text-muted-foreground mb-1">Aylık Ödeme</p>
+                                    <p className="text-lg font-semibold text-gray-900">
+                                        {new Intl.NumberFormat('tr-TR', { style: 'currency', currency: loan.currencyCode }).format(loan.monthlyPayment)}
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Progress Bar */}
                             <div className="space-y-1">

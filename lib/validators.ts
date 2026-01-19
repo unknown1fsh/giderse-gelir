@@ -75,6 +75,7 @@ export const loanSchema = z.object({
   currencyId: z.number().int().positive('Para birimi seçiniz'),
   startDate: z.date(),
   description: z.string().optional().nullable(),
+  isFictional: z.boolean().optional(),
 })
 
 // Otomatik ödeme validasyonu

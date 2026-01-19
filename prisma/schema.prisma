@@ -738,6 +738,8 @@ model Loan {
   startDate             DateTime      @map("start_date") @db.Date
   description           String?       @db.Text
   isActive              Boolean       @default(true) @map("is_active")
+  isFictional           Boolean       @default(false) @map("is_fictional") // Kurgu/planlama kredisi mi?
+  monthlyPayment        Decimal?      @map("monthly_payment") @db.Decimal(15, 2) // Aylık ödeme tutarı
   createdAt             DateTime      @default(now()) @map("created_at")
   updatedAt             DateTime      @updatedAt @map("updated_at")
 

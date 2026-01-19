@@ -30,8 +30,33 @@ export default function NewLoanPage() {
         paymentDay: 15,
         currencyId: 0,
         startDate: new Date().toISOString().split('T')[0],
-        description: ''
+        description: '',
+        isFictional: false
     })
+
+    // Aylık ödeme hesaplama
+    const calculateMonthlyPayment = () => {
+        const total = Number(formData.totalAmount)
+        const count = Number(formData.installmentCount)
+        const rate = Number(formData.interestRate)
+
+        if (!total || !count || count <= 0) {
+            return 0
+        }
+
+        // Faiz yoksa basit bölme
+        if (!rate || rate === 0) {
+            return total / count
+        }
+
+        // Faizli kredi hesaplama
+        const monthlyRate = rate / 100 / 12
+        const numerator = monthlyRate * Math.pow(1 + monthlyRate, count)
+        const denominator = Math.pow(1 + monthlyRate, count) - 1
+        return total * (numerator / denominator)
+    }
+
+    const monthlyPayment = calculateMonthlyPayment()
 
     useEffect(() => {
         fetchReferenceData()
@@ -74,7 +99,8 @@ export default function NewLoanPage() {
                 success('Başarılı', 'Kredi başarıyla eklendi')
                 router.push('/loans')
             } else {
-                error('Hata', 'Kredi eklenirken bir hata oluştu')
+                const errorData = await res.json()
+                error('Hata', errorData.error || 'Kredi eklenirken bir hata oluştu')
             }
         } catch (err) {
             error('Hata', 'Kredi eklenirken bir hata oluştu')
@@ -120,6 +146,48 @@ export default function NewLoanPage() {
                                     onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
                                 />
                             </div>
+
+                            {/* Kurgu Kredisi Checkbox */}
+                            <div className="md:col-span-2">
+                                <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <input
+                                        type="checkbox"
+                                        id="isFictional"
+                                        checked={formData.isFictional}
+                                        onChange={e => setFormData(prev => ({ ...prev, isFictional: e.target.checked }))}
+                                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                    <label htmlFor="isFictional" className="flex-1 text-sm font-medium text-gray-900 cursor-pointer">
+                                        Bu bir kurgu/planlama kredisidir
+                                    </label>
+                                </div>
+                                {formData.isFictional && (
+                                    <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                        <p className="text-sm text-yellow-800">
+                                            ⚠️ <strong>Dikkat:</strong> Kurgu kredisi olarak işaretlendiğinde, aylık ödeme tutarı nakit bakiyenizden otomatik olarak düşülecektir. Bu gerçek bir ödeme değil, planlama amaçlıdır.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Aylık Ödeme Gösterimi */}
+                            {monthlyPayment > 0 && (
+                                <div className="md:col-span-2">
+                                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm font-medium text-gray-700">Hesaplanan Aylık Ödeme:</span>
+                                            <span className="text-lg font-bold text-green-700">
+                                                {monthlyPayment.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {refData?.currencies.find(c => c.id === formData.currencyId)?.code || ''}
+                                            </span>
+                                        </div>
+                                        {formData.interestRate && Number(formData.interestRate) > 0 && (
+                                            <p className="text-xs text-gray-600 mt-1">
+                                                Faiz oranı: %{formData.interestRate} (yıllık)
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             <div>
                                 <label className="block text-sm font-medium mb-1">Banka *</label>

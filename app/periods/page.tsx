@@ -31,7 +31,9 @@ export default function PeriodsPage() {
   }
 
   const confirmDelete = async () => {
-    if (!periodToDelete) return
+    if (!periodToDelete) {
+      return
+    }
     const periodId = periodToDelete
     setIsDeleteDialogOpen(false)
 

@@ -7,7 +7,7 @@ import { AuthService } from '../../../lib/auth'
 const prisma = new PrismaClient()
 const loanService = new LoanService(prisma)
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
     try {
         const token = (await cookies()).get('auth-token')?.value
         const user = token ? await AuthService.validateSession(token) : null

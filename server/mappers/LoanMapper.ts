@@ -1,10 +1,9 @@
-import { Loan, Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { LoanDTO } from '../dto/LoanDTO'
 
 export class LoanMapper {
     static prismaToDTO(loan: any): LoanDTO {
         return {
-            id: loan.id,
             userId: loan.userId,
             bankId: loan.bankId,
             name: loan.name,
@@ -18,8 +17,6 @@ export class LoanMapper {
             startDate: loan.startDate,
             description: loan.description || undefined,
             isActive: loan.isActive,
-            createdAt: loan.createdAt,
-            updatedAt: loan.updatedAt,
             bankName: loan.bank?.name,
             currencyCode: loan.currency?.code,
         }

@@ -2,9 +2,9 @@
 export { BaseDTO } from './BaseDTO'
 export { UserDTO, RegisterUserDTO, LoginUserDTO, UpdateUserDTO } from './UserDTO'
 export { TransactionDTO, CreateTransactionDTO } from './TransactionDTO'
-export {
+export type {
   SystemParameterDTO,
   CreateSystemParameterDTO,
   SystemParameterGroupDTO,
 } from './SystemParameterDTO'
-export { LoanDTO, CreateLoanDTO } from './LoanDTO'
+export type { LoanDTO, CreateLoanDTO } from './LoanDTO'

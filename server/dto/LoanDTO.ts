@@ -1,5 +1,4 @@
 import { BaseDTO } from './BaseDTO'
-import { Prisma } from '@prisma/client'
 
 export interface LoanDTO extends BaseDTO {
     userId: number

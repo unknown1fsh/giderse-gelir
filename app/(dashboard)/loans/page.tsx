@@ -10,11 +10,8 @@ import {
     CreditCard,
     Plus,
     Trash2,
-    Info,
     Calendar,
-    DollarSign,
-    TrendingUp,
-    History
+    TrendingUp
 } from 'lucide-react'
 
 interface Loan {
@@ -60,7 +57,9 @@ export default function LoansPage() {
     }
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Bu krediyi silmek istediğinize emin misiniz?')) return
+        if (!confirm('Bu krediyi silmek istediğinize emin misiniz?')) {
+            return
+        }
 
         try {
             const res = await fetch(`/api/loans/${id}`, { method: 'DELETE' })
@@ -75,7 +74,9 @@ export default function LoansPage() {
         }
     }
 
-    if (loading) return <div className="p-6">Yükleniyor...</div>
+    if (loading) {
+        return <div className="p-6">Yükleniyor...</div>
+    }
 
     return (
         <div className="space-y-6">

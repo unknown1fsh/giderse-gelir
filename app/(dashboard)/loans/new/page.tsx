@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/lib/use-toast'
-import { ArrowLeft, Save, Building2, CreditCard } from 'lucide-react'
+import { ArrowLeft, Save, CreditCard } from 'lucide-react'
 
 interface ReferenceData {
     banks: Array<{ id: number; name: string }>
@@ -83,7 +83,9 @@ export default function NewLoanPage() {
         }
     }
 
-    if (loading) return <div className="p-6">Yükleniyor...</div>
+    if (loading) {
+        return <div className="p-6">Yükleniyor...</div>
+    }
 
     return (
         <div className="space-y-6 max-w-2xl mx-auto">

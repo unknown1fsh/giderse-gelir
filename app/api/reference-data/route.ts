@@ -58,7 +58,7 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
   })
 
   // Kullanıcıya özel veriler (sadece login olmuşsa)
-  const [accounts, creditCards, eWallets, beneficiaries] = await Promise.all([
+  const [accounts, creditCards, eWallets, beneficiaries, loans] = await Promise.all([
     user
       ? prisma.account.findMany({
         include: { bank: true, currency: true, accountType: true },

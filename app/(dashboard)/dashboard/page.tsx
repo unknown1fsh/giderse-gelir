@@ -99,7 +99,7 @@ export default function DashboardPage() {
     if (fetchedRef.current || loading) {
       return
     }
-    
+
     // Kullanıcı yoksa, 401 hatası beklenebilir, ama yine de fetch deneyelim
     // Eğer gerçekten giriş yapmamışsa, middleware zaten yönlendirecek
     fetchedRef.current = true
@@ -216,8 +216,8 @@ export default function DashboardPage() {
 
   // Hızlı işlemler
   const quickActions = [
-    { icon: Plus, label: 'Gelir Ekle', href: '/transactions/new?type=income', color: 'from-green-500 to-emerald-600' },
-    { icon: TrendingDown, label: 'Gider Ekle', href: '/transactions/new?type=expense', color: 'from-red-500 to-rose-600' },
+    { icon: Plus, label: 'Gelir Ekle', href: '/transactions/new-income', color: 'from-green-500 to-emerald-600' },
+    { icon: TrendingDown, label: 'Gider Ekle', href: '/transactions/new-expense', color: 'from-red-500 to-rose-600' },
     { icon: Wallet, label: 'Hesaplar', href: '/accounts', color: 'from-blue-500 to-indigo-600' },
     { icon: Brain, label: 'Analiz', href: '/analysis', color: 'from-purple-500 to-pink-600' },
   ]
@@ -285,8 +285,8 @@ export default function DashboardPage() {
                 {/* Premium Badge */}
                 {user && user.plan !== 'free' && (
                   <div className={`flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-full flex-shrink-0 ${user.plan === 'enterprise_premium' ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30' :
-                      user.plan === 'enterprise' ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30' :
-                        'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30'
+                    user.plan === 'enterprise' ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30' :
+                      'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30'
                     }`}>
                     {user.plan === 'enterprise_premium' ? <Award className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-400" /> :
                       user.plan === 'enterprise' ? <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400" /> :
@@ -580,8 +580,8 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-3">
                         <div
                           className={`w-3 h-3 rounded-full ${category.tx_type_name === 'Gelir'
-                              ? 'bg-gradient-to-br from-green-400 to-emerald-500'
-                              : 'bg-gradient-to-br from-red-400 to-rose-500'
+                            ? 'bg-gradient-to-br from-green-400 to-emerald-500'
+                            : 'bg-gradient-to-br from-red-400 to-rose-500'
                             }`}
                         />
                         <span className="text-sm font-medium text-slate-700">{category.category_name}</span>
@@ -603,7 +603,7 @@ export default function DashboardPage() {
                   </div>
                   <p className="text-slate-600 font-medium">Kategori verisi bulunmuyor</p>
                   <p className="text-sm text-slate-400 mt-1">Henüz işlem kaydı yok</p>
-                  <Link href="/transactions/new" className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors">
+                  <Link href="/transactions/new-expense" className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors">
                     <Plus className="h-4 w-4" /> İlk İşlemi Ekle
                   </Link>
                 </div>

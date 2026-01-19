@@ -16,7 +16,6 @@ const BASE_URL = 'http://localhost:3000/api'
 describe('Beneficiaries API Endpoints', () => {
   let userId: number
   let authToken: string
-  let beneficiaryId: number
 
   beforeAll(async () => {
     logTestSuiteStart('Beneficiaries API Endpoints')
@@ -24,8 +23,7 @@ describe('Beneficiaries API Endpoints', () => {
     userId = testUser.user.id
     authToken = testUser.token
 
-    const beneficiary = await createTestBeneficiary(userId)
-    beneficiaryId = beneficiary.id
+    await createTestBeneficiary(userId)
   })
 
   afterAll(async () => {

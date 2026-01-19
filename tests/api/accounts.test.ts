@@ -152,7 +152,6 @@ describe('Account API Endpoints', () => {
         'yeni kredi kartı oluşturmalı',
         '/accounts',
         'POST',
-        'POST',
         response.status,
         duration,
         success,

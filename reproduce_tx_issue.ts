@@ -77,7 +77,7 @@ async function main() {
         console.log('SUCCESS:', transaction);
     } catch (error: any) {
         console.error('FAILURE:', error.message);
-        if (error.stack) console.error(error.stack);
+        if (error.stack) {console.error(error.stack);}
     }
 }
 

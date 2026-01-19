@@ -16,7 +16,6 @@ const BASE_URL = 'http://localhost:3000/api'
 describe('E-Wallets API Endpoints', () => {
   let userId: number
   let authToken: string
-  let ewalletId: number
 
   beforeAll(async () => {
     logTestSuiteStart('E-Wallets API Endpoints')
@@ -24,8 +23,7 @@ describe('E-Wallets API Endpoints', () => {
     userId = testUser.user.id
     authToken = testUser.token
 
-    const ewallet = await createTestEwallet(userId)
-    ewalletId = ewallet.id
+    await createTestEwallet(userId)
   })
 
   afterAll(async () => {

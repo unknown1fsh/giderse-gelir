@@ -13,6 +13,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import { useToast } from '@/lib/use-toast'
 import { useUser } from '@/lib/user-context'
 import { getDisplayName } from '@/lib/utils'
 import {
@@ -89,6 +91,8 @@ export default function SettingsPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
+  const { success: toastSuccess, error: toastError } = useToast()
   const [currencies, setCurrencies] = useState<
     Array<{ id: number; code: string; name: string; symbol: string }>
   >([])
@@ -161,10 +165,9 @@ export default function SettingsPage() {
       })
 
       if (success) {
-        setSaveMessage('Ayarlar başarıyla kaydedildi!')
-        setTimeout(() => setSaveMessage(''), 3000)
+        toastSuccess('Başarılı', 'Ayarlar başarıyla kaydedildi!')
       } else {
-        setSaveMessage('Ayarlar kaydedilemedi. Lütfen tekrar deneyin.')
+        toastError('Hata', 'Ayarlar kaydedilemedi. Lütfen tekrar deneyin.')
       }
     } catch (error) {
       setSaveMessage('Bir hata oluştu. Lütfen tekrar deneyin.')
@@ -196,33 +199,6 @@ export default function SettingsPage() {
       return
     }
 
-    // Kullanıcıdan onay al
-    const confirmed = window.confirm(
-      '⚠️ UYARI: Bu işlem tüm verilerinizi kalıcı olarak silecektir!\n\n' +
-      '• Tüm işlem geçmişi\n' +
-      '• Tüm hesaplar\n' +
-      '• Tüm kredi kartları\n' +
-      '• Otomatik ödemeler\n' +
-      '• Altın ve yatırım verileri\n\n' +
-      'Bu işlem geri alınamaz!\n\n' +
-      'Devam etmek istediğinizden emin misiniz?'
-    )
-
-    if (!confirmed) {
-      return
-    }
-
-    // İkinci onay
-    const doubleConfirmed = window.confirm(
-      'Son uyarı: Tüm verileriniz silinecek!\n\n' +
-      'Bu işlem geri alınamaz!\n\n' +
-      'Kesinlikle devam etmek istiyor musunuz?'
-    )
-
-    if (!doubleConfirmed) {
-      return
-    }
-
     try {
       setIsSaving(true)
 
@@ -232,17 +208,20 @@ export default function SettingsPage() {
       })
 
       if (response.ok) {
-        alert('✅ Tüm verileriniz başarıyla silindi!')
+        toastSuccess('Tüm verileriniz başarıyla silindi!')
         // Sayfayı yenile
-        window.location.reload()
+        setTimeout(() => {
+          window.location.reload()
+        }, 1500)
       } else {
-        alert('❌ Veriler silinirken bir hata oluştu. Lütfen tekrar deneyin.')
+        toastError('Veriler silinirken bir hata oluştu. Lütfen tekrar deneyin.')
       }
     } catch (error) {
       console.error('Reset data error:', error)
-      alert('❌ Bir hata oluştu. Lütfen tekrar deneyin.')
+      toastError('Bir hata oluştu. Lütfen tekrar deneyin.')
     } finally {
       setIsSaving(false)
+      setIsResetDialogOpen(false)
     }
   }
 
@@ -950,7 +929,7 @@ export default function SettingsPage() {
                           </div>
                           <Button
                             onClick={() => {
-                              void handleResetAllData()
+                              setIsResetDialogOpen(true)
                             }}
                             variant="destructive"
                             className="mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold"
@@ -961,6 +940,17 @@ export default function SettingsPage() {
                         </div>
                       </div>
                     </div>
+
+                    <ConfirmationDialog
+                      isOpen={isResetDialogOpen}
+                      onClose={() => setIsResetDialogOpen(false)}
+                      onConfirm={handleResetAllData}
+                      title="Verileri Sıfırla"
+                      message="Tüm verilerinizi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!"
+                      warningMessage="Tüm işlem geçmişi, hesaplar, kartlar ve yatırımlar silinecektir."
+                      confirmText="Evet, Her Şeyi Sil"
+                      cancelText="İptal"
+                    />
 
                     <div className="p-4 border border-amber-200 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50">
                       <div className="flex items-start space-x-3">

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Save, Coins, Search, TrendingUp, TrendingDown } from 'lucide-react'
 import { parseCurrencyInput } from '@/lib/validators'
+import { useToast } from '@/lib/use-toast'
 
 interface Crypto {
   id: string
@@ -27,6 +28,7 @@ interface Currency {
 
 export default function NewCryptoInvestmentPage() {
   const router = useRouter()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [cryptoList, setCryptoList] = useState<Crypto[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -82,17 +84,17 @@ export default function NewCryptoInvestmentPage() {
     e.preventDefault()
 
     if (!selectedCrypto) {
-      alert('Lütfen bir kripto para seçiniz')
+      toastError('Hata', 'Lütfen bir kripto para seçiniz')
       return
     }
 
     if (!formData.quantity || parseFloat(formData.quantity) <= 0) {
-      alert('Lütfen geçerli bir miktar giriniz')
+      toastError('Hata', 'Lütfen geçerli bir miktar giriniz')
       return
     }
 
     if (!formData.purchasePrice || parseFloat(formData.purchasePrice) <= 0) {
-      alert('Lütfen geçerli bir alış fiyatı giriniz')
+      toastError('Hata', 'Lütfen geçerli bir alış fiyatı giriniz')
       return
     }
 
@@ -126,15 +128,15 @@ export default function NewCryptoInvestmentPage() {
       })
 
       if (response.ok) {
-        alert('Kripto yatırımı başarıyla eklendi')
+        toastSuccess('Başarılı', 'Kripto yatırımı başarıyla eklendi')
         router.push('/investments')
       } else {
         const errorData = await response.json()
-        alert('Hata: ' + (errorData.error || 'Yatırım eklenemedi'))
+        toastError('Hata', errorData.error || 'Yatırım eklenemedi')
       }
     } catch (error) {
       console.error('Yatırım eklenirken hata:', error)
-      alert('Yatırım eklenirken hata oluştu')
+      toastError('Hata', 'Yatırım eklenirken hata oluştu')
     } finally {
       setSaving(false)
     }
@@ -202,11 +204,10 @@ export default function NewCryptoInvestmentPage() {
                         purchasePrice: crypto.currentPrice.toFixed(2),
                       }))
                     }}
-                    className={`w-full p-4 border rounded-lg text-left transition-all ${
-                      selectedCrypto?.id === crypto.id
+                    className={`w-full p-4 border rounded-lg text-left transition-all ${selectedCrypto?.id === crypto.id
                         ? 'border-orange-500 bg-orange-50'
                         : 'border-gray-200 hover:border-orange-300 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -225,9 +226,8 @@ export default function NewCryptoInvestmentPage() {
                           })}
                         </div>
                         <div
-                          className={`text-sm flex items-center justify-end gap-1 ${
-                            crypto.priceChange24h >= 0 ? 'text-green-600' : 'text-red-600'
-                          }`}
+                          className={`text-sm flex items-center justify-end gap-1 ${crypto.priceChange24h >= 0 ? 'text-green-600' : 'text-red-600'
+                            }`}
                         >
                           {crypto.priceChange24h >= 0 ? (
                             <TrendingUp className="h-3 w-3" />

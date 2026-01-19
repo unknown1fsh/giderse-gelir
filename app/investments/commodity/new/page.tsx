@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Save, Layers } from 'lucide-react'
 import { parseCurrencyInput } from '@/lib/validators'
+import { useToast } from '@/lib/use-toast'
 import type { Currency, ReferenceData } from '@/app/investments/types'
 
 const DEFAULT_COMMODITIES = [
@@ -17,6 +18,7 @@ const DEFAULT_COMMODITIES = [
 
 export default function NewCommodityInvestmentPage() {
   const router = useRouter()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [currencies, setCurrencies] = useState<Currency[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -97,15 +99,15 @@ export default function NewCommodityInvestmentPage() {
       })
 
       if (response.ok) {
-        alert('Emtia yatırımı eklendi')
+        toastSuccess('Başarılı', 'Emtia yatırımı eklendi')
         router.push('/investments')
       } else {
         const errorData = (await response.json()) as { error?: string }
-        alert('Hata: ' + (errorData.error ?? 'Yatırım eklenemedi'))
+        toastError('Hata', errorData.error ?? 'Yatırım eklenemedi')
       }
     } catch (error) {
       console.error('Yatırım eklenirken hata:', error)
-      alert('Yatırım eklenirken hata oluştu')
+      toastError('Hata', 'Yatırım eklenirken hata oluştu')
     } finally {
       setSaving(false)
     }
@@ -145,7 +147,7 @@ export default function NewCommodityInvestmentPage() {
                   onChange={e =>
                     setSelectedCommodity(
                       DEFAULT_COMMODITIES.find(c => c.symbol === e.target.value) ??
-                        DEFAULT_COMMODITIES[0]
+                      DEFAULT_COMMODITIES[0]
                     )
                   }
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500"

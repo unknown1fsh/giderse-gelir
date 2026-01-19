@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Wallet, ArrowLeft, Home, Edit, Trash2, Plus } from 'lucide-react'
 import { formatCurrency } from '@/lib/validators'
+import { useToast } from '@/lib/use-toast'
 import { EditNameModal } from '@/components/ui/edit-name-modal'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 
@@ -26,6 +27,7 @@ interface EWallet {
 
 export default function EWalletsPage() {
   const router = useRouter()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [eWallets, setEWallets] = useState<EWallet[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -75,13 +77,13 @@ export default function EWalletsPage() {
             wallet.id === selectedWallet.id ? { ...wallet, name: newName } : wallet
           )
         )
-        alert('E-cüzdan adı başarıyla güncellendi')
+        toastSuccess('Başarılı', 'E-cüzdan adı başarıyla güncellendi')
       } else {
-        alert('E-cüzdan adı güncellenemedi')
+        toastError('Hata', 'E-cüzdan adı güncellenemedi')
       }
     } catch (error) {
       console.error('E-cüzdan güncelleme hatası:', error)
-      alert('E-cüzdan güncellenirken hata oluştu')
+      toastError('Hata', 'E-cüzdan güncellenirken hata oluştu')
     }
   }
 
@@ -98,14 +100,14 @@ export default function EWalletsPage() {
 
       if (response.ok) {
         const result = (await response.json()) as { message: string }
-        alert(result.message)
+        toastSuccess('Başarılı', result.message || 'E-cüzdan silindi')
         setEWallets(prev => prev.filter(wallet => wallet.id !== selectedWallet.id))
       } else {
-        alert('E-cüzdan silinemedi')
+        toastError('Hata', 'E-cüzdan silinemedi')
       }
     } catch (error) {
       console.error('E-cüzdan silme hatası:', error)
-      alert('E-cüzdan silinirken hata oluştu')
+      toastError('Hata', 'E-cüzdan silinirken hata oluştu')
     }
   }
 

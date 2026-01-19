@@ -6,9 +6,13 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import BrandLogo from '@/components/brand-logo'
+import { useToast } from '@/lib/use-toast'
 
 export default function LoginPage() {
+  const router = useRouter()
+  const { success, error: toastError } = useToast()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -35,13 +39,22 @@ export default function LoginPage() {
       const data = (await response.json()) as { success?: boolean; message?: string }
 
       if (data.success) {
-        // Başarılı login sonrası dashboard'a yönlendir (full page reload ile context'leri yenile)
-        window.location.href = '/dashboard'
+        success('Giriş Başarılı', 'Yönlendiriliyorsunuz...')
+        // Dashboard'a yönlendir (router.push kullanıyoruz ki toast görünebilsin)
+        router.push('/dashboard')
+        // Sayfa yenilemesi gerekiyorsa dashboard içinde yapılabilir veya 1sn sonra reload
+        setTimeout(() => {
+          window.location.reload()
+        }, 500)
       } else {
-        setError(data.message || 'Giriş yapılırken bir hata oluştu')
+        const msg = data.message || 'Giriş yapılırken bir hata oluştu'
+        setError(msg)
+        toastError('Giriş Başarısız', msg)
       }
     } catch (err) {
-      setError('Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.')
+      const msg = 'Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.'
+      setError(msg)
+      toastError('Hata', msg)
     } finally {
       setIsLoading(false)
     }

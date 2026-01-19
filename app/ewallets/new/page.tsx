@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Save, Wallet, Mail, Phone } from 'lucide-react'
 import { parseCurrencyInput } from '@/lib/validators'
+import { useToast } from '@/lib/use-toast'
 
 interface Currency {
   id: number
@@ -19,6 +20,7 @@ interface ReferenceData {
 
 export default function NewEWalletPage() {
   const router = useRouter()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -61,23 +63,23 @@ export default function NewEWalletPage() {
 
     // Validasyon
     if (!formData.name.trim()) {
-      alert('E-cüzdan adı zorunludur')
+      toastError('Hata', 'E-cüzdan adı zorunludur')
       return
     }
 
     if (!formData.provider) {
-      alert('Sağlayıcı seçimi zorunludur')
+      toastError('Hata', 'Sağlayıcı seçimi zorunludur')
       return
     }
 
     if (!formData.currencyId) {
-      alert('Para birimi seçimi zorunludur')
+      toastError('Hata', 'Para birimi seçimi zorunludur')
       return
     }
 
     // En az bir iletişim bilgisi olmalı
     if (!formData.accountEmail && !formData.accountPhone) {
-      alert('En az bir iletişim bilgisi (E-posta veya Telefon) girilmelidir')
+      toastError('Hata', 'En az bir iletişim bilgisi (E-posta veya Telefon) girilmelidir')
       return
     }
 
@@ -101,15 +103,15 @@ export default function NewEWalletPage() {
       })
 
       if (response.ok) {
-        alert('E-cüzdan başarıyla eklendi')
+        toastSuccess('Başarılı', 'E-cüzdan başarıyla eklendi')
         router.push('/ewallets')
       } else {
         const errorData = (await response.json()) as { error?: string }
-        alert('Hata: ' + (errorData.error || 'E-cüzdan eklenemedi'))
+        toastError('Hata', errorData.error || 'E-cüzdan eklenemedi')
       }
     } catch (error) {
       console.error('E-cüzdan eklenirken hata:', error)
-      alert('E-cüzdan eklenirken hata oluştu')
+      toastError('Hata', 'E-cüzdan eklenirken hata oluştu')
     } finally {
       setSaving(false)
     }

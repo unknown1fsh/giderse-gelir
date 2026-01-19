@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Home, Coins, Save, Loader2 } from 'lucide-react'
+import { useToast } from '@/lib/use-toast'
 
 interface ReferenceData {
   goldTypes: Array<{
@@ -23,6 +24,7 @@ interface ReferenceData {
 
 export default function NewGoldItemPage() {
   const router = useRouter()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -75,14 +77,15 @@ export default function NewGoldItemPage() {
       })
 
       if (response.ok) {
+        toastSuccess('Başarılı', 'Altın eşyası başarıyla eklendi')
         router.push('/gold')
       } else {
         const errorData = (await response.json()) as { error?: string }
-        alert('Hata: ' + (errorData.error || 'Altın eşyası eklenemedi'))
+        toastError('Hata', errorData.error || 'Altın eşyası eklenemedi')
       }
     } catch (error) {
       console.error('Altın eşyası eklenirken hata:', error)
-      alert('Altın eşyası eklenirken hata oluştu')
+      toastError('Hata', 'Altın eşyası eklenirken hata oluştu')
     } finally {
       setSaving(false)
     }

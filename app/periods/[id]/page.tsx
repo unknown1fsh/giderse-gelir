@@ -18,6 +18,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import PageHeader from '@/components/page-header'
+import { useToast } from '@/lib/use-toast'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 
 interface PeriodDetail {
   id: number
@@ -55,6 +57,8 @@ export default function PeriodDetailPage() {
   const periodId = params.id as string
 
   const [period, setPeriod] = useState<PeriodDetail | null>(null)
+  const { success: toastSuccess, error: toastError } = useToast()
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -374,21 +378,7 @@ export default function PeriodDetailPage() {
           {totalRecords === 0 && (
             <button
               onClick={() => {
-                void (async () => {
-                  if (confirm('Bu dönemi silmek istediğinizden emin misiniz?')) {
-                    const response = await fetch(`/api/periods/${periodId}`, {
-                      method: 'DELETE',
-                      credentials: 'include',
-                    })
-
-                    if (response.ok) {
-                      router.push('/periods')
-                    } else {
-                      const data = (await response.json()) as { error?: string }
-                      alert(data.error || 'Dönem silinemedi')
-                    }
-                  }
-                })()
+                setIsDeleteDialogOpen(true)
               }}
               className="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
             >
@@ -398,6 +388,33 @@ export default function PeriodDetailPage() {
           )}
         </div>
       )}
+
+      <ConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={async () => {
+          setIsDeleteDialogOpen(false)
+          const response = await fetch(`/api/periods/${periodId}`, {
+            method: 'DELETE',
+            credentials: 'include',
+          })
+
+          if (response.ok) {
+            toastSuccess('Dönem başarıyla silindi')
+            setTimeout(() => {
+              router.push('/periods')
+            }, 1000)
+          } else {
+            const data = (await response.json()) as { error?: string }
+            toastError(data.error || 'Dönem silinemedi')
+          }
+        }}
+        title="Dönemi Sil"
+        message="Bu dönemi silmek istediğinizden emin misiniz?"
+        warningMessage="Dönem kaydı kalıcı olarak silinecektir."
+        confirmText="Evet, Sil"
+        cancelText="İptal"
+      />
     </div>
   )
 }

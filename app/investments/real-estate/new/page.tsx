@@ -6,10 +6,12 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Save, Building2 } from 'lucide-react'
 import { parseCurrencyInput } from '@/lib/validators'
+import { useToast } from '@/lib/use-toast'
 import type { Currency, ReferenceData } from '@/app/investments/types'
 
 export default function NewRealEstateInvestmentPage() {
   const router = useRouter()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [currencies, setCurrencies] = useState<Currency[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -76,15 +78,15 @@ export default function NewRealEstateInvestmentPage() {
         credentials: 'include',
       })
       if (response.ok) {
-        alert('Gayrimenkul yatırımı eklendi')
+        toastSuccess('Başarılı', 'Gayrimenkul yatırımı eklendi')
         router.push('/investments')
       } else {
         const errorData = (await response.json()) as { error?: string }
-        alert('Hata: ' + (errorData.error ?? 'Yatırım eklenemedi'))
+        toastError('Hata', errorData.error ?? 'Yatırım eklenemedi')
       }
     } catch (error) {
       console.error('Yatırım eklenirken hata:', error)
-      alert('Yatırım eklenirken hata oluştu')
+      toastError('Hata', 'Yatırım eklenirken hata oluştu')
     } finally {
       setSaving(false)
     }

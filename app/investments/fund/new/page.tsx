@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Save, PieChart } from 'lucide-react'
 import { parseCurrencyInput } from '@/lib/validators'
+import { useToast } from '@/lib/use-toast'
 import type { MarketSearchResult } from '@/app/investments/types'
 
 interface SelectedFund {
@@ -15,6 +16,7 @@ interface SelectedFund {
 
 export default function NewFundInvestmentPage() {
   const router = useRouter()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -95,16 +97,16 @@ export default function NewFundInvestmentPage() {
       })
 
       if (response.ok) {
-        alert('Yatırım fonu başarıyla eklendi')
+        toastSuccess('Başarılı', 'Yatırım fonu başarıyla eklendi')
         router.push('/investments')
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const errorData: { error?: string } = await response.json()
-        alert('Hata: ' + (errorData.error ?? 'Yatırım eklenemedi'))
+        toastError('Hata', errorData.error ?? 'Yatırım eklenemedi')
       }
     } catch (error) {
       console.error('Yatırım eklenirken hata:', error)
-      alert('Yatırım eklenirken hata oluştu')
+      toastError('Hata', 'Yatırım eklenirken hata oluştu')
     } finally {
       setSaving(false)
     }

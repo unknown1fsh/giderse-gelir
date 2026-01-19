@@ -18,6 +18,7 @@ import {
 import { formatCurrency } from '@/lib/validators'
 import { EditNameModal } from '@/components/ui/edit-name-modal'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import { useToast } from '@/lib/use-toast'
 
 interface GoldItem {
   id: number
@@ -41,6 +42,7 @@ interface GoldItem {
 export default function GoldPage() {
   const router = useRouter()
   const [goldItems, setGoldItems] = useState<GoldItem[]>([])
+  const { success: toastSuccess, error: toastError } = useToast()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -88,13 +90,13 @@ export default function GoldPage() {
         setGoldItems(prev =>
           prev.map(gold => (gold.id === selectedGold.id ? { ...gold, name: newName } : gold))
         )
-        alert('Altın adı başarıyla güncellendi')
+        toastSuccess('Başarılı', 'Altın adı başarıyla güncellendi')
       } else {
-        alert('Altın adı güncellenemedi')
+        toastError('Hata', 'Altın adı güncellenemedi')
       }
     } catch (error) {
       console.error('Altın güncelleme hatası:', error)
-      alert('Altın güncellenirken hata oluştu')
+      toastError('Hata', 'Altın güncellenirken hata oluştu')
     }
   }
 
@@ -111,15 +113,15 @@ export default function GoldPage() {
 
       if (response.ok) {
         const result = (await response.json()) as { message: string }
-        alert(result.message)
+        toastSuccess('Başarılı', result.message || 'Altın silindi')
         // Listeyi güncelle
         setGoldItems(prev => prev.filter(gold => gold.id !== selectedGold.id))
       } else {
-        alert('Altın silinemedi')
+        toastError('Hata', 'Altın silinemedi')
       }
     } catch (error) {
       console.error('Altın silme hatası:', error)
-      alert('Altın silinirken hata oluştu')
+      toastError('Hata', 'Altın silinirken hata oluştu')
     }
   }
 
@@ -296,7 +298,7 @@ export default function GoldPage() {
                           {formatCurrency(
                             Math.abs(
                               parseFloat(item.currentValueTry || '0') -
-                                parseFloat(item.purchasePrice)
+                              parseFloat(item.purchasePrice)
                             ),
                             'TRY'
                           )}

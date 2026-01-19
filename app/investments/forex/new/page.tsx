@@ -6,12 +6,14 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Save, Globe } from 'lucide-react'
 import { parseCurrencyInput } from '@/lib/validators'
+import { useToast } from '@/lib/use-toast'
 import type { Currency, ReferenceData } from '@/app/investments/types'
 
 const DEFAULT_PAIRS = ['USDTRY', 'EURTRY', 'GBPTRY', 'XAUUSD']
 
 export default function NewForexInvestmentPage() {
   const router = useRouter()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [currencies, setCurrencies] = useState<Currency[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -89,15 +91,15 @@ export default function NewForexInvestmentPage() {
         credentials: 'include',
       })
       if (response.ok) {
-        alert('Döviz yatırımı eklendi')
+        toastSuccess('Başarılı', 'Döviz yatırımı eklendi')
         router.push('/investments')
       } else {
         const errorData = (await response.json()) as { error?: string }
-        alert('Hata: ' + (errorData.error ?? 'Yatırım eklenemedi'))
+        toastError('Hata', errorData.error ?? 'Yatırım eklenemedi')
       }
     } catch (error) {
       console.error('Yatırım eklenirken hata:', error)
-      alert('Yatırım eklenirken hata oluştu')
+      toastError('Hata', 'Yatırım eklenirken hata oluştu')
     } finally {
       setSaving(false)
     }

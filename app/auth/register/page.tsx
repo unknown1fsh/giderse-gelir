@@ -25,7 +25,7 @@ import { useToast } from '@/lib/use-toast'
 
 export default function RegisterPage() {
   const router = useRouter()
-  const { success } = useToast()
+  const { success, error: toastError } = useToast()
   const [formData, setFormData] = useState({
     username: '',
     name: '',
@@ -48,40 +48,52 @@ export default function RegisterPage() {
 
     // Validation
     if (formData.password !== formData.confirmPassword) {
-      setError('Şifreler eşleşmiyor')
+      const msg = 'Şifreler eşleşmiyor'
+      setError(msg)
+      toastError('Doğrulama Hatası', msg)
       setIsLoading(false)
       return
     }
 
     if (!agreedToTerms) {
-      setError('Kullanım şartlarını kabul etmelisiniz')
+      const msg = 'Kullanım şartlarını kabul etmelisiniz'
+      setError(msg)
+      toastError('Doğrulama Hatası', msg)
       setIsLoading(false)
       return
     }
 
     // Frontend şifre validasyonu
     if (formData.password.length < 8) {
-      setError('Şifre en az 8 karakter olmalıdır')
+      const msg = 'Şifre en az 8 karakter olmalıdır'
+      setError(msg)
+      toastError('Doğrulama Hatası', msg)
       setIsLoading(false)
       return
     }
 
     // Username validasyonu
     if (formData.username.length < 3 || formData.username.length > 50) {
-      setError('Kullanıcı adı 3-50 karakter arasında olmalıdır')
+      const msg = 'Kullanıcı adı 3-50 karakter arasında olmalıdır'
+      setError(msg)
+      toastError('Doğrulama Hatası', msg)
       setIsLoading(false)
       return
     }
 
     const usernameRegex = /^[a-zA-Z0-9_-]+$/
     if (!usernameRegex.test(formData.username)) {
-      setError('Kullanıcı adı sadece harf, rakam, alt çizgi ve tire içerebilir')
+      const msg = 'Kullanıcı adı sadece harf, rakam, alt çizgi ve tire içerebilir'
+      setError(msg)
+      toastError('Doğrulama Hatası', msg)
       setIsLoading(false)
       return
     }
 
     if (!/^[a-zA-Z0-9]/.test(formData.username) || !/[a-zA-Z0-9]$/.test(formData.username)) {
-      setError('Kullanıcı adı harf veya rakam ile başlayıp bitmelidir')
+      const msg = 'Kullanıcı adı harf veya rakam ile başlayıp bitmelidir'
+      setError(msg)
+      toastError('Doğrulama Hatası', msg)
       setIsLoading(false)
       return
     }
@@ -112,9 +124,9 @@ export default function RegisterPage() {
 
       if (!response.ok) {
         // API'den gelen hata mesajını al
-        // BaseError.toJSON() formatı: { error: message, errorCode, statusCode }
         const errorMessage = data.error || data.message || 'Kayıt olurken bir hata oluştu'
         setError(errorMessage)
+        toastError('Kayıt Hatası', errorMessage)
         setIsLoading(false)
         return
       }
@@ -128,7 +140,7 @@ export default function RegisterPage() {
           'Tamam'
         )
 
-        // Formu temizle ve Login sayfasına yönlendir (veya anasayfaya)
+        // Formu temizle
         setFormData({
           username: '',
           name: '',
@@ -142,11 +154,15 @@ export default function RegisterPage() {
         // Toast'ın görünmesi için client-side redirect kullanıyoruz (state korunur)
         router.push('/auth/login')
       } else {
-        setError(data.message || data.error || 'Kayıt olurken bir hata oluştu')
+        const msg = data.message || data.error || 'Kayıt olurken bir hata oluştu'
+        setError(msg)
+        toastError('Kayıt Başarısız', msg)
       }
     } catch (err) {
       console.error('Register error:', err)
-      setError('Kayıt olurken bir hata oluştu. Lütfen tekrar deneyin.')
+      const msg = 'Kayıt olurken bir hata oluştu. Lütfen tekrar deneyin.'
+      setError(msg)
+      toastError('Sistem Hatası', msg)
     } finally {
       setIsLoading(false)
     }

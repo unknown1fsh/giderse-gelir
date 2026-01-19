@@ -15,15 +15,25 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useToast } from '@/lib/use-toast'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 
 export default function PeriodsPage() {
   const { periods, loading, activePeriod, changePeriod } = usePeriod()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [periodToDelete, setPeriodToDelete] = useState<number | null>(null)
 
   const handleDelete = async (periodId: number) => {
-    if (!confirm('Bu dönemi silmek istediğinizden emin misiniz?')) {
-      return
-    }
+    setPeriodToDelete(periodId)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!periodToDelete) return
+    const periodId = periodToDelete
+    setIsDeleteDialogOpen(false)
 
     setDeletingId(periodId)
     try {
@@ -35,16 +45,20 @@ export default function PeriodsPage() {
       const data = (await response.json()) as { success?: boolean; error?: string }
 
       if (response.ok) {
+        toastSuccess('Başarılı', 'Dönem başarıyla silindi')
         // Sayfayı yenile
-        window.location.reload()
+        setTimeout(() => {
+          window.location.reload()
+        }, 1500)
       } else {
-        alert(data.error || 'Dönem silinemedi')
+        toastError('Hata', data.error || 'Dönem silinemedi')
       }
     } catch (error) {
       console.error('Delete period error:', error)
-      alert('Dönem silinirken bir hata oluştu')
+      toastError('Hata', 'Dönem silinirken bir hata oluştu')
     } finally {
       setDeletingId(null)
+      setPeriodToDelete(null)
     }
   }
 
@@ -135,9 +149,8 @@ export default function PeriodsPage() {
             {openPeriods.map(period => (
               <Card
                 key={period.id}
-                className={`hover:shadow-lg transition-shadow ${
-                  period.id === activePeriod?.id ? 'border-blue-300 bg-blue-50/30' : ''
-                }`}
+                className={`hover:shadow-lg transition-shadow ${period.id === activePeriod?.id ? 'border-blue-300 bg-blue-50/30' : ''
+                  }`}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -275,6 +288,20 @@ export default function PeriodsPage() {
           </CardContent>
         </Card>
       )}
+
+      <ConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => {
+          setIsDeleteDialogOpen(false)
+          setPeriodToDelete(null)
+        }}
+        onConfirm={confirmDelete}
+        title="Dönemi Sil"
+        message="Bu dönemi silmek istediğinizden emin misiniz?"
+        warningMessage="Bu işlem geri alınamaz. Döneme ait tüm veriler (işlemler, raporlar vb.) silinecektir."
+        confirmText="Evet, Sil"
+        cancelText="İptal"
+      />
     </div>
   )
 }

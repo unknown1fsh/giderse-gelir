@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Save, TrendingUp, Search, Building2 } from 'lucide-react'
 import { parseCurrencyInput } from '@/lib/validators'
+import { useToast } from '@/lib/use-toast'
 import type { MarketSearchResult } from '@/app/investments/types'
 
 interface SelectedStock {
@@ -17,6 +18,7 @@ interface SelectedStock {
 
 export default function NewStockInvestmentPage() {
   const router = useRouter()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -66,7 +68,7 @@ export default function NewStockInvestmentPage() {
     e.preventDefault()
 
     if (!selectedStock) {
-      alert('Lütfen bir hisse senedi seçiniz')
+      toastError('Hata', 'Lütfen bir hisse senedi seçiniz')
       return
     }
 
@@ -100,16 +102,16 @@ export default function NewStockInvestmentPage() {
       })
 
       if (response.ok) {
-        alert('Hisse senedi yatırımı başarıyla eklendi')
+        toastSuccess('Başarılı', 'Hisse senedi yatırımı başarıyla eklendi')
         router.push('/investments')
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const errorData: { error?: string } = await response.json()
-        alert('Hata: ' + (errorData.error ?? 'Yatırım eklenemedi'))
+        toastError('Hata', errorData.error ?? 'Yatırım eklenemedi')
       }
     } catch (error) {
       console.error('Yatırım eklenirken hata:', error)
-      alert('Yatırım eklenirken hata oluştu')
+      toastError('Hata', 'Yatırım eklenirken hata oluştu')
     } finally {
       setSaving(false)
     }
@@ -118,7 +120,7 @@ export default function NewStockInvestmentPage() {
   const totalValue =
     selectedStock && formData.quantity && (formData.currentPrice || formData.purchasePrice)
       ? parseFloat(formData.quantity) *
-        parseCurrencyInput(formData.currentPrice || formData.purchasePrice)
+      parseCurrencyInput(formData.currentPrice || formData.purchasePrice)
       : 0
 
   if (loading) {
@@ -179,11 +181,10 @@ export default function NewStockInvestmentPage() {
                         exchange: stock.exchange,
                       })
                     }
-                    className={`w-full p-4 border rounded-lg text-left transition-all ${
-                      selectedStock?.symbol === stock.symbol
+                    className={`w-full p-4 border rounded-lg text-left transition-all ${selectedStock?.symbol === stock.symbol
                         ? 'border-green-500 bg-green-50'
                         : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">

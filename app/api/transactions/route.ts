@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { transactionSchema } from '@/lib/validators'
-import { getCurrentUser } from '@/lib/auth-refactored'
+import { getCurrentUser } from '@/lib/auth'
 import { TransactionService } from '@/server/services/impl/TransactionService'
 import { ExceptionMapper } from '@/server/errors'
 
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Aktif dönemi al (opsiyonel - migration sonrası aktif olacak)
-    const { getActivePeriod } = await import('@/lib/auth-refactored')
+    const { getActivePeriod } = await import('@/lib/auth')
     const activePeriod = await getActivePeriod(request)
 
     // Period sistemi henüz aktif değilse, tüm işlemleri getir
@@ -122,7 +122,7 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
   })
 
   // Aktif dönemi al (opsiyonel)
-  const { getActivePeriod } = await import('@/lib/auth-refactored')
+  const { getActivePeriod } = await import('@/lib/auth')
   const activePeriod = await getActivePeriod(request)
 
   // Transaction data hazırla

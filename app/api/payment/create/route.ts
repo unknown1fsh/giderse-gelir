@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth-refactored'
+import { getCurrentUser } from '@/lib/auth'
 import { createPaymentLink } from '@/lib/paytr'
 import { getClientIp } from '@/lib/rate-limit'
 import { prisma } from '@/lib/prisma'

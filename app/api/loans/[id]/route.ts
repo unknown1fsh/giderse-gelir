@@ -1,17 +1,14 @@
-import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { PrismaClient } from '@prisma/client'
-import { LoanService } from '../../../../server/services/impl/LoanService'
-import { AuthService } from '../../../../lib/auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { LoanService } from '@/server/services/impl/LoanService'
+import { getCurrentUser } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
-const prisma = new PrismaClient()
 const loanService = new LoanService(prisma)
 
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params
-        const token = (await cookies()).get('auth-token')?.value
-        const user = token ? await AuthService.validateSession(token) : null
+        const user = await getCurrentUser(request instanceof NextRequest ? request : new NextRequest(request))
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -27,16 +24,15 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     }
 }
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params
-        const token = (await cookies()).get('auth-token')?.value
-        const user = token ? await AuthService.validateSession(token) : null
+        const user = await getCurrentUser(request instanceof NextRequest ? request : new NextRequest(request))
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const body = await req.json()
+        const body = await request.json()
         if (body.startDate) {
             body.startDate = new Date(body.startDate)
         }
@@ -48,11 +44,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 }
 
-export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params
-        const token = (await cookies()).get('auth-token')?.value
-        const user = token ? await AuthService.validateSession(token) : null
+        const user = await getCurrentUser(request instanceof NextRequest ? request : new NextRequest(request))
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

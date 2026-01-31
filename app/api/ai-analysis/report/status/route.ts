@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth-refactored'
+import { getCurrentUser } from '@/lib/auth'
 import { ExceptionMapper } from '@/server/errors'
 import { BadRequestError } from '@/server/errors'
 import { getRemainingReports } from '@/lib/ai-report-limit'

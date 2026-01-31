@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth-refactored'
+import { getCurrentUser } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 import { getPlanById, getPlanLimits, PLAN_IDS } from '@/lib/plan-config'
 

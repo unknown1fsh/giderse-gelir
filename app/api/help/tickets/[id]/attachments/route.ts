@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth-refactored'
+import { getCurrentUser } from '@/lib/auth'
 import { ExceptionMapper } from '@/server/errors'
 import { UnauthorizedError, BadRequestError, NotFoundError } from '@/server/errors'
 import { writeFile, mkdir } from 'fs/promises'

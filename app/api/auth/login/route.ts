@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { setAuthCookie } from '@/lib/auth-refactored'
+import { setAuthCookie } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { AuthService } from '@/server/services/impl/AuthService'
 import { LoginUserDTO } from '@/server/dto/UserDTO'

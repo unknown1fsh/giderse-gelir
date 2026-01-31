@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth-refactored'
-import { AuthService } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/auth'
+import { AuthService } from '@/server/services/impl/AuthService'
+import { prisma } from '@/lib/prisma'
 
 export async function PUT(request: NextRequest) {
   try {
@@ -35,7 +36,8 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    const result = await AuthService.updateUser(user.id, updateData)
+    const authService = new AuthService(prisma)
+    const result = await authService.updateUser(user.id, updateData)
 
     if (result.success) {
       return NextResponse.json({

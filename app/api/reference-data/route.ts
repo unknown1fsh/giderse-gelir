@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { ExceptionMapper } from '@/server/errors'
-import { getCurrentUser } from '@/lib/auth-refactored'
+import { getCurrentUser } from '@/lib/auth'
 import { SystemParameterService } from '@/server/services/impl/SystemParameterService'
 
 // Bu endpoint tüm referans verilerini getirir

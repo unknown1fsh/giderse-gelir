@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from './auth-refactored'
+import { getCurrentUser } from '@/lib/auth'
 import { UserRole } from '@/server/enums/UserRole'
 
 // Admin rolü kontrolü yapar

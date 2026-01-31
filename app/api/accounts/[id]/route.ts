@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth-refactored'
+import { getCurrentUser } from '@/lib/auth'
 
 // Bu metot belirli bir hesabın detaylarını ve transaction'larını döndürür
 // Girdi: account ID (route parameter)

@@ -1,16 +1,13 @@
-import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { PrismaClient } from '@prisma/client'
-import { LoanService } from '../../../server/services/impl/LoanService'
-import { AuthService } from '../../../lib/auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { LoanService } from '@/server/services/impl/LoanService'
+import { getCurrentUser } from '@/lib/auth'
 
-const prisma = new PrismaClient()
 const loanService = new LoanService(prisma)
 
-export async function GET(_req: Request) {
+export async function GET(request: Request) {
     try {
-        const token = (await cookies()).get('auth-token')?.value
-        const user = token ? await AuthService.validateSession(token) : null
+        const user = await getCurrentUser(request instanceof NextRequest ? request : new NextRequest(request))
 
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -23,16 +20,15 @@ export async function GET(_req: Request) {
     }
 }
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
     try {
-        const token = (await cookies()).get('auth-token')?.value
-        const user = token ? await AuthService.validateSession(token) : null
+        const user = await getCurrentUser(request instanceof NextRequest ? request : new NextRequest(request))
 
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const body = await req.json()
+        const body = await request.json()
         const loan = await loanService.create({
             ...body,
             userId: Number(user.id),

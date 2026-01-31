@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth-refactored'
+import { getCurrentUser } from '@/lib/auth'
 
 // E-cüzdan güncelle (sadece isim)
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

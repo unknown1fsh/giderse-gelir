@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth-refactored'
+import { getCurrentUser } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Aktif dönemi al (opsiyonel)
-    const { getActivePeriod } = await import('@/lib/auth-refactored')
+    const { getActivePeriod } = await import('@/lib/auth')
     const activePeriod = await getActivePeriod(request)
 
     // Where clause hazırla
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as CreateAccountBody
 
     // Aktif dönemi al (opsiyonel)
-    const { getActivePeriod } = await import('@/lib/auth-refactored')
+    const { getActivePeriod } = await import('@/lib/auth')
     const activePeriod = await getActivePeriod(request)
 
     // Hesap türüne göre farklı işlemler

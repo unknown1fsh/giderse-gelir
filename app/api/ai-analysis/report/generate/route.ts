@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth-refactored'
+import { getCurrentUser } from '@/lib/auth'
 import { ExceptionMapper } from '@/server/errors'
 import { BadRequestError } from '@/server/errors'
 import { checkPremiumAccess } from '@/lib/premium-middleware'

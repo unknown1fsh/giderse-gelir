@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { clearAuthCookie } from '@/lib/auth-refactored'
+import { clearAuthCookie } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { AuthService } from '@/server/services/impl/AuthService'
 import { ExceptionMapper } from '@/server/errors'

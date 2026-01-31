@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth-refactored'
-import { AuthService } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/auth'
+import { AuthService } from '@/server/services/impl/AuthService'
+import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,7 +27,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await AuthService.changePassword(user.id, currentPassword, newPassword)
+    const authService = new AuthService(prisma)
+    const result = await authService.changePassword(user.id, currentPassword, newPassword)
 
     if (result.success) {
       return NextResponse.json({

@@ -319,6 +319,106 @@ export class AuthService {
     })
   }
 
+  // Bu metot kullanıcı bilgilerini günceller.
+  async updateUser(
+    userId: number,
+    data: {
+      name?: string
+      username?: string
+      phone?: string
+      avatar?: string
+      timezone?: string
+      notifications?: any
+      settings?: any
+    }
+  ): Promise<{ success: boolean; user?: UserDTO; error?: string }> {
+    try {
+      if (data.username) {
+        const currentUser = await this.userRepository.findById(userId)
+        if (!currentUser) {
+          throw new Error('Kullanıcı bulunamadı')
+        }
+
+        if (data.username !== currentUser.username) {
+          if (currentUser.usernameChangeCount >= 1) {
+            throw new Error('Kullanıcı adınızı sadece 1 kez değiştirebilirsiniz.')
+          }
+
+          const existingUser = await this.userRepository.findByUsername(data.username)
+          if (existingUser) {
+            throw new Error('Bu kullanıcı adı zaten alınmış.')
+          }
+
+          ; (data as any).usernameChangeCount = { increment: 1 }
+        } else {
+          delete data.username
+        }
+      }
+
+      const user = await this.prisma.user.update({
+        where: { id: userId },
+        data,
+        include: {
+          subscriptions: {
+            where: { status: 'active' },
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
+        },
+      })
+
+      return {
+        success: true,
+        user: UserMapper.prismaToDTO(user),
+      }
+    } catch (error) {
+      console.error('[AUTH] Update user error:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Güncelleme başarısız',
+      }
+    }
+  }
+
+  // Bu metot kullanıcının şifresini değiştirir.
+  async changePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      })
+
+      if (!user) {
+        throw new Error('Kullanıcı bulunamadı')
+      }
+
+      const isValidPassword = await bcrypt.compare(currentPassword, user.passwordHash)
+      if (!isValidPassword) {
+        throw new Error('Mevcut şifre yanlış')
+      }
+
+      const newPasswordHash = await bcrypt.hash(newPassword, 12)
+
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash: newPasswordHash },
+      })
+
+      await this.logoutAll(userId)
+
+      return { success: true }
+    } catch (error) {
+      console.error('[AUTH] Change password error:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Şifre değiştirme başarısız',
+      }
+    }
+  }
+
   // Bu metot tüm session'ları sonlandırır.
   // Girdi: userId
   // Çıktı: void

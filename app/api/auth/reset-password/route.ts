@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { ExceptionMapper } from '@/server/errors'
 import { BadRequestError } from '@/server/errors'
 import bcrypt from 'bcryptjs'
-import { AuthService } from '@/lib/auth'
+import { AuthService } from '@/server/services/impl/AuthService'
 
 // Bu metot şifre sıfırlama işlemini gerçekleştirir (POST).
 // Girdi: NextRequest (JSON body: token, password)
@@ -57,7 +57,8 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     })
 
     // Tüm oturumları kapat (Güvenlik önlemi)
-    await AuthService.logoutAll(user.id)
+    const authService = new AuthService(prisma)
+    await authService.logoutAll(user.id)
 
     return NextResponse.json({
         success: true,

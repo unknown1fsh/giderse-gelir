@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth-refactored'
+import { getCurrentUser } from '@/lib/auth'
 
 // Dönemi aktif dönem olarak ayarla
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

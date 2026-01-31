@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getActivePeriod, getCurrentUser } from '@/lib/auth-refactored'
+import { getActivePeriod, getCurrentUser } from '@/lib/auth'
 import { Prisma } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
@@ -163,19 +163,19 @@ export async function GET(request: NextRequest) {
     // BigInt değerlerini string'e çevir
     const kpi = kpiData[0]
       ? {
-          total_income: kpiData[0].total_income?.toString() || '0',
-          total_expense: kpiData[0].total_expense?.toString() || '0',
-          net_amount: kpiData[0].net_amount?.toString() || '0',
-          income_count: kpiData[0].income_count?.toString() || '0',
-          expense_count: kpiData[0].expense_count?.toString() || '0',
-        }
+        total_income: kpiData[0].total_income?.toString() || '0',
+        total_expense: kpiData[0].total_expense?.toString() || '0',
+        net_amount: kpiData[0].net_amount?.toString() || '0',
+        income_count: kpiData[0].income_count?.toString() || '0',
+        expense_count: kpiData[0].expense_count?.toString() || '0',
+      }
       : {
-          total_income: '0',
-          total_expense: '0',
-          net_amount: '0',
-          income_count: '0',
-          expense_count: '0',
-        }
+        total_income: '0',
+        total_expense: '0',
+        net_amount: '0',
+        income_count: '0',
+        expense_count: '0',
+      }
 
     const payments = upcomingPayments.map(payment => ({
       ...payment,

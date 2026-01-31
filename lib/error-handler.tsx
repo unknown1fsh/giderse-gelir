@@ -132,34 +132,32 @@ export function GlobalErrorHandler() {
       }
     }
 
-    // Console error override (development için)
-    if (process.env.NODE_ENV === 'development') {
-      const originalError = console.error
-      console.error = (...args: any[]) => {
-        // 401/403 hatalarını filtrele
-        const message = args.join(' ')
-        if (
-          message.includes('401') ||
-          message.includes('403') ||
-          message.includes('Unauthorized') ||
-          message.includes('code: 403') ||
-          message.includes('cloudflareinsights.com') ||
-          message.includes('beacon.min.js') ||
-          message.includes('Access-Control-Allow-Origin') ||
-          message.includes('doubleclick.net') ||
-          message.includes('googleads.g.doubleclick.net') ||
-          message.includes('MIME type') ||
-          message.includes('is not executable') ||
-          message.includes('ERR_FAILED') ||
-          message.includes('ERR_ABORTED') ||
-          message.includes('499') ||
-          message.includes('CORS')
-        ) {
-          // Sessizce geç
-          return
-        }
-        originalError.apply(console, args)
+    // Console error override - Third-party gürültüsünü engelle
+    const originalError = console.error
+    console.error = (...args: any[]) => {
+      const message = args.join(' ')
+      if (
+        message.includes('401') ||
+        message.includes('403') ||
+        message.includes('Unauthorized') ||
+        message.includes('code: 403') ||
+        message.includes('cloudflareinsights.com') ||
+        message.includes('beacon.min.js') ||
+        message.includes('Access-Control-Allow-Origin') ||
+        message.includes('doubleclick.net') ||
+        message.includes('googleads.g.doubleclick.net') ||
+        message.includes('MIME type') ||
+        message.includes('is not executable') ||
+        message.includes('ERR_FAILED') ||
+        message.includes('ERR_ABORTED') ||
+        message.includes('ERR_BLOCKED_BY_CLIENT') ||
+        message.includes('499') ||
+        message.includes('CORS')
+      ) {
+        // Sessizce geç
+        return
       }
+      originalError.apply(console, args)
     }
 
     window.addEventListener('unhandledrejection', handleUnhandledRejection)

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { hasValidToken } from './lib/auth'
+import { hasValidToken } from './lib/auth-utils'
 
 // Korumalı rotalar
 const protectedRoutes = [

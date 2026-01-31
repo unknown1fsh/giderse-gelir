@@ -442,11 +442,7 @@ export async function getCurrentUser(request: NextRequest): Promise<User | null>
   }
 }
 
-// Basit token kontrolü (Edge runtime için)
-export function hasValidToken(request: NextRequest): boolean {
-  const token = request.cookies.get('auth-token')?.value
-  return !!token
-}
+export { hasValidToken } from './auth-utils'
 
 export async function setAuthCookie(token: string, expiresAt: Date) {
   const cookieStore = await cookies()

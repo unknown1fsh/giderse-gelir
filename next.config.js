@@ -1,25 +1,9 @@
-const path = require('path')
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Standalone mode devre dışı - normal build kullanıyoruz
   // output: 'standalone',
 
   serverExternalPackages: ['@prisma/client'],
-
-  // @react-pdf/renderer: Node.js CJS build'e zorla (browser build 500 hatası veriyor)
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        '@react-pdf/renderer': path.resolve(
-          __dirname,
-          'node_modules/@react-pdf/renderer/lib/react-pdf.cjs'
-        ),
-      }
-    }
-    return config
-  },
 
   // Environment variables to expose to the client
   env: {

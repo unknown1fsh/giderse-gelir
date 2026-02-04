@@ -1,4 +1,36 @@
-import type { AIReportDataForPDF } from '@/components/ai-report-pdf'
+export interface AIReportDataForPDF {
+  summary: {
+    totalIncome: number
+    totalExpense: number
+    netAmount: number
+    savingsRate: number
+    period: string
+  }
+  categoryAnalysis: Array<{
+    category: string
+    amount: number
+    percentage: number
+    count: number
+  }>
+  topCategories: Array<{
+    category: string
+    amount: number
+    trend: string
+  }>
+  cashFlow: Array<{
+    month: string
+    income: number
+    expense: number
+    balance: number
+  }>
+  insights: Array<{
+    type: string
+    title: string
+    description: string
+    priority: string
+    impact: string
+  }>
+}
 
 /**
  * API/DB'den gelen ham reportData'yı PDF bileşenine uygun formata normalize eder.

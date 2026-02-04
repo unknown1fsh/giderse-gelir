@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import React from 'react'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth'
 import { ExceptionMapper } from '@/server/errors'
 import { BadRequestError, NotFoundError } from '@/server/errors'
 import { normalizeReportDataForPDF } from '@/lib/ai-report-pdf-utils'
-import { AIReportPDFDocument } from '@/components/ai-report-pdf'
-import { renderToBuffer } from '@react-pdf/renderer'
+import { generateAIReportPDF } from '@/lib/ai-report-pdf-generator'
 import { Logger } from '@/server/utils/Logger'
 
 export const runtime = 'nodejs'
@@ -14,7 +12,7 @@ export const runtime = 'nodejs'
 /**
  * AI Analiz Raporu PDF indirme endpoint'i
  * GET /api/ai-analysis/report/[id]/pdf
- * Sunucu tarafında PDF oluşturur (tarayıcı hasOwnProperty hatasını önler)
+ * pdf-lib ile sunucu tarafında PDF oluşturur
  */
 export const GET = ExceptionMapper.asyncHandler(
   async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
@@ -49,26 +47,20 @@ export const GET = ExceptionMapper.asyncHandler(
     const reportInfo = {
       reportDate: report.reportDate.toISOString(),
       monthYear: report.monthYear,
-      status: report.status,
     }
 
-    let buffer: Buffer
+    let body: Uint8Array
     try {
-      const documentElement = React.createElement(AIReportPDFDocument, {
-        reportData,
-        reportInfo,
-      }) as React.ReactElement
-      buffer = await renderToBuffer(documentElement)
+      body = await generateAIReportPDF(reportData, reportInfo)
     } catch (pdfError) {
       Logger.error('PDF oluşturma hatası', pdfError)
       console.error('PDF generation error details:', pdfError)
       throw pdfError
     }
 
-    const body = new Uint8Array(buffer)
     const filename = `AI-Analiz-Raporu-${report.monthYear}.pdf`
 
-    return new NextResponse(body, {
+    return new NextResponse(body as unknown as BodyInit, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

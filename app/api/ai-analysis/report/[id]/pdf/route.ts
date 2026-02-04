@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import React from 'react'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth'
 import { ExceptionMapper } from '@/server/errors'
@@ -6,7 +7,6 @@ import { BadRequestError, NotFoundError } from '@/server/errors'
 import { normalizeReportDataForPDF } from '@/lib/ai-report-pdf-utils'
 import { AIReportPDFDocument } from '@/components/ai-report-pdf'
 import { renderToBuffer } from '@react-pdf/renderer'
-import React from 'react'
 import { Logger } from '@/server/utils/Logger'
 
 export const runtime = 'nodejs'

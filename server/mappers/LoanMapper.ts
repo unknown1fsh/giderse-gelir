@@ -4,6 +4,7 @@ import { LoanDTO } from '../dto/LoanDTO'
 export class LoanMapper {
     static prismaToDTO(loan: any): LoanDTO {
         return {
+            id: loan.id,
             userId: loan.userId,
             bankId: loan.bankId,
             name: loan.name,

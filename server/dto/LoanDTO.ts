@@ -1,6 +1,7 @@
 import { BaseDTO } from './BaseDTO'
 
 export interface LoanDTO extends BaseDTO {
+    id: number
     userId: number
     bankId: number
     name: string

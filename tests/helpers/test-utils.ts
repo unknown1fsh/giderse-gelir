@@ -210,6 +210,142 @@ export async function createTestPeriod(userId: number, periodType = 'monthly') {
   })
 }
 
+// 2026 Ocak dönemi oluşturur (gerçekçi test verileri için)
+export async function create2026TestPeriod(userId: number): Promise<{
+  id: number
+  startDate: Date
+  endDate: Date
+}> {
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (!user) {
+    throw new Error(`Kullanıcı bulunamadı: userId=${userId}`)
+  }
+
+  const startDate = new Date('2026-01-01')
+  const endDate = new Date('2026-01-31')
+
+  const period = await prisma.period.create({
+    data: {
+      userId,
+      name: '2026 Ocak',
+      periodType: 'MONTHLY',
+      startDate,
+      endDate,
+      isActive: true,
+      isClosed: false,
+    },
+  })
+
+  return {
+    id: period.id,
+    startDate: period.startDate,
+    endDate: period.endDate,
+  }
+}
+
+// Referans verilerini döndürür (2026 kapsamlı test için)
+export async function getReferenceIds() {
+  const [
+    txTypeGelir,
+    txTypeGider,
+    categoryMaas,
+    categoryYemekKarti,
+    categoryKira,
+    categoryMarket,
+    categoryFatura,
+    categoryUlasim,
+    categorySaglik,
+    categoryAbonelik,
+    categoryDigerGider,
+    categoryEkGelir,
+    paymentMethodHavale,
+    paymentMethodKrediKarti,
+    currencyTry,
+    bankZiraat,
+    bankGaranti,
+    accountTypeVadesiz,
+    accountTypeVadeli,
+    goldTypeCeyrek,
+    goldPurity22K,
+  ] = await Promise.all([
+    prisma.refTxType.findFirst({ where: { code: 'GELIR' } }),
+    prisma.refTxType.findFirst({ where: { code: 'GIDER' } }),
+    prisma.refTxCategory.findFirst({
+      where: { txType: { code: 'GELIR' }, code: 'MAAS' },
+    }),
+    prisma.refTxCategory.findFirst({
+      where: { txType: { code: 'GELIR' }, code: 'YEMEK_KARTI' },
+    }),
+    prisma.refTxCategory.findFirst({
+      where: { txType: { code: 'GIDER' }, code: 'KIRA' },
+    }),
+    prisma.refTxCategory.findFirst({
+      where: { txType: { code: 'GIDER' }, code: 'MARKET' },
+    }),
+    prisma.refTxCategory.findFirst({
+      where: { txType: { code: 'GIDER' }, code: 'FATURA' },
+    }),
+    prisma.refTxCategory.findFirst({
+      where: { txType: { code: 'GIDER' }, code: 'ULASIM' },
+    }),
+    prisma.refTxCategory.findFirst({
+      where: { txType: { code: 'GIDER' }, code: 'SAGLIK' },
+    }),
+    prisma.refTxCategory.findFirst({
+      where: { txType: { code: 'GIDER' }, code: 'ABONELIK' },
+    }),
+    prisma.refTxCategory.findFirst({
+      where: { txType: { code: 'GIDER' }, code: 'DIGER_GIDER' },
+    }),
+    prisma.refTxCategory.findFirst({
+      where: { txType: { code: 'GELIR' }, code: 'EK_GELIR' },
+    }),
+    prisma.refPaymentMethod.findFirst({ where: { code: 'HAVALE_EFT' } }),
+    prisma.refPaymentMethod.findFirst({ where: { code: 'KREDI_KARTI' } }),
+    prisma.refCurrency.findFirst({ where: { code: 'TRY' } }),
+    prisma.refBank.findFirst({ where: { asciiName: 'Ziraat Bankasi' } }),
+    prisma.refBank.findFirst({ where: { asciiName: 'Garanti BBVA' } }),
+    prisma.refAccountType.findFirst({ where: { code: 'VADESIZ' } }),
+    prisma.refAccountType.findFirst({ where: { code: 'VADELI' } }),
+    prisma.refGoldType.findFirst({ where: { code: 'CEYREK_ALTIN' } }),
+    prisma.refGoldPurity.findFirst({ where: { code: '22K' } }),
+  ])
+
+  // Transaction API SystemParameter ID bekliyor; RefPaymentMethod.code ile SystemParameter bul
+  const paymentMethodParam = await prisma.systemParameter.findFirst({
+    where: { paramGroup: 'PAYMENT_METHOD', isActive: true },
+    orderBy: { displayOrder: 'asc' },
+  })
+
+  const anyBank = bankZiraat ?? bankGaranti ?? (await prisma.refBank.findFirst())
+  const secondBank = bankGaranti ?? (anyBank ? await prisma.refBank.findFirst({ where: { NOT: { id: anyBank.id } } }) : null) ?? anyBank
+
+  return {
+    txTypeGelir,
+    txTypeGider,
+    categoryMaas: categoryMaas ?? (txTypeGelir ? await prisma.refTxCategory.findFirst({ where: { txTypeId: txTypeGelir.id } }) : null),
+    categoryYemekKarti: categoryYemekKarti ?? categoryMaas ?? (txTypeGelir ? await prisma.refTxCategory.findFirst({ where: { txTypeId: txTypeGelir.id } }) : null),
+    categoryKira: categoryKira ?? (txTypeGider ? await prisma.refTxCategory.findFirst({ where: { txTypeId: txTypeGider.id } }) : null),
+    categoryMarket: categoryMarket ?? categoryKira ?? (txTypeGider ? await prisma.refTxCategory.findFirst({ where: { txTypeId: txTypeGider.id } }) : null),
+    categoryFatura: categoryFatura ?? categoryKira ?? (txTypeGider ? await prisma.refTxCategory.findFirst({ where: { txTypeId: txTypeGider.id } }) : null),
+    categoryUlasim: categoryUlasim ?? categoryKira ?? (txTypeGider ? await prisma.refTxCategory.findFirst({ where: { txTypeId: txTypeGider.id } }) : null),
+    categorySaglik: categorySaglik ?? categoryKira ?? (txTypeGider ? await prisma.refTxCategory.findFirst({ where: { txTypeId: txTypeGider.id } }) : null),
+    categoryAbonelik: categoryAbonelik ?? categoryKira ?? (txTypeGider ? await prisma.refTxCategory.findFirst({ where: { txTypeId: txTypeGider.id } }) : null),
+    categoryDigerGider: categoryDigerGider ?? categoryKira ?? (txTypeGider ? await prisma.refTxCategory.findFirst({ where: { txTypeId: txTypeGider.id } }) : null),
+    categoryEkGelir: categoryEkGelir ?? categoryMaas ?? (txTypeGelir ? await prisma.refTxCategory.findFirst({ where: { txTypeId: txTypeGelir.id } }) : null),
+    paymentMethodHavale,
+    paymentMethodKrediKarti,
+    paymentMethodParam, // Transaction API için SystemParameter.id
+    currencyTry: currencyTry ?? (await prisma.refCurrency.findFirst()),
+    bankZiraat: anyBank,
+    bankGaranti: secondBank,
+    accountTypeVadesiz: accountTypeVadesiz ?? (await prisma.refAccountType.findFirst()),
+    accountTypeVadeli: accountTypeVadeli ?? (await prisma.refAccountType.findFirst()),
+    goldTypeCeyrek: goldTypeCeyrek ?? (await prisma.refGoldType.findFirst()),
+    goldPurity22K: goldPurity22K ?? (await prisma.refGoldPurity.findFirst()),
+  }
+}
+
 // Bu metot test ticket oluşturur.
 // Girdi: userId, categoryId (opsiyonel)
 // Çıktı: ticket
@@ -315,6 +451,26 @@ export async function createTestEwallet(userId: number) {
     },
     include: {
       currency: true,
+    },
+  })
+}
+
+// Premium abonelik ekler (Gold, Investment, AutoPayment testleri için)
+export async function addPremiumSubscription(userId: number) {
+  const startDate = new Date()
+  const endDate = new Date()
+  endDate.setFullYear(endDate.getFullYear() + 1)
+
+  return prisma.userSubscription.create({
+    data: {
+      userId,
+      planId: 'premium',
+      status: 'active',
+      startDate,
+      endDate,
+      amount: 0,
+      currency: 'TRY',
+      autoRenew: false,
     },
   })
 }

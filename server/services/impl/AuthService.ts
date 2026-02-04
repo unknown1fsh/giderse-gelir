@@ -174,6 +174,18 @@ export class AuthService {
         },
       })
 
+      // Aktif dönem yoksa, kullanıcının ilk aktif dönemini otomatik ata
+      const activePeriod = await this.prisma.period.findFirst({
+        where: { userId: user.id, isActive: true, isClosed: false },
+        orderBy: { startDate: 'desc' },
+      })
+      if (activePeriod) {
+        await this.prisma.userSession.update({
+          where: { id: session.id },
+          data: { activePeriodId: activePeriod.id },
+        })
+      }
+
       await this.userService.updateLastLogin(user.id)
 
       // eslint-disable-next-line no-console

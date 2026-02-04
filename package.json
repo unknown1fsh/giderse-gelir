@@ -32,6 +32,7 @@
     "validate": "npm run typecheck && npm run lint:check && npm run format:check",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed-demo": "tsx scripts/seed-demo-user.ts",
     "db:studio": "prisma studio",
     "migrate:periods": "tsx scripts/migrate-to-periods.ts",
     "check-db": "npx tsx scripts/verify-free-user.ts",

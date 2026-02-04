@@ -178,6 +178,20 @@ npm run dev
 
 Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini açın.
 
+#### 6. Demo Hesap (2026 Test Verileri)
+
+2026 tahmini verilerle dolu demo hesabı oluşturmak için:
+
+```bash
+npm run db:seed-demo
+```
+
+**Giriş bilgileri:**
+- **E-posta:** demo@giderse-gelir.com
+- **Şifre:** 123456
+
+Demo hesapta: Maaş 115.000 TL, Kira 35.000 TL, banka hesapları, kredi kartı, krediler, faturalar, yatırımlar, altın, hedefler ve otomatik ödemeler bulunur.
+
 ### 📦 Kurulum Seçenekleri
 
 #### Tam Geliştirme Ortamı

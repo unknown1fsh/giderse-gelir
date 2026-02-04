@@ -916,6 +916,28 @@ async function main() {
   // Demo işlemler (sadece reference data için, user-specific değil)
   console.log('✅ Demo işlemler atlandı (user-specific olacak)')
 
+  // Destek talebi kategorileri (yoksa oluştur)
+  const existingCategories = await prisma.supportTicketCategory.count()
+  if (existingCategories === 0) {
+    const supportCategories = [
+      { name: 'Üyelik', description: 'Üyelik ve abonelik talepleri', icon: 'Crown', color: 'purple' },
+      { name: 'Teknik Destek', description: 'Teknik sorunlar ve yardım', icon: 'Settings', color: 'blue' },
+      { name: 'Hesap Yönetimi', description: 'Hesap ayarları ve yönetimi', icon: 'User', color: 'green' },
+      { name: 'Ödeme', description: 'Ödeme ve faturalama sorunları', icon: 'CreditCard', color: 'orange' },
+      { name: 'Öneri ve Şikayet', description: 'Öneriler ve şikayetler', icon: 'MessageSquare', color: 'pink' },
+      { name: 'Diğer', description: 'Diğer konular', icon: 'HelpCircle', color: 'gray' },
+    ]
+    await prisma.supportTicketCategory.createMany({
+      data: supportCategories.map(cat => ({
+        ...cat,
+        isActive: true,
+      })),
+    })
+    console.log('✅ Destek talebi kategorileri eklendi')
+  } else {
+    console.log('✅ Destek talebi kategorileri zaten mevcut')
+  }
+
   // Demo döviz kurları
   const tryCurrency = currencies.find(c => c.code === 'TRY')
   const usdCurrency = currencies.find(c => c.code === 'USD')
@@ -923,31 +945,56 @@ async function main() {
   const xauCurrency = currencies.find(c => c.code === 'XAU')
 
   if (tryCurrency && usdCurrency && eurCurrency && xauCurrency) {
+    const rateDate = new Date('2024-01-01')
     await Promise.all([
-      prisma.fxRate.create({
-        data: {
+      prisma.fxRate.upsert({
+        where: {
+          fromCurrencyId_toCurrencyId_rateDate: {
+            fromCurrencyId: usdCurrency.id,
+            toCurrencyId: tryCurrency.id,
+            rateDate,
+          },
+        },
+        update: { rate: 30.25, source: 'TCMB' },
+        create: {
           fromCurrencyId: usdCurrency.id,
           toCurrencyId: tryCurrency.id,
           rate: 30.25,
-          rateDate: new Date('2024-01-01'),
+          rateDate,
           source: 'TCMB',
         },
       }),
-      prisma.fxRate.create({
-        data: {
+      prisma.fxRate.upsert({
+        where: {
+          fromCurrencyId_toCurrencyId_rateDate: {
+            fromCurrencyId: eurCurrency.id,
+            toCurrencyId: tryCurrency.id,
+            rateDate,
+          },
+        },
+        update: { rate: 33.15, source: 'TCMB' },
+        create: {
           fromCurrencyId: eurCurrency.id,
           toCurrencyId: tryCurrency.id,
           rate: 33.15,
-          rateDate: new Date('2024-01-01'),
+          rateDate,
           source: 'TCMB',
         },
       }),
-      prisma.fxRate.create({
-        data: {
+      prisma.fxRate.upsert({
+        where: {
+          fromCurrencyId_toCurrencyId_rateDate: {
+            fromCurrencyId: xauCurrency.id,
+            toCurrencyId: tryCurrency.id,
+            rateDate,
+          },
+        },
+        update: { rate: 2040.5, source: 'TCMB' },
+        create: {
           fromCurrencyId: xauCurrency.id,
           toCurrencyId: tryCurrency.id,
           rate: 2040.5,
-          rateDate: new Date('2024-01-01'),
+          rateDate,
           source: 'TCMB',
         },
       }),

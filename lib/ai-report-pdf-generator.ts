@@ -14,6 +14,26 @@ const formatCurrency = (value: number) =>
     maximumFractionDigits: 2,
   }).format(value)
 
+/** pdf-lib WinAnsi encoding için Türkçe karakterleri ASCII karşılıklarına çevirir */
+function sanitizeForWinAnsi(text: string): string {
+  const map: Record<string, string> = {
+    'ğ': 'g',
+    'ü': 'u',
+    'ş': 's',
+    'ç': 'c',
+    'ö': 'o',
+    'ı': 'i',
+    'Ğ': 'G',
+    'Ü': 'U',
+    'Ş': 'S',
+    'Ç': 'C',
+    'Ö': 'O',
+    'İ': 'I',
+    '₺': 'TL ',
+  }
+  return text.replace(/[ğüşçöıĞÜŞÇÖİ₺]/g, (c) => map[c] ?? c)
+}
+
 function wrapText(text: string, maxWidth: number, fontSize: number): string[] {
   const words = text.split(/\s+/)
   const lines: string[] = []
@@ -60,35 +80,35 @@ export async function generateAIReportPDF(
     height: A4_HEIGHT,
     color: rgb(0.486, 0.227, 0.929),
   })
-  coverPage.drawText('AI Analiz Raporu', {
+  coverPage.drawText(sanitizeForWinAnsi('AI Analiz Raporu'), {
     x: A4_WIDTH / 2 - 100,
     y: A4_HEIGHT / 2 + 60,
     size: 36,
     font: fontBold,
     color: rgb(1, 1, 1),
   })
-  coverPage.drawText('Yapay Zeka Destekli Finansal Analiz', {
+  coverPage.drawText(sanitizeForWinAnsi('Yapay Zeka Destekli Finansal Analiz'), {
     x: A4_WIDTH / 2 - 120,
     y: A4_HEIGHT / 2 + 20,
     size: 18,
     font: font,
     color: rgb(0.91, 0.84, 1),
   })
-  coverPage.drawText(`Donem: ${reportData.summary.period}`, {
+  coverPage.drawText(sanitizeForWinAnsi(`Donem: ${reportData.summary.period}`), {
     x: A4_WIDTH / 2 - 60,
     y: A4_HEIGHT / 2 - 20,
     size: 14,
     font: font,
     color: rgb(0.77, 0.71, 0.99),
   })
-  coverPage.drawText(reportDateFormatted, {
+  coverPage.drawText(sanitizeForWinAnsi(reportDateFormatted), {
     x: A4_WIDTH / 2 - 50,
     y: A4_HEIGHT / 2 - 50,
     size: 12,
     font: font,
     color: rgb(0.65, 0.55, 0.98),
   })
-  coverPage.drawText('Bu rapor GiderSE-Gelir platformu tarafindan otomatik olusturulmustur.', {
+  coverPage.drawText(sanitizeForWinAnsi('Bu rapor GiderSE-Gelir platformu tarafindan otomatik olusturulmustur.'), {
     x: A4_WIDTH / 2 - 180,
     y: A4_HEIGHT / 2 - 150,
     size: 12,
@@ -100,7 +120,7 @@ export async function generateAIReportPDF(
   const page2 = doc.addPage([A4_WIDTH, A4_HEIGHT])
   let y = A4_HEIGHT - MARGIN
 
-  page2.drawText('Finansal Ozet', {
+  page2.drawText(sanitizeForWinAnsi('Finansal Ozet'), {
     x: MARGIN,
     y,
     size: 18,
@@ -140,8 +160,8 @@ export async function generateAIReportPDF(
         borderColor: rgb(0.9, 0.9, 0.9),
         borderWidth: 1,
       })
-      page2.drawText(left.label, { x: MARGIN + 10, y: y - 25, size: 9, font: font, color: rgb(0.4, 0.4, 0.4) })
-      page2.drawText(left.value, { x: MARGIN + 10, y: y - 42, size: 14, font: fontBold, color: left.color })
+      page2.drawText(sanitizeForWinAnsi(left.label), { x: MARGIN + 10, y: y - 25, size: 9, font: font, color: rgb(0.4, 0.4, 0.4) })
+      page2.drawText(sanitizeForWinAnsi(left.value), { x: MARGIN + 10, y: y - 42, size: 14, font: fontBold, color: left.color })
     }
     if (right) {
       page2.drawRectangle({
@@ -153,14 +173,14 @@ export async function generateAIReportPDF(
         borderColor: rgb(0.9, 0.9, 0.9),
         borderWidth: 1,
       })
-      page2.drawText(right.label, {
+      page2.drawText(sanitizeForWinAnsi(right.label), {
         x: MARGIN + boxWidth + 22,
         y: y - 25,
         size: 9,
         font: font,
         color: rgb(0.4, 0.4, 0.4),
       })
-      page2.drawText(right.value, {
+      page2.drawText(sanitizeForWinAnsi(right.value), {
         x: MARGIN + boxWidth + 22,
         y: y - 42,
         size: 14,
@@ -172,7 +192,7 @@ export async function generateAIReportPDF(
   }
 
   y -= 20
-  page2.drawText('Kategori Analizi', {
+  page2.drawText(sanitizeForWinAnsi('Kategori Analizi'), {
     x: MARGIN,
     y,
     size: 18,
@@ -180,7 +200,7 @@ export async function generateAIReportPDF(
     color: rgb(0.486, 0.227, 0.929),
   })
   y -= 25
-  page2.drawText('En cok harcama yapilan kategoriler', {
+  page2.drawText(sanitizeForWinAnsi('En cok harcama yapilan kategoriler'), {
     x: MARGIN,
     y,
     size: 9,
@@ -192,8 +212,8 @@ export async function generateAIReportPDF(
   for (const cat of reportData.topCategories.slice(0, 8)) {
     const catData = reportData.categoryAnalysis.find((c) => c.category === cat.category)
     const pct = catData ? `%${catData.percentage.toFixed(1)}` : ''
-    page2.drawText(cat.category, { x: MARGIN, y, size: 11, font: fontBold, color: rgb(0.2, 0.2, 0.2) })
-    page2.drawText(formatCurrency(cat.amount), {
+    page2.drawText(sanitizeForWinAnsi(cat.category), { x: MARGIN, y, size: 11, font: fontBold, color: rgb(0.2, 0.2, 0.2) })
+    page2.drawText(sanitizeForWinAnsi(formatCurrency(cat.amount)), {
       x: A4_WIDTH - MARGIN - 80,
       y,
       size: 11,
@@ -201,12 +221,12 @@ export async function generateAIReportPDF(
       color: rgb(0.486, 0.227, 0.929),
     })
     if (pct) {
-      page2.drawText(pct, { x: A4_WIDTH - MARGIN - 40, y, size: 9, font: font, color: rgb(0.4, 0.4, 0.4) })
+      page2.drawText(sanitizeForWinAnsi(pct), { x: A4_WIDTH - MARGIN - 40, y, size: 9, font: font, color: rgb(0.4, 0.4, 0.4) })
     }
     y -= 22
   }
 
-  page2.drawText(`GiderSE-Gelir AI Rapor | ${reportDateFormatted}`, {
+  page2.drawText(sanitizeForWinAnsi(`GiderSE-Gelir AI Rapor | ${reportDateFormatted}`), {
     x: MARGIN,
     y: 30,
     size: 8,
@@ -218,7 +238,7 @@ export async function generateAIReportPDF(
   const page3 = doc.addPage([A4_WIDTH, A4_HEIGHT])
   y = A4_HEIGHT - MARGIN
 
-  page3.drawText('AI Onerileri', {
+  page3.drawText(sanitizeForWinAnsi('AI Onerileri'), {
     x: MARGIN,
     y,
     size: 18,
@@ -226,7 +246,7 @@ export async function generateAIReportPDF(
     color: rgb(0.486, 0.227, 0.929),
   })
   y -= 25
-  page3.drawText(`Yapay zeka destekli finansal oneriler ve analizler (${reportData.insights.length} oneri)`, {
+  page3.drawText(sanitizeForWinAnsi(`Yapay zeka destekli finansal oneriler ve analizler (${reportData.insights.length} oneri)`), {
     x: MARGIN,
     y,
     size: 9,
@@ -240,7 +260,7 @@ export async function generateAIReportPDF(
   let insightsPage = page3
   for (const insight of reportData.insights) {
     if (y < 100) {
-      insightsPage.drawText(`GiderSE-Gelir AI Rapor | ${reportDateFormatted}`, {
+      insightsPage.drawText(sanitizeForWinAnsi(`GiderSE-Gelir AI Rapor | ${reportDateFormatted}`), {
         x: MARGIN,
         y: 30,
         size: 8,
@@ -251,7 +271,7 @@ export async function generateAIReportPDF(
       y = A4_HEIGHT - MARGIN
     }
 
-    insightsPage.drawText(getPriorityLabel(insight.priority), {
+    insightsPage.drawText(sanitizeForWinAnsi(getPriorityLabel(insight.priority)), {
       x: MARGIN,
       y,
       size: 8,
@@ -259,19 +279,19 @@ export async function generateAIReportPDF(
       color: rgb(0.486, 0.227, 0.929),
     })
     y -= 14
-    insightsPage.drawText(insight.title, { x: MARGIN, y, size: 11, font: fontBold, color: rgb(0.35, 0.22, 0.53) })
+    insightsPage.drawText(sanitizeForWinAnsi(insight.title), { x: MARGIN, y, size: 11, font: fontBold, color: rgb(0.35, 0.22, 0.53) })
     y -= 16
 
-    const descLines = wrapText(insight.description, PAGE_WIDTH, 9)
+    const descLines = wrapText(sanitizeForWinAnsi(insight.description), PAGE_WIDTH, 9)
     for (const line of descLines) {
       insightsPage.drawText(line, { x: MARGIN, y, size: 9, font: font, color: rgb(0.4, 0.4, 0.4) })
       y -= 12
     }
-    insightsPage.drawText(insight.impact, { x: MARGIN, y, size: 8, font: font, color: rgb(0.66, 0.33, 0.98) })
+    insightsPage.drawText(sanitizeForWinAnsi(insight.impact), { x: MARGIN, y, size: 8, font: font, color: rgb(0.66, 0.33, 0.98) })
     y -= 25
   }
 
-  insightsPage.drawText(`GiderSE-Gelir AI Rapor | ${reportDateFormatted}`, {
+  insightsPage.drawText(sanitizeForWinAnsi(`GiderSE-Gelir AI Rapor | ${reportDateFormatted}`), {
     x: MARGIN,
     y: 30,
     size: 8,
@@ -284,7 +304,7 @@ export async function generateAIReportPDF(
     const page4 = doc.addPage([A4_WIDTH, A4_HEIGHT])
     y = A4_HEIGHT - MARGIN
 
-    page4.drawText('Nakit Akis Analizi', {
+    page4.drawText(sanitizeForWinAnsi('Nakit Akis Analizi'), {
       x: MARGIN,
       y,
       size: 18,
@@ -292,7 +312,7 @@ export async function generateAIReportPDF(
       color: rgb(0.486, 0.227, 0.929),
     })
     y -= 25
-    page4.drawText('Son aylarin gelir/gider trendi', {
+    page4.drawText(sanitizeForWinAnsi('Son aylarin gelir/gider trendi'), {
       x: MARGIN,
       y,
       size: 9,
@@ -302,22 +322,22 @@ export async function generateAIReportPDF(
     y -= 25
 
     for (const flow of reportData.cashFlow) {
-      page4.drawText(flow.month, { x: MARGIN, y, size: 11, font: fontBold, color: rgb(0.2, 0.2, 0.2) })
-      page4.drawText(`Gelir: ${formatCurrency(flow.income)}`, {
+      page4.drawText(sanitizeForWinAnsi(flow.month), { x: MARGIN, y, size: 11, font: fontBold, color: rgb(0.2, 0.2, 0.2) })
+      page4.drawText(sanitizeForWinAnsi(`Gelir: ${formatCurrency(flow.income)}`), {
         x: MARGIN + 150,
         y,
         size: 10,
         font: font,
         color: rgb(0.13, 0.77, 0.37),
       })
-      page4.drawText(`Gider: ${formatCurrency(flow.expense)}`, {
+      page4.drawText(sanitizeForWinAnsi(`Gider: ${formatCurrency(flow.expense)}`), {
         x: MARGIN + 280,
         y,
         size: 10,
         font: font,
         color: rgb(0.94, 0.27, 0.27),
       })
-      page4.drawText(`Net: ${formatCurrency(flow.balance)}`, {
+      page4.drawText(sanitizeForWinAnsi(`Net: ${formatCurrency(flow.balance)}`), {
         x: MARGIN + 410,
         y,
         size: 10,
@@ -327,7 +347,7 @@ export async function generateAIReportPDF(
       y -= 22
     }
 
-    page4.drawText(`GiderSE-Gelir AI Rapor | ${reportDateFormatted}`, {
+    page4.drawText(sanitizeForWinAnsi(`GiderSE-Gelir AI Rapor | ${reportDateFormatted}`), {
       x: MARGIN,
       y: 30,
       size: 8,

@@ -10,6 +10,7 @@ export {
   TooManyRequestsError,
   InternalServerError,
   ServiceUnavailableError,
+  AIReportCapacityError,
 } from './HttpError'
 export { BusinessRuleError, LimitExceededError, InsufficientBalanceError } from './BusinessError'
 export { ExceptionMapper } from './ExceptionMapper'

@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser, getActivePeriod } from '@/lib/auth'
-import { ExceptionMapper } from '@/server/errors'
-import { BadRequestError } from '@/server/errors'
+import { ExceptionMapper, BadRequestError, AIReportCapacityError } from '@/server/errors'
 import { checkPremiumAccess } from '@/lib/premium-middleware'
 import { canGenerateAIReport, getReportLevelForPlan } from '@/lib/ai-report-limit'
 import { AIAnalysisService } from '@/server/services/impl/AIAnalysisService'
+
+export const maxDuration = 120 // saniye - OpenAI API yanıt süresi için
 
 /**
  * AI Analiz Raporu oluşturma endpoint'i
@@ -111,7 +112,22 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
       { status: 201 }
     )
   } catch (error) {
-    // Hata durumunda kullanım kaydını güncelle
+    // Yoğunluk/timeout hatası: rapor hakkı korunmalı - kullanım kaydını sil
+    if (error instanceof AIReportCapacityError) {
+      await prisma.aIReportUsage.delete({
+        where: { id: usageRecord.id },
+      })
+      return NextResponse.json(
+        {
+          error: error.message,
+          capacityError: true,
+          retryLater: true,
+        },
+        { status: 503 }
+      )
+    }
+
+    // Diğer hatalar: kullanım kaydını failed olarak güncelle
     await prisma.aIReportUsage.update({
       where: { id: usageRecord.id },
       data: {

@@ -9,6 +9,7 @@ import {
 } from '@prisma/client'
 import { getReportLevelForPlan } from '@/lib/ai-report-limit'
 import { OpenAIService } from '@/server/services/OpenAIService'
+import { AIReportCapacityError } from '@/server/errors'
 
 export interface AIReportData {
   summary: {
@@ -511,6 +512,22 @@ export class AIAnalysisService {
   }
 
   /**
+   * Timeout veya network hatası mı kontrol eder
+   */
+  private isTimeoutOrNetworkError(error: unknown): boolean {
+    if (!(error instanceof Error)) return false
+    const msg = error.message.toLowerCase()
+    return (
+      msg.includes('timeout') ||
+      msg.includes('timed out') ||
+      msg.includes('network') ||
+      msg.includes('econnreset') ||
+      msg.includes('econnrefused') ||
+      msg.includes('fetch failed')
+    )
+  }
+
+  /**
    * Premium seviyesi AI önerileri
    */
   private async generatePremiumInsights(
@@ -565,6 +582,11 @@ export class AIAnalysisService {
       return insights.slice(0, 10)
     } catch (error) {
       console.error('OpenAI generatePremiumInsights error:', error)
+      if (this.isTimeoutOrNetworkError(error)) {
+        throw new AIReportCapacityError(
+          'Yoğun ilginize teşekkürler. Şu anda yoğunluktan dolayı rapor oluşturulamıyor, lütfen daha sonra yeniden deneyiniz.'
+        )
+      }
       throw error
     }
   }
@@ -614,6 +636,11 @@ export class AIAnalysisService {
       return insights.slice(0, 10) // Premium'dan fazla 10 öneri daha
     } catch (error) {
       console.error('OpenAI generateEnterpriseInsights error:', error)
+      if (this.isTimeoutOrNetworkError(error)) {
+        throw new AIReportCapacityError(
+          'Yoğun ilginize teşekkürler. Şu anda yoğunluktan dolayı rapor oluşturulamıyor, lütfen daha sonra yeniden deneyiniz.'
+        )
+      }
       throw error
     }
   }
@@ -663,6 +690,11 @@ export class AIAnalysisService {
       return insights.slice(0, 15) // Enterprise'dan fazla 15 öneri daha
     } catch (error) {
       console.error('OpenAI generateEnterprisePremiumInsights error:', error)
+      if (this.isTimeoutOrNetworkError(error)) {
+        throw new AIReportCapacityError(
+          'Yoğun ilginize teşekkürler. Şu anda yoğunluktan dolayı rapor oluşturulamıyor, lütfen daha sonra yeniden deneyiniz.'
+        )
+      }
       throw error
     }
   }
@@ -744,6 +776,11 @@ export class AIAnalysisService {
       return riskAnalysis
     } catch (error) {
       console.error('OpenAI calculateRiskAnalysis error:', error)
+      if (this.isTimeoutOrNetworkError(error)) {
+        throw new AIReportCapacityError(
+          'Yoğun ilginize teşekkürler. Şu anda yoğunluktan dolayı rapor oluşturulamıyor, lütfen daha sonra yeniden deneyiniz.'
+        )
+      }
       throw error
     }
   }
@@ -807,6 +844,11 @@ export class AIAnalysisService {
       return predictions
     } catch (error) {
       console.error('OpenAI generatePredictions error:', error)
+      if (this.isTimeoutOrNetworkError(error)) {
+        throw new AIReportCapacityError(
+          'Yoğun ilginize teşekkürler. Şu anda yoğunluktan dolayı rapor oluşturulamıyor, lütfen daha sonra yeniden deneyiniz.'
+        )
+      }
       throw error
     }
   }
@@ -835,6 +877,11 @@ export class AIAnalysisService {
       return benchmarks
     } catch (error) {
       console.error('OpenAI generateBenchmarks error:', error)
+      if (this.isTimeoutOrNetworkError(error)) {
+        throw new AIReportCapacityError(
+          'Yoğun ilginize teşekkürler. Şu anda yoğunluktan dolayı rapor oluşturulamıyor, lütfen daha sonra yeniden deneyiniz.'
+        )
+      }
       throw error
     }
   }

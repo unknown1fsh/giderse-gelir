@@ -8,7 +8,7 @@ export class OpenAIService {
   private client: OpenAI
   private readonly model = 'gpt-4-turbo-preview'
   private readonly maxRetries = 3
-  private readonly timeout = 30000 // 30 saniye
+  private readonly timeout = 120000 // 120 saniye
 
   constructor() {
     const apiKey = getEnv('OPENAI_API_KEY')

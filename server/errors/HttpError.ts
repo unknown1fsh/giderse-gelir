@@ -72,3 +72,12 @@ export class ServiceUnavailableError extends BaseError {
     super(message, 503, 'SERVICE_UNAVAILABLE')
   }
 }
+
+/** AI rapor yoğunluk/timeout hatası - rapor hakkı korunmalı */
+export class AIReportCapacityError extends ServiceUnavailableError {
+  constructor(
+    message = 'Yoğun ilginize teşekkürler. Şu anda yoğunluktan dolayı rapor oluşturulamıyor, lütfen daha sonra yeniden deneyiniz.'
+  ) {
+    super(message)
+  }
+}

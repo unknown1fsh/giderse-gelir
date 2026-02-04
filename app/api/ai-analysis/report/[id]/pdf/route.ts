@@ -5,8 +5,11 @@ import { ExceptionMapper } from '@/server/errors'
 import { BadRequestError, NotFoundError } from '@/server/errors'
 import { normalizeReportDataForPDF } from '@/lib/ai-report-pdf-utils'
 import { AIReportPDFDocument } from '@/components/ai-report-pdf'
-import { pdf } from '@react-pdf/renderer'
+import { renderToBuffer } from '@react-pdf/renderer'
 import React from 'react'
+import { Logger } from '@/server/utils/Logger'
+
+export const runtime = 'nodejs'
 
 /**
  * AI Analiz Raporu PDF indirme endpoint'i
@@ -49,16 +52,22 @@ export const GET = ExceptionMapper.asyncHandler(
       status: report.status,
     }
 
-    const documentElement = React.createElement(AIReportPDFDocument, {
-      reportData,
-      reportInfo,
-    }) as React.ReactElement
-    const pdfDoc = pdf(documentElement)
-    // Node.js ortamında toBuffer() Buffer döndürür (tipler browser build'den gelebilir)
-    const buffer = (await pdfDoc.toBuffer()) as unknown as Buffer
-    const body = new Uint8Array(buffer)
+    let buffer: Buffer
+    try {
+      const documentElement = React.createElement(AIReportPDFDocument, {
+        reportData,
+        reportInfo,
+      }) as React.ReactElement
+      buffer = await renderToBuffer(documentElement)
+    } catch (pdfError) {
+      Logger.error('PDF oluşturma hatası', pdfError)
+      console.error('PDF generation error details:', pdfError)
+      throw pdfError
+    }
 
+    const body = new Uint8Array(buffer)
     const filename = `AI-Analiz-Raporu-${report.monthYear}.pdf`
+
     return new NextResponse(body, {
       status: 200,
       headers: {

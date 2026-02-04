@@ -28,6 +28,7 @@ import {
   Shield,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/validators'
+import { useToast } from '@/lib/use-toast'
 
 interface AIReportData {
   summary: {
@@ -105,6 +106,7 @@ export default function AIReportDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [pdfDownloading, setPdfDownloading] = useState(false)
+  const { error: toastError } = useToast()
 
   useEffect(() => {
     const reportId = params.id as string
@@ -170,6 +172,10 @@ export default function AIReportDetailPage() {
       URL.revokeObjectURL(url)
     } catch (err) {
       console.error('PDF indirme hatası:', err)
+      toastError(
+        'PDF oluşturulamadı',
+        'PDF oluşturulurken bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
+      )
     } finally {
       setPdfDownloading(false)
     }

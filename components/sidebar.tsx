@@ -89,7 +89,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
       <div
         className={`
           fixed lg:static inset-y-0 left-0 z-50
-          flex h-screen h-[100dvh] w-72 flex-col 
+          flex h-screen h-[100dvh] w-72 max-w-[85vw] flex-col 
           bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white shadow-2xl
           transform transition-transform duration-300 ease-smooth
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -102,7 +102,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
             {onClose && (
               <button
                 onClick={onClose}
-                className="absolute right-4 top-6 lg:hidden z-10 p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-all duration-200 hover:scale-110"
+                className="absolute right-4 top-6 lg:hidden z-10 min-h-[44px] min-w-[44px] p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-all duration-200 hover:scale-110 flex items-center justify-center"
                 aria-label="Close menu"
               >
                 <X className="h-5 w-5" />
@@ -213,7 +213,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                 key={item.name}
                 href={item.href}
                 onClick={handleLinkClick}
-                className={`group flex items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${isActive
+                className={`group flex items-center space-x-3 rounded-xl px-4 min-h-[48px] py-3 text-sm font-medium transition-all duration-300 ${isActive
                   ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white shadow-lg border border-blue-500/30 scale-[1.02]'
                   : 'text-slate-300 hover:bg-slate-700/50 hover:text-white hover:shadow-md hover:scale-[1.01]'
                   }`}
@@ -243,7 +243,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               <Link
                 href="/admin"
                 onClick={handleLinkClick}
-                className={`flex items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${pathname === '/admin'
+                className={`flex items-center space-x-3 rounded-xl px-4 min-h-[48px] py-3 text-sm font-medium transition-all duration-300 ${pathname === '/admin'
                   ? 'bg-gradient-to-r from-red-600/20 to-pink-600/20 text-white shadow-lg border border-red-500/30'
                   : 'text-slate-300 hover:bg-red-600/20 hover:text-red-400'
                   }`}
@@ -266,7 +266,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
             <Link
               href="/settings"
               onClick={handleLinkClick}
-              className="flex items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition-all duration-300 hover:bg-slate-700/50 hover:text-white hover:scale-[1.01]"
+              className="flex items-center space-x-3 rounded-xl px-4 min-h-[48px] py-3 text-sm font-medium text-slate-300 transition-all duration-300 hover:bg-slate-700/50 hover:text-white hover:scale-[1.01]"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-700/50 group-hover:scale-110 transition-transform duration-300">
                 <Settings className="h-4 w-4" />
@@ -276,7 +276,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
 
             <button
               onClick={() => void handleLogout()}
-              className="w-full flex items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition-all duration-300 hover:bg-red-600/20 hover:text-red-400 hover:scale-[1.01]"
+              className="w-full flex items-center space-x-3 rounded-xl px-4 min-h-[48px] py-3 text-sm font-medium text-slate-300 transition-all duration-300 hover:bg-red-600/20 hover:text-red-400 hover:scale-[1.01]"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-700/50 group-hover:scale-110 transition-transform duration-300">
                 <LogOut className="h-4 w-4" />

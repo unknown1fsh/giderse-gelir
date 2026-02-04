@@ -39,7 +39,7 @@ const CalendarCell = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLD
     <div
       ref={ref}
       className={cn(
-        'h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20',
+        'min-h-[44px] min-w-[44px] sm:h-9 sm:w-9 h-11 w-11 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20',
         className
       )}
       {...props}
@@ -58,7 +58,7 @@ const CalendarDay = React.forwardRef<
   <button
     ref={ref}
     className={cn(
-      'h-9 w-9 p-0 font-normal aria-selected:opacity-100',
+      'min-h-[44px] min-w-[44px] h-11 w-11 sm:h-9 sm:w-9 p-0 font-normal aria-selected:opacity-100',
       isSelected &&
         'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground',
       isToday && 'bg-accent text-accent-foreground',
@@ -73,7 +73,7 @@ const CalendarWeekday = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('h-9 w-9 p-0 text-center text-sm font-medium text-muted-foreground', className)}
+      className={cn('min-h-[44px] min-w-[44px] h-11 w-11 sm:h-9 sm:w-9 p-0 text-center text-sm font-medium text-muted-foreground', className)}
       {...props}
     />
   )
@@ -86,7 +86,7 @@ const CalendarNavigation = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <button
     ref={ref}
-    className={cn('h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100', className)}
+    className={cn('min-h-[44px] min-w-[44px] h-9 w-9 sm:h-7 sm:w-7 bg-transparent p-0 opacity-50 hover:opacity-100', className)}
     {...props}
   />
 ))

@@ -15,7 +15,7 @@ export default function KVKKPage() {
                     <Button
                         variant="ghost"
                         onClick={() => router.push('/landing')}
-                        className="text-slate-300 hover:text-white mb-4"
+                        className="text-slate-300 hover:text-white mb-4 min-h-[48px]"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Ana Sayfaya Dön

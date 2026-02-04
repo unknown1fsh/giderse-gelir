@@ -98,8 +98,8 @@ export default function PeriodOnboarding() {
 
   // Dönem yok, onboarding göster
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl bg-white shadow-2xl border-2">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-2xl border-2 m-4">
         <CardHeader className="text-center space-y-4 bg-white">
           <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
             <Calendar className="h-8 w-8 text-blue-600" />
@@ -159,18 +159,18 @@ export default function PeriodOnboarding() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <button
               onClick={() => void handleCreateDefaultPeriod()}
               disabled={creating}
-              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 min-h-[48px] px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {creating ? 'Oluşturuluyor...' : 'Dönem Oluştur ve Başla'}
             </button>
             <button
               onClick={() => router.push('/periods/new')}
               disabled={creating}
-              className="px-6 py-3 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium disabled:opacity-50"
+              className="min-h-[48px] px-6 py-3 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium disabled:opacity-50"
             >
               Özelleştir
             </button>

@@ -236,7 +236,7 @@ export default function NewTransactionPage() {
                       categoryId: 0, // Kategoriyi sıfırla
                     }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
                   <option value={0}>Seçiniz</option>
@@ -258,7 +258,7 @@ export default function NewTransactionPage() {
                       categoryId: parseInt(e.target.value),
                     }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
                   <option value={0}>Seçiniz</option>
@@ -284,7 +284,7 @@ export default function NewTransactionPage() {
                     }))
                   }
                   placeholder="0,00"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -299,7 +299,7 @@ export default function NewTransactionPage() {
                       currencyId: parseInt(e.target.value),
                     }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                   disabled={!referenceData?.currencies || referenceData.currencies.length === 0}
                 >
@@ -335,7 +335,7 @@ export default function NewTransactionPage() {
                       paymentMethodId: parseInt(e.target.value),
                     }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
                   <option value={0}>Seçiniz</option>
@@ -358,7 +358,7 @@ export default function NewTransactionPage() {
                       transactionDate: e.target.value,
                     }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -376,7 +376,7 @@ export default function NewTransactionPage() {
                       creditCardId: 0, // Kredi kartını sıfırla
                     }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value={0}>Seçiniz</option>
                   {referenceData?.accounts.map(account => (
@@ -398,7 +398,7 @@ export default function NewTransactionPage() {
                       accountId: 0, // Hesabı sıfırla
                     }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value={0}>Seçiniz</option>
                   {referenceData?.creditCards.map(card => (
@@ -421,7 +421,7 @@ export default function NewTransactionPage() {
                   }))
                 }
                 rows={3}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="İşlem açıklaması..."
               />
             </div>
@@ -438,7 +438,7 @@ export default function NewTransactionPage() {
                   }))
                 }
                 placeholder="etiket1, etiket2, etiket3"
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
               />
               <p className="text-xs text-muted-foreground mt-1">Etiketleri virgülle ayırın</p>
             </div>

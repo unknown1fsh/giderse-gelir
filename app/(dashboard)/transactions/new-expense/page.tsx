@@ -564,14 +564,14 @@ export default function NewExpensePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-lg">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <button onClick={() => router.back()} className="min-h-[44px] min-w-[44px] p-2 hover:bg-gray-100 rounded-lg flex items-center justify-center self-start" aria-label="Geri">
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
           <div className="flex items-center gap-2">
             <TrendingDown className="h-6 w-6 text-red-500" />
-            <h1 className="text-3xl font-bold text-red-600">Yeni Gider Ekle</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-red-600">Yeni Gider Ekle</h1>
           </div>
           <p className="text-muted-foreground">Gider işleminizin detaylarını girin</p>
         </div>
@@ -638,7 +638,7 @@ export default function NewExpensePage() {
                   <select
                     value={formData.loanId}
                     onChange={e => setFormData(prev => ({ ...prev, loanId: parseInt(e.target.value) }))}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                     required={isLoanPayment}
                   >
                     <option value={0}>Kredi seçiniz</option>
@@ -667,7 +667,7 @@ export default function NewExpensePage() {
                       value={recurringData.name}
                       onChange={e => setRecurringData(prev => ({ ...prev, name: e.target.value }))}
                       placeholder="Örn: Netflix Aboneliği"
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
                       required={isRecurring}
                     />
                   </div>
@@ -678,7 +678,7 @@ export default function NewExpensePage() {
                       onChange={e =>
                         setRecurringData(prev => ({ ...prev, frequency: e.target.value }))
                       }
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
                     >
                       <option value="daily">Günlük</option>
                       <option value="weekly">Haftalık</option>
@@ -696,7 +696,7 @@ export default function NewExpensePage() {
                       onChange={e =>
                         setRecurringData(prev => ({ ...prev, endDate: e.target.value }))
                       }
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
                     />
                     <p className="text-xs text-gray-500 mt-1">
                       Boş bırakırsanız süresiz devam eder
@@ -714,7 +714,7 @@ export default function NewExpensePage() {
                   onChange={e =>
                     setFormData(prev => ({ ...prev, categoryId: parseInt(e.target.value) }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   required
                 >
                   <option value={0}>Gider kategorisi seçiniz</option>
@@ -751,7 +751,7 @@ export default function NewExpensePage() {
                   value={formData.amount}
                   onChange={e => setFormData(prev => ({ ...prev, amount: e.target.value }))}
                   placeholder="0,00"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -773,7 +773,7 @@ export default function NewExpensePage() {
                       beneficiaryId: 0,
                     }))
                   }}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   required
                 >
                   <option value={0}>Ödeme yöntemi seçiniz</option>
@@ -793,7 +793,7 @@ export default function NewExpensePage() {
                   onChange={e =>
                     setFormData(prev => ({ ...prev, transactionDate: e.target.value }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -808,7 +808,7 @@ export default function NewExpensePage() {
                   onChange={e =>
                     setFormData(prev => ({ ...prev, accountId: parseInt(e.target.value) }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   required
                 >
                   <option value={0}>Hesap seçiniz</option>
@@ -830,7 +830,7 @@ export default function NewExpensePage() {
                   onChange={e =>
                     setFormData(prev => ({ ...prev, creditCardId: parseInt(e.target.value) }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   required
                 >
                   <option value={0}>Kredi kartı seçiniz</option>
@@ -853,7 +853,7 @@ export default function NewExpensePage() {
                     onChange={e =>
                       setFormData(prev => ({ ...prev, accountId: parseInt(e.target.value) }))
                     }
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
                   >
                     <option value={0}>Hesap seçiniz</option>
@@ -874,7 +874,7 @@ export default function NewExpensePage() {
                       onChange={e =>
                         setFormData(prev => ({ ...prev, beneficiaryId: parseInt(e.target.value) }))
                       }
-                      className="flex-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      className="flex-1 form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
                       required
                     >
                       <option value={0}>Alıcı seçiniz</option>
@@ -908,7 +908,7 @@ export default function NewExpensePage() {
                     onChange={e =>
                       setFormData(prev => ({ ...prev, eWalletId: parseInt(e.target.value) }))
                     }
-                    className="flex-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    className="flex-1 form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
                   >
                     <option value={0}>E-cüzdan seçiniz</option>
@@ -946,7 +946,7 @@ export default function NewExpensePage() {
                 onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Gider hakkında notlarınız..."
                 rows={3}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
 
@@ -959,7 +959,7 @@ export default function NewExpensePage() {
                 value={formData.tags}
                 onChange={e => setFormData(prev => ({ ...prev, tags: e.target.value }))}
                 placeholder="market, alışveriş, yiyecek"
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
 
@@ -1064,7 +1064,7 @@ export default function NewExpensePage() {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                className="flex-1 min-h-[48px] px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50"
                 disabled={saving}
               >
                 İptal
@@ -1072,7 +1072,7 @@ export default function NewExpensePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 flex items-center justify-center gap-2"
+                className="flex-1 min-h-[48px] px-4 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 flex items-center justify-center gap-2"
               >
                 {saving ? (
                   'Kaydediliyor...'
@@ -1103,7 +1103,7 @@ export default function NewExpensePage() {
                   type="text"
                   value={beneficiaryForm.name}
                   onChange={e => setBeneficiaryForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md"
                   placeholder="Ahmet Yılmaz"
                 />
               </div>
@@ -1114,7 +1114,7 @@ export default function NewExpensePage() {
                   type="text"
                   value={beneficiaryForm.iban}
                   onChange={e => setBeneficiaryForm(prev => ({ ...prev, iban: e.target.value }))}
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md"
                   placeholder="TR00 0000 0000 0000 0000 0000 00"
                 />
               </div>
@@ -1127,7 +1127,7 @@ export default function NewExpensePage() {
                   onChange={e =>
                     setBeneficiaryForm(prev => ({ ...prev, accountNo: e.target.value }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md"
                   placeholder="12345678"
                 />
               </div>
@@ -1139,7 +1139,7 @@ export default function NewExpensePage() {
                   onChange={e =>
                     setBeneficiaryForm(prev => ({ ...prev, bankId: parseInt(e.target.value) }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md"
                 >
                   <option value={0}>Banka seçiniz</option>
                   {referenceData?.banks.map(bank => (
@@ -1158,7 +1158,7 @@ export default function NewExpensePage() {
                   onChange={e =>
                     setBeneficiaryForm(prev => ({ ...prev, phoneNumber: e.target.value }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md"
                   placeholder="05XX XXX XX XX"
                 />
               </div>
@@ -1167,7 +1167,7 @@ export default function NewExpensePage() {
                 <button
                   type="button"
                   onClick={() => setShowBeneficiaryModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="flex-1 min-h-[48px] px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50"
                 >
                   İptal
                 </button>
@@ -1176,7 +1176,7 @@ export default function NewExpensePage() {
                   onClick={() => {
                     void handleAddBeneficiary()
                   }}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="flex-1 min-h-[48px] px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Ekle
                 </button>
@@ -1201,7 +1201,7 @@ export default function NewExpensePage() {
                   type="text"
                   value={eWalletForm.name}
                   onChange={e => setEWalletForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md"
                   placeholder="Papara Hesabım"
                 />
               </div>
@@ -1211,7 +1211,7 @@ export default function NewExpensePage() {
                 <select
                   value={eWalletForm.provider}
                   onChange={e => setEWalletForm(prev => ({ ...prev, provider: e.target.value }))}
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md"
                 >
                   <option value="">Seçiniz</option>
                   <option value="PayPal">PayPal</option>
@@ -1230,7 +1230,7 @@ export default function NewExpensePage() {
                   onChange={e =>
                     setEWalletForm(prev => ({ ...prev, accountEmail: e.target.value }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md"
                   placeholder="ornek@email.com"
                 />
               </div>
@@ -1243,7 +1243,7 @@ export default function NewExpensePage() {
                   onChange={e =>
                     setEWalletForm(prev => ({ ...prev, accountPhone: e.target.value }))
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md"
                   placeholder="05XX XXX XX XX"
                 />
               </div>
@@ -1254,7 +1254,7 @@ export default function NewExpensePage() {
                   type="text"
                   value={eWalletForm.balance}
                   onChange={e => setEWalletForm(prev => ({ ...prev, balance: e.target.value }))}
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md"
                   placeholder="0,00"
                 />
               </div>
@@ -1263,7 +1263,7 @@ export default function NewExpensePage() {
                 <button
                   type="button"
                   onClick={() => setShowEWalletModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="flex-1 min-h-[48px] px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50"
                 >
                   İptal
                 </button>
@@ -1272,7 +1272,7 @@ export default function NewExpensePage() {
                   onClick={() => {
                     void handleAddEWallet()
                   }}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="flex-1 min-h-[48px] px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Ekle
                 </button>

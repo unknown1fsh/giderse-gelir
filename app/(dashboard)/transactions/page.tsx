@@ -232,7 +232,7 @@ export default function TransactionsPage() {
               </button>
               <Link
                 href="/transactions/new"
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium text-sm hover:shadow-lg hover:scale-105 transition-all"
+                className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-3 sm:py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium text-sm hover:shadow-lg hover:scale-105 transition-all"
               >
                 <Plus className="h-4 w-4" />
                 Yeni İşlem
@@ -351,12 +351,13 @@ export default function TransactionsPage() {
                   placeholder="İşlem ara (kategori, açıklama, etiket)..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full min-h-[48px] pl-10 pr-12 py-3 sm:py-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm"
                 />
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-100 rounded-full"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-slate-100 rounded-full"
+                    aria-label="Aramayı temizle"
                   >
                     <X className="h-3 w-3 text-slate-400" />
                   </button>
@@ -364,7 +365,7 @@ export default function TransactionsPage() {
               </div>
 
               {/* Tip Filtresi */}
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {[
                   { value: 'all', label: 'Tümü', count: stats.total },
                   { value: 'income', label: 'Gelir', count: stats.incomeCount },
@@ -373,7 +374,7 @@ export default function TransactionsPage() {
                   <button
                     key={filter.value}
                     onClick={() => setFilterType(filter.value as FilterType)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filterType === filter.value
+                    className={`min-h-[44px] px-4 py-2 rounded-lg text-sm font-medium transition-all ${filterType === filter.value
                       ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
@@ -391,7 +392,7 @@ export default function TransactionsPage() {
               <select
                 value={selectedCategory}
                 onChange={e => setSelectedCategory(e.target.value)}
-                className="px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full min-h-[48px] sm:w-auto px-4 py-3 sm:py-2.5 border border-slate-200 rounded-xl bg-white text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">Tüm Kategoriler</option>
                 {categories.map(cat => (
@@ -436,14 +437,14 @@ export default function TransactionsPage() {
                     ? 'Filtreleri temizleyerek tüm işlemleri görün'
                     : 'İlk işleminizi eklemek için yukarıdaki butonları kullanın'}
                 </p>
-                {(searchTerm || filterType !== 'all' || selectedCategory !== 'all') && (
+                    {(searchTerm || filterType !== 'all' || selectedCategory !== 'all') && (
                   <button
                     onClick={() => {
                       setSearchTerm('')
                       setFilterType('all')
                       setSelectedCategory('all')
                     }}
-                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                    className="mt-4 min-h-[48px] px-4 py-3 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
                   >
                     Filtreleri Temizle
                   </button>
@@ -454,7 +455,7 @@ export default function TransactionsPage() {
                 {Object.entries(groupedTransactions).map(([date, txList]) => (
                   <div key={date}>
                     {/* Tarih Başlığı */}
-                    <div className="px-6 py-3 bg-slate-50 sticky top-0">
+                    <div className="px-4 sm:px-6 py-3 bg-slate-50 sticky top-0">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-slate-400" />
                         <span className="text-sm font-medium text-slate-600">{date}</span>
@@ -466,9 +467,9 @@ export default function TransactionsPage() {
                     {txList.map(transaction => (
                       <div
                         key={transaction.id}
-                        className="group px-6 py-4 hover:bg-slate-50 transition-colors"
+                        className="group px-4 sm:px-6 py-4 hover:bg-slate-50 transition-colors"
                       >
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                           {/* İkon */}
                           <div className={`p-3 rounded-xl ${transaction.txType.code === 'GELIR'
                             ? 'bg-gradient-to-br from-green-100 to-emerald-100'
@@ -554,12 +555,12 @@ export default function TransactionsPage() {
                             </p>
                           </div>
 
-                          {/* Hover Actions */}
-                          <div className="hidden group-hover:flex items-center gap-1">
-                            <button className="p-2 hover:bg-slate-200 rounded-lg transition-colors">
+                          {/* Actions - mobilde her zaman görünür, desktop'ta hover'da */}
+                          <div className="flex opacity-100 sm:opacity-0 sm:group-hover:opacity-100 items-center gap-1 flex-shrink-0 transition-opacity">
+                            <button className="min-h-[44px] min-w-[44px] p-2 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center" aria-label="Düzenle">
                               <Edit3 className="h-4 w-4 text-slate-500" />
                             </button>
-                            <button className="p-2 hover:bg-red-100 rounded-lg transition-colors">
+                            <button className="min-h-[44px] min-w-[44px] p-2 hover:bg-red-100 rounded-lg transition-colors flex items-center justify-center" aria-label="Sil">
                               <Trash2 className="h-4 w-4 text-red-500" />
                             </button>
                           </div>

@@ -28,7 +28,7 @@ export default function PeriodSelector() {
     return (
       <Link
         href="/periods/new"
-        className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-lg hover:bg-yellow-500/30 transition-colors"
+        className="w-full flex items-center justify-center space-x-2 px-4 min-h-[44px] py-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg hover:bg-yellow-500/30 transition-colors"
       >
         <Plus className="h-4 w-4 text-yellow-400" />
         <span className="text-sm font-medium text-yellow-300">Dönem Oluştur</span>
@@ -47,7 +47,7 @@ export default function PeriodSelector() {
     <div className="relative w-full">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between space-x-3 px-4 py-2 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-all duration-200 group"
+        className="w-full flex items-center justify-between space-x-3 px-4 min-h-[44px] py-3 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-all duration-200 group"
       >
         <div className="flex items-center space-x-2 flex-1 min-w-0">
           <Calendar className="h-4 w-4 text-blue-400 flex-shrink-0" />
@@ -80,7 +80,7 @@ export default function PeriodSelector() {
                     Açık Dönemler
                   </p>
                 </div>
-                <div className="max-h-64 overflow-y-auto">
+                <div className="max-h-[70vh] overflow-y-auto">
                   {openPeriods.map(period => (
                     <button
                       key={period.id}
@@ -122,7 +122,7 @@ export default function PeriodSelector() {
                     Kapalı Dönemler
                   </p>
                 </div>
-                <div className="max-h-32 overflow-y-auto">
+                <div className="max-h-[40vh] overflow-y-auto">
                   {periods
                     .filter(p => p.isClosed)
                     .map(period => (
@@ -160,7 +160,7 @@ export default function PeriodSelector() {
               <Link
                 href="/periods"
                 onClick={() => setIsOpen(false)}
-                className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white rounded transition-colors"
+                className="w-full flex items-center space-x-2 px-3 min-h-[44px] py-3 text-sm text-slate-300 hover:bg-slate-700 hover:text-white rounded transition-colors"
               >
                 <Calendar className="h-4 w-4" />
                 <span>Dönemleri Yönet</span>
@@ -168,7 +168,7 @@ export default function PeriodSelector() {
               <Link
                 href="/periods/new"
                 onClick={() => setIsOpen(false)}
-                className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-blue-400 hover:bg-blue-500/20 rounded transition-colors"
+                className="w-full flex items-center space-x-2 px-3 min-h-[44px] py-3 text-sm text-blue-400 hover:bg-blue-500/20 rounded transition-colors"
               >
                 <Plus className="h-4 w-4" />
                 <span>Yeni Dönem Oluştur</span>

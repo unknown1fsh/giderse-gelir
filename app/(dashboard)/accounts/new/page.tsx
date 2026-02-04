@@ -244,7 +244,7 @@ export default function NewAccountPage() {
                       ? 'Örn: Ziraat Bankası World Kart'
                       : 'Örn: 22 Ayar Altın Bilezik'
                 }
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
             </div>
@@ -259,7 +259,7 @@ export default function NewAccountPage() {
                       onChange={e =>
                         setFormData(prev => ({ ...prev, bankId: parseInt(e.target.value) }))
                       }
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     >
                       <option value={0}>Seçiniz</option>
@@ -278,7 +278,7 @@ export default function NewAccountPage() {
                       onChange={e =>
                         setFormData(prev => ({ ...prev, accountTypeId: parseInt(e.target.value) }))
                       }
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     >
                       <option value={0}>Seçiniz</option>
@@ -299,7 +299,7 @@ export default function NewAccountPage() {
                       onChange={e =>
                         setFormData(prev => ({ ...prev, currencyId: parseInt(e.target.value) }))
                       }
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                       disabled={!referenceData?.currencies || referenceData.currencies.length === 0}
                     >
@@ -331,7 +331,7 @@ export default function NewAccountPage() {
                       value={formData.balance}
                       onChange={e => setFormData(prev => ({ ...prev, balance: e.target.value }))}
                       placeholder="0,00"
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -346,7 +346,7 @@ export default function NewAccountPage() {
                         setFormData(prev => ({ ...prev, accountNumber: e.target.value }))
                       }
                       placeholder="Hesap numarası"
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
 
@@ -391,7 +391,7 @@ export default function NewAccountPage() {
                       onChange={e =>
                         setFormData(prev => ({ ...prev, bankId: parseInt(e.target.value) }))
                       }
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     >
                       <option value={0}>Seçiniz</option>
@@ -410,7 +410,7 @@ export default function NewAccountPage() {
                       onChange={e =>
                         setFormData(prev => ({ ...prev, currencyId: parseInt(e.target.value) }))
                       }
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                       disabled={!referenceData?.currencies || referenceData.currencies.length === 0}
                     >
@@ -446,7 +446,7 @@ export default function NewAccountPage() {
                         setFormData(prev => ({ ...prev, limitAmount: e.target.value }))
                       }
                       placeholder="0,00"
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />
                   </div>
@@ -461,7 +461,7 @@ export default function NewAccountPage() {
                       onChange={e =>
                         setFormData(prev => ({ ...prev, dueDay: parseInt(e.target.value) }))
                       }
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />
                   </div>
@@ -479,7 +479,7 @@ export default function NewAccountPage() {
                       onChange={e =>
                         setFormData(prev => ({ ...prev, goldTypeId: parseInt(e.target.value) }))
                       }
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     >
                       <option value={0}>Altın türü seçiniz</option>
@@ -501,7 +501,7 @@ export default function NewAccountPage() {
                       onChange={e =>
                         setFormData(prev => ({ ...prev, goldPurityId: parseInt(e.target.value) }))
                       }
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     >
                       <option value={0}>Ayar seçiniz</option>
@@ -526,7 +526,7 @@ export default function NewAccountPage() {
                       value={formData.weight}
                       onChange={e => setFormData(prev => ({ ...prev, weight: e.target.value }))}
                       placeholder="0,00"
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />
                   </div>
@@ -541,7 +541,7 @@ export default function NewAccountPage() {
                         setFormData(prev => ({ ...prev, purchasePrice: e.target.value }))
                       }
                       placeholder="0,00"
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />
                   </div>

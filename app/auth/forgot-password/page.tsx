@@ -43,14 +43,14 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen min-h-[100dvh] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 sm:p-6 py-8">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
 
       <div className="relative w-full max-w-md">
         <div className="mb-6">
           <Link
             href="/auth/login"
-            className="inline-flex items-center text-white/70 hover:text-white transition-colors"
+            className="inline-flex items-center min-h-[44px] text-white/70 hover:text-white transition-colors py-2"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Girişe Dön
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
                 </p>
                 <Button
                   variant="outline"
-                  className="w-full border-white/20 text-white hover:bg-white/10"
+                  className="w-full min-h-[48px] border-white/20 text-white hover:bg-white/10"
                   onClick={() => setStatus('idle')}
                 >
                   Tekrar Gönder
@@ -120,7 +120,7 @@ export default function ForgotPasswordPage() {
                 <Button
                   type="submit"
                   disabled={status === 'loading'}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 text-lg font-semibold shadow-lg"
+                  className="w-full min-h-[48px] bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 text-base sm:text-lg font-semibold shadow-lg"
                 >
                   {status === 'loading' ? (
                     <>

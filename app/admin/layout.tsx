@@ -83,13 +83,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-20">
+      <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-20 pt-[env(safe-area-inset-top)]">
         <div className="p-4 sm:p-6 lg:p-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
+                className="lg:hidden min-h-[44px] min-w-[44px] p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center flex-shrink-0"
               >
                 {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
@@ -107,19 +107,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="p-3 rounded-full bg-gradient-to-br from-red-500 to-pink-600 shadow-lg">
                 <Shield className="h-6 w-6 text-white" />
               </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">Admin Paneli</h1>
-                <p className="text-sm sm:text-base text-slate-600">
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-3xl font-bold text-slate-800 truncate">Admin Paneli</h1>
+                <p className="text-xs sm:text-base text-slate-600 hidden sm:block">
                   Sistem yönetimi ve istatistikler
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={() => {
                   window.location.reload()
                 }}
-                className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
+                className="min-h-[44px] min-w-[44px] p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center"
                 title="Yenile"
               >
                 <RefreshCw className="h-5 w-5 text-slate-700" />
@@ -150,7 +150,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={cn(
-                    'flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors',
+                    'flex items-center space-x-3 px-4 min-h-[44px] py-3 rounded-lg transition-colors',
                     isActive
                       ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-md'
                       : 'text-slate-700 hover:bg-slate-100'

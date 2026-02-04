@@ -150,7 +150,7 @@ function VerifyEmailContent() {
                     void resendVerification()
                   }}
                   disabled={resending}
-                  className="w-full"
+                  className="w-full min-h-[48px]"
                   variant="outline"
                 >
                   {resending ? (
@@ -179,7 +179,7 @@ function VerifyEmailContent() {
           )}
 
           <div className="text-center space-y-2 pt-4">
-            <Link href="/auth/login" className="text-sm text-purple-600 hover:underline">
+            <Link href="/auth/login" className="text-sm text-purple-600 hover:underline min-h-[44px] flex items-center justify-center">
               Giriş sayfasına dön
             </Link>
           </div>

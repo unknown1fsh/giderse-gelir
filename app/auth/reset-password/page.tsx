@@ -96,7 +96,7 @@ function ResetPasswordContent() {
                             Giriş sayfasına yönlendiriliyorsunuz...
                         </p>
                         <Button
-                            className="w-full bg-white/10 hover:bg-white/20 text-white"
+                            className="w-full min-h-[48px] bg-white/10 hover:bg-white/20 text-white"
                             onClick={() => router.push('/auth/login')}
                         >
                             Giriş Yap
@@ -135,7 +135,8 @@ function ResetPasswordContent() {
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2 text-slate-400 hover:text-slate-300"
+                                    aria-label={showPassword ? 'Şifreyi gizle' : 'Şifreyi göster'}
                                 >
                                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                 </button>
@@ -161,7 +162,7 @@ function ResetPasswordContent() {
                         <Button
                             type="submit"
                             disabled={status === 'loading' || !token}
-                            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 text-lg font-semibold shadow-lg"
+                            className="w-full min-h-[48px] bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 text-base sm:text-lg font-semibold shadow-lg"
                         >
                             {status === 'loading' ? (
                                 <>
@@ -181,14 +182,14 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+        <div className="min-h-screen min-h-[100dvh] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 sm:p-6 py-8">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
 
             <div className="relative w-full max-w-md flex flex-col items-center">
                 <div className="mb-6 self-start w-full">
                     <Link
                         href="/auth/login"
-                        className="inline-flex items-center text-white/70 hover:text-white transition-colors"
+                        className="inline-flex items-center min-h-[44px] text-white/70 hover:text-white transition-colors py-2"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Girişe Dön

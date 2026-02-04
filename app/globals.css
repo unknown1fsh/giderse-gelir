@@ -342,4 +342,28 @@
     @apply focus:ring-2 focus:ring-purple-500 focus:border-transparent;
     @apply transition-all duration-200;
   }
+
+  /* Mobile-friendly native form inputs */
+  .form-input-mobile {
+    @apply min-h-[48px] px-4 py-3 sm:px-3 sm:py-2 text-base sm:text-sm;
+  }
+
+  /* Touch target minimum (WCAG) */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Prevent iOS zoom on input focus (16px minimum) */
+  input.form-input-mobile,
+  select.form-input-mobile,
+  textarea.form-input-mobile {
+    font-size: 16px;
+  }
+  @media (min-width: 640px) {
+    input.form-input-mobile,
+    select.form-input-mobile,
+    textarea.form-input-mobile {
+      font-size: 0.875rem;
+    }
+  }
 }

@@ -51,7 +51,7 @@ export default function PageHeader({
                       type="button"
                       onClick={onBack}
                       aria-label={backAriaLabel}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="min-h-[44px] min-w-[44px] p-2 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-center"
                     >
                       <span className="sr-only">{backAriaLabel}</span>
                       <span aria-hidden="true" className="inline-flex items-center justify-center">
@@ -65,7 +65,7 @@ export default function PageHeader({
                       key={action.ariaLabel + action.href}
                       href={action.href}
                       aria-label={action.ariaLabel}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="min-h-[44px] min-w-[44px] p-2 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-center"
                     >
                       {action.icon}
                     </Link>

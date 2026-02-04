@@ -137,7 +137,7 @@ export default function NewGoldItemPage() {
                 value={formData.name}
                 onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Örn: 22 Ayar Altın Bilezik"
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
             </div>
@@ -148,7 +148,7 @@ export default function NewGoldItemPage() {
                 <select
                   value={formData.goldTypeId}
                   onChange={e => setFormData(prev => ({ ...prev, goldTypeId: e.target.value }))}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
                   <option value="">Altın türü seçin</option>
@@ -168,7 +168,7 @@ export default function NewGoldItemPage() {
                 <select
                   value={formData.goldPurityId}
                   onChange={e => setFormData(prev => ({ ...prev, goldPurityId: e.target.value }))}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
                   <option value="">Ayar seçin</option>
@@ -194,7 +194,7 @@ export default function NewGoldItemPage() {
                   value={formData.weight}
                   onChange={e => setFormData(prev => ({ ...prev, weight: e.target.value }))}
                   placeholder="Örn: 15.50"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -208,7 +208,7 @@ export default function NewGoldItemPage() {
                   value={formData.purchasePrice}
                   onChange={e => setFormData(prev => ({ ...prev, purchasePrice: e.target.value }))}
                   placeholder="Örn: 25000.00"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -221,7 +221,7 @@ export default function NewGoldItemPage() {
                 onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Eşya hakkında ek bilgiler..."
                 rows={3}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 

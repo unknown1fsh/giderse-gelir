@@ -134,7 +134,7 @@ export default function PaymentCheckout({
                 <p className="text-sm text-red-700 mt-1">{error}</p>
               </div>
             </div>
-            <Button onClick={handleRetry} className="w-full" variant="outline">
+            <Button onClick={handleRetry} className="w-full min-h-[48px]" variant="outline">
               Tekrar Dene
             </Button>
           </div>

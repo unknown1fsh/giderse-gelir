@@ -69,7 +69,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen min-h-[100dvh] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 sm:p-6 py-8">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
 
@@ -78,7 +78,7 @@ export default function LoginPage() {
         <div className="mb-6">
           <Link
             href="/landing"
-            className="inline-flex items-center text-white/70 hover:text-white transition-colors"
+            className="inline-flex items-center min-h-[44px] text-white/70 hover:text-white transition-colors py-2"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Geri Dön
@@ -149,15 +149,16 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2 text-slate-400 hover:text-slate-300"
+                    aria-label={showPassword ? 'Şifreyi gizle' : 'Şifreyi göster'}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <label className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <label className="flex items-center space-x-2 cursor-pointer min-h-[44px]">
                   <input
                     type="checkbox"
                     checked={rememberMe}
@@ -169,7 +170,7 @@ export default function LoginPage() {
                 </label>
                 <Link
                   href="/auth/forgot-password"
-                  className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                  className="text-sm text-purple-400 hover:text-purple-300 transition-colors min-h-[44px] flex items-center"
                 >
                   Şifremi unuttum
                 </Link>
@@ -178,7 +179,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 text-lg font-semibold shadow-lg"
+                className="w-full min-h-[48px] bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 text-base sm:text-lg font-semibold shadow-lg"
               >
                 {isLoading ? (
                   <>

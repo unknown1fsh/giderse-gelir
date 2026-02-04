@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react'
 import {
   Document,
@@ -7,7 +5,6 @@ import {
   Text,
   View,
   StyleSheet,
-  pdf,
 } from '@react-pdf/renderer'
 
 export interface AIReportDataForPDF {
@@ -412,14 +409,4 @@ export function AIReportPDFDocument({ reportData, reportInfo }: AIReportPDFProps
       )}
     </Document>
   )
-}
-
-export async function generateReportPDFBlob(
-  reportData: AIReportDataForPDF,
-  reportInfo: ReportInfoForPDF
-): Promise<Blob> {
-  const blob = await pdf(
-    <AIReportPDFDocument reportData={reportData} reportInfo={reportInfo} />
-  ).toBlob()
-  return blob
 }

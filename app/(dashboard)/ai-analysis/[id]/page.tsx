@@ -153,12 +153,13 @@ export default function AIReportDetailPage() {
     }
     setPdfDownloading(true)
     try {
-      const { generateReportPDFBlob } = await import('@/components/ai-report-pdf')
-      const blob = await generateReportPDFBlob(report.reportData, {
-        reportDate: report.reportDate,
-        monthYear: report.monthYear,
-        status: report.status,
+      const res = await fetch(`/api/ai-analysis/report/${report.id}/pdf`, {
+        credentials: 'include',
       })
+      if (!res.ok) {
+        throw new Error('PDF oluşturulamadı')
+      }
+      const blob = await res.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url

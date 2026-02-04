@@ -3,7 +3,7 @@ const nextConfig = {
   // Standalone mode devre dışı - normal build kullanıyoruz
   // output: 'standalone',
 
-  serverExternalPackages: ['@prisma/client'],
+  serverExternalPackages: ['@prisma/client', '@react-pdf/renderer'],
 
   // Environment variables to expose to the client
   env: {

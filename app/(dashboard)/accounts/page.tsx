@@ -115,12 +115,15 @@ export default function AccountsPage() {
       ])
 
       if (accountsRes.ok) {
-        const accountsData = (await accountsRes.json()) as BankAccount[]
-        // Nakit hesapları: accountNumber === 'CASH' VEYA ismi 'Nakit' içerenler
+        const accountsData = (await accountsRes.json()) as Array<BankAccount & { accountType?: string }>
+        // Sadece banka hesaplarını al (kredi kartı ve altın kayıtlarını hariç tut)
+        const bankOnly = Array.isArray(accountsData)
+          ? accountsData.filter((a) => a.accountType === 'bank')
+          : []
         const isCashAccount = (acc: BankAccount) =>
-          acc.accountNumber === 'CASH' || acc.name.toLowerCase().includes('nakit')
-        setCashAccounts(accountsData.filter(isCashAccount))
-        setBankAccounts(accountsData.filter(acc => !isCashAccount(acc)))
+          acc.accountNumber === 'CASH' || acc.name?.toLowerCase().includes('nakit')
+        setCashAccounts(bankOnly.filter(isCashAccount))
+        setBankAccounts(bankOnly.filter((acc) => !isCashAccount(acc)))
       }
 
       if (ewalletsRes?.ok && isPremium) {
@@ -224,22 +227,22 @@ export default function AccountsPage() {
 
   // Hesaplamalar
   const totalCashBalance = cashAccounts.reduce((sum, acc) => {
-    const rate = acc.currency.code === 'USD' ? 35 : acc.currency.code === 'EUR' ? 38 : 1
+    const rate = acc.currency?.code === 'USD' ? 35 : acc.currency?.code === 'EUR' ? 38 : 1
     return sum + parseFloat(acc.balance) * rate
   }, 0)
 
   const totalBankBalance = bankAccounts.reduce((sum, acc) => {
-    const rate = acc.currency.code === 'USD' ? 35 : acc.currency.code === 'EUR' ? 38 : 1
+    const rate = acc.currency?.code === 'USD' ? 35 : acc.currency?.code === 'EUR' ? 38 : 1
     return sum + parseFloat(acc.balance) * rate
   }, 0)
 
   const totalEWalletBalance = eWallets.reduce((sum, wallet) => {
-    const rate = wallet.currency.code === 'USD' ? 35 : wallet.currency.code === 'EUR' ? 38 : 1
+    const rate = wallet.currency?.code === 'USD' ? 35 : wallet.currency?.code === 'EUR' ? 38 : 1
     return sum + parseFloat(wallet.balance) * rate
   }, 0)
 
   const totalCardDebt = creditCards.reduce((sum, card) => {
-    const rate = card.currency.code === 'USD' ? 35 : card.currency.code === 'EUR' ? 38 : 1
+    const rate = card.currency?.code === 'USD' ? 35 : card.currency?.code === 'EUR' ? 38 : 1
     const used = parseFloat(card.limitAmount) - parseFloat(card.availableLimit)
     return sum + used * rate
   }, 0)

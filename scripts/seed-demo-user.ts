@@ -188,7 +188,7 @@ async function main() {
     },
   })
 
-  const periodSubat = await prisma.period.create({
+  await prisma.period.create({
     data: {
       userId: user.id,
       name: '2026 Şubat',
@@ -217,7 +217,7 @@ async function main() {
     },
   })
 
-  const birikimHesap = await prisma.account.create({
+  await prisma.account.create({
     data: {
       userId: user.id,
       periodId: period.id,

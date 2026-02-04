@@ -132,7 +132,7 @@ async function main() {
       active: true,
     },
   })
-  const birikimHesap = await prisma.account.create({
+  await prisma.account.create({
     data: {
       userId: user.id,
       periodId: period.id,

@@ -104,6 +104,7 @@ export default function AIReportDetailPage() {
   const [report, setReport] = useState<ReportInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [pdfDownloading, setPdfDownloading] = useState(false)
 
   useEffect(() => {
     const reportId = params.id as string
@@ -145,6 +146,33 @@ export default function AIReportDetailPage() {
       setLoading(false)
     }
   }, [params.id])
+
+  const handleDownloadPDF = async () => {
+    if (!report) {
+      return
+    }
+    setPdfDownloading(true)
+    try {
+      const { generateReportPDFBlob } = await import('@/components/ai-report-pdf')
+      const blob = await generateReportPDFBlob(report.reportData, {
+        reportDate: report.reportDate,
+        monthYear: report.monthYear,
+        status: report.status,
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `AI-Analiz-Raporu-${report.monthYear}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('PDF indirme hatası:', err)
+    } finally {
+      setPdfDownloading(false)
+    }
+  }
 
   const getInsightIcon = (type: string) => {
     switch (type) {
@@ -284,9 +312,15 @@ export default function AIReportDetailPage() {
                 <Badge variant={report.status === 'completed' ? 'default' : 'secondary'}>
                   {report.status === 'completed' ? 'Tamamlandı' : report.status}
                 </Badge>
-                <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                  onClick={() => void handleDownloadPDF()}
+                  disabled={pdfDownloading}
+                >
                   <Download className="h-4 w-4 mr-2" />
-                  PDF İndir
+                  {pdfDownloading ? 'Hazırlanıyor...' : 'PDF İndir'}
                 </Button>
               </div>
             </div>

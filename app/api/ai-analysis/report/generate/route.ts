@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth'
+import { getCurrentUser, getActivePeriod } from '@/lib/auth'
 import { ExceptionMapper } from '@/server/errors'
 import { BadRequestError } from '@/server/errors'
 import { checkPremiumAccess } from '@/lib/premium-middleware'
@@ -62,9 +62,14 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
   // Rapor seviyesini belirle
   const reportLevel = getReportLevelForPlan(currentPlan)
 
-  // Ay-Yıl bilgisi
+  // Aktif dönemi al (özet tarih aralığı için)
+  const activePeriod = await getActivePeriod(request)
+
+  // Ay-Yıl bilgisi (aktif dönem varsa ondan, yoksa şu anki ay)
   const now = new Date()
-  const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const monthYear = activePeriod
+    ? `${new Date(activePeriod.startDate).getFullYear()}-${String(new Date(activePeriod.startDate).getMonth() + 1).padStart(2, '0')}`
+    : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 
   // Kullanım kaydı oluştur (processing durumunda)
   const usageRecord = await prisma.aIReportUsage.create({
@@ -81,7 +86,7 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
   try {
     // AI Analiz Servisini kullanarak rapor oluştur
     const aiAnalysisService = new AIAnalysisService(prisma)
-    const reportData = await aiAnalysisService.generateReport(user.id, currentPlan)
+    const reportData = await aiAnalysisService.generateReport(user.id, currentPlan, activePeriod)
 
     // Kullanım kaydını güncelle (completed)
     await prisma.aIReportUsage.update({

@@ -302,181 +302,42 @@ export default function CategoriesAnalysis() {
     router.push('/dashboard')
   }
 
-  // Demo veriler - gerçek uygulamada API'den gelecek
+  const colorPalette = [
+    'from-red-400 to-red-600',
+    'from-blue-400 to-blue-600',
+    'from-purple-400 to-purple-600',
+    'from-green-400 to-green-600',
+    'from-orange-400 to-orange-600',
+    'from-gray-400 to-gray-600',
+  ]
+
   useEffect(() => {
-    const loadCategoryData = () => {
-      // Kullanıcı planına göre farklı veriler
-      let data: CategoryDataItem[] = []
-
-      if (user?.plan === 'free') {
-        data = [
-          {
-            name: 'Gıda & İçecek',
-            amount: 465,
-            percentage: 26.4,
-            trend: 5.2,
-            budget: 400,
-            color: 'from-red-400 to-red-600',
-            status: 'over',
-          },
-          {
-            name: 'Ulaşım',
-            amount: 610,
-            percentage: 34.6,
-            trend: -2.1,
-            budget: 500,
-            color: 'from-blue-400 to-blue-600',
-            status: 'over',
-          },
-          {
-            name: 'Eğlence',
-            amount: 830,
-            percentage: 47.1,
-            trend: 8.7,
-            budget: 600,
-            color: 'from-purple-400 to-purple-600',
-            status: 'over',
-          },
-          {
-            name: 'Sağlık',
-            amount: 1250,
-            percentage: 70.9,
-            trend: 12.3,
-            budget: 800,
-            color: 'from-green-400 to-green-600',
-            status: 'over',
-          },
-          {
-            name: 'Alışveriş',
-            amount: 1850,
-            percentage: 100,
-            trend: 3.4,
-            budget: 1000,
-            color: 'from-orange-400 to-orange-600',
-            status: 'over',
-          },
-        ]
-      } else if (user?.plan === 'premium') {
-        data = [
-          {
-            name: 'Gıda & İçecek',
-            amount: 465,
-            percentage: 8.2,
-            trend: 5.2,
-            budget: 400,
-            color: 'from-red-400 to-red-600',
-            status: 'over',
-          },
-          {
-            name: 'Ulaşım',
-            amount: 610,
-            percentage: 10.8,
-            trend: -2.1,
-            budget: 500,
-            color: 'from-blue-400 to-blue-600',
-            status: 'over',
-          },
-          {
-            name: 'Eğlence',
-            amount: 830,
-            percentage: 14.7,
-            trend: 8.7,
-            budget: 600,
-            color: 'from-purple-400 to-purple-600',
-            status: 'over',
-          },
-          {
-            name: 'Sağlık',
-            amount: 1250,
-            percentage: 22.1,
-            trend: 12.3,
-            budget: 800,
-            color: 'from-green-400 to-green-600',
-            status: 'over',
-          },
-          {
-            name: 'Alışveriş',
-            amount: 1850,
-            percentage: 32.7,
-            trend: 3.4,
-            budget: 1000,
-            color: 'from-orange-400 to-orange-600',
-            status: 'over',
-          },
-          {
-            name: 'Diğer',
-            amount: 650,
-            percentage: 11.5,
-            trend: -1.8,
-            budget: 500,
-            color: 'from-gray-400 to-gray-600',
-            status: 'over',
-          },
-        ]
-      } else if (user?.plan === 'enterprise') {
-        data = [
-          {
-            name: 'Gıda & İçecek',
-            amount: 8500,
-            percentage: 17.0,
-            trend: 5.2,
-            budget: 7000,
-            color: 'from-red-400 to-red-600',
-            status: 'over',
-          },
-          {
-            name: 'Ulaşım',
-            amount: 12200,
-            percentage: 24.4,
-            trend: -2.1,
-            budget: 10000,
-            color: 'from-blue-400 to-blue-600',
-            status: 'over',
-          },
-          {
-            name: 'Eğlence',
-            amount: 16600,
-            percentage: 33.2,
-            trend: 8.7,
-            budget: 12000,
-            color: 'from-purple-400 to-purple-600',
-            status: 'over',
-          },
-          {
-            name: 'Sağlık',
-            amount: 25000,
-            percentage: 50.0,
-            trend: 12.3,
-            budget: 15000,
-            color: 'from-green-400 to-green-600',
-            status: 'over',
-          },
-          {
-            name: 'Alışveriş',
-            amount: 37000,
-            percentage: 74.0,
-            trend: 3.4,
-            budget: 20000,
-            color: 'from-orange-400 to-orange-600',
-            status: 'over',
-          },
-          {
-            name: 'Diğer',
-            amount: 13000,
-            percentage: 26.0,
-            trend: -1.8,
-            budget: 8000,
-            color: 'from-gray-400 to-gray-600',
-            status: 'over',
-          },
-        ]
+    async function loadCategoryData() {
+      const res = await fetch('/api/analysis/categories', { credentials: 'include' })
+      if (!res.ok) {
+        if (res.status === 403) {
+          setCategoryData([])
+        } else {
+          setCategoryData([])
+        }
+        setIsLoading(false)
+        return
       }
-
+      const json = (await res.json()) as { categories: Array<{ name: string; amount: number; percentage: number; monthlyGrowth?: number; trend?: string }> }
+      const cats = json.categories || []
+      const data: CategoryDataItem[] = cats.map((c, i) => ({
+        name: c.name,
+        amount: c.amount,
+        percentage: c.percentage,
+        trend: c.monthlyGrowth ?? (c.trend === 'up' ? 5 : c.trend === 'down' ? -5 : 0),
+        budget: 0,
+        color: colorPalette[i % colorPalette.length],
+        status: 'on' as const,
+      }))
       setCategoryData(data)
       setIsLoading(false)
     }
-
-    loadCategoryData()
+    void loadCategoryData()
   }, [user])
 
   // Şahıs Premium özellikler

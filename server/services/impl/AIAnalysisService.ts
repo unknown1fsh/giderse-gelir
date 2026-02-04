@@ -102,8 +102,13 @@ export class AIAnalysisService {
 
   /**
    * AI analiz raporu oluşturur
+   * @param activePeriod Kullanıcının aktif dönemi - özet bu dönemin tarih aralığına göre hesaplanır
    */
-  async generateReport(userId: number, planId: string): Promise<AIReportData> {
+  async generateReport(
+    userId: number,
+    planId: string,
+    activePeriod?: { startDate: Date; endDate: Date; name: string } | null
+  ): Promise<AIReportData> {
     const reportLevel = getReportLevelForPlan(planId)
 
     // Kullanıcının tüm finansal verilerini topla
@@ -114,13 +119,13 @@ export class AIAnalysisService {
 
     switch (reportLevel) {
       case 'enterprise_premium':
-        reportData = await this.generateEnterprisePremiumReport(financialData, userId)
+        reportData = await this.generateEnterprisePremiumReport(financialData, userId, activePeriod)
         break
       case 'enterprise':
-        reportData = await this.generateEnterpriseReport(financialData, userId)
+        reportData = await this.generateEnterpriseReport(financialData, userId, activePeriod)
         break
       default:
-        reportData = await this.generatePremiumReport(financialData, userId)
+        reportData = await this.generatePremiumReport(financialData, userId, activePeriod)
     }
 
     return reportData
@@ -271,18 +276,38 @@ export class AIAnalysisService {
 
   /**
    * Premium seviyesi rapor oluşturur
+   * @param activePeriod Varsa bu dönemin tarih aralığındaki işlemler kullanılır
    */
   private async generatePremiumReport(
     data: Awaited<ReturnType<typeof this.collectFinancialData>>,
-    _userId: number
+    _userId: number,
+    activePeriod?: { startDate: Date; endDate: Date; name: string } | null
   ): Promise<AIReportData> {
     const now = new Date()
-    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    let periodStart = activePeriod
+      ? new Date(activePeriod.startDate)
+      : new Date(now.getFullYear(), now.getMonth(), 1)
+    let periodEnd = activePeriod
+      ? new Date(activePeriod.endDate)
+      : new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
 
-    // Bu ayın transactions
-    const thisMonthTransactions = data.transactions.filter(
-      t => new Date(t.transactionDate) >= currentMonthStart
-    )
+    // Dönem transactions (aktif dönem varsa onun aralığı, yoksa bu ay)
+    let thisMonthTransactions = data.transactions.filter(t => {
+      const txDate = new Date(t.transactionDate)
+      return txDate >= periodStart && txDate <= periodEnd
+    })
+
+    // Fallback: Aktif dönem yoksa ve bu ay boşsa, en son işlem olan ayı kullan
+    if (thisMonthTransactions.length === 0 && data.transactions.length > 0 && !activePeriod) {
+      const lastTx = data.transactions[0]
+      const lastDate = new Date(lastTx.transactionDate)
+      periodStart = new Date(lastDate.getFullYear(), lastDate.getMonth(), 1)
+      periodEnd = new Date(lastDate.getFullYear(), lastDate.getMonth() + 1, 0, 23, 59, 59)
+      thisMonthTransactions = data.transactions.filter(t => {
+        const txDate = new Date(t.transactionDate)
+        return txDate >= periodStart && txDate <= periodEnd
+      })
+    }
     // Gelir/Gider hesaplamaları
     const thisMonthIncome = thisMonthTransactions
       .filter(t => t.txType.code === 'GELIR')
@@ -359,13 +384,17 @@ export class AIAnalysisService {
       }
     )
 
+    const periodLabel = activePeriod
+      ? activePeriod.name
+      : `${periodStart.getFullYear()}-${String(periodStart.getMonth() + 1).padStart(2, '0')}`
+
     return {
       summary: {
         totalIncome: thisMonthIncome,
         totalExpense: thisMonthExpense,
         netAmount,
         savingsRate,
-        period: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
+        period: periodLabel,
       },
       categoryAnalysis,
       topCategories,
@@ -379,9 +408,10 @@ export class AIAnalysisService {
    */
   private async generateEnterpriseReport(
     data: Awaited<ReturnType<typeof this.collectFinancialData>>,
-    userId: number
+    userId: number,
+    activePeriod?: { startDate: Date; endDate: Date; name: string } | null
   ): Promise<AIReportData> {
-    const premiumReport = await this.generatePremiumReport(data, userId)
+    const premiumReport = await this.generatePremiumReport(data, userId, activePeriod)
 
     // Enterprise ekstra analizler
     const riskAnalysis = await this.calculateRiskAnalysis(data)
@@ -410,9 +440,10 @@ export class AIAnalysisService {
    */
   private async generateEnterprisePremiumReport(
     data: Awaited<ReturnType<typeof this.collectFinancialData>>,
-    userId: number
+    userId: number,
+    activePeriod?: { startDate: Date; endDate: Date; name: string } | null
   ): Promise<AIReportData> {
-    const enterpriseReport = await this.generateEnterpriseReport(data, userId)
+    const enterpriseReport = await this.generateEnterpriseReport(data, userId, activePeriod)
 
     // Enterprise Premium ekstra analizler
     const advancedPredictions = await this.generatePredictions(

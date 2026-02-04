@@ -10,7 +10,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Oturum bulunamadı' }, { status: 401 })
     }
 
-    // Demo veriler - gerçek uygulamada veritabanından çekilecek
     const exportData = {
       reportTypes: [
         {
@@ -69,35 +68,7 @@ export async function GET(request: NextRequest) {
         },
       ],
 
-      availableReports: [
-        {
-          id: '1',
-          name: 'Aylık Finansal Özet - Haziran 2024',
-          type: 'Kapsamlı Rapor',
-          createdAt: '2024-06-30T10:30:00Z',
-          size: '2.4 MB',
-          status: 'ready' as const,
-          format: 'pdf',
-        },
-        {
-          id: '2',
-          name: 'Kategori Analizi - Son 3 Ay',
-          type: 'Kategori Raporu',
-          createdAt: '2024-06-28T14:15:00Z',
-          size: '1.8 MB',
-          status: 'ready' as const,
-          format: 'excel',
-        },
-        {
-          id: '3',
-          name: 'Nakit Akışı Tahmini - Q3 2024',
-          type: 'Nakit Akışı Raporu',
-          createdAt: '2024-06-25T09:45:00Z',
-          size: '3.1 MB',
-          status: 'processing' as const,
-          format: 'pdf',
-        },
-      ],
+      availableReports: [],
 
       exportSettings: {
         dateRange: '30d',

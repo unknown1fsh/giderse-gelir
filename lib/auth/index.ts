@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import { AuthService } from '@/server/services/impl/AuthService'
@@ -59,6 +59,38 @@ export async function setAuthCookie(token: string, expiresAt: Date): Promise<voi
 export async function clearAuthCookie(): Promise<void> {
     const cookieStore = await cookies()
     cookieStore.delete('auth-token')
+}
+
+/**
+ * Geçersiz oturum için 401 response oluşturur.
+ * İstekte auth-token varsa (veritabanında geçersiz), cookie'yi temizleyerek
+ * redirect loop'unu önler.
+ */
+export function createUnauthorizedResponse(
+    request: NextRequest,
+    message = 'Oturum bulunamadı'
+): NextResponse {
+    const token = request.cookies.get('auth-token')?.value
+    const isProduction = process.env.NODE_ENV === 'production'
+    const isSecure = isProduction || process.env.NEXTAUTH_URL?.startsWith('https://') || false
+
+    const response = NextResponse.json(
+        { error: message, errorCode: 'UNAUTHORIZED', statusCode: 401 },
+        { status: 401 }
+    )
+
+    if (token) {
+        response.cookies.set('auth-token', '', {
+            path: '/',
+            maxAge: 0,
+            expires: new Date(0),
+            httpOnly: true,
+            secure: isSecure,
+            sameSite: 'lax',
+        })
+    }
+
+    return response
 }
 
 /**

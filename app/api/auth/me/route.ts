@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
-import { UnauthorizedError } from '@/server/errors'
+import { createUnauthorizedResponse, getCurrentUser } from '@/lib/auth'
 import { ExceptionMapper } from '@/server/errors'
 
 // Bu metot mevcut kullanıcı bilgilerini getirir (GET).
@@ -11,7 +10,7 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
   const user = await getCurrentUser(request)
 
   if (!user) {
-    throw new UnauthorizedError('Oturum bulunamadı')
+    return createUnauthorizedResponse(request, 'Oturum bulunamadı')
   }
 
   return NextResponse.json({

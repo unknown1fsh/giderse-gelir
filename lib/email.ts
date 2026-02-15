@@ -3,7 +3,44 @@ import { Resend } from 'resend'
 // Resend client instance
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+/**
+ * Production ortamında APP_URL'in doğru ayarlandığını garanti eder.
+ * Asla localhost URL'i ile email gönderilmesine izin vermez.
+ */
+function getAppUrl(): string {
+  const url = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL
+
+  if (!url) {
+    if (process.env.NODE_ENV === 'production') {
+      console.error(
+        '❌ KRITIK: NEXT_PUBLIC_APP_URL veya NEXTAUTH_URL environment variable ayarlanmamış! ' +
+        'Email linkleri localhost olarak gönderilecek. Lütfen Railway dashboard\'dan bu değişkeni ayarlayın.'
+      )
+      // Production'da fallback olarak hata fırlat - localhost URL'i ile email gönderilmesini engelle
+      throw new Error(
+        'NEXT_PUBLIC_APP_URL veya NEXTAUTH_URL environment variable ayarlanmalıdır. ' +
+        'Email gönderimi için geçerli bir production URL gereklidir.'
+      )
+    }
+    // Sadece development ortamında localhost'a fallback yap
+    return 'http://localhost:3000'
+  }
+
+  // URL'de localhost varsa ve production ortamındaysak uyar
+  if (url.includes('localhost') && process.env.NODE_ENV === 'production') {
+    console.error(
+      `❌ KRITIK: APP_URL localhost olarak ayarlanmış (${url}). ` +
+      'Production ortamında bu değer gerçek domain olmalıdır!'
+    )
+    throw new Error(
+      `APP_URL localhost olarak ayarlanmış (${url}). ` +
+      'Production ortamında geçerli bir domain kullanılmalıdır.'
+    )
+  }
+
+  return url
+}
+
 const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev'
 const FROM_NAME = process.env.FROM_NAME || 'GiderSe Gelir'
 
@@ -20,7 +57,7 @@ export async function sendVerificationEmail(
     return { success: false, error: 'Email servisi yapılandırılmamış' }
   }
 
-  const verificationUrl = `${APP_URL}/auth/verify-email?token=${token}`
+  const verificationUrl = `${getAppUrl()}/auth/verify-email?token=${token}`
 
   try {
     const { error } = await resend.emails.send({
@@ -149,7 +186,7 @@ export async function sendWelcomeEmail(
               </ul>
               
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${APP_URL}/dashboard" 
+                <a href="${getAppUrl()}/dashboard" 
                    style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
                   Dashboard'a Git
                 </a>
@@ -171,7 +208,7 @@ Merhaba ${name},
 
 GiderSe Gelir ailesine hoş geldiniz! 🎉
 
-Finansal takibinizi kolaylaştırmak için buradayız. Dashboard'a gitmek için: ${APP_URL}/dashboard
+Finansal takibinizi kolaylaştırmak için buradayız. Dashboard'a gitmek için: ${getAppUrl()}/dashboard
 
 Sorularınız için her zaman yanınızdayız. İyi kullanımlar!
 
@@ -207,7 +244,7 @@ export async function sendPasswordResetEmail(
     return { success: false, error: 'Email servisi yapılandırılmamış' }
   }
 
-  const resetUrl = `${APP_URL}/auth/reset-password?token=${resetToken}`
+  const resetUrl = `${getAppUrl()}/auth/reset-password?token=${resetToken}`
 
   try {
     const { error } = await resend.emails.send({
@@ -302,7 +339,7 @@ export async function sendSupportTicketCreatedEmail(
     return { success: false, error: 'Email servisi yapılandırılmamış' }
   }
 
-  const ticketUrl = `${APP_URL}/help/tickets/${ticketNumber}`
+  const ticketUrl = `${getAppUrl()}/help/tickets/${ticketNumber}`
 
   try {
     const { error } = await resend.emails.send({
@@ -405,7 +442,7 @@ export async function sendSupportTicketStatusChangedEmail(
     closed: 'Kapatıldı',
   }
 
-  const ticketUrl = `${APP_URL}/help/tickets/${ticketNumber}`
+  const ticketUrl = `${getAppUrl()}/help/tickets/${ticketNumber}`
 
   try {
     const { error } = await resend.emails.send({
@@ -499,7 +536,7 @@ export async function sendSupportTicketReplyEmail(
     return { success: false, error: 'Email servisi yapılandırılmamış' }
   }
 
-  const ticketUrl = `${APP_URL}/help/tickets/${ticketNumber}`
+  const ticketUrl = `${getAppUrl()}/help/tickets/${ticketNumber}`
 
   try {
     const { error } = await resend.emails.send({
@@ -599,7 +636,7 @@ export async function sendAdminNewTicketNotification(
     return { success: false, error: 'Email servisi yapılandırılmamış' }
   }
 
-  const ticketUrl = `${APP_URL}/admin/support-tickets/${ticketNumber}`
+  const ticketUrl = `${getAppUrl()}/admin/support-tickets/${ticketNumber}`
 
   try {
     const { error } = await resend.emails.send({

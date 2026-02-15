@@ -66,7 +66,10 @@ export async function createPaymentLink(
     const paymentDescription = description || `${productType} ödeme`
 
     // Varsayılan success/fail URL'leri
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL
+    if (!baseUrl || (baseUrl.includes('localhost') && process.env.NODE_ENV === 'production')) {
+      throw new Error('NEXT_PUBLIC_APP_URL veya NEXTAUTH_URL production ortamında doğru ayarlanmalıdır.')
+    }
     const defaultSuccessUrl = `${baseUrl}/premium/payment-success?merchant_oid=${merchantOrderId}`
     const defaultFailUrl = `${baseUrl}/premium/payment-failed?merchant_oid=${merchantOrderId}`
     const finalSuccessUrl = successUrl || defaultSuccessUrl

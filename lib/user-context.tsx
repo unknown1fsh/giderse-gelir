@@ -45,14 +45,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   // Geçerli sayfa korumalı bir sayfa mı kontrol et
   const isProtectedPage = (): boolean => {
     const currentPath = window.location.pathname
-    const publicPaths = ['/landing', '/auth/login', '/auth/register', '/auth/forgot-password']
+    const publicPaths = ['/landing', '/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password', '/auth/verify-email']
     return !publicPaths.some(path => currentPath.startsWith(path))
   }
 
   // Geçerli sayfa public bir sayfa mı kontrol et
   const isPublicPage = (): boolean => {
     const currentPath = window.location.pathname
-    const publicPaths = ['/landing', '/auth/login', '/auth/register', '/auth/forgot-password']
+    const publicPaths = ['/landing', '/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password', '/auth/verify-email']
     return publicPaths.some(path => currentPath.startsWith(path))
   }
 

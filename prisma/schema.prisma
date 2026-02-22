@@ -206,7 +206,7 @@ model User {
 model UserSession {
   id             String   @id @default(cuid())
   userId         Int      @map("user_id")
-  token          String   @unique @db.VarChar(500)
+  token          String   @unique @db.Text
   activePeriodId Int?     @map("active_period_id")
   expiresAt      DateTime @map("expires_at")
   userAgent      String?  @map("user_agent")

@@ -33,8 +33,9 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
   const authService = new AuthService(prisma)
 
   const userAgent = request.headers.get('user-agent') || undefined
-  const ipAddress =
-    request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || '127.0.0.1'
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  const ipAddressRaw = forwardedFor ? forwardedFor.split(',')[0].trim() : (request.headers.get('x-real-ip') || '127.0.0.1')
+  const ipAddress = ipAddressRaw.substring(0, 45)
 
   const loginDTO = new LoginUserDTO({ email, password })
   const result = await authService.login(loginDTO, userAgent, ipAddress)

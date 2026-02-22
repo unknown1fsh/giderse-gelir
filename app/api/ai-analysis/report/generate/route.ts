@@ -66,11 +66,9 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
   // Aktif dönemi al (özet tarih aralığı için)
   const activePeriod = await getActivePeriod(request)
 
-  // Ay-Yıl bilgisi (aktif dönem varsa ondan, yoksa şu anki ay)
+  // Ay-Yıl: limit her zaman şu anki takvim ayına göre (kalan rapor sayısı ile tutarlı olsun)
   const now = new Date()
-  const monthYear = activePeriod
-    ? `${new Date(activePeriod.startDate).getFullYear()}-${String(new Date(activePeriod.startDate).getMonth() + 1).padStart(2, '0')}`
-    : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 
   // Kullanım kaydı oluştur (processing durumunda)
   const usageRecord = await prisma.aIReportUsage.create({

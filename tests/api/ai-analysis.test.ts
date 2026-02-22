@@ -100,5 +100,17 @@ describe('AI Analysis API Endpoints', () => {
       )
       expect([200, 400, 500]).toContain(response.status)
     })
+
+    it('limitInfo remaining/total/used sayılarını dönmeli', async () => {
+      const response = await testFetch(`${BASE_URL}/ai-analysis/report/status`, {
+        headers: { Cookie: createAuthCookie(authToken) },
+      })
+      if (response.status !== 200) return
+      const json = (await response.json()) as { success?: boolean; data?: { limitInfo?: { remaining: number; total: number; used: number } } }
+      if (!json.success || !json.data?.limitInfo) return
+      expect(typeof json.data.limitInfo.remaining).toBe('number')
+      expect(typeof json.data.limitInfo.total).toBe('number')
+      expect(typeof json.data.limitInfo.used).toBe('number')
+    })
   })
 })

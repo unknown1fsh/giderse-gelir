@@ -83,16 +83,28 @@ export function GlobalErrorHandler() {
         return
       }
 
-      // Google Ads/DoubleClick hatalarını suppress et
+      // Google Ads/DoubleClick/Analytics hatalarını suppress et
       if (
         event.filename?.includes('doubleclick.net') ||
         event.filename?.includes('googleads.g.doubleclick.net') ||
+        event.filename?.includes('googlesyndication.com') ||
+        event.filename?.includes('googleadservices.com') ||
+        event.filename?.includes('google-analytics.com') ||
         event.message?.includes('doubleclick.net') ||
         event.message?.includes('googleads.g.doubleclick.net') ||
+        event.message?.includes('googlesyndication.com') ||
+        event.message?.includes('googleadservices.com') ||
+        event.message?.includes('google-analytics.com') ||
+        event.message?.includes('adsbygoogle') ||
         event.message?.includes('MIME type') ||
         event.message?.includes('is not executable') ||
         event.message?.includes('ERR_ABORTED') ||
-        (event.target && (event.target as HTMLElement).tagName === 'SCRIPT' && (event.target as HTMLScriptElement).src?.includes('doubleclick.net'))
+        event.message?.includes('ERR_BLOCKED_BY_CLIENT') ||
+        (event.target && (event.target as HTMLElement).tagName === 'SCRIPT' && (
+          (event.target as HTMLScriptElement).src?.includes('doubleclick.net') ||
+          (event.target as HTMLScriptElement).src?.includes('googlesyndication.com') ||
+          (event.target as HTMLScriptElement).src?.includes('googleadservices.com')
+        ))
       ) {
         event.preventDefault()
         return
@@ -152,7 +164,12 @@ export function GlobalErrorHandler() {
         message.includes('ERR_ABORTED') ||
         message.includes('ERR_BLOCKED_BY_CLIENT') ||
         message.includes('499') ||
-        message.includes('CORS')
+        message.includes('CORS') ||
+        message.includes('adsbygoogle') ||
+        message.includes('pagead') ||
+        message.includes('googlesyndication.com') ||
+        message.includes('googleadservices.com') ||
+        message.includes('google-analytics.com')
       ) {
         // Sessizce geç
         return

@@ -3,11 +3,29 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { CreditCard, AlertCircle, Calendar, ArrowLeft, Home, Tag, Edit, Trash2 } from 'lucide-react'
+import {
+  AppPageShell,
+  Button,
+  Card,
+  CardContent,
+  EmptyState,
+  StatCard,
+  StatsGrid,
+  Spinner,
+  ConfirmationDialog,
+  EditNameModal,
+} from '@/components/mosaic'
+import {
+  CreditCard,
+  AlertTriangle,
+  Wallet,
+  Plus,
+  Edit,
+  Trash2,
+  Building2,
+  Calendar,
+} from 'lucide-react'
 import { formatCurrency } from '@/lib/validators'
-import { EditNameModal } from '@/components/ui/edit-name-modal'
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { useToast } from '@/lib/use-toast'
 
 interface CreditCardData {
@@ -15,17 +33,28 @@ interface CreditCardData {
   name: string
   limitAmount: string
   availableLimit: string
+  statementDay: number
   dueDay: number
-  bank: {
-    id: number
-    name: string
-  }
-  currency: {
-    id: number
-    code: string
-    name: string
-  }
+  minPaymentPercent: string
+  bank: { id: number; name: string }
+  currency: { id: number; code: string; name: string }
   createdAt: string
+}
+
+function getNextDueDate(dueDay: number): Date {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const thisMonth = new Date(today.getFullYear(), today.getMonth(), dueDay)
+  return thisMonth > today
+    ? thisMonth
+    : new Date(today.getFullYear(), today.getMonth() + 1, dueDay)
+}
+
+function getDaysUntilDue(dueDay: number): number {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const next = getNextDueDate(dueDay)
+  return Math.ceil((next.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 }
 
 export default function CardsPage() {
@@ -39,259 +68,265 @@ export default function CardsPage() {
   const [selectedCard, setSelectedCard] = useState<CreditCardData | null>(null)
 
   useEffect(() => {
-    async function fetchCreditCards() {
-      try {
-        const response = await fetch('/api/cards', {
-          credentials: 'include',
-        })
-        if (response.ok) {
-          const data = await response.json()
-          setCreditCards(data)
-        } else {
-          setError('Kredi kartları yüklenemedi')
-        }
-      } catch (error) {
-        console.error('Kredi kartları yüklenirken hata:', error)
-        setError('Kredi kartları yüklenirken hata oluştu')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchCreditCards()
+    fetch('/api/cards', { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : Promise.reject('Yüklenemedi')))
+      .then(data => setCreditCards(data))
+      .catch(() => setError('Kredi kartları yüklenirken hata oluştu'))
+      .finally(() => setLoading(false))
   }, [])
 
   const handleEditName = async (newName: string) => {
-    if (!selectedCard) {
-      return
-    }
-
-    try {
-      const response = await fetch(`/api/cards/${selectedCard.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newName }),
-        credentials: 'include',
-      })
-
-      if (response.ok) {
-        // Listeyi güncelle
-        setCreditCards(prev =>
-          prev.map(card => (card.id === selectedCard.id ? { ...card, name: newName } : card))
-        )
-        toastSuccess('Başarılı', 'Kart adı başarıyla güncellendi')
-      } else {
-        toastError('Hata', 'Kart adı güncellenemedi')
-      }
-    } catch (error) {
-      console.error('Kart güncelleme hatası:', error)
-      toastError('Hata', 'Kart güncellenirken hata oluştu')
+    if (!selectedCard) {return}
+    const res = await fetch(`/api/cards/${selectedCard.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newName }),
+      credentials: 'include',
+    })
+    if (res.ok) {
+      setCreditCards(prev =>
+        prev.map(c => (c.id === selectedCard.id ? { ...c, name: newName } : c))
+      )
+      toastSuccess('Başarılı', 'Kart adı güncellendi')
+    } else {
+      toastError('Hata', 'Kart adı güncellenemedi')
     }
   }
 
   const handleDelete = async () => {
-    if (!selectedCard) {
-      return
-    }
-
-    try {
-      const response = await fetch(`/api/cards/${selectedCard.id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        toastSuccess('Başarılı', result.message)
-        // Listeyi güncelle
-        setCreditCards(prev => prev.filter(card => card.id !== selectedCard.id))
-      } else {
-        toastError('Hata', 'Kart silinemedi')
-      }
-    } catch (error) {
-      console.error('Kart silme hatası:', error)
-      toastError('Hata', 'Kart silinirken hata oluştu')
+    if (!selectedCard) {return}
+    const res = await fetch(`/api/cards/${selectedCard.id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+    if (res.ok) {
+      const result = await res.json()
+      toastSuccess('Başarılı', result.message)
+      setCreditCards(prev => prev.filter(c => c.id !== selectedCard.id))
+    } else {
+      toastError('Hata', 'Kart silinemedi')
     }
   }
 
-  // Hesaplamalar
-  const totalLimit = creditCards.reduce((sum, card) => sum + parseFloat(card.limitAmount), 0)
+  const totalLimit = creditCards.reduce((sum, c) => sum + parseFloat(c.limitAmount), 0)
   const totalUsed = creditCards.reduce(
-    (sum, card) => sum + (parseFloat(card.limitAmount) - parseFloat(card.availableLimit)),
+    (sum, c) => sum + (parseFloat(c.limitAmount) - parseFloat(c.availableLimit)),
     0
   )
-  const nextDueDate =
-    creditCards.length > 0 ? Math.min(...creditCards.map(card => card.dueDay)) : null
+  const totalAvailable = totalLimit - totalUsed
+  const overallUtilization = totalLimit > 0 ? ((totalUsed / totalLimit) * 100).toFixed(0) : '0'
+
+  const nearestDue =
+    creditCards.length > 0
+      ? creditCards.reduce((min, c) =>
+          getDaysUntilDue(c.dueDay) < getDaysUntilDue(min.dueDay) ? c : min
+        )
+      : null
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <Link href="/dashboard" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <Home className="h-5 w-5" />
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold">Kredi Kartları</h1>
-            <p className="text-muted-foreground">
-              Kredi kartı limitlerinizi ve ödeme tarihlerini takip edin
-            </p>
-          </div>
+    <AppPageShell
+      header={{
+        title: 'Kredi Kartları',
+        description: 'Limit kullanımını ve ödeme tarihlerini takip edin',
+        onBack: () => router.back(),
+        actions: (
+          <Button asChild variant="glow">
+            <Link href="/accounts/new?type=credit_card">
+              <Plus className="mr-2 h-4 w-4" />
+              Yeni Kart
+            </Link>
+          </Button>
+        ),
+      }}
+    >
+      {/* Özet istatistikler */}
+      <StatsGrid className="xl:grid-cols-3">
+        <StatCard
+          title="Toplam Limit"
+          value={formatCurrency(totalLimit, 'TRY')}
+          icon={CreditCard}
+          color="blue"
+          description={`${creditCards.length} kart`}
+        />
+        <StatCard
+          title="Kullanılan"
+          value={formatCurrency(totalUsed, 'TRY')}
+          icon={AlertTriangle}
+          color="amber"
+          description={`%${overallUtilization} kullanım oranı`}
+        />
+        <StatCard
+          title="Kullanılabilir"
+          value={formatCurrency(totalAvailable, 'TRY')}
+          icon={Wallet}
+          color="green"
+          description={
+            nearestDue
+              ? `En yakın ödeme ${getDaysUntilDue(nearestDue.dueDay)} gün sonra`
+              : 'Mevcut kullanılabilir limit'
+          }
+        />
+      </StatsGrid>
+
+      {/* Kart listesi */}
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <Spinner />
         </div>
-        <Link
-          href="/cards/new"
-          className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          <CreditCard className="mr-2 h-4 w-4" />
-          Yeni Kart
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Toplam Limit</CardTitle>
-            <CreditCard className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {formatCurrency(totalLimit, 'TRY')}
-            </div>
-            <p className="text-xs text-muted-foreground">Tüm kartların toplam limiti</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Kullanılan Limit</CardTitle>
-            <AlertCircle className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
-              {formatCurrency(totalUsed, 'TRY')}
-            </div>
-            <p className="text-xs text-muted-foreground">Kullanılan limit tutarı</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Yaklaşan Ödeme</CardTitle>
-            <Calendar className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {nextDueDate ? `${nextDueDate}` : '-'}
-            </div>
-            <p className="text-xs text-muted-foreground">En yakın ödeme tarihi</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Kart Listesi</CardTitle>
-          <CardDescription>Tüm kredi kartlarınızın listesi</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-slate-600">Kredi kartları yükleniyor...</p>
-            </div>
-          ) : error ? (
-            <div className="text-center py-8">
-              <p className="text-red-600">{error}</p>
-            </div>
-          ) : creditCards.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <CreditCard className="h-8 w-8 mx-auto mb-2" />
-              <p>Henüz kredi kartı eklenmemiş</p>
-              <Link href="/accounts/new?type=credit_card" className="text-blue-600 hover:underline">
-                İlk kartınızı ekleyin
+      ) : error ? (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center text-red-400">
+          {error}
+        </div>
+      ) : creditCards.length === 0 ? (
+        <EmptyState
+          title="Henüz kart eklenmemiş"
+          description="Kredi kartı limitlerini ve ödeme tarihlerini takip etmek için kart ekleyin."
+          icon={<CreditCard className="h-10 w-10" />}
+          action={
+            <Button asChild variant="glow">
+              <Link href="/accounts/new?type=credit_card">
+                <Plus className="mr-2 h-4 w-4" />
+                İlk Kartı Ekle
               </Link>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {creditCards.map(card => (
-                <div
-                  key={card.id}
-                  className="group p-4 border border-slate-200 rounded-xl hover:shadow-md transition-all duration-200 bg-gradient-to-r from-slate-50 to-slate-100/50"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-3 h-3 rounded-full bg-purple-500" />
-                        <h3 className="font-semibold text-slate-800">{card.name}</h3>
-                        <span className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-700">
-                          Kredi Kartı
-                        </span>
-                      </div>
+            </Button>
+          }
+        />
+      ) : (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {creditCards.map(card => {
+            const limit = parseFloat(card.limitAmount)
+            const available = parseFloat(card.availableLimit)
+            const used = limit - available
+            const utilizationPct = limit > 0 ? (used / limit) * 100 : 0
+            const minPayment = used * (parseFloat(card.minPaymentPercent) / 100)
+            const daysUntilDue = getDaysUntilDue(card.dueDay)
 
-                      <div className="flex items-center gap-4 text-xs text-slate-500">
-                        <div className="flex items-center gap-1">
-                          <Tag className="h-3 w-3" />
-                          {card.bank.name}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {card.dueDay}. gün ödeme
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <CreditCard className="h-3 w-3" />
-                          {new Date(card.createdAt).toLocaleDateString('tr-TR')}
-                        </div>
-                      </div>
+            const barColor =
+              utilizationPct >= 80
+                ? 'bg-red-500'
+                : utilizationPct >= 50
+                  ? 'bg-amber-500'
+                  : 'bg-emerald-500'
+
+            const dueDayColor =
+              daysUntilDue <= 3
+                ? 'text-red-400'
+                : daysUntilDue <= 7
+                  ? 'text-amber-400'
+                  : 'text-slate-300'
+
+            return (
+              <Card
+                key={card.id}
+                className="overflow-hidden border-border/80 bg-card/95 shadow-sm transition-all duration-300 hover:shadow-md"
+              >
+                {/* Kart görseli */}
+                <div className="relative h-40 overflow-hidden bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900 p-5">
+                  <div className="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-white/5" />
+                  <div className="absolute -bottom-8 -right-2 h-24 w-24 rounded-full bg-white/5" />
+                  <div className="absolute -bottom-4 left-0 h-20 w-20 rounded-full bg-purple-500/10" />
+
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="mb-0.5 text-xs text-slate-400">{card.bank.name}</p>
+                      <h3 className="text-lg font-bold text-white">{card.name}</h3>
                     </div>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => {
+                          setSelectedCard(card)
+                          setShowEditModal(true)
+                        }}
+                        className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+                        title="Adı düzenle"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedCard(card)
+                          setShowDeleteConfirm(true)
+                        }}
+                        className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                        title="Kartı sil"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
 
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-purple-600">
-                          {formatCurrency(parseFloat(card.limitAmount), card.currency.code)}
-                        </p>
-                        <p className="text-sm text-slate-500">
-                          Kullanılabilir:{' '}
-                          {formatCurrency(parseFloat(card.availableLimit), card.currency.code)}
-                        </p>
-                      </div>
-
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => {
-                            setSelectedCard(card)
-                            setShowEditModal(true)
-                          }}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Düzenle"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedCard(card)
-                            setShowDeleteConfirm(true)
-                          }}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Sil"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
+                  <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
+                    <div>
+                      <p className="text-xs text-slate-400">Limit</p>
+                      <p className="text-xl font-bold text-white">
+                        {formatCurrency(limit, card.currency.code)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-slate-400">Para birimi</p>
+                      <p className="text-sm font-semibold text-slate-200">{card.currency.code}</p>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Düzenleme Modal */}
+                <CardContent className="space-y-4 p-5">
+                  {/* Kullanım çubuğu */}
+                  <div>
+                    <div className="mb-1.5 flex justify-between text-xs text-muted-foreground">
+                      <span>Kullanım %{utilizationPct.toFixed(0)}</span>
+                      <span>
+                        {formatCurrency(used, card.currency.code)} /{' '}
+                        {formatCurrency(limit, card.currency.code)}
+                      </span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+                        style={{ width: `${Math.min(utilizationPct, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Detaylar */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Kullanılabilir</p>
+                      <p className="text-sm font-semibold text-emerald-400">
+                        {formatCurrency(available, card.currency.code)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Min. Ödeme</p>
+                      <p className="text-sm font-semibold text-amber-400">
+                        {formatCurrency(minPayment, card.currency.code)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Kalan Gün</p>
+                      <p className={`text-sm font-semibold ${dueDayColor}`}>
+                        {daysUntilDue} gün
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Alt bilgi */}
+                  <div className="flex items-center justify-between border-t border-border/50 pt-3 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                      <Building2 className="h-3.5 w-3.5" />
+                      {card.bank.name}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5" />
+                      Ekstre: {card.statementDay}. · Ödeme: {card.dueDay}.
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )}
+
       {selectedCard && (
         <EditNameModal
           isOpen={showEditModal}
@@ -306,7 +341,6 @@ export default function CardsPage() {
         />
       )}
 
-      {/* Silme Onay Dialog */}
       {selectedCard && (
         <ConfirmationDialog
           isOpen={showDeleteConfirm}
@@ -322,6 +356,6 @@ export default function CardsPage() {
           cancelText="İptal"
         />
       )}
-    </div>
+    </AppPageShell>
   )
 }

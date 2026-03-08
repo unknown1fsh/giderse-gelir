@@ -4,8 +4,7 @@
 export const PLAN_IDS = {
   FREE: 'free',
   PREMIUM: 'premium',
-  ENTERPRISE: 'enterprise',
-  ENTERPRISE_PREMIUM: 'enterprise_premium',
+  FAMILY: 'family',
 } as const
 
 export type PlanId = (typeof PLAN_IDS)[keyof typeof PLAN_IDS]
@@ -28,51 +27,56 @@ export interface PlanConfig extends PlanPricing {
   categories: PlanFeatureCategory[]
   limitations: string[]
   popular?: boolean
-  savings?: string
-  custom?: string
+  badge?: string
+  trialDays?: number
 }
 
-// Plan fiyatları
+// Plan fiyatları (TRY, aylık)
 export const PLAN_PRICES: Record<PlanId, number> = {
   [PLAN_IDS.FREE]: 0,
-  [PLAN_IDS.PREMIUM]: 250,
-  [PLAN_IDS.ENTERPRISE]: 450,
-  [PLAN_IDS.ENTERPRISE_PREMIUM]: 0, // Özel fiyat
+  [PLAN_IDS.PREMIUM]: 149,
+  [PLAN_IDS.FAMILY]: 249,
 }
 
 // Plan limitleri
 export const PLAN_LIMITS: Record<
   PlanId,
   {
-    transactions: number // -1 = sınırsız
-    accounts: number // -1 = sınırsız
-    creditCards: number // -1 = sınırsız
-    analysis: number // -1 = sınırsız
+    transactions: number   // -1 = sınırsız
+    accounts: number
+    creditCards: number
+    ewallets: number
+    goals: number
+    budgets: number
+    members: number        // aile üye sayısı
   }
 > = {
   [PLAN_IDS.FREE]: {
-    transactions: 50,
+    transactions: 100,
     accounts: 3,
     creditCards: 2,
-    analysis: 10,
+    ewallets: 2,
+    goals: 3,
+    budgets: 3,
+    members: 1,
   },
   [PLAN_IDS.PREMIUM]: {
     transactions: -1,
     accounts: -1,
     creditCards: -1,
-    analysis: -1,
+    ewallets: -1,
+    goals: -1,
+    budgets: -1,
+    members: 1,
   },
-  [PLAN_IDS.ENTERPRISE]: {
+  [PLAN_IDS.FAMILY]: {
     transactions: -1,
     accounts: -1,
     creditCards: -1,
-    analysis: -1,
-  },
-  [PLAN_IDS.ENTERPRISE_PREMIUM]: {
-    transactions: -1,
-    accounts: -1,
-    creditCards: -1,
-    analysis: -1,
+    ewallets: -1,
+    goals: -1,
+    budgets: -1,
+    members: 5,
   },
 }
 
@@ -80,24 +84,33 @@ export const PLAN_LIMITS: Record<
 export const PLANS: Record<PlanId, PlanConfig> = {
   [PLAN_IDS.FREE]: {
     id: PLAN_IDS.FREE,
-    name: 'Ücretsiz',
+    name: 'Başlangıç',
     price: PLAN_PRICES.free,
     currency: 'TRY',
     period: 'month',
-    description: 'Temel özellikler',
+    description: 'Kişisel finans takibine başlamak için',
+    trialDays: 0,
     categories: [
       {
-        name: 'Temel Finansal Yönetim',
+        name: 'Temel Özellikler',
         features: [
-          'Aylık 50 işlem',
-          'Temel raporlar',
-          'Mobil erişim',
-          'E-posta desteği',
-          'Temel kategoriler',
+          'Aylık 100 işlem kaydı',
+          '3 banka hesabı',
+          '2 kredi kartı, 2 e-cüzdan',
+          '3 tasarruf hedefi',
+          'Temel bütçe takibi',
+          'Dönem yönetimi',
+          'Mobil uyumlu arayüz',
         ],
       },
     ],
-    limitations: ['Sınırlı işlem sayısı', 'Temel raporlar', 'Standart destek'],
+    limitations: [
+      'Sınırlı işlem sayısı (aylık 100)',
+      'AI analiz yok',
+      'PDF/Excel export yok',
+      'Yatırım takibi yok',
+      'Otomatik ödeme takibi yok',
+    ],
     popular: false,
   },
 
@@ -107,168 +120,121 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     price: PLAN_PRICES.premium,
     currency: 'TRY',
     period: 'month',
-    description: 'Bireysel kullanıcılar için tüm premium özellikler',
+    description: 'Paranı tam kontrol altına almak isteyenler için',
+    trialDays: 30,
+    badge: 'En Popüler',
     categories: [
       {
-        name: '🧠 AI & Akıllı Analizler',
+        name: 'Sınırsız Kullanım',
         features: [
-          'AI Finansal Asistan',
-          'Otomatik Kategorileme',
-          'Tahmin Modelleri',
-          'Akıllı Öneriler',
+          'Sınırsız işlem kaydı',
+          'Sınırsız hesap & kredi kartı',
+          'Sınırsız e-cüzdan',
+          'Sınırsız hedef & bütçe',
         ],
       },
       {
-        name: '📊 Gelişmiş Raporlama',
+        name: 'AI & Akıllı Analizler',
         features: [
-          'İnteraktif Grafikler',
-          'Harcama Dağılımı',
-          'Trend Analizleri',
-          'PDF/Excel Raporları',
+          'AI finansal asistan',
+          'Harcama tahminleri (3–6 ay)',
+          'Otomatik kategorileme',
+          'Nakit akış analizi',
+          'Trend raporları',
+          'Kategori bazlı analizler',
         ],
       },
       {
-        name: '🎯 Akıllı Hedefleme',
-        features: ['Kişisel Hedefler', 'Mevsimsel Analiz', 'Akıllı Bildirimler', 'Başarı Takibi'],
+        name: 'Yatırım & Varlık Takibi',
+        features: [
+          'Hisse senedi takibi',
+          'Kripto portföyü',
+          'Altın & emtia',
+          'Yatırım fonu takibi',
+          'Canlı fiyat güncellemeleri',
+        ],
       },
       {
-        name: '⚡ Otomasyon & Verimlilik',
-        features: ['Otomatik Takip', 'Akıllı Tekrarlar', 'Zaman Tasarrufu', 'Özelleştirilebilir'],
+        name: 'Otomasyon',
+        features: [
+          'Otomatik ödeme takibi',
+          'Kira, fatura, abonelik takibi',
+          'Bildirim & hatırlatmalar',
+        ],
       },
       {
-        name: '🛡️ Premium Destek',
-        features: ['7/24 Premium Destek', 'Gelişmiş Güvenlik', 'Premium Tema', 'Bulut Yedekleme'],
+        name: 'Raporlama',
+        features: [
+          'PDF rapor dışa aktarma',
+          'Excel/CSV export',
+          'Özelleştirilebilir dashboard',
+        ],
+      },
+      {
+        name: 'Destek',
+        features: ['7/24 öncelikli e-posta desteği', 'Yeni özellik erken erişimi'],
       },
     ],
     limitations: [],
     popular: true,
-    savings: 'Yıllık ödeme ile %20 indirim',
   },
 
-  [PLAN_IDS.ENTERPRISE]: {
-    id: PLAN_IDS.ENTERPRISE,
-    name: 'Enterprise',
-    price: PLAN_PRICES.enterprise,
+  [PLAN_IDS.FAMILY]: {
+    id: PLAN_IDS.FAMILY,
+    name: 'Aile',
+    price: PLAN_PRICES.family,
     currency: 'TRY',
     period: 'month',
-    description: 'KOBİ ve şirketler için kurumsal çözümler',
+    description: 'Aile bütçesini birlikte yönetenler için',
+    trialDays: 30,
+    badge: 'Aile Paketi',
     categories: [
       {
-        name: '🏢 Kurumsal Yönetim',
+        name: 'Premium\'ın Tamamı',
         features: [
-          'Tüm Premium Özellikler',
-          'Çoklu Kullanıcı Desteği',
-          'Departman Yönetimi',
-          'Rol Bazlı Erişim Kontrolü',
+          'Sınırsız işlem, hesap, kart',
+          'AI analiz & tahminler',
+          'Yatırım & portföy takibi',
+          'Otomatik ödeme takibi',
+          'PDF/Excel export',
         ],
       },
       {
-        name: '🔧 Entegrasyonlar',
-        features: ['API Erişimi', 'Webhook Desteği', 'Özel Entegrasyonlar', 'ERP/CRM Entegrasyonu'],
-      },
-      {
-        name: '📈 Gelişmiş Analizler',
+        name: 'Aile Özellikleri',
         features: [
-          'Departman Bazlı Raporlar',
-          'Bütçe Takibi',
-          'Nakit Akış Tahminleri',
-          "Özel Dashboard'lar",
+          '5 kişiye kadar paylaşım',
+          'Ortak aile bütçesi',
+          'Üye bazlı harcama takibi',
+          'Aile bazlı hedefler',
+          'Ortak dönem yönetimi',
         ],
       },
       {
-        name: '🎯 Premium Destek',
+        name: 'Öncelikli Destek',
         features: [
-          'Dedicated Hesap Yöneticisi',
-          'Öncelikli 7/24 Destek',
-          'Özel Eğitim',
-          'SLA Garantisi',
+          '7/24 öncelikli e-posta & sohbet',
+          'Telefon destek (hafta içi)',
+          'Hesap yöneticisi atama',
         ],
       },
     ],
     limitations: [],
     popular: false,
-  },
-
-  [PLAN_IDS.ENTERPRISE_PREMIUM]: {
-    id: PLAN_IDS.ENTERPRISE_PREMIUM,
-    name: 'Enterprise Premium',
-    price: PLAN_PRICES.enterprise_premium,
-    currency: 'TRY',
-    period: 'month',
-    description: 'Holding ve büyük kurumlar için ultra premium',
-    categories: [
-      {
-        name: '🏢 Kurumsal Yönetim',
-        features: [
-          'Çoklu Şirket Konsolidasyonu',
-          'Sınırsız Departman Yönetimi',
-          'Hiyerarşik Yetki Sistemi',
-          'Global Şube Ağı',
-        ],
-      },
-      {
-        name: '🔒 Enterprise Güvenlik',
-        features: [
-          'Kurumsal Quantum Şifreleme',
-          'Enterprise Sıfır Güven',
-          'Siber Tehdit İzleme',
-          'Uyumluluk Yönetimi',
-        ],
-      },
-      {
-        name: '🤖 AI Süper Zeka',
-        features: [
-          'Kurumsal AI Süper Zeka',
-          'Kurumsal Gelir Optimizasyonu',
-          'Operasyonel Verimlilik',
-          'Kurumsal Süreç Otomasyonu',
-        ],
-      },
-      {
-        name: '🌐 Global Altyapı',
-        features: [
-          'Global İş Ağı',
-          'Enterprise Bulut Altyapısı',
-          'Çoklu Para Birimi Yönetimi',
-          'VIP Kurumsal Destek',
-        ],
-      },
-      {
-        name: '💰 Kurumsal Gelir Artırma',
-        features: [
-          'Pazar Genişletme',
-          'Müşteri Segmentasyonu',
-          'Ürün Portföy Optimizasyonu',
-          'Kurumsal Ortaklıklar',
-        ],
-      },
-      {
-        name: '📈 İş Zekası & Analytics',
-        features: [
-          'Kurumsal Dashboard',
-          'Enterprise API',
-          'Özel Sistem Entegrasyonları',
-          'Beyaz Etiket Çözümü',
-        ],
-      },
-    ],
-    limitations: [],
-    popular: false,
-    custom: 'Özel fiyatlandırma için iletişime geçin',
   },
 }
 
-// Helper fonksiyonlar
+/* ────────── Helper fonksiyonlar ────────── */
+
 export function getPlanById(planId: string): PlanConfig | undefined {
   return PLANS[planId as PlanId]
 }
 
 export function getPlanPrice(planId: string): number {
-  return PLAN_PRICES[planId as PlanId] || 0
+  return PLAN_PRICES[planId as PlanId] ?? 0
 }
 
 export function getPlanLimits(planId: string) {
-  return PLAN_LIMITS[planId as PlanId] || PLAN_LIMITS.free
+  return PLAN_LIMITS[planId as PlanId] ?? PLAN_LIMITS.free
 }
 
 export function isValidPlanId(planId: string): planId is PlanId {
@@ -279,15 +245,17 @@ export function getAllPlans(): PlanConfig[] {
   return Object.values(PLANS)
 }
 
-// Premium özellikleri kontrol etme
+/** Premium plan kontrolü — Premium veya Aile planı */
 export function isPremiumPlan(planId: string): boolean {
-  return (
-    planId === PLAN_IDS.PREMIUM ||
-    planId === PLAN_IDS.ENTERPRISE ||
-    planId === PLAN_IDS.ENTERPRISE_PREMIUM
-  )
+  return planId === PLAN_IDS.PREMIUM || planId === PLAN_IDS.FAMILY
 }
 
+/** Aile planı kontrolü */
+export function isFamilyPlan(planId: string): boolean {
+  return planId === PLAN_IDS.FAMILY
+}
+
+// Geriye dönük uyumluluk — eski enterprise kontrollerini premium'a düşür
 export function isEnterprisePlan(planId: string): boolean {
-  return planId === PLAN_IDS.ENTERPRISE || planId === PLAN_IDS.ENTERPRISE_PREMIUM
+  return isFamilyPlan(planId)
 }

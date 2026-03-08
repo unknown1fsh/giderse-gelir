@@ -2,9 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AuthCardShell, AuthShell, Button, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/mosaic'
 import { CheckCircle2, XCircle, Mail, Loader2, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import BrandLogo from '@/components/brand-logo'
@@ -107,19 +105,22 @@ function VerifyEmailContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <BrandLogo size={36} variant="light" priority textClassName="text-slate-800" />
-          </div>
+    <AuthShell
+      title="E-posta Doğrulama"
+      description="E-posta adresinizi doğrulayın"
+      backHref="/auth/login"
+      backLabel="Giriş sayfasına dön"
+      hero={<BrandLogo size={40} variant="dark" priority textClassName="text-white" />}
+    >
+      <AuthCardShell className="mx-auto max-w-md">
+        <CardHeader className="px-0 text-center">
           <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
             <Mail className="h-8 w-8 text-white" />
           </div>
           <CardTitle className="text-2xl font-bold">E-posta Doğrulama</CardTitle>
           <CardDescription>E-posta adresinizi doğrulayın</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <div className="space-y-4">
           {status === 'loading' && (
             <div className="text-center py-8">
               <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
@@ -183,9 +184,9 @@ function VerifyEmailContent() {
               Giriş sayfasına dön
             </Link>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </AuthCardShell>
+    </AuthShell>
   )
 }
 
@@ -193,16 +194,22 @@ export default function VerifyEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-4">
-          <Card className="w-full max-w-md">
+        <AuthShell
+          title="E-posta Doğrulama"
+          description="Doğrulama durumu hazırlanıyor."
+          backHref="/auth/login"
+          backLabel="Giriş sayfasına dön"
+          hero={<BrandLogo size={40} variant="dark" priority textClassName="text-white" />}
+        >
+          <AuthCardShell className="mx-auto w-full max-w-md">
             <CardContent className="py-8">
               <div className="text-center">
                 <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
                 <p className="text-gray-600">Yükleniyor...</p>
               </div>
             </CardContent>
-          </Card>
-        </div>
+          </AuthCardShell>
+        </AuthShell>
       }
     >
       <VerifyEmailContent />

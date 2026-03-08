@@ -5,43 +5,69 @@ import { Menu } from 'lucide-react'
 import Sidebar from '@/components/sidebar'
 import PeriodOnboarding from '@/components/period-onboarding'
 import BrandLogo from '@/components/brand-logo'
+import { useUser } from '@/lib/user-context'
+import { getDisplayName } from '@/lib/utils'
+import { GlobalOmnibox } from '@/components/dashboard/global-omnibox'
+import { NotificationCenter } from '@/components/dashboard/notification-center'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { user } = useUser()
 
   return (
-    <div className="flex h-screen h-[100dvh] bg-slate-50">
-      {/* Mobile Header - Sadece mobilde görünür */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-white shadow-sm border-b border-slate-200 pt-[env(safe-area-inset-top)]">
-        <div className="flex items-center justify-between px-4 py-3">
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="min-h-[44px] min-w-[44px] p-2 rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-center"
-            aria-label="Open menu"
-          >
-            <Menu className="h-6 w-6 text-slate-700" />
-          </button>
-          <div className="flex items-center space-x-2">
-            <BrandLogo
-              size={32}
-              priority
-              variant="light"
-              textClassName="text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
-            />
-          </div>
-          <div className="w-10" /> {/* Spacer for centering */}
-        </div>
-      </header>
-
-      {/* Sidebar with mobile state */}
+    <div className="flex h-screen h-[100dvh] bg-[var(--mosaic-bg)]">
+      {/* Sidebar */}
       <Sidebar isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto pt-14 lg:pt-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="p-4 sm:p-6">
-          {children}
-        </div>
-      </main>
+      {/* Main Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Top Header */}
+        <header className="mosaic-header flex items-center justify-between gap-4">
+          {/* Left: Mobile menu + Brand */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Menü"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <div className="lg:hidden">
+              <BrandLogo
+                size={28}
+                priority
+                variant="dark"
+                textClassName="text-base bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Center: Search */}
+          <div className="hidden sm:flex flex-1 max-w-md">
+            <GlobalOmnibox />
+          </div>
+
+          {/* Right: Notifications + User */}
+          <div className="flex items-center gap-2">
+            <NotificationCenter />
+            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-border">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-sm font-bold">
+                {user ? getDisplayName(user).charAt(0).toUpperCase() : 'U'}
+              </div>
+              <span className="text-sm text-foreground font-medium">
+                {user ? getDisplayName(user) : ''}
+              </span>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div className="mosaic-page-content">
+            {children}
+          </div>
+        </main>
+      </div>
 
       <PeriodOnboarding />
     </div>

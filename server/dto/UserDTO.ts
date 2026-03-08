@@ -15,6 +15,15 @@ export class UserDTO extends BaseDTO {
   role: string
   usernameChangeCount: number
   isActive: boolean
+  emailVerified: boolean
+  timezone: string
+  language: string
+  currency: string
+  dateFormat: string
+  numberFormat: string
+  theme: string
+  notifications: Record<string, unknown>
+  settings: Record<string, unknown>
   createdAt: Date
   lastLoginAt?: Date
 
@@ -29,6 +38,15 @@ export class UserDTO extends BaseDTO {
     role: string
     usernameChangeCount: number
     isActive: boolean
+    emailVerified: boolean
+    timezone: string
+    language: string
+    currency: string
+    dateFormat: string
+    numberFormat: string
+    theme: string
+    notifications: Record<string, unknown>
+    settings: Record<string, unknown>
     createdAt: Date
     lastLoginAt?: Date
   }) {
@@ -43,6 +61,15 @@ export class UserDTO extends BaseDTO {
     this.role = data.role
     this.usernameChangeCount = data.usernameChangeCount
     this.isActive = data.isActive
+    this.emailVerified = data.emailVerified
+    this.timezone = data.timezone
+    this.language = data.language
+    this.currency = data.currency
+    this.dateFormat = data.dateFormat
+    this.numberFormat = data.numberFormat
+    this.theme = data.theme
+    this.notifications = data.notifications
+    this.settings = data.settings
     this.createdAt = data.createdAt
     this.lastLoginAt = data.lastLoginAt
   }

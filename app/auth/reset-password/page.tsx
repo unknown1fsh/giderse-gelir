@@ -2,10 +2,8 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Eye, EyeOff, Lock, AlertCircle, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react'
+import { AuthCardShell, AuthShell, Button, CardContent, CardDescription, CardHeader, CardTitle, Input } from '@/components/mosaic'
+import { Eye, EyeOff, Lock, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import BrandLogo from '@/components/brand-logo'
 
@@ -78,14 +76,14 @@ function ResetPasswordContent() {
     }
 
     return (
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl w-full max-w-md">
-            <CardHeader className="text-center pb-4">
+        <AuthCardShell className="w-full max-w-md">
+            <CardHeader className="px-0 pb-4 text-center">
                 <CardTitle className="text-2xl font-bold text-white">Yeni Şifre Belirle</CardTitle>
                 <CardDescription className="text-slate-300">
                     Hesabınız için yeni bir şifre oluşturun.
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <div className="space-y-6">
                 {status === 'success' ? (
                     <div className="text-center space-y-4">
                         <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4 flex flex-col items-center">
@@ -175,49 +173,37 @@ function ResetPasswordContent() {
                         </Button>
                     </form>
                 )}
-            </CardContent>
-        </Card>
+            </div>
+        </AuthCardShell>
     )
 }
 
 export default function ResetPasswordPage() {
     return (
-        <div className="min-h-screen min-h-[100dvh] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 sm:p-6 py-8">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
-
-            <div className="relative w-full max-w-md flex flex-col items-center">
-                <div className="mb-6 self-start w-full">
-                    <Link
-                        href="/auth/login"
-                        className="inline-flex items-center min-h-[44px] text-white/70 hover:text-white transition-colors py-2"
-                    >
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Girişe Dön
-                    </Link>
-                </div>
-
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center space-x-3 mb-4">
-                        <BrandLogo
-                            size={48}
-                            priority
-                            variant="dark"
-                            textClassName="text-2xl font-bold text-white"
-                        />
-                    </div>
-                </div>
-
+        <AuthShell
+            title="Yeni Şifre Belirle"
+            description="Hesabınız için güvenli bir yeni şifre oluşturun."
+            backHref="/auth/login"
+            backLabel="Girişe Dön"
+            hero={(
+                <BrandLogo
+                    size={48}
+                    priority
+                    variant="dark"
+                    textClassName="text-2xl font-bold text-white"
+                />
+            )}
+        >
                 <Suspense fallback={
-                    <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl w-full max-w-md">
+                    <AuthCardShell className="w-full max-w-md">
                         <CardContent className="py-10 text-center text-white">
                             <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
                             <p>Yükleniyor...</p>
                         </CardContent>
-                    </Card>
+                    </AuthCardShell>
                 }>
-                    <ResetPasswordContent />
-                </Suspense>
-            </div>
-        </div>
+                <ResetPasswordContent />
+            </Suspense>
+        </AuthShell>
     )
 }

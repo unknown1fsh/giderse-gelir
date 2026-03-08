@@ -4,19 +4,19 @@ import { useState, useEffect } from 'react'
 import { useToast } from '@/lib/use-toast'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
+import { Button } from '@/components/mosaic'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/mosaic'
+import { Badge } from '@/components/mosaic'
+import { Textarea } from '@/components/mosaic'
+import { Label } from '@/components/mosaic'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
+} from '@/components/mosaic'
+import { Skeleton } from '@/components/mosaic'
 import { ArrowLeft, Download, Send, Loader2 } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils'
 

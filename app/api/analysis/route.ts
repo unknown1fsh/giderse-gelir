@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getActivePeriod, getCurrentUser } from '@/lib/auth'
+import { getNetWorthSummary } from '@/lib/finance/net-worth'
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,25 +37,12 @@ export async function GET(request: NextRequest) {
 
     const activePeriod = await getActivePeriod(request)
     const txBaseWhere: { userId: number; periodId?: number } = { userId: user.id }
-    const accountBaseWhere: { userId: number; active: boolean; periodId?: number } = {
-      userId: user.id,
-      active: true,
-    }
-    const cardBaseWhere: { userId: number; active: boolean; periodId?: number } = {
-      userId: user.id,
-      active: true,
-    }
-    const goldBaseWhere: { userId: number; periodId?: number } = { userId: user.id }
-
     if (activePeriod) {
       txBaseWhere.periodId = activePeriod.id
-      accountBaseWhere.periodId = activePeriod.id
-      cardBaseWhere.periodId = activePeriod.id
-      goldBaseWhere.periodId = activePeriod.id
     }
 
     // Paralel veri çekme
-    const [transactions, accounts, _creditCards, goldItems, lastMonthTransactions] =
+    const [transactions, netWorthSummary, lastMonthTransactions] =
       await Promise.all([
         // Bu dönem işlemleri
         prisma.transaction.findMany({
@@ -74,29 +62,9 @@ export async function GET(request: NextRequest) {
             transactionDate: 'desc',
           },
         }),
-        // Hesaplar
-        prisma.account.findMany({
-          where: accountBaseWhere,
-          include: {
-            currency: true,
-            bank: true,
-          },
-        }),
-        // Kredi kartları
-        prisma.creditCard.findMany({
-          where: cardBaseWhere,
-          include: {
-            currency: true,
-            bank: true,
-          },
-        }),
-        // Altın eşyalar
-        prisma.goldItem.findMany({
-          where: goldBaseWhere,
-          include: {
-            goldType: true,
-            goldPurity: true,
-          },
+        getNetWorthSummary(prisma, {
+          userId: user.id,
+          activePeriodId: activePeriod?.id,
         }),
         // Geçen ay işlemleri (trend hesaplama için)
         prisma.transaction.findMany({
@@ -136,18 +104,8 @@ export async function GET(request: NextRequest) {
       lastMonthExpense > 0 ? ((totalExpense - lastMonthExpense) / lastMonthExpense) * 100 : 0
     const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome) * 100 : 0
 
-    // Varlık hesaplamaları
-    const totalBankBalance = accounts.reduce((sum, acc) => {
-      const rate = acc.currency.code === 'USD' ? 30 : acc.currency.code === 'EUR' ? 32 : 1
-      return sum + Number(acc.balance) * rate
-    }, 0)
-
-    const totalGoldValue = goldItems.reduce((sum, item) => {
-      return sum + Number(item.currentValueTry || 0)
-    }, 0)
-
-    const totalAssets = totalBankBalance + totalGoldValue
-    const netWorth = totalAssets - totalExpense
+    const totalAssets = netWorthSummary.totalAssets
+    const netWorth = netWorthSummary.netWorth
 
     // Kategori analizi
     const categoryMap = new Map()

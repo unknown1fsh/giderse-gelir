@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/mosaic'
 import { useUser } from '@/lib/user-context'
 import { getDisplayName } from '@/lib/utils'
 import { formatCurrency } from '@/lib/validators'
@@ -123,7 +123,7 @@ export default function EnterpriseDashboardPage() {
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-amber-500/20 to-orange-600/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-emerald-500/10 to-teal-600/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 sm:w-96 sm:h-96 bg-gradient-to-br from-emerald-500/10 to-teal-600/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
       </div>
 
       {/* Floating Tech Elements */}
@@ -144,7 +144,7 @@ export default function EnterpriseDashboardPage() {
 
       <div className="relative z-10">
         {/* Ultra Header */}
-        <div className="bg-black/20 backdrop-blur-sm border-b border-amber-500/30 sticky top-0 z-20">
+        <div className="bg-black/20 backdrop-blur-xl border-b border-amber-500/30 sticky top-0 z-20">
           <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
               <div>
@@ -161,7 +161,7 @@ export default function EnterpriseDashboardPage() {
               </div>
               <div className="flex flex-wrap items-center gap-3 sm:gap-6">
                 {/* Ultra Premium Badge */}
-                <div className="flex items-center space-x-3 bg-gradient-to-r from-amber-500/30 to-orange-500/30 backdrop-blur-sm rounded-full px-6 py-3 border-2 border-amber-500/50">
+                <div className="flex items-center space-x-3 bg-gradient-to-r from-amber-500/30 to-orange-500/30 backdrop-blur-xl rounded-full px-6 py-3 border-2 border-amber-500/50">
                   <Award className="h-6 w-6 text-amber-400" />
                   <span className="text-amber-400 font-black text-lg">ULTRA PREMIUM</span>
                 </div>
@@ -178,24 +178,24 @@ export default function EnterpriseDashboardPage() {
         {/* User Welcome Section */}
         <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
           <div className="max-w-7xl mx-auto">
-            <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 backdrop-blur-sm rounded-3xl p-4 sm:p-6 lg:p-8 border-2 border-amber-500/30">
-              <div className="flex items-center justify-between">
+            <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 backdrop-blur-xl rounded-3xl p-4 sm:p-6 lg:p-8 border-2 border-amber-500/30">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h2 className="text-3xl font-black text-white mb-2">
+                  <h2 className="text-xl sm:text-3xl font-black text-white mb-2">
                     Hoş geldin,{' '}
                     <span className="text-amber-400">
                       {user ? getDisplayName(user) : 'Kullanıcı'}
                     </span>
                     ! 👑
                   </h2>
-                  <p className="text-amber-200 text-lg">
+                  <p className="text-amber-200 text-sm sm:text-lg">
                     Ultra Premium Enterprise üyeliğiniz aktif. Tüm gelişmiş özellikler
                     kullanımınızda.
                   </p>
                 </div>
-                <div className="text-right">
-                  <div className="text-2xl font-black text-amber-400 mb-1">ULTRA PREMIUM</div>
-                  <div className="text-amber-200">Enterprise Member</div>
+                <div className="text-left sm:text-right shrink-0">
+                  <div className="text-lg sm:text-2xl font-black text-amber-400 mb-1">ULTRA PREMIUM</div>
+                  <div className="text-amber-200 text-sm">Enterprise Member</div>
                 </div>
               </div>
             </div>
@@ -206,10 +206,10 @@ export default function EnterpriseDashboardPage() {
           {/* Ultra KPI Cards */}
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-              <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border-2 border-emerald-500/30 hover:scale-105">
+              <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-xl border-2 border-emerald-500/30 hover:scale-105">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-lg font-bold text-emerald-200">Toplam Gelir</CardTitle>
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-xl group-hover:scale-110 transition-transform">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-mosaic-lg group-hover:scale-110 transition-transform">
                     <TrendingUp className="h-6 w-6 text-white" />
                   </div>
                 </CardHeader>
@@ -223,10 +223,10 @@ export default function EnterpriseDashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-red-500/20 to-rose-500/20 backdrop-blur-sm border-2 border-red-500/30 hover:scale-105">
+              <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-red-500/20 to-rose-500/20 backdrop-blur-xl border-2 border-red-500/30 hover:scale-105">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-lg font-bold text-red-200">Toplam Gider</CardTitle>
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-xl group-hover:scale-110 transition-transform">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-mosaic-lg group-hover:scale-110 transition-transform">
                     <TrendingDown className="h-6 w-6 text-white" />
                   </div>
                 </CardHeader>
@@ -240,10 +240,10 @@ export default function EnterpriseDashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 backdrop-blur-sm border-2 border-blue-500/30 hover:scale-105">
+              <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 backdrop-blur-xl border-2 border-blue-500/30 hover:scale-105">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-lg font-bold text-blue-200">Net Durum</CardTitle>
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-xl group-hover:scale-110 transition-transform flex items-center justify-center">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-mosaic-lg group-hover:scale-110 transition-transform flex items-center justify-center">
                     <span className="text-3xl font-bold text-white">₺</span>
                   </div>
                 </CardHeader>
@@ -261,10 +261,10 @@ export default function EnterpriseDashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm border-2 border-purple-500/30 hover:scale-105">
+              <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-xl border-2 border-purple-500/30 hover:scale-105">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-lg font-bold text-purple-200">Toplam İşlem</CardTitle>
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-xl group-hover:scale-110 transition-transform">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-mosaic-lg group-hover:scale-110 transition-transform">
                     <CreditCard className="h-6 w-6 text-white" />
                   </div>
                 </CardHeader>
@@ -281,10 +281,10 @@ export default function EnterpriseDashboardPage() {
           {/* Ultra Content Grid */}
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
             {/* Ultra Upcoming Payments */}
-            <Card className="border-0 shadow-2xl bg-black/20 backdrop-blur-sm border-2 border-amber-500/30">
+            <Card className="border-0 shadow-2xl bg-black/20 backdrop-blur-xl border-2 border-amber-500/30">
               <CardHeader className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-t-3xl">
                 <CardTitle className="flex items-center gap-4 text-2xl font-black text-amber-200">
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-xl">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-mosaic-lg">
                     <Calendar className="h-6 w-6 text-white" />
                   </div>
                   Yaklaşan Ödemeler
@@ -301,16 +301,16 @@ export default function EnterpriseDashboardPage() {
                         key={payment.id}
                         className="group p-6 border-2 border-amber-500/30 rounded-2xl hover:bg-amber-500/10 transition-all duration-200 bg-gradient-to-r from-amber-500/5 to-orange-500/5"
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <p className="font-black text-xl text-amber-200">{payment.name}</p>
-                            <p className="text-amber-300 text-lg">{payment.bank_name}</p>
-                            <p className="text-amber-400 text-sm mt-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-black text-base sm:text-xl text-amber-200 break-words">{payment.name}</p>
+                            <p className="text-amber-300 text-sm sm:text-lg">{payment.bank_name}</p>
+                            <p className="text-amber-400 text-sm mt-1 sm:mt-2">
                               Vade: {payment.due_day}. gün
                             </p>
                           </div>
-                          <div className="text-right">
-                            <p className="font-black text-2xl text-red-400">
+                          <div className="text-left sm:text-right shrink-0">
+                            <p className="font-black text-xl sm:text-2xl text-red-400">
                               {formatCurrency(parseFloat(payment.current_debt), 'TRY')}
                             </p>
                             <p className="text-amber-400 text-sm">
@@ -334,10 +334,10 @@ export default function EnterpriseDashboardPage() {
             </Card>
 
             {/* Ultra Category Breakdown */}
-            <Card className="border-0 shadow-2xl bg-black/20 backdrop-blur-sm border-2 border-purple-500/30">
+            <Card className="border-0 shadow-2xl bg-black/20 backdrop-blur-xl border-2 border-purple-500/30">
               <CardHeader className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-t-3xl">
                 <CardTitle className="flex items-center gap-4 text-2xl font-black text-purple-200">
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-xl">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-mosaic-lg">
                     <BarChart3 className="h-6 w-6 text-white" />
                   </div>
                   Kategori Dağılımı
@@ -356,7 +356,7 @@ export default function EnterpriseDashboardPage() {
                       >
                         <div className="flex items-center gap-4">
                           <div
-                            className={`w-6 h-6 rounded-full shadow-lg ${
+                            className={`w-6 h-6 rounded-full shadow-mosaic ${
                               category.tx_type_name === 'Gelir'
                                 ? 'bg-gradient-to-br from-emerald-400 to-teal-500'
                                 : 'bg-gradient-to-br from-red-400 to-rose-500'

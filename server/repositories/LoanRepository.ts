@@ -69,7 +69,7 @@ export class LoanRepository extends BaseRepository<Loan> {
 
     async decrementRemainingInstallments(id: number): Promise<Loan> {
         const loan = await this.prisma.loan.findUnique({ where: { id } })
-        if (!loan) throw new Error('Loan not found')
+        if (!loan) {throw new Error('Loan not found')}
 
         const newRemaining = Math.max(0, loan.remainingInstallments - 1)
 
@@ -84,7 +84,7 @@ export class LoanRepository extends BaseRepository<Loan> {
 
     async incrementRemainingInstallments(id: number): Promise<Loan> {
         const loan = await this.prisma.loan.findUnique({ where: { id } })
-        if (!loan) throw new Error('Loan not found')
+        if (!loan) {throw new Error('Loan not found')}
 
         return this.prisma.loan.update({
             where: { id },

@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/mosaic'
+import { Badge } from '@/components/mosaic'
 import { Database, Server, Activity, Users } from 'lucide-react'
 
 interface SystemStats {
@@ -125,15 +125,15 @@ export default function AdminSystem() {
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-600">Sistem Durumu</span>
+              <span className="text-sm text-muted-foreground">Sistem Durumu</span>
               <Badge variant="default">Aktif</Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-600">Veritabanı</span>
+              <span className="text-sm text-muted-foreground">Veritabanı</span>
               <Badge variant="default">Bağlı</Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-600">API Durumu</span>
+              <span className="text-sm text-muted-foreground">API Durumu</span>
               <Badge variant="default">Çalışıyor</Badge>
             </div>
           </div>

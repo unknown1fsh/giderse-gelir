@@ -1,7 +1,6 @@
-// Bu enum abonelik planlarını tanımlar.
+// Abonelik planlarını tanımlayan enum
 export enum PlanId {
   FREE = 'free',
   PREMIUM = 'premium',
-  ENTERPRISE = 'enterprise',
-  ENTERPRISE_PREMIUM = 'enterprise_premium',
+  FAMILY = 'family',
 }

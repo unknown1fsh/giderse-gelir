@@ -1,15 +1,15 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
 import { XCircle, ArrowLeft, RefreshCw, CreditCard, Phone, Mail, HelpCircle } from 'lucide-react'
 
 export default function PaymentFailedPage() {
   const router = useRouter()
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-4">
       <Card
         variant="glass"
         className="w-full max-w-md hover:shadow-glow-lg transition-all duration-300"
@@ -37,7 +37,7 @@ export default function PaymentFailedPage() {
                 </p>
               </div>
             </div>
-            <ul className="text-red-700 text-sm mt-3 space-y-2">
+            <ul className="text-red-400 text-sm mt-3 space-y-2">
               <li className="flex items-start">
                 <CreditCard className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
                 Kart bilgileriniz (numara, CVV, son kullanma tarihi) doğru mu?
@@ -113,7 +113,7 @@ export default function PaymentFailedPage() {
           </div>
 
           {/* Destek bilgileri */}
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-5 hover:shadow-md transition-all duration-300">
+          <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-200 rounded-xl p-5 hover:shadow-md transition-all duration-300">
             <h3 className="font-semibold text-purple-900 mb-3 flex items-center">
               <div className="p-1.5 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 shadow-glow mr-2">
                 <Phone className="h-4 w-4 text-white" />
@@ -122,13 +122,13 @@ export default function PaymentFailedPage() {
             </h3>
             <div className="space-y-2 text-sm">
               <div className="flex items-center text-purple-800">
-                <Mail className="h-4 w-4 mr-2 text-purple-600" />
+                <Mail className="h-4 w-4 mr-2 text-purple-400" />
                 <a href="mailto:support@giderse.com" className="hover:underline">
                   support@giderse.com
                 </a>
               </div>
               <div className="flex items-center text-purple-800">
-                <Phone className="h-4 w-4 mr-2 text-purple-600" />
+                <Phone className="h-4 w-4 mr-2 text-purple-400" />
                 <span>+90 (850) 123 45 67</span>
               </div>
               <p className="text-purple-700 text-xs mt-3">

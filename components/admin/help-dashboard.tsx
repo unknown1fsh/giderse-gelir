@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Badge, Card, CardContent, CardHeader, CardTitle, PageHeader, Skeleton } from '@/components/mosaic'
 import {
   BookOpen,
   MessageSquare,
@@ -15,7 +14,6 @@ import {
   AlertCircle,
   TrendingUp,
 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 
 interface HelpStats {
   faqs: {
@@ -171,17 +169,11 @@ export default function HelpDashboard() {
 
   return (
     <div className="space-y-6 pb-8">
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8 md:p-12 text-white shadow-2xl">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20" />
-        <div className="relative z-10">
-          <h1 className="text-4xl md:text-5xl font-bold mb-2 flex items-center gap-3">
-            <MessageSquare className="h-10 w-10" />
-            Help Yönetim Dashboard
-          </h1>
-          <p className="text-lg md:text-xl text-white/90">FAQ ve destek talepleri istatistikleri</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Help Yönetim Dashboard"
+        description="FAQ ve destek talepleri istatistiklerini tek ekranda izleyin."
+        breadcrumbs={[{ label: 'Admin' }, { label: 'Help Dashboard' }]}
+      />
 
       {/* FAQ Stats */}
       <div>

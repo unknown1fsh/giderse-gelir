@@ -121,18 +121,22 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+      <div className="flex items-center justify-center py-12 min-h-[400px]">
+        <div className="flex mt-8 flex-col items-center animate-pulse">
+          <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-muted-foreground font-medium">Dashboard verileri yükleniyor...</p>
+        </div>
       </div>
     )
   }
 
   if (error || !data) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <p className="text-red-600 font-semibold">{error || 'Veri yüklenemedi'}</p>
+      <div className="flex items-center justify-center py-12 min-h-[400px]">
+        <div className="text-center max-w-sm mx-auto p-6 rounded-2xl bg-destructive/10 border border-destructive/20">
+          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+          <p className="text-destructive font-semibold text-lg">{error || 'Veri yüklenemedi'}</p>
+          <p className="text-destructive/80 text-sm mt-2">Lütfen daha sonra tekrar deneyin veya sayfayı yenileyin.</p>
         </div>
       </div>
     )
@@ -224,7 +228,7 @@ export default function AdminDashboard() {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-[300px] text-slate-500">
+            <div className="flex items-center justify-center h-[300px] text-muted-foreground">
               Veri bulunamadı
             </div>
           )}
@@ -257,7 +261,7 @@ export default function AdminDashboard() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-[300px] text-slate-500">
+            <div className="flex items-center justify-center h-[300px] text-muted-foreground">
               Veri bulunamadı
             </div>
           )}
@@ -281,7 +285,7 @@ export default function AdminDashboard() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-[300px] text-slate-500">
+            <div className="flex items-center justify-center h-[300px] text-muted-foreground">
               Veri bulunamadı
             </div>
           )}
@@ -305,7 +309,7 @@ export default function AdminDashboard() {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-[300px] text-slate-500">
+            <div className="flex items-center justify-center h-[300px] text-muted-foreground">
               Veri bulunamadı
             </div>
           )}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import DataTable from './DataTable'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@/components/mosaic'
 import { formatCurrency } from '@/lib/validators'
 import { getDisplayName } from '@/lib/utils'
 
@@ -99,8 +99,8 @@ export default function AdminTransactions() {
       header: 'Kullanıcı',
       render: (tx: Transaction) => (
         <div>
-          <div className="text-sm font-medium text-slate-900">{getDisplayName(tx.user)}</div>
-          <div className="text-sm text-slate-500">{tx.user.email}</div>
+          <div className="text-sm font-medium text-foreground">{getDisplayName(tx.user)}</div>
+          <div className="text-sm text-muted-foreground">{tx.user.email}</div>
         </div>
       ),
     },
@@ -129,7 +129,7 @@ export default function AdminTransactions() {
       key: 'date',
       header: 'Tarih',
       render: (tx: Transaction) => (
-        <span className="text-sm text-slate-500">
+        <span className="text-sm text-muted-foreground">
           {new Date(tx.transactionDate).toLocaleDateString('tr-TR')}
         </span>
       ),
@@ -138,7 +138,7 @@ export default function AdminTransactions() {
       key: 'description',
       header: 'Açıklama',
       render: (tx: Transaction) => (
-        <span className="text-sm text-slate-600">{tx.description || '-'}</span>
+        <span className="text-sm text-muted-foreground">{tx.description || '-'}</span>
       ),
     },
   ]

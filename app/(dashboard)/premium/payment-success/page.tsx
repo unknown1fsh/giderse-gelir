@@ -2,8 +2,8 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
 import { CheckCircle2, Loader2, ArrowRight, Crown, Sparkles, Star, Gift } from 'lucide-react'
 import { useUser } from '@/lib/user-context'
 
@@ -62,7 +62,7 @@ function PaymentSuccessContent() {
   }, [merchantOid, refreshUser])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           {loading ? (
@@ -78,7 +78,7 @@ function PaymentSuccessContent() {
               <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
                 <CheckCircle2 className="h-8 w-8 text-white" />
               </div>
-              <CardTitle className="text-2xl font-bold text-green-600">Ödeme Başarılı!</CardTitle>
+              <CardTitle className="text-2xl font-bold text-green-400">Ödeme Başarılı!</CardTitle>
               <CardDescription>Aboneliğiniz aktif edildi</CardDescription>
             </>
           ) : (
@@ -86,7 +86,7 @@ function PaymentSuccessContent() {
               <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center">
                 <CheckCircle2 className="h-8 w-8 text-white" />
               </div>
-              <CardTitle className="text-2xl font-bold text-red-600">
+              <CardTitle className="text-2xl font-bold text-red-400">
                 Ödeme Bilgisi Bulunamadı
               </CardTitle>
               <CardDescription>Ödeme durumunuzu kontrol edin</CardDescription>
@@ -97,12 +97,12 @@ function PaymentSuccessContent() {
           {success && (
             <>
               {/* Kutlama mesajı */}
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6">
+              <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-2 border-green-200 rounded-xl p-6">
                 <div className="flex items-start space-x-3">
-                  <Crown className="h-6 w-6 text-green-600 mt-0.5" />
+                  <Crown className="h-6 w-6 text-green-400 mt-0.5" />
                   <div>
                     <h3 className="font-semibold text-green-800 mb-1">Hoş Geldiniz!</h3>
-                    <p className="text-green-700 text-sm">
+                    <p className="text-green-400 text-sm">
                       Ödemeniz başarıyla tamamlandı. {planInfo?.name || 'Premium'} aboneliğiniz
                       aktif edildi!
                     </p>
@@ -114,7 +114,7 @@ function PaymentSuccessContent() {
               {planInfo && (
                 <div className="bg-purple-50 border border-purple-200 rounded-xl p-6">
                   <div className="flex items-center space-x-2 mb-4">
-                    <Sparkles className="h-5 w-5 text-purple-600" />
+                    <Sparkles className="h-5 w-5 text-purple-400" />
                     <h3 className="font-semibold text-purple-900">
                       {planInfo.name} Özellikleriniz Aktif
                     </h3>
@@ -122,7 +122,7 @@ function PaymentSuccessContent() {
                   <ul className="space-y-2">
                     {planInfo.features.map((feature, index) => (
                       <li key={index} className="flex items-start text-sm text-purple-800">
-                        <Star className="h-4 w-4 text-purple-600 mr-2 mt-0.5 flex-shrink-0" />
+                        <Star className="h-4 w-4 text-purple-400 mr-2 mt-0.5 flex-shrink-0" />
                         {feature}
                       </li>
                     ))}
@@ -169,7 +169,7 @@ function PaymentSuccessContent() {
               <div className="text-center pt-2 border-t border-gray-200">
                 <p className="text-xs text-gray-600">
                   Sorunuz mu var?{' '}
-                  <a href="mailto:support@giderse.com" className="text-purple-600 hover:underline">
+                  <a href="mailto:support@giderse.com" className="text-purple-400 hover:underline">
                     7/24 premium destek
                   </a>{' '}
                   ile iletişime geçin
@@ -199,11 +199,11 @@ export default function PaymentSuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-4">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-4">
           <Card className="w-full max-w-md">
             <CardContent className="py-8">
               <div className="text-center">
-                <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
+                <Loader2 className="h-12 w-12 animate-spin text-purple-400 mx-auto mb-4" />
                 <p className="text-gray-600">Yükleniyor...</p>
               </div>
             </CardContent>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth'
+import { syncNotificationEvents } from '@/lib/notifications/service'
 
 export async function GET(request: NextRequest) {
     try {
@@ -51,6 +52,10 @@ export async function POST(request: NextRequest) {
                 status: 'active'
             },
             include: { currency: true }
+        })
+
+        await syncNotificationEvents(prisma, {
+            userId: user.id,
         })
 
         return NextResponse.json(goal, { status: 201 })

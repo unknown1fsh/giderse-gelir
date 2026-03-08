@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 import { UserRepository } from '../../repositories/UserRepository'
 import { UserService } from './UserService'
 import { UserMapper } from '../../mappers/UserMapper'
@@ -340,8 +340,13 @@ export class AuthService {
       phone?: string
       avatar?: string
       timezone?: string
-      notifications?: any
-      settings?: any
+      language?: string
+      currency?: string
+      dateFormat?: string
+      numberFormat?: string
+      theme?: string
+      notifications?: Record<string, unknown>
+      settings?: Record<string, unknown>
     }
   ): Promise<{ success: boolean; user?: UserDTO; error?: string }> {
     try {
@@ -367,9 +372,50 @@ export class AuthService {
         }
       }
 
+      const updatePayload: Prisma.UserUpdateInput = {}
+      if (data.name !== undefined) {
+        updatePayload.name = data.name
+      }
+      if (data.username !== undefined) {
+        updatePayload.username = data.username
+      }
+      if (data.phone !== undefined) {
+        updatePayload.phone = data.phone
+      }
+      if (data.avatar !== undefined) {
+        updatePayload.avatar = data.avatar
+      }
+      if (data.timezone !== undefined) {
+        updatePayload.timezone = data.timezone
+      }
+      if (data.language !== undefined) {
+        updatePayload.language = data.language
+      }
+      if (data.currency !== undefined) {
+        updatePayload.currency = data.currency
+      }
+      if (data.dateFormat !== undefined) {
+        updatePayload.dateFormat = data.dateFormat
+      }
+      if (data.numberFormat !== undefined) {
+        updatePayload.numberFormat = data.numberFormat
+      }
+      if (data.theme !== undefined) {
+        updatePayload.theme = data.theme
+      }
+      if (data.notifications !== undefined) {
+        updatePayload.notifications = data.notifications as Prisma.InputJsonValue
+      }
+      if (data.settings !== undefined) {
+        updatePayload.settings = data.settings as Prisma.InputJsonValue
+      }
+      if ('usernameChangeCount' in (data as Record<string, unknown>)) {
+        updatePayload.usernameChangeCount = (data as { usernameChangeCount: Prisma.IntFieldUpdateOperationsInput }).usernameChangeCount
+      }
+
       const user = await this.prisma.user.update({
         where: { id: userId },
-        data,
+        data: updatePayload,
         include: {
           subscriptions: {
             where: { status: 'active' },

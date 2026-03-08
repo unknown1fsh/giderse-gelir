@@ -4,68 +4,91 @@ import { transactionSchema } from '@/lib/validators'
 import { getCurrentUser } from '@/lib/auth'
 import { TransactionService } from '@/server/services/impl/TransactionService'
 import { ExceptionMapper } from '@/server/errors'
+import { buildTransactionWhere, parseTransactionFilters } from '@/lib/search'
+import { syncNotificationEvents } from '@/lib/notifications/service'
 
 export async function GET(request: NextRequest) {
   try {
-    // Kullanıcı doğrulama
     const user = await getCurrentUser(request)
     if (!user) {
       return NextResponse.json({ error: 'Oturum bulunamadı' }, { status: 401 })
     }
 
-    // Aktif dönemi al (opsiyonel - migration sonrası aktif olacak)
     const { getActivePeriod } = await import('@/lib/auth')
     const activePeriod = await getActivePeriod(request)
-
-    // Period sistemi henüz aktif değilse, tüm işlemleri getir
-    const whereClause: {
-      userId: number
-      periodId?: number
-    } = {
-      userId: user.id,
+    const { searchParams } = new URL(request.url)
+    const filters = parseTransactionFilters(searchParams)
+    const whereClause = buildTransactionWhere(user.id, activePeriod?.id, filters)
+    const orderBy: Record<string, 'asc' | 'desc'> = {
+      [filters.sortBy]: filters.sortDirection,
     }
 
-    if (activePeriod) {
-      whereClause.periodId = activePeriod.id
-    }
+    const [transactions, total, categories, txTypes] = await Promise.all([
+      prisma.transaction.findMany({
+        include: {
+          txType: true,
+          category: true,
+          paymentMethod: true,
+          account: {
+            include: {
+              bank: true,
+              currency: true,
+            },
+          },
+          creditCard: {
+            include: {
+              bank: true,
+              currency: true,
+            },
+          },
+          eWallet: {
+            include: {
+              currency: true,
+            },
+          },
+          beneficiary: {
+            include: {
+              bank: true,
+            },
+          },
+          currency: true,
+        },
+        where: whereClause,
+        orderBy,
+        skip: (filters.page - 1) * filters.limit,
+        take: filters.limit,
+      }),
+      prisma.transaction.count({
+        where: whereClause,
+      }),
+      prisma.refTxCategory.findMany({
+        where: {
+          active: true,
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      }),
+      prisma.refTxType.findMany({
+        where: {
+          active: true,
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      }),
+    ])
 
-    const transactions = await prisma.transaction.findMany({
-      include: {
-        txType: true,
-        category: true,
-        paymentMethod: true,
-        account: {
-          include: {
-            bank: true,
-            currency: true,
-          },
-        },
-        creditCard: {
-          include: {
-            bank: true,
-            currency: true,
-          },
-        },
-        eWallet: {
-          include: {
-            currency: true,
-          },
-        },
-        beneficiary: {
-          include: {
-            bank: true,
-          },
-        },
-        currency: true,
-      },
-      where: whereClause,
-      orderBy: {
-        transactionDate: 'desc',
-      },
-      take: 50,
+    return NextResponse.json({
+      items: transactions,
+      page: filters.page,
+      limit: filters.limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / filters.limit)),
+      filters,
+      categories,
+      txTypes,
     })
-
-    return NextResponse.json(transactions)
   } catch (error) {
     console.error('Transactions API error:', error)
     return NextResponse.json({ error: 'İşlemler alınamadı' }, { status: 500 })
@@ -134,6 +157,11 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
 
   // ✅ Service katmanı üzerinden oluştur (kategori-tip validation dahil)
   const transaction = await transactionService.create(transactionData)
+
+  await syncNotificationEvents(prisma, {
+    userId: user.id,
+    activePeriodId: activePeriod?.id,
+  })
 
   return NextResponse.json(transaction, { status: 201 })
 })

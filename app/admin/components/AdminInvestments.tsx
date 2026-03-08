@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import DataTable from './DataTable'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@/components/mosaic'
 import { formatCurrency } from '@/lib/validators'
 import { getDisplayName } from '@/lib/utils'
 
@@ -104,8 +104,8 @@ export default function AdminInvestments() {
       header: 'Kullanıcı',
       render: (inv: Investment) => (
         <div>
-          <div className="text-sm font-medium text-slate-900">{getDisplayName(inv.user)}</div>
-          <div className="text-sm text-slate-500">{inv.user.email}</div>
+          <div className="text-sm font-medium text-foreground">{getDisplayName(inv.user)}</div>
+          <div className="text-sm text-muted-foreground">{inv.user.email}</div>
         </div>
       ),
     },
@@ -115,7 +115,7 @@ export default function AdminInvestments() {
       render: (inv: Investment) => (
         <div>
           <div className="font-medium">{inv.name}</div>
-          {inv.symbol && <div className="text-sm text-slate-500">{inv.symbol}</div>}
+          {inv.symbol && <div className="text-sm text-muted-foreground">{inv.symbol}</div>}
         </div>
       ),
     },

@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/mosaic'
+import { Input } from '@/components/mosaic'
+import { Textarea } from '@/components/mosaic'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/mosaic'
 import {
   Table,
   TableBody,
@@ -12,18 +12,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
+} from '@/components/mosaic'
+import { Switch } from '@/components/mosaic'
+import { Label } from '@/components/mosaic'
+import { Badge } from '@/components/mosaic'
+import { Skeleton } from '@/components/mosaic'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/mosaic'
 import {
   Plus,
   Edit,
@@ -42,7 +42,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/components/mosaic'
 
 interface FAQ {
   id: number

@@ -1,520 +1,1153 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useToast } from '@/lib/use-toast'
-import { useUser } from '@/lib/user-context'
-import { isPremiumPlan } from '@/lib/plan-config'
-import PremiumUpgradeModal from '@/components/premium-upgrade-modal'
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import {
-  ArrowLeft,
-  Home,
-  Plus,
-  TrendingUp,
-  TrendingDown,
+  ArrowUpRight,
+  BarChart3,
   Building2,
   Coins,
-  Globe,
-  PieChart,
-  Shield,
-  Layers,
-  Star,
   Crown,
-  ChevronRight,
   Edit2,
+  PieChart,
+  Plus,
+  RefreshCcw,
+  Save,
+  Search,
+  Shield,
+  Sparkles,
   Trash2,
+  TrendingDown,
+  TrendingUp,
 } from 'lucide-react'
+import PremiumUpgradeModal from '@/components/premium-upgrade-modal'
+import {
+  AppPageShell,
+  Badge,
+  Button,
+  ChartCard,
+  ConfirmDialog,
+  DashboardCard,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  EmptyState,
+  ErrorState,
+  FilterBar,
+  FormField,
+  Input,
+  SearchBox,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  StatCard,
+  StatsGrid,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Textarea,
+} from '@/components/mosaic'
+import {
+  INVESTMENT_TYPE_DEFINITIONS,
+  INVESTMENT_TYPE_OPTIONS,
+  normalizeInvestment,
+  RISK_LEVEL_OPTIONS,
+  type InvestmentTypeId,
+  type NormalizedInvestment,
+} from '@/lib/finance/investments'
+import { isPremiumPlan } from '@/lib/plan-config'
+import { useToast } from '@/lib/use-toast'
+import { useUser } from '@/lib/user-context'
 import { formatCurrency } from '@/lib/validators'
 
-interface Investment {
+type CurrencyOption = {
   id: number
-  investmentType: string
+  code: string
   name: string
-  symbol?: string
-  quantity: string
-  purchasePrice: string
-  currentPrice: string | null
-  purchaseDate: string
-  notes?: string
-  category?: string
-  riskLevel: string
-  currency: { id: number; code: string; name: string }
-  createdAt: string
 }
 
-type TabType = 'all' | 'stock' | 'fund' | 'bond' | 'crypto' | 'commodity' | 'forex' | 'real-estate'
+type FilterPerformance = 'all' | 'gainers' | 'losers'
+type SortMode = 'value-desc' | 'invested-desc' | 'profit-desc' | 'profit-asc' | 'newest' | 'oldest' | 'name-asc'
 
-const investmentCategories = [
-  { id: 'stock', name: 'Hisse', icon: TrendingUp, color: 'green', gradient: 'from-green-500 to-emerald-600' },
-  { id: 'fund', name: 'Fon', icon: PieChart, color: 'blue', gradient: 'from-blue-500 to-indigo-600' },
-  { id: 'bond', name: 'Tahvil', icon: Shield, color: 'purple', gradient: 'from-purple-500 to-violet-600' },
-  { id: 'crypto', name: 'Kripto', icon: Coins, color: 'yellow', gradient: 'from-yellow-500 to-orange-600' },
-  { id: 'commodity', name: 'Emtia', icon: Layers, color: 'amber', gradient: 'from-amber-500 to-yellow-600' },
-  { id: 'forex', name: 'Döviz', icon: Globe, color: 'cyan', gradient: 'from-cyan-500 to-blue-600' },
-  { id: 'real-estate', name: 'Gayrimenkul', icon: Building2, color: 'red', gradient: 'from-red-500 to-rose-600' },
-]
+type EditorState = {
+  open: boolean
+  mode: 'create' | 'edit'
+  investment: NormalizedInvestment | null
+}
+
+const TYPE_ICONS = {
+  stock: TrendingUp,
+  fund: PieChart,
+  bond: Shield,
+  crypto: Coins,
+  commodity: Sparkles,
+  forex: ArrowUpRight,
+  'real-estate': Building2,
+  other: BarChart3,
+} satisfies Record<InvestmentTypeId, typeof TrendingUp>
 
 export default function InvestmentsPage() {
-  const router = useRouter()
-  const { user, loading: userLoading, refreshUser } = useUser()
+  const { user, loading: userLoading } = useUser()
   const { success: toastSuccess, error: toastError } = useToast()
 
-  const [investments, setInvestments] = useState<Investment[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<TabType>('all')
+  const [error, setError] = useState('')
+  const [investments, setInvestments] = useState<NormalizedInvestment[]>([])
+  const [currencies, setCurrencies] = useState<CurrencyOption[]>([])
+  const [query, setQuery] = useState('')
+  const [typeFilter, setTypeFilter] = useState<'all' | InvestmentTypeId>('all')
+  const [currencyFilter, setCurrencyFilter] = useState('all')
+  const [riskFilter, setRiskFilter] = useState<'all' | 'low' | 'medium' | 'high'>('all')
+  const [performanceFilter, setPerformanceFilter] = useState<FilterPerformance>('all')
+  const [sortMode, setSortMode] = useState<SortMode>('value-desc')
+  const [page, setPage] = useState(1)
   const [showPremiumModal, setShowPremiumModal] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [investmentToDelete, setInvestmentToDelete] = useState<number | null>(null)
-  const fetchedRef = useRef(false)
+  const [editorState, setEditorState] = useState<EditorState>({
+    open: false,
+    mode: 'create',
+    investment: null,
+  })
+  const [deleteTarget, setDeleteTarget] = useState<NormalizedInvestment | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [formData, setFormData] = useState({
+    investmentType: 'stock' as InvestmentTypeId,
+    name: '',
+    symbol: '',
+    quantity: '',
+    purchasePrice: '',
+    currentPrice: '',
+    purchaseDate: new Date().toISOString().split('T')[0],
+    currencyId: '',
+    category: INVESTMENT_TYPE_DEFINITIONS.stock.defaultCategory,
+    riskLevel: INVESTMENT_TYPE_DEFINITIONS.stock.defaultRiskLevel,
+    notes: '',
+  })
 
   const isPremium = isPremiumPlan(user?.plan || 'free')
-
-  // Plan değişikliklerini dinle
-  useEffect(() => {
-    const handlePlanChange = () => {
-      void refreshUser()
-    }
-    window.addEventListener('plan-changed', handlePlanChange)
-    return () => window.removeEventListener('plan-changed', handlePlanChange)
-  }, [refreshUser])
+  const pageSize = 8
 
   useEffect(() => {
-    if (fetchedRef.current || userLoading) {
+    if (userLoading) {
       return
     }
-    fetchedRef.current = true
+
     void fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userLoading])
+  }, [userLoading, isPremium])
 
   async function fetchData() {
-    if (!isPremium) {
-      setLoading(false)
-      return
-    }
-
     try {
-      const response = await fetch('/api/investments', { credentials: 'include' })
-      if (response.ok) {
-        const data = (await response.json()) as Investment[]
-        setInvestments(data)
-      } else if (response.status === 403) {
-        // Premium required - handled by UI
+      setLoading(true)
+      setError('')
+
+      const referenceResponse = await fetch('/api/reference-data', { credentials: 'include' })
+      if (referenceResponse.ok) {
+        const referenceData = (await referenceResponse.json()) as { currencies?: CurrencyOption[] }
+        const currencyItems = referenceData.currencies ?? []
+        setCurrencies(currencyItems)
+        const tryCurrency = currencyItems.find(currency => currency.code === 'TRY') ?? currencyItems[0]
+        setFormData(prev => ({
+          ...prev,
+          currencyId: prev.currencyId || (tryCurrency ? String(tryCurrency.id) : ''),
+        }))
       }
-    } catch (error) {
-      console.error('Yatırımlar yüklenirken hata:', error)
+
+      if (!isPremium) {
+        setInvestments([])
+        return
+      }
+
+      const response = await fetch('/api/investments', { credentials: 'include' })
+      const payload = (await response.json()) as Array<Record<string, unknown>> & {
+        error?: string
+        requiresPremium?: boolean
+      }
+
+      if (!response.ok) {
+        if ((payload as { requiresPremium?: boolean }).requiresPremium) {
+          return
+        }
+
+        throw new Error((payload as { error?: string }).error || 'Yatirimlar yuklenemedi')
+      }
+
+      setInvestments((payload as Array<Record<string, unknown>>).map(item => normalizeInvestment(item as never)))
+    } catch (fetchError) {
+      console.error('Investments fetch error:', fetchError)
+      setError(fetchError instanceof Error ? fetchError.message : 'Yatirimlar yuklenemedi')
     } finally {
       setLoading(false)
     }
   }
 
-  const getCategoryInfo = (type: string) => {
-    return investmentCategories.find(c => c.id === type) || investmentCategories[0]
+  const dominantCurrency = useMemo(() => {
+    const counts = investments.reduce<Record<string, number>>((acc, investment) => {
+      acc[investment.currency.code] = (acc[investment.currency.code] || 0) + 1
+      return acc
+    }, {})
+
+    return Object.entries(counts).sort((left, right) => right[1] - left[1])[0]?.[0] || 'TRY'
+  }, [investments])
+
+  const summary = useMemo(() => {
+    const totalCurrentValue = investments.reduce((sum, investment) => sum + investment.currentValue, 0)
+    const totalInvested = investments.reduce((sum, investment) => sum + investment.investedValue, 0)
+    const totalProfitLoss = investments.reduce((sum, investment) => sum + investment.profitLoss, 0)
+    const profitLossPercent = totalInvested > 0 ? (totalProfitLoss / totalInvested) * 100 : 0
+    const activeCount = investments.length
+    const winners = investments.filter(investment => investment.profitLoss >= 0).length
+    const winRate = activeCount > 0 ? (winners / activeCount) * 100 : 0
+
+    return {
+      totalCurrentValue,
+      totalInvested,
+      totalProfitLoss,
+      profitLossPercent,
+      activeCount,
+      winRate,
+    }
+  }, [investments])
+
+  const typeBreakdown = useMemo(() => {
+    return INVESTMENT_TYPE_OPTIONS.map(option => {
+      const items = investments.filter(investment => investment.investmentType === option.id)
+      const value = items.reduce((sum, investment) => sum + investment.currentValue, 0)
+      return {
+        ...option,
+        count: items.length,
+        value,
+        share: summary.totalCurrentValue > 0 ? (value / summary.totalCurrentValue) * 100 : 0,
+      }
+    })
+      .filter(item => item.count > 0)
+      .sort((left, right) => right.value - left.value)
+  }, [investments, summary.totalCurrentValue])
+
+  const currencyBreakdown = useMemo(() => {
+    const byCurrency = investments.reduce<Record<string, { code: string; count: number; value: number }>>(
+      (acc, investment) => {
+        const key = investment.currency.code
+        if (!acc[key]) {
+          acc[key] = { code: key, count: 0, value: 0 }
+        }
+
+        acc[key].count += 1
+        acc[key].value += investment.currentValue
+        return acc
+      },
+      {}
+    )
+
+    return Object.values(byCurrency).sort((left, right) => right.value - left.value)
+  }, [investments])
+
+  const filteredInvestments = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase()
+
+    const filtered = investments.filter(investment => {
+      const matchesQuery =
+        !normalizedQuery ||
+        [investment.name, investment.symbol, investment.category, investment.currency.code]
+          .join(' ')
+          .toLowerCase()
+          .includes(normalizedQuery)
+
+      const matchesType = typeFilter === 'all' || investment.investmentType === typeFilter
+      const matchesCurrency =
+        currencyFilter === 'all' || investment.currency.code === currencyFilter
+      const matchesRisk = riskFilter === 'all' || investment.riskLevel === riskFilter
+      const matchesPerformance =
+        performanceFilter === 'all' ||
+        (performanceFilter === 'gainers' && investment.profitLoss >= 0) ||
+        (performanceFilter === 'losers' && investment.profitLoss < 0)
+
+      return matchesQuery && matchesType && matchesCurrency && matchesRisk && matchesPerformance
+    })
+
+    return filtered.sort((left, right) => {
+      switch (sortMode) {
+        case 'invested-desc':
+          return right.investedValue - left.investedValue
+        case 'profit-desc':
+          return right.profitLoss - left.profitLoss
+        case 'profit-asc':
+          return left.profitLoss - right.profitLoss
+        case 'newest':
+          return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+        case 'oldest':
+          return new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime()
+        case 'name-asc':
+          return left.name.localeCompare(right.name, 'tr')
+        case 'value-desc':
+        default:
+          return right.currentValue - left.currentValue
+      }
+    })
+  }, [currencyFilter, investments, performanceFilter, query, riskFilter, sortMode, typeFilter])
+
+  const pageCount = Math.max(1, Math.ceil(filteredInvestments.length / pageSize))
+  const pageItems = filteredInvestments.slice((page - 1) * pageSize, page * pageSize)
+  const bestPerformer = [...investments].sort((left, right) => right.profitLossPercent - left.profitLossPercent)[0]
+  const weakestPerformer = [...investments].sort((left, right) => left.profitLossPercent - right.profitLossPercent)[0]
+  const recentInvestments = [...investments]
+    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
+    .slice(0, 5)
+
+  useEffect(() => {
+    setPage(1)
+  }, [query, typeFilter, currencyFilter, riskFilter, performanceFilter, sortMode])
+
+  function resetForm(target?: NormalizedInvestment | null) {
+    const defaultCurrency =
+      currencies.find(currency => currency.code === 'TRY') ?? currencies[0] ?? null
+
+    setFormData({
+      investmentType: (target?.investmentType as InvestmentTypeId) || 'stock',
+      name: target?.name || '',
+      symbol: target?.symbol || '',
+      quantity: target ? String(target.quantity) : '',
+      purchasePrice: target ? String(target.purchasePrice) : '',
+      currentPrice: target ? String(target.currentPrice) : '',
+      purchaseDate: target
+        ? target.purchaseDate.slice(0, 10)
+        : new Date().toISOString().split('T')[0],
+      currencyId: target ? String(target.currency.id) : defaultCurrency ? String(defaultCurrency.id) : '',
+      category: target?.category || INVESTMENT_TYPE_DEFINITIONS.stock.defaultCategory,
+      riskLevel: target?.riskLevel || INVESTMENT_TYPE_DEFINITIONS.stock.defaultRiskLevel,
+      notes: target?.notes || '',
+    })
   }
 
-  const filteredInvestments = activeTab === 'all'
-    ? investments
-    : investments.filter(inv => inv.investmentType === activeTab)
-
-  // Hesaplamalar
-  const calculateValue = (inv: Investment) => {
-    const quantity = parseFloat(inv.quantity)
-    const price = parseFloat(inv.currentPrice || inv.purchasePrice)
-    return quantity * price
-  }
-
-  const calculateProfitLoss = (inv: Investment) => {
-    const quantity = parseFloat(inv.quantity)
-    const purchasePrice = parseFloat(inv.purchasePrice)
-    const currentPrice = parseFloat(inv.currentPrice || inv.purchasePrice)
-    return (currentPrice - purchasePrice) * quantity
-  }
-
-  const totalValue = investments.reduce((sum, inv) => sum + calculateValue(inv), 0)
-  const totalProfitLoss = investments.reduce((sum, inv) => sum + calculateProfitLoss(inv), 0)
-  const totalInvested = investments.reduce((sum, inv) => {
-    return sum + parseFloat(inv.quantity) * parseFloat(inv.purchasePrice)
-  }, 0)
-  const profitLossPercent = totalInvested > 0 ? (totalProfitLoss / totalInvested) * 100 : 0
-
-  const handleAddInvestment = (type?: string) => {
+  function openCreateDrawer() {
     if (!isPremium) {
       setShowPremiumModal(true)
       return
     }
-    router.push(type ? `/investments/${type}/new` : '/investments/new')
+
+    resetForm(null)
+    setEditorState({ open: true, mode: 'create', investment: null })
   }
 
-  const handleDelete = (id: number) => {
-    setInvestmentToDelete(id)
-    setShowDeleteConfirm(true)
+  function openEditDrawer(investment: NormalizedInvestment) {
+    resetForm(investment)
+    setEditorState({ open: true, mode: 'edit', investment })
   }
 
-  const confirmDelete = async () => {
-    if (!investmentToDelete) {
+  async function submitEditor() {
+    const definition = INVESTMENT_TYPE_DEFINITIONS[formData.investmentType]
+
+    if (!formData.name.trim() || !formData.quantity.trim() || !formData.purchasePrice.trim()) {
+      toastError('Hata', 'Ad, miktar ve alis fiyati zorunludur')
+      return
+    }
+
+    if (!formData.currencyId) {
+      toastError('Hata', 'Para birimi seciniz')
+      return
+    }
+
+    setSaving(true)
+
+    try {
+      const url =
+        editorState.mode === 'edit' && editorState.investment
+          ? `/api/investments/${editorState.investment.id}`
+          : '/api/investments'
+
+      const response = await fetch(url, {
+        method: editorState.mode === 'edit' ? 'PATCH' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          investmentType: formData.investmentType,
+          name: formData.name.trim(),
+          symbol: formData.symbol.trim() || formData.name.trim(),
+          quantity: formData.quantity.trim(),
+          purchasePrice: formData.purchasePrice.trim(),
+          currentPrice: (formData.currentPrice || formData.purchasePrice).trim(),
+          purchaseDate: formData.purchaseDate,
+          currencyId: Number(formData.currencyId),
+          category: formData.category.trim() || definition.defaultCategory,
+          riskLevel: formData.riskLevel,
+          notes: formData.notes.trim(),
+        }),
+      })
+
+      const payload = (await response.json()) as Record<string, unknown>
+
+      if (!response.ok) {
+        if (payload.requiresPremium) {
+          setShowPremiumModal(true)
+          return
+        }
+
+        toastError('Hata', String(payload.error || 'Kayit guncellenemedi'))
+        return
+      }
+
+      const normalized = normalizeInvestment(payload as never)
+      setInvestments(prev =>
+        editorState.mode === 'edit'
+          ? prev.map(item => (item.id === normalized.id ? normalized : item))
+          : [normalized, ...prev]
+      )
+      setEditorState({ open: false, mode: 'create', investment: null })
+      toastSuccess(
+        'Basarili',
+        editorState.mode === 'edit' ? 'Yatirim guncellendi' : 'Yatirim eklendi'
+      )
+    } catch (submitError) {
+      console.error('Investment editor submit error:', submitError)
+      toastError('Hata', 'Kayit islemi tamamlanamadi')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) {
       return
     }
 
     try {
-      const response = await fetch(`/api/investments/${investmentToDelete}`, {
+      const response = await fetch(`/api/investments/${deleteTarget.id}`, {
         method: 'DELETE',
         credentials: 'include',
       })
 
-      if (response.ok) {
-        toastSuccess('Başarılı', 'Yatırım silindi')
-        setInvestments(prev => prev.filter(inv => inv.id !== investmentToDelete))
-      } else {
-        toastError('Hata', 'Yatırım silinemedi')
+      if (!response.ok) {
+        const payload = (await response.json()) as { error?: string }
+        toastError('Hata', payload.error || 'Yatirim silinemedi')
+        return
       }
-    } catch (error) {
-      console.error('Silme hatası:', error)
-      toastError('Hata', 'Yatırım silinemedi')
+
+      setInvestments(prev => prev.filter(item => item.id !== deleteTarget.id))
+      toastSuccess('Basarili', 'Yatirim silindi')
+    } catch (deleteError) {
+      console.error('Investment delete error:', deleteError)
+      toastError('Hata', 'Yatirim silinemedi')
     } finally {
-      setShowDeleteConfirm(false)
-      setInvestmentToDelete(null)
+      setDeleteTarget(null)
     }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Yatırımlar yükleniyor...</p>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="space-y-3 text-center">
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-primary" />
+          <p className="text-sm text-muted-foreground">Yatirim merkezi hazirlaniyor...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.back()}
-              className="p-2 hover:bg-white/80 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5 text-slate-600" />
-            </button>
-            <Link href="/dashboard" className="p-2 hover:bg-white/80 rounded-lg transition-colors">
-              <Home className="h-5 w-5 text-slate-600" />
-            </Link>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">Yatırım Araçları</h1>
-              <p className="text-sm text-slate-600">Portföyünüzü yönetin ve takip edin</p>
-            </div>
-          </div>
-          <button
-            onClick={() => handleAddInvestment()}
-            className="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+    <>
+      <AppPageShell
+        header={{
+          title: 'Yatirim Merkezi',
+          description:
+            'Tablo odakli portfolio gorunumu, filtrelenebilir pozisyon listesi ve hizli yonetim aksiyonlari.',
+          actions: (
+            <>
+              <Button variant="outline" onClick={() => void fetchData()}>
+                <RefreshCcw className="mr-2 h-4 w-4" />
+                Yenile
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href="/investments/new">
+                  <Search className="mr-2 h-4 w-4" />
+                  Tur bazli akis
+                </Link>
+              </Button>
+              <Button onClick={openCreateDrawer}>
+                <Plus className="mr-2 h-4 w-4" />
+                Yeni yatirim
+              </Button>
+            </>
+          ),
+        }}
+      >
+        {!isPremium ? (
+          <DashboardCard
+            title="Premium yatirim merkezi"
+            description="Hisse, fon, kripto ve diger varliklar icin tam portfoy kontrolu Premium plana dahildir."
+            icon={Crown}
+            headerAction={<Badge variant="premium">Premium</Badge>}
           >
-            <Plus className="h-5 w-5 mr-2" />
-            Yeni Yatırım
-          </button>
-        </div>
-
-        {/* Premium Banner for Free Users */}
-        {!isPremium && (
-          <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 rounded-2xl p-6 sm:p-8 shadow-xl mb-6">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-              <div className="text-center lg:text-left">
-                <div className="flex items-center justify-center lg:justify-start gap-2 mb-2">
-                  <Crown className="h-8 w-8 text-yellow-300" />
-                  <h2 className="text-2xl sm:text-3xl font-bold text-white">Premium Özellik</h2>
-                </div>
-                <p className="text-purple-100 text-lg max-w-xl">
-                  Yatırım portföyü yönetimi, hisse senetleri, kripto paralar, fonlar ve daha fazlası için Premium&apos;a geçin.
+            <div className="grid gap-6 lg:grid-cols-[1.5fr_minmax(0,1fr)]">
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Mosaic dark yatirim deneyimi; filtrelenebilir tablo, hizli edit drawer&apos;i,
+                  performans panelleri ve type-specific create akislarini tek merkezde toplar.
                 </p>
-              </div>
-              <button
-                onClick={() => setShowPremiumModal(true)}
-                className="px-8 py-4 bg-white text-purple-600 font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
-              >
-                Premium&apos;a Geç
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Portfolio Summary - Only for Premium */}
-        {isPremium && (
-          <>
-            {/* Portfolio Value Card */}
-            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 sm:p-8 shadow-xl mb-6">
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-                <div>
-                  <p className="text-blue-100 text-sm font-medium mb-1">Toplam Portföy Değeri</p>
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
-                    {formatCurrency(totalValue, 'TRY')}
-                  </h2>
-                  <div className="flex items-center gap-4 mt-3">
-                    <div className={`flex items-center gap-1 ${totalProfitLoss >= 0 ? 'text-green-300' : 'text-red-300'}`}>
-                      {totalProfitLoss >= 0 ? (
-                        <TrendingUp className="h-5 w-5" />
-                      ) : (
-                        <TrendingDown className="h-5 w-5" />
-                      )}
-                      <span className="font-semibold">{formatCurrency(Math.abs(totalProfitLoss), 'TRY')}</span>
-                      <span className="text-sm">({profitLossPercent >= 0 ? '+' : ''}{profitLossPercent.toFixed(1)}%)</span>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-xl border border-border bg-muted/20 p-4">
+                    <div className="text-sm font-medium text-foreground">Table-first ekran</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Tur, para birimi, risk ve performans bazli filtreleme.
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-border bg-muted/20 p-4">
+                    <div className="text-sm font-medium text-foreground">CRUD aksiyonlari</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Olustur, duzenle ve sil akislarina ayni merkezden erisin.
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-border bg-muted/20 p-4">
+                    <div className="text-sm font-medium text-foreground">Analitik sag panel</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Dagilim, kazananlar ve son eklenenler tek bakista.
                     </div>
                   </div>
                 </div>
+              </div>
+              <div className="rounded-2xl border border-primary/20 bg-primary/10 p-6">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-full bg-white/20 backdrop-blur-sm">
-                    <TrendingUp className="h-8 w-8 text-white" />
+                  <div className="rounded-xl bg-primary/15 p-3 text-primary">
+                    <Crown className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <div className="text-lg font-semibold text-foreground">Premium&apos;a gecin</div>
+                    <div className="text-sm text-muted-foreground">
+                      Tum yatirim araclarini tek panelden yonetin.
+                    </div>
                   </div>
                 </div>
+                <Button className="mt-6 w-full" onClick={() => setShowPremiumModal(true)}>
+                  Premium ozellikleri ac
+                </Button>
               </div>
             </div>
-
-            {/* Summary Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md group-hover:scale-110 transition-transform">
-                      <TrendingUp className="h-4 w-4 text-white" />
+          </DashboardCard>
+        ) : error ? (
+          <ErrorState
+            title="Yatirimlar yuklenemedi"
+            description={error}
+            onRetry={() => void fetchData()}
+          />
+        ) : (
+          <>
+            <DashboardCard
+              title="Portfoy ozeti"
+              description="Ana KPI seti ve performans ozetleri"
+              icon={BarChart3}
+              headerAction={
+                <Badge variant={currencyBreakdown.length > 1 ? 'warning' : 'success'}>
+                  {currencyBreakdown.length > 1
+                    ? `${currencyBreakdown.length} para birimi`
+                    : dominantCurrency}
+                </Badge>
+              }
+            >
+              <div className="space-y-5">
+                <div className="rounded-2xl border border-border bg-muted/20 p-6">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                      <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                        Toplam portfoy degeri
+                      </div>
+                      <div className="mt-3 text-4xl font-bold tracking-tight text-foreground">
+                        {formatCurrency(summary.totalCurrentValue, dominantCurrency)}
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <Badge variant={summary.totalProfitLoss >= 0 ? 'success' : 'destructive'}>
+                          {summary.totalProfitLoss >= 0 ? '+' : ''}
+                          {formatCurrency(summary.totalProfitLoss, dominantCurrency)}
+                        </Badge>
+                        <Badge variant="outline">
+                          {summary.profitLossPercent >= 0 ? '+' : ''}
+                          {summary.profitLossPercent.toFixed(2)}%
+                        </Badge>
+                      </div>
                     </div>
-                    <span className="text-xs text-slate-500">{investments.length}</span>
-                  </div>
-                  <p className="text-xs text-slate-600 mb-1">Toplam Yatırım</p>
-                  <p className="text-lg font-bold text-blue-600">{investments.length} adet</p>
-                </CardContent>
-              </Card>
-
-              <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 shadow-md group-hover:scale-110 transition-transform">
-                      <Coins className="h-4 w-4 text-white" />
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-600 mb-1">Yatırılan</p>
-                  <p className="text-lg font-bold text-green-600">{formatCurrency(totalInvested, 'TRY')}</p>
-                </CardContent>
-              </Card>
-
-              <Card className={`group hover:shadow-lg transition-all duration-300 border-0 ${totalProfitLoss >= 0 ? 'bg-gradient-to-br from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100' : 'bg-gradient-to-br from-red-50 to-rose-50 hover:from-red-100 hover:to-rose-100'}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className={`p-2 rounded-lg shadow-md group-hover:scale-110 transition-transform ${totalProfitLoss >= 0 ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-red-500 to-rose-600'}`}>
-                      {totalProfitLoss >= 0 ? <TrendingUp className="h-4 w-4 text-white" /> : <TrendingDown className="h-4 w-4 text-white" />}
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-600 mb-1">Kar/Zarar</p>
-                  <p className={`text-lg font-bold ${totalProfitLoss >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                    {totalProfitLoss >= 0 ? '+' : ''}{formatCurrency(totalProfitLoss, 'TRY')}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className={`group hover:shadow-lg transition-all duration-300 border-0 ${profitLossPercent >= 0 ? 'bg-gradient-to-br from-cyan-50 to-blue-50 hover:from-cyan-100 hover:to-blue-100' : 'bg-gradient-to-br from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100'}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className={`p-2 rounded-lg shadow-md group-hover:scale-110 transition-transform ${profitLossPercent >= 0 ? 'bg-gradient-to-br from-cyan-500 to-blue-600' : 'bg-gradient-to-br from-orange-500 to-red-600'}`}>
-                      <Star className="h-4 w-4 text-white" />
+                    <div className="max-w-sm text-sm text-muted-foreground">
+                      Agirlikli gosterim para birimi: <span className="font-medium text-foreground">{dominantCurrency}</span>.
+                      Karisik para birimlerinde panel dagilimlari kayit bazli normalize edilir.
                     </div>
                   </div>
-                  <p className="text-xs text-slate-600 mb-1">Getiri</p>
-                  <p className={`text-lg font-bold ${profitLossPercent >= 0 ? 'text-cyan-600' : 'text-orange-600'}`}>
-                    {profitLossPercent >= 0 ? '+' : ''}{profitLossPercent.toFixed(1)}%
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Category Tabs */}
-            <div className="flex flex-wrap gap-2 mb-6 bg-white/60 backdrop-blur-sm p-2 rounded-xl shadow-sm">
-              <button
-                onClick={() => setActiveTab('all')}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${activeTab === 'all'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                  : 'text-slate-600 hover:bg-white hover:shadow-sm'
-                  }`}
-              >
-                Tümü
-                <span className={`text-xs px-1.5 py-0.5 rounded-full ${activeTab === 'all' ? 'bg-white/20' : 'bg-slate-200'}`}>
-                  {investments.length}
-                </span>
-              </button>
-              {investmentCategories.map(category => {
-                const Icon = category.icon
-                const count = investments.filter(inv => inv.investmentType === category.id).length
-                const isActive = activeTab === category.id
-
-                return (
-                  <button
-                    key={category.id}
-                    onClick={() => setActiveTab(category.id as TabType)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${isActive
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                      : 'text-slate-600 hover:bg-white hover:shadow-sm'
-                      }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {category.name}
-                    <span className={`text-xs px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20' : 'bg-slate-200'}`}>
-                      {count}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Investments List */}
-            <div className="space-y-4">
-              {filteredInvestments.length === 0 ? (
-                <Card className="border-dashed border-2 border-slate-200 bg-slate-50/50">
-                  <CardContent className="py-12 text-center">
-                    <TrendingUp className="mx-auto h-12 w-12 text-slate-300 mb-4" />
-                    <p className="text-slate-500 mb-4">
-                      {activeTab === 'all' ? 'Henüz yatırım eklenmemiş' : `Bu kategoride yatırım bulunmuyor`}
-                    </p>
-                    <button
-                      onClick={() => handleAddInvestment(activeTab === 'all' ? undefined : activeTab)}
-                      className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      İlk Yatırımı Ekle
-                    </button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredInvestments.map(investment => {
-                    const category = getCategoryInfo(investment.investmentType)
-                    const Icon = category.icon
-                    const value = calculateValue(investment)
-                    const profitLoss = calculateProfitLoss(investment)
-                    const profitPercent = parseFloat(investment.purchasePrice) > 0
-                      ? (profitLoss / (parseFloat(investment.quantity) * parseFloat(investment.purchasePrice))) * 100
-                      : 0
-
-                    return (
-                      <Card key={investment.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-                        <div className={`absolute inset-0 bg-gradient-to-r ${category.gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
-                        <CardHeader className="pb-2">
-                          <div className="flex justify-between items-start">
-                            <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg bg-gradient-to-br ${category.gradient} shadow-md`}>
-                                <Icon className="h-4 w-4 text-white" />
-                              </div>
-                              <div>
-                                <CardTitle className="text-base">{investment.name}</CardTitle>
-                                <CardDescription>
-                                  {investment.symbol && `${investment.symbol} • `}{category.name}
-                                </CardDescription>
-                              </div>
-                            </div>
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button
-                                onClick={() => router.push(`/investments/${investment.id}/edit`)}
-                                className="p-1.5 hover:bg-slate-100 rounded-lg"
-                              >
-                                <Edit2 className="h-4 w-4 text-slate-500" />
-                              </button>
-                              <button
-                                onClick={() => void handleDelete(investment.id)}
-                                className="p-1.5 hover:bg-slate-100 rounded-lg"
-                              >
-                                <Trash2 className="h-4 w-4 text-red-500" />
-                              </button>
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex justify-between items-end mb-3">
-                            <div>
-                              <p className="text-xs text-slate-500">Değer</p>
-                              <p className="text-xl font-bold text-slate-800">
-                                {formatCurrency(value, investment.currency.code)}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-xs text-slate-500">Kar/Zarar</p>
-                              <div className={`flex items-center gap-1 ${profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {profitLoss >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-                                <span className="font-semibold">
-                                  {profitLoss >= 0 ? '+' : ''}{formatCurrency(profitLoss, investment.currency.code)}
-                                </span>
-                              </div>
-                              <p className={`text-xs ${profitLoss >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                ({profitPercent >= 0 ? '+' : ''}{profitPercent.toFixed(1)}%)
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex justify-between text-xs text-slate-500 mb-3">
-                            <span>{parseFloat(investment.quantity)} adet</span>
-                            <span>Alış: {formatCurrency(parseFloat(investment.purchasePrice), investment.currency.code)}</span>
-                          </div>
-                          <Link
-                            href={`/investments/${investment.id}`}
-                            className={`flex items-center justify-between w-full px-3 py-2 bg-${category.color}-50 text-${category.color}-600 rounded-lg hover:bg-${category.color}-100 text-sm font-medium transition-colors`}
-                          >
-                            <span>Detaylar</span>
-                            <ChevronRight className="h-4 w-4" />
-                          </Link>
-                        </CardContent>
-                      </Card>
-                    )
-                  })}
                 </div>
-              )}
+
+                <StatsGrid>
+                  <StatCard
+                    title="Aktif kayit"
+                    value={summary.activeCount}
+                    icon={BarChart3}
+                    color="blue"
+                    description="Takip edilen toplam pozisyon"
+                  />
+                  <StatCard
+                    title="Yatirilan"
+                    value={formatCurrency(summary.totalInvested, dominantCurrency)}
+                    icon={Coins}
+                    color="amber"
+                    description="Toplam maliyet baziniz"
+                  />
+                  <StatCard
+                    title="Kar / zarar"
+                    value={`${summary.totalProfitLoss >= 0 ? '+' : ''}${formatCurrency(summary.totalProfitLoss, dominantCurrency)}`}
+                    icon={summary.totalProfitLoss >= 0 ? TrendingUp : TrendingDown}
+                    color={summary.totalProfitLoss >= 0 ? 'emerald' : 'rose'}
+                    description="Acilis maliyetine gore"
+                  />
+                  <StatCard
+                    title="Kazanc oranı"
+                    value={`${summary.winRate.toFixed(0)}%`}
+                    icon={Sparkles}
+                    color="purple"
+                    description="Karda olan kayit orani"
+                  />
+                </StatsGrid>
+              </div>
+            </DashboardCard>
+
+            <FilterBar>
+              <SearchBox
+                value={query}
+                onSearch={value => setQuery(value)}
+                placeholder="Varlik, sembol, kategori ara..."
+              />
+
+              <Select value={typeFilter} onValueChange={value => setTypeFilter(value as typeof typeFilter)}>
+                <SelectTrigger className="sm:w-[180px]">
+                  <SelectValue placeholder="Tur" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tum turler</SelectItem>
+                  {INVESTMENT_TYPE_OPTIONS.map(option => (
+                    <SelectItem key={option.id} value={option.id}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={currencyFilter} onValueChange={value => setCurrencyFilter(value)}>
+                <SelectTrigger className="sm:w-[160px]">
+                  <SelectValue placeholder="Para birimi" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tum para birimleri</SelectItem>
+                  {currencyBreakdown.map(item => (
+                    <SelectItem key={item.code} value={item.code}>
+                      {item.code}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={riskFilter} onValueChange={value => setRiskFilter(value as typeof riskFilter)}>
+                <SelectTrigger className="sm:w-[150px]">
+                  <SelectValue placeholder="Risk" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tum riskler</SelectItem>
+                  {RISK_LEVEL_OPTIONS.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={performanceFilter}
+                onValueChange={value => setPerformanceFilter(value as FilterPerformance)}
+              >
+                <SelectTrigger className="sm:w-[160px]">
+                  <SelectValue placeholder="Performans" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tum durumlar</SelectItem>
+                  <SelectItem value="gainers">Karda</SelectItem>
+                  <SelectItem value="losers">Zararda</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={sortMode} onValueChange={value => setSortMode(value as SortMode)}>
+                <SelectTrigger className="sm:w-[170px]">
+                  <SelectValue placeholder="Siralama" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="value-desc">Deger: yuksekten</SelectItem>
+                  <SelectItem value="invested-desc">Maliyet: yuksekten</SelectItem>
+                  <SelectItem value="profit-desc">Kar: yuksekten</SelectItem>
+                  <SelectItem value="profit-asc">Kar: dusukten</SelectItem>
+                  <SelectItem value="newest">En yeni</SelectItem>
+                  <SelectItem value="oldest">En eski</SelectItem>
+                  <SelectItem value="name-asc">Ada gore</SelectItem>
+                </SelectContent>
+              </Select>
+            </FilterBar>
+
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_360px]">
+              <DashboardCard
+                title="Pozisyon tablosu"
+                description={`${filteredInvestments.length} kayit listeleniyor`}
+                icon={BarChart3}
+                headerAction={
+                  <Badge variant="outline">
+                    Sayfa {page} / {pageCount}
+                  </Badge>
+                }
+                className="min-w-0"
+                noPadding
+              >
+                {filteredInvestments.length === 0 ? (
+                  <div className="p-6">
+                    <EmptyState
+                      title="Filtrelerle eslesen yatirim yok"
+                      description="Arama ve filtreleri temizleyin ya da yeni bir yatirim ekleyin."
+                      action={
+                        <div className="flex flex-wrap justify-center gap-2">
+                          <Button variant="outline" onClick={() => {
+                            setQuery('')
+                            setTypeFilter('all')
+                            setCurrencyFilter('all')
+                            setRiskFilter('all')
+                            setPerformanceFilter('all')
+                            setSortMode('value-desc')
+                          }}>
+                            Filtreleri temizle
+                          </Button>
+                          <Button onClick={openCreateDrawer}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Yeni yatirim
+                          </Button>
+                        </div>
+                      }
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Varlik</TableHead>
+                          <TableHead>Miktar / Alis</TableHead>
+                          <TableHead>Yatirilan</TableHead>
+                          <TableHead>Guncel</TableHead>
+                          <TableHead>Kar / zarar</TableHead>
+                          <TableHead>Risk</TableHead>
+                          <TableHead>Tarih</TableHead>
+                          <TableHead className="text-right">Aksiyon</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pageItems.map(investment => {
+                          const option =
+                            INVESTMENT_TYPE_DEFINITIONS[investment.investmentType as InvestmentTypeId] ??
+                            INVESTMENT_TYPE_DEFINITIONS.other
+                          const Icon =
+                            TYPE_ICONS[investment.investmentType as InvestmentTypeId] ?? TYPE_ICONS.other
+
+                          return (
+                            <TableRow key={investment.id}>
+                              <TableCell>
+                                <div className="flex items-start gap-3">
+                                  <div className="rounded-xl bg-primary/10 p-2 text-primary">
+                                    <Icon className="h-4 w-4" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="font-medium text-foreground">{investment.name}</div>
+                                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                      {investment.symbol ? <span>{investment.symbol}</span> : null}
+                                      <Badge variant="outline">{option.shortLabel}</Badge>
+                                      <span>{investment.currency.code}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="space-y-1">
+                                  <div className="font-medium text-foreground">{investment.quantity}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {formatCurrency(investment.purchasePrice, investment.currency.code)}
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>{formatCurrency(investment.investedValue, investment.currency.code)}</TableCell>
+                              <TableCell>{formatCurrency(investment.currentValue, investment.currency.code)}</TableCell>
+                              <TableCell>
+                                <div className={`${investment.profitLoss >= 0 ? 'text-green-400' : 'text-rose-400'}`}>
+                                  <div className="font-medium">
+                                    {investment.profitLoss >= 0 ? '+' : ''}
+                                    {formatCurrency(investment.profitLoss, investment.currency.code)}
+                                  </div>
+                                  <div className="text-xs">
+                                    {investment.profitLossPercent >= 0 ? '+' : ''}
+                                    {investment.profitLossPercent.toFixed(2)}%
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={
+                                    investment.riskLevel === 'low'
+                                      ? 'success'
+                                      : investment.riskLevel === 'medium'
+                                        ? 'warning'
+                                        : 'destructive'
+                                  }
+                                >
+                                  {investment.riskLevel === 'low'
+                                    ? 'Dusuk'
+                                    : investment.riskLevel === 'medium'
+                                      ? 'Orta'
+                                      : 'Yuksek'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                {new Date(investment.purchaseDate).toLocaleDateString('tr-TR')}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex justify-end gap-1">
+                                  <Button variant="ghost" size="icon" onClick={() => openEditDrawer(investment)}>
+                                    <Edit2 className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                    onClick={() => setDeleteTarget(investment)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                    <div className="flex flex-col gap-3 border-t border-border p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-muted-foreground">
+                        {filteredInvestments.length} kaydin {(page - 1) * pageSize + 1}-
+                        {Math.min(page * pageSize, filteredInvestments.length)} arasi gosteriliyor.
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                          disabled={page === 1}
+                        >
+                          Onceki
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPage(prev => Math.min(prev + 1, pageCount))}
+                          disabled={page === pageCount}
+                        >
+                          Sonraki
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </DashboardCard>
+
+              <div className="space-y-6">
+                <ChartCard title="Varlik dagilimi" description="Portfoy icindeki tur paylari" icon={PieChart}>
+                  {typeBreakdown.length === 0 ? (
+                    <div className="text-sm text-muted-foreground">Dagilim icin yatirim bulunmuyor.</div>
+                  ) : (
+                    <div className="space-y-3">
+                      {typeBreakdown.slice(0, 6).map(item => (
+                        <div key={item.id} className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="font-medium text-foreground">{item.label}</div>
+                            <div className="text-muted-foreground">
+                              {item.share.toFixed(1)}% • {item.count} kayit
+                            </div>
+                          </div>
+                          <div className="h-2 overflow-hidden rounded-full bg-muted">
+                            <div
+                              className="h-full rounded-full bg-primary"
+                              style={{ width: `${Math.min(item.share, 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </ChartCard>
+
+                <ChartCard title="One cikanlar" description="Performansa gore hizli okuma" icon={TrendingUp}>
+                  <div className="space-y-4">
+                    {bestPerformer ? (
+                      <div className="rounded-xl border border-green-500/20 bg-green-500/10 p-4">
+                        <div className="text-xs uppercase tracking-wide text-green-300">En guclu pozisyon</div>
+                        <div className="mt-2 font-semibold text-foreground">{bestPerformer.name}</div>
+                        <div className="mt-1 text-sm text-green-300">
+                          +{bestPerformer.profitLossPercent.toFixed(2)}% •{' '}
+                          {formatCurrency(bestPerformer.profitLoss, bestPerformer.currency.code)}
+                        </div>
+                      </div>
+                    ) : null}
+                    {weakestPerformer ? (
+                      <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4">
+                        <div className="text-xs uppercase tracking-wide text-rose-300">En zayif pozisyon</div>
+                        <div className="mt-2 font-semibold text-foreground">{weakestPerformer.name}</div>
+                        <div className="mt-1 text-sm text-rose-300">
+                          {weakestPerformer.profitLossPercent.toFixed(2)}% •{' '}
+                          {formatCurrency(weakestPerformer.profitLoss, weakestPerformer.currency.code)}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                </ChartCard>
+
+                <ChartCard title="Para birimi maruziyeti" description="Kayit sayisi ve hacim" icon={Coins}>
+                  {currencyBreakdown.length === 0 ? (
+                    <div className="text-sm text-muted-foreground">Para birimi maruziyeti olusmadi.</div>
+                  ) : (
+                    <div className="space-y-3">
+                      {currencyBreakdown.map(item => (
+                        <div key={item.code} className="flex items-center justify-between rounded-xl border border-border bg-muted/20 p-3">
+                          <div>
+                            <div className="font-medium text-foreground">{item.code}</div>
+                            <div className="text-xs text-muted-foreground">{item.count} kayit</div>
+                          </div>
+                          <div className="text-sm font-medium text-foreground">
+                            {formatCurrency(item.value, item.code)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </ChartCard>
+
+                <ChartCard title="Son hareketler" description="En son eklenen kayitlar" icon={RefreshCcw}>
+                  {recentInvestments.length === 0 ? (
+                    <div className="text-sm text-muted-foreground">Henuz kayit eklenmedi.</div>
+                  ) : (
+                    <div className="space-y-3">
+                      {recentInvestments.map(item => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          className="flex w-full items-center justify-between rounded-xl border border-border bg-muted/20 p-3 text-left transition hover:border-primary/30 hover:bg-muted/40"
+                          onClick={() => openEditDrawer(item)}
+                        >
+                          <div>
+                            <div className="font-medium text-foreground">{item.name}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(item.createdAt).toLocaleDateString('tr-TR')} • {item.currency.code}
+                            </div>
+                          </div>
+                          <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </ChartCard>
+              </div>
             </div>
           </>
         )}
+      </AppPageShell>
 
-        {/* Investment Categories for Premium Users - Quick Add */}
-        {isPremium && (
-          <div className="mt-8">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Hızlı Yatırım Ekle</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
-              {investmentCategories.map(category => {
-                const Icon = category.icon
-                return (
-                  <button
-                    key={category.id}
-                    onClick={() => handleAddInvestment(category.id)}
-                    className="group p-4 rounded-xl bg-white/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300 border border-slate-200 hover:border-blue-300"
+      <Drawer
+        open={editorState.open}
+        onOpenChange={open => setEditorState(prev => ({ ...prev, open }))}
+      >
+        <DrawerContent className="sm:max-w-xl">
+          <DrawerHeader>
+            <DrawerTitle>
+              {editorState.mode === 'edit' ? 'Yatirimi duzenle' : 'Hizli yatirim ekle'}
+            </DrawerTitle>
+            <DrawerDescription>
+              Ortak veri kontrati kullanilir. Gerekirse detayli tur akislarina gecis yapabilirsiniz.
+            </DrawerDescription>
+          </DrawerHeader>
+          <DrawerBody>
+            <div className="space-y-4">
+              <FormField label="Yatirim turu">
+                <Select
+                  value={formData.investmentType}
+                  onValueChange={value =>
+                    setFormData(prev => ({
+                      ...prev,
+                      investmentType: value as InvestmentTypeId,
+                      category:
+                        INVESTMENT_TYPE_DEFINITIONS[value as InvestmentTypeId]?.defaultCategory ||
+                        prev.category,
+                      riskLevel:
+                        INVESTMENT_TYPE_DEFINITIONS[value as InvestmentTypeId]?.defaultRiskLevel ||
+                        prev.riskLevel,
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tur seciniz" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {INVESTMENT_TYPE_OPTIONS.map(option => (
+                      <SelectItem key={option.id} value={option.id}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormField>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormField label="Yatirim adi" required>
+                  <Input
+                    value={formData.name}
+                    onChange={event => setFormData(prev => ({ ...prev, name: event.target.value }))}
+                    placeholder="Varlik adi"
+                  />
+                </FormField>
+                <FormField label="Sembol">
+                  <Input
+                    value={formData.symbol}
+                    onChange={event =>
+                      setFormData(prev => ({ ...prev, symbol: event.target.value.toUpperCase() }))
+                    }
+                    placeholder="Sembol"
+                  />
+                </FormField>
+                <FormField label="Miktar" required>
+                  <Input
+                    value={formData.quantity}
+                    onChange={event => setFormData(prev => ({ ...prev, quantity: event.target.value }))}
+                    placeholder="0"
+                  />
+                </FormField>
+                <FormField label="Para birimi" required>
+                  <Select
+                    value={formData.currencyId}
+                    onValueChange={value => setFormData(prev => ({ ...prev, currencyId: value }))}
                   >
-                    <div className={`p-3 rounded-lg bg-gradient-to-br ${category.gradient} shadow-md mx-auto mb-3 w-fit group-hover:scale-110 transition-transform`}>
-                      <Icon className="h-5 w-5 text-white" />
-                    </div>
-                    <p className="text-sm font-medium text-slate-700 text-center">{category.name}</p>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        )}
-      </div>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Para birimi seciniz" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies.map(currency => (
+                        <SelectItem key={currency.id} value={String(currency.id)}>
+                          {currency.code} - {currency.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
+                <FormField label="Alis fiyati" required>
+                  <Input
+                    value={formData.purchasePrice}
+                    onChange={event =>
+                      setFormData(prev => ({ ...prev, purchasePrice: event.target.value }))
+                    }
+                    placeholder="0.00"
+                  />
+                </FormField>
+                <FormField label="Guncel fiyat">
+                  <Input
+                    value={formData.currentPrice}
+                    onChange={event =>
+                      setFormData(prev => ({ ...prev, currentPrice: event.target.value }))
+                    }
+                    placeholder="0.00"
+                  />
+                </FormField>
+                <FormField label="Kategori">
+                  <Input
+                    value={formData.category}
+                    onChange={event => setFormData(prev => ({ ...prev, category: event.target.value }))}
+                    placeholder="Kategori"
+                  />
+                </FormField>
+                <FormField label="Risk seviyesi">
+                  <Select
+                    value={formData.riskLevel}
+                    onValueChange={value =>
+                      setFormData(prev => ({
+                        ...prev,
+                        riskLevel: value as typeof prev.riskLevel,
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Risk seciniz" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {RISK_LEVEL_OPTIONS.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
+              </div>
 
-      {/* Premium Modal */}
+              <FormField label="Alis tarihi" required>
+                <Input
+                  type="date"
+                  value={formData.purchaseDate}
+                  onChange={event =>
+                    setFormData(prev => ({ ...prev, purchaseDate: event.target.value }))
+                  }
+                />
+              </FormField>
+
+              <FormField label="Notlar">
+                <Textarea
+                  value={formData.notes}
+                  onChange={event => setFormData(prev => ({ ...prev, notes: event.target.value }))}
+                  rows={4}
+                  placeholder="Strateji, notlar, hedefler..."
+                />
+              </FormField>
+            </div>
+          </DrawerBody>
+          <DrawerFooter>
+            <Button variant="outline" onClick={() => setEditorState(prev => ({ ...prev, open: false }))}>
+              Kapat
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href={`/investments/${formData.investmentType}/new`}>
+                Tur bazli akisa git
+              </Link>
+            </Button>
+            <Button onClick={() => void submitEditor()} loading={saving}>
+              <Save className="mr-2 h-4 w-4" />
+              {editorState.mode === 'edit' ? 'Degisiklikleri kaydet' : 'Yatirimi olustur'}
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Yatirimi sil"
+        message={`${deleteTarget?.name || 'Secili kaydi'} silmek istediginize emin misiniz?`}
+        warningMessage="Kayit pasife alinacak ve portfoy ozetleri aninda guncellenecek."
+        confirmText="Evet, sil"
+        cancelText="Iptal"
+      />
+
       <PremiumUpgradeModal
         isOpen={showPremiumModal}
         onClose={() => setShowPremiumModal(false)}
-        featureName="Yatırım Araçları"
+        featureName="Yatirim Yonetimi"
       />
-
-      <ConfirmationDialog
-        isOpen={showDeleteConfirm}
-        onClose={() => {
-          setShowDeleteConfirm(false)
-          setInvestmentToDelete(null)
-        }}
-        onConfirm={confirmDelete}
-        title="Yatırımı Sil"
-        message="Bu yatırımı silmek istediğinizden emin misiniz?"
-        warningMessage="Yatırım silindiğinde portföy değerleriniz güncellenecektir. Bu işlem geri alınamaz."
-        confirmText="Evet, Sil"
-        cancelText="İptal"
-      />
-    </div>
+    </>
   )
 }

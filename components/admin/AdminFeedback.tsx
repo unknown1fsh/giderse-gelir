@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
 import { MessageSquare, Search, Filter, CheckCircle2, Clock, Reply, Eye } from 'lucide-react'
 import {
   Select,
@@ -10,7 +10,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/mosaic'
 
 interface Feedback {
   id: number

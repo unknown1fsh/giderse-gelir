@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
+import { Badge } from '@/components/mosaic'
 import { usePremium } from '@/lib/use-premium'
 import { useUser } from '@/lib/user-context'
 import {
@@ -461,26 +461,26 @@ export default function TrendsAnalysis() {
     }
 
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+        <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-full sm:max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className={`h-2 bg-gradient-to-r ${feature.gradient} rounded-t-2xl`} />
 
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-xl bg-gradient-to-r ${feature.gradient} text-white`}>
-                  <feature.icon className="w-6 h-6" />
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl bg-gradient-to-r ${feature.gradient} text-white shrink-0`}>
+                  <feature.icon className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{feature.title}</h2>
-                  <p className="text-gray-600">{feature.description}</p>
+                  <h2 className="text-base sm:text-xl font-bold text-gray-900">{feature.title}</h2>
+                  <p className="text-sm text-gray-600">{feature.description}</p>
                 </div>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedFeature(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 shrink-0"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -506,17 +506,17 @@ export default function TrendsAnalysis() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-800 to-purple-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 text-white">
-                <BarChart3 className="w-8 h-8" />
+              <div className="p-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 text-white shrink-0">
+                <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
                   {isEnterpriseUser ? 'Kurumsal Trend Analizi' : 'Trend Analizi'}
                 </h1>
                 <p className="text-gray-600">
@@ -550,7 +550,7 @@ export default function TrendsAnalysis() {
         </div>
 
         {/* Premium Aksiyonlar */}
-        <Card className="mb-8 border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+        <Card className="mb-8 border-0 shadow-mosaic-lg bg-slate-800/80 backdrop-blur-xl">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
               <Crown className="w-6 h-6 text-yellow-500" />
@@ -571,7 +571,7 @@ export default function TrendsAnalysis() {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
               {premiumFeatures.map(feature => (
                 <div
                   key={feature.id}
@@ -580,7 +580,7 @@ export default function TrendsAnalysis() {
                 >
                   {/* Performance Badge */}
                   <div className="absolute top-4 right-4">
-                    <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                    <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-xl">
                       {feature.performance}
                     </Badge>
                   </div>
@@ -598,7 +598,7 @@ export default function TrendsAnalysis() {
                     {/* Action Button */}
                     <Button
                       size="sm"
-                      className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                      className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-xl"
                     >
                       {feature.action}
                       <ArrowRight className="w-4 h-4 ml-2" />
@@ -614,14 +614,14 @@ export default function TrendsAnalysis() {
         </Card>
 
         {/* Ana Trend Kartları */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-100">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+          <Card className="border-0 shadow-mosaic bg-gradient-to-br from-green-500/10 to-emerald-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-600">Aylık Trend</p>
-                  <p className="text-2xl font-bold text-green-700">Pozitif</p>
-                  <p className="text-xs text-green-600 flex items-center mt-1">
+                  <p className="text-sm font-medium text-green-400">Aylık Trend</p>
+                  <p className="text-2xl font-bold text-green-400">Pozitif</p>
+                  <p className="text-xs text-green-400 flex items-center mt-1">
                     <TrendingUp className="w-3 h-3 mr-1" />
                     +18.7%
                   </p>
@@ -633,13 +633,13 @@ export default function TrendsAnalysis() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-100">
+          <Card className="border-0 shadow-mosaic bg-gradient-to-br from-blue-500/10 to-cyan-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-600">3 Aylık Ortalama</p>
-                  <p className="text-2xl font-bold text-blue-700">₺12,450</p>
-                  <p className="text-xs text-blue-600 flex items-center mt-1">
+                  <p className="text-sm font-medium text-blue-400">3 Aylık Ortalama</p>
+                  <p className="text-2xl font-bold text-blue-400">₺12,450</p>
+                  <p className="text-xs text-blue-400 flex items-center mt-1">
                     <Minus className="w-3 h-3 mr-1" />
                     +2.3%
                   </p>
@@ -651,13 +651,13 @@ export default function TrendsAnalysis() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-violet-100">
+          <Card className="border-0 shadow-mosaic bg-gradient-to-br from-purple-500/10 to-violet-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-purple-600">Tahmin Doğruluğu</p>
+                  <p className="text-sm font-medium text-purple-400">Tahmin Doğruluğu</p>
                   <p className="text-2xl font-bold text-purple-700">%94.2</p>
-                  <p className="text-xs text-purple-600 flex items-center mt-1">
+                  <p className="text-xs text-purple-400 flex items-center mt-1">
                     <Sparkles className="w-3 h-3 mr-1" />
                     AI Destekli
                   </p>
@@ -669,7 +669,7 @@ export default function TrendsAnalysis() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-50 to-red-100">
+          <Card className="border-0 shadow-mosaic bg-gradient-to-br from-orange-500/10 to-red-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -689,7 +689,7 @@ export default function TrendsAnalysis() {
         </div>
 
         {/* Trend Geçmişi */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm mb-8">
+        <Card className="border-0 shadow-mosaic bg-slate-800/80 backdrop-blur-xl mb-8">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-purple-500" />6 Aylık Trend Geçmişi
@@ -743,7 +743,7 @@ export default function TrendsAnalysis() {
               ].map((month, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-4 rounded-xl bg-accent/20 hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex items-center gap-4">
                     <div className="text-center">
@@ -753,9 +753,9 @@ export default function TrendsAnalysis() {
                     <div
                       className={`p-2 rounded-lg ${
                         month.trend === 'up'
-                          ? 'bg-green-100 text-green-600'
+                          ? 'bg-green-500/15 text-green-400'
                           : month.trend === 'down'
-                            ? 'bg-red-100 text-red-600'
+                            ? 'bg-red-500/15 text-red-400'
                             : 'bg-gray-100 text-gray-600'
                       }`}
                     >
@@ -768,19 +768,19 @@ export default function TrendsAnalysis() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-6">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-6">
                     <div className="text-right">
                       <p className="text-sm text-gray-600">Gelir</p>
-                      <p className="font-medium text-green-600">₺{month.income.toLocaleString()}</p>
+                      <p className="font-medium text-green-400">₺{month.income.toLocaleString()}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-gray-600">Gider</p>
-                      <p className="font-medium text-red-600">₺{month.expenses.toLocaleString()}</p>
+                      <p className="font-medium text-red-400">₺{month.expenses.toLocaleString()}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-gray-600">Net</p>
                       <p
-                        className={`font-medium ${month.netFlow > 0 ? 'text-green-600' : 'text-red-600'}`}
+                        className={`font-medium ${month.netFlow > 0 ? 'text-green-400' : 'text-red-400'}`}
                       >
                         ₺{month.netFlow.toLocaleString()}
                       </p>
@@ -793,7 +793,7 @@ export default function TrendsAnalysis() {
         </Card>
 
         {/* Gelecek Tahminleri */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <Card className="border-0 shadow-mosaic bg-slate-800/80 backdrop-blur-xl">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <Brain className="w-5 h-5 text-purple-500" />
@@ -801,40 +801,40 @@ export default function TrendsAnalysis() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 p-6 rounded-xl border border-green-200">
                 <h3 className="font-bold text-green-800 mb-3">📈 1 Ay Sonra</h3>
                 <div className="space-y-2">
-                  <p className="text-sm text-green-700">
+                  <p className="text-sm text-green-400">
                     Tahmini Gelir: <span className="font-medium">₺47,500</span>
                   </p>
-                  <p className="text-sm text-green-700">
+                  <p className="text-sm text-green-400">
                     Tahmini Gider: <span className="font-medium">₺33,200</span>
                   </p>
-                  <p className="text-sm text-green-700">
+                  <p className="text-sm text-green-400">
                     Tahmini Net: <span className="font-bold">₺14,300</span>
                   </p>
-                  <Badge className="bg-green-100 text-green-700">+9.6% Artış</Badge>
+                  <Badge className="bg-green-500/15 text-green-400">+9.6% Artış</Badge>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-xl border border-blue-200">
+              <div className="bg-gradient-to-br from-blue-500/10 to-cyan-50 p-6 rounded-xl border border-blue-200">
                 <h3 className="font-bold text-blue-800 mb-3">📊 3 Ay Sonra</h3>
                 <div className="space-y-2">
-                  <p className="text-sm text-blue-700">
+                  <p className="text-sm text-blue-400">
                     Tahmini Gelir: <span className="font-medium">₺49,200</span>
                   </p>
-                  <p className="text-sm text-blue-700">
+                  <p className="text-sm text-blue-400">
                     Tahmini Gider: <span className="font-medium">₺34,800</span>
                   </p>
-                  <p className="text-sm text-blue-700">
+                  <p className="text-sm text-blue-400">
                     Tahmini Net: <span className="font-bold">₺14,400</span>
                   </p>
-                  <Badge className="bg-blue-100 text-blue-700">+10.3% Artış</Badge>
+                  <Badge className="bg-blue-500/15 text-blue-400">+10.3% Artış</Badge>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200">
+              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-200">
                 <h3 className="font-bold text-purple-800 mb-3">🎯 6 Ay Sonra</h3>
                 <div className="space-y-2">
                   <p className="text-sm text-purple-700">
@@ -846,7 +846,7 @@ export default function TrendsAnalysis() {
                   <p className="text-sm text-purple-700">
                     Tahmini Net: <span className="font-bold">₺15,600</span>
                   </p>
-                  <Badge className="bg-purple-100 text-purple-700">+19.5% Artış</Badge>
+                  <Badge className="bg-purple-500/15 text-purple-700">+19.5% Artış</Badge>
                 </div>
               </div>
             </div>
@@ -864,19 +864,19 @@ export default function TrendsAnalysis() {
 function PredictiveAnalysisModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200">
+      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-200">
         <h3 className="text-lg font-bold text-purple-800 mb-3">🔮 AI Tahmin Analizi</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Brain className="w-5 h-5 text-purple-600" />
+            <Brain className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">Makine öğrenmesi destekli tahminler</span>
           </div>
           <div className="flex items-center gap-3">
-            <Brain className="w-5 h-5 text-purple-600" />
+            <Brain className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">Çoklu faktör analizi</span>
           </div>
           <div className="flex items-center gap-3">
-            <Brain className="w-5 h-5 text-purple-600" />
+            <Brain className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">%94.2 doğruluk oranı</span>
           </div>
         </div>
@@ -899,20 +899,20 @@ function PredictiveAnalysisModal() {
 function SeasonalTrendsModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-xl border border-blue-200">
+      <div className="bg-gradient-to-r from-blue-500/10 to-cyan-50 p-6 rounded-xl border border-blue-200">
         <h3 className="text-lg font-bold text-blue-800 mb-3">📅 Mevsimsel Trend Analizi</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Calendar className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">Mevsimsel harcama kalıpları</span>
+            <Calendar className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">Mevsimsel harcama kalıpları</span>
           </div>
           <div className="flex items-center gap-3">
-            <Calendar className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">Yıllık döngü analizi</span>
+            <Calendar className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">Yıllık döngü analizi</span>
           </div>
           <div className="flex items-center gap-3">
-            <Calendar className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">Planlama önerileri</span>
+            <Calendar className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">Planlama önerileri</span>
           </div>
         </div>
       </div>
@@ -934,20 +934,20 @@ function SeasonalTrendsModal() {
 function MarketInsightsModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
+      <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-6 rounded-xl border border-green-200">
         <h3 className="text-lg font-bold text-green-800 mb-3">📊 Pazar İçgörüleri</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <BarChart3 className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">Pazar trendleri analizi</span>
+            <BarChart3 className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">Pazar trendleri analizi</span>
           </div>
           <div className="flex items-center gap-3">
-            <BarChart3 className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">Fırsat tespiti</span>
+            <BarChart3 className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">Fırsat tespiti</span>
           </div>
           <div className="flex items-center gap-3">
-            <BarChart3 className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">Rekabet analizi</span>
+            <BarChart3 className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">Rekabet analizi</span>
           </div>
         </div>
       </div>
@@ -969,7 +969,7 @@ function MarketInsightsModal() {
 function InvestmentTrendsModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-xl border border-orange-200">
+      <div className="bg-gradient-to-r from-orange-500/10 to-red-50 p-6 rounded-xl border border-orange-200">
         <h3 className="text-lg font-bold text-orange-800 mb-3">💰 Yatırım Trendleri</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
@@ -1008,15 +1008,15 @@ function SpendingForecastModal() {
         <h3 className="text-lg font-bold text-indigo-800 mb-3">🎯 Harcama Tahmini</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-indigo-600" />
+            <Target className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">Gelecek harcama tahminleri</span>
           </div>
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-indigo-600" />
+            <Target className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">Bütçe planlama</span>
           </div>
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-indigo-600" />
+            <Target className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">Senaryo analizi</span>
           </div>
         </div>
@@ -1039,20 +1039,20 @@ function SpendingForecastModal() {
 function RiskAnalysisModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-red-50 to-rose-50 p-6 rounded-xl border border-red-200">
+      <div className="bg-gradient-to-r from-red-500/10 to-rose-500/10 p-6 rounded-xl border border-red-200">
         <h3 className="text-lg font-bold text-red-800 mb-3">🛡️ Risk Analizi</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Shield className="w-5 h-5 text-red-600" />
-            <span className="text-red-700">Finansal risk değerlendirmesi</span>
+            <Shield className="w-5 h-5 text-red-400" />
+            <span className="text-red-400">Finansal risk değerlendirmesi</span>
           </div>
           <div className="flex items-center gap-3">
-            <Shield className="w-5 h-5 text-red-600" />
-            <span className="text-red-700">Erken uyarı sistemi</span>
+            <Shield className="w-5 h-5 text-red-400" />
+            <span className="text-red-400">Erken uyarı sistemi</span>
           </div>
           <div className="flex items-center gap-3">
-            <Shield className="w-5 h-5 text-red-600" />
-            <span className="text-red-700">Risk azaltma önerileri</span>
+            <Shield className="w-5 h-5 text-red-400" />
+            <span className="text-red-400">Risk azaltma önerileri</span>
           </div>
         </div>
       </div>

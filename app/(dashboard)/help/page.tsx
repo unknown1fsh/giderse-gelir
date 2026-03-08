@@ -2,14 +2,20 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  PageHeader,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Button,
+  SearchBox,
+  StatCard
+} from '@/components/mosaic'
 import FAQList from '@/components/help/faq-list'
-import SearchBar from '@/components/help/search-bar'
 import CategoryTabs from '@/components/help/category-tabs'
-import StatsCards from '@/components/help/stats-cards'
-import { MessageSquare, BookOpen, Plus, HelpCircle, Sparkles } from 'lucide-react'
-import NavigationButtons from '@/components/help/navigation-buttons'
+import { MessageSquare, BookOpen, Plus, CheckCircle, Clock } from 'lucide-react'
 
 interface FAQ {
   id: number
@@ -23,7 +29,6 @@ interface FAQ {
 export default function HelpPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [, setFaqs] = useState<FAQ[]>([])
   const [categories, setCategories] = useState<Array<{ name: string; count: number }>>([])
   const [stats, setStats] = useState({
     totalFAQs: 0,
@@ -35,15 +40,12 @@ export default function HelpPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // FAQ'leri getir
         const faqResponse = await fetch('/api/help/faq')
         const faqResult = (await faqResponse.json()) as { success: boolean; data?: FAQ[] }
 
         if (faqResult.success && faqResult.data) {
-          setFaqs(faqResult.data)
           setStats(prev => ({ ...prev, totalFAQs: faqResult.data?.length || 0 }))
 
-          // Kategorileri hesapla
           const categoryMap = new Map<string, number>()
           faqResult.data.forEach(faq => {
             const cat = faq.category || 'Genel'
@@ -57,7 +59,6 @@ export default function HelpPage() {
           setCategories(categoryList)
         }
 
-        // Ticket istatistiklerini getir
         const ticketsResponse = await fetch('/api/help/tickets')
         const ticketsResult = (await ticketsResponse.json()) as {
           success: boolean
@@ -87,129 +88,115 @@ export default function HelpPage() {
   const filteredCategory = searchQuery ? null : selectedCategory
 
   return (
-    <div className="space-y-8 pb-8">
-      {/* Navigation Buttons */}
-      <NavigationButtons backHref="/dashboard" backLabel="Dashboard'a Dön" />
-
-      {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 p-8 md:p-12 text-white shadow-2xl">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20" />
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-              <HelpCircle className="h-8 w-8" />
-            </div>
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-2">Yardım Merkezi</h1>
-              <p className="text-lg md:text-xl text-white/90">
-                Sorularınızın cevaplarını bulun veya bizimle iletişime geçin
-              </p>
-            </div>
-          </div>
-          <div className="mt-6 max-w-2xl">
-            <SearchBar
+    <div className="space-y-6 pb-8">
+      <PageHeader
+        title="Yardım Merkezi"
+        description="Sorularınızın cevaplarını bulun veya bizimle iletişime geçin"
+        actions={
+          <div className="w-full sm:w-80">
+            <SearchBox
               onSearch={setSearchQuery}
-              placeholder="SSS'lerde ara... (örn: ödeme, hesap, abonelik)"
-              className="w-full"
+              placeholder="SSS'lerde ara..."
             />
           </div>
-        </div>
+        }
+      />
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Toplam SSS"
+          value={stats.totalFAQs}
+          icon={<BookOpen className="h-4 w-4" />}
+        />
+        <StatCard
+          title="Toplam Talep"
+          value={stats.totalTickets}
+          icon={<MessageSquare className="h-4 w-4" />}
+        />
+        <StatCard
+          title="Çözülen"
+          value={stats.resolvedTickets}
+          icon={<CheckCircle className="h-4 w-4" />}
+        />
+        <StatCard
+          title="Bekleyen"
+          value={stats.pendingTickets}
+          icon={<Clock className="h-4 w-4" />}
+        />
       </div>
 
-      {/* Quick Access Cards */}
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Link href="#faq">
-          <Card className="group relative overflow-hidden border-2 hover:border-blue-500 transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="relative">
+          <Card className="h-full hover:border-primary transition-all duration-300">
+            <CardHeader>
               <div className="flex items-center space-x-3">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg group-hover:scale-110 transition-transform">
-                  <BookOpen className="h-6 w-6" />
+                <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
+                  <BookOpen className="h-5 w-5" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl">Sıkça Sorulan Sorular</CardTitle>
+                  <CardTitle className="text-lg">Sıkça Sorulan Sorular</CardTitle>
                   <CardDescription className="mt-1">SSS&apos;leri keşfedin</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="relative">
-              <Button
-                variant="outline"
-                className="w-full group-hover:bg-blue-50 group-hover:border-blue-500 transition-colors"
-              >
-                SSS&apos;leri Görüntüle
+            <CardContent>
+              <Button variant="outline" className="w-full">
+                Görüntüle
               </Button>
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/help/tickets">
-          <Card className="group relative overflow-hidden border-2 hover:border-green-500 transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="relative">
+          <Card className="h-full hover:border-primary transition-all duration-300">
+            <CardHeader>
               <div className="flex items-center space-x-3">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 text-white shadow-lg group-hover:scale-110 transition-transform">
-                  <MessageSquare className="h-6 w-6" />
+                <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
+                  <MessageSquare className="h-5 w-5" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl">Destek Taleplerim</CardTitle>
+                  <CardTitle className="text-lg">Destek Taleplerim</CardTitle>
                   <CardDescription className="mt-1">Taleplerinizi görüntüleyin</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="relative">
-              <Button
-                variant="outline"
-                className="w-full group-hover:bg-green-50 group-hover:border-green-500 transition-colors"
-              >
-                Taleplerimi Görüntüle
+            <CardContent>
+              <Button variant="outline" className="w-full">
+                Görüntüle
               </Button>
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/help/tickets/new">
-          <Card className="group relative overflow-hidden border-2 hover:border-purple-500 transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="relative">
+          <Card className="h-full hover:border-primary transition-all duration-300">
+            <CardHeader>
               <div className="flex items-center space-x-3">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg group-hover:scale-110 transition-transform">
-                  <Plus className="h-6 w-6" />
+                <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
+                  <Plus className="h-5 w-5" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl">Yeni Talep</CardTitle>
+                  <CardTitle className="text-lg">Yeni Talep</CardTitle>
                   <CardDescription className="mt-1">Destek talebi oluşturun</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="relative">
-              <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg">
-                Yeni Talep Oluştur
+            <CardContent>
+              <Button className="w-full">
+                Oluştur
               </Button>
             </CardContent>
           </Card>
         </Link>
       </div>
 
-      {/* Stats Cards */}
-      <StatsCards
-        totalFAQs={stats.totalFAQs}
-        totalTickets={stats.totalTickets}
-        resolvedTickets={stats.resolvedTickets}
-        pendingTickets={stats.pendingTickets}
-      />
-
-      {/* FAQ Section */}
-      <div id="faq" className="space-y-6">
+      <div id="faq" className="space-y-6 pt-6 border-t border-border">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-              <Sparkles className="h-8 w-8 text-purple-600" />
-              Sıkça Sorulan Sorular
-            </h2>
-            <p className="text-gray-600 mt-2">
+            <h2 className="text-xl font-bold text-foreground">Sıkça Sorulan Sorular</h2>
+            <p className="text-muted-foreground mt-1 text-sm">
               Aradığınız cevabı bulamadınız mı?{' '}
-              <Link href="/help/tickets/new" className="text-blue-600 hover:underline font-medium">
+              <Link href="/help/tickets/new" className="text-primary hover:underline font-medium">
                 Destek talebi oluşturabilirsiniz
               </Link>
               .

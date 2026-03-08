@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
+import { Badge } from '@/components/mosaic'
 import { usePremium } from '@/lib/use-premium'
 import { useUser } from '@/lib/user-context'
 import {
@@ -456,26 +456,26 @@ export default function ExportAnalysis() {
     }
 
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+        <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-full sm:max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className={`h-2 bg-gradient-to-r ${feature.gradient} rounded-t-2xl`} />
 
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-xl bg-gradient-to-r ${feature.gradient} text-white`}>
-                  <feature.icon className="w-6 h-6" />
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl bg-gradient-to-r ${feature.gradient} text-white shrink-0`}>
+                  <feature.icon className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{feature.title}</h2>
-                  <p className="text-gray-600">{feature.description}</p>
+                  <h2 className="text-base sm:text-xl font-bold text-gray-900">{feature.title}</h2>
+                  <p className="text-sm text-gray-600">{feature.description}</p>
                 </div>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedFeature(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 shrink-0"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -501,17 +501,17 @@ export default function ExportAnalysis() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-800 to-orange-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white">
-                <Download className="w-8 h-8" />
+              <div className="p-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white shrink-0">
+                <Download className="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
                   {isEnterpriseUser ? 'Kurumsal Export & Raporlar' : 'Export & Raporlar'}
                 </h1>
                 <p className="text-gray-600">
@@ -545,7 +545,7 @@ export default function ExportAnalysis() {
         </div>
 
         {/* Premium Aksiyonlar */}
-        <Card className="mb-8 border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+        <Card className="mb-8 border-0 shadow-mosaic-lg bg-slate-800/80 backdrop-blur-xl">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
               <Crown className="w-6 h-6 text-yellow-500" />
@@ -566,7 +566,7 @@ export default function ExportAnalysis() {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
               {premiumFeatures.map(feature => (
                 <div
                   key={feature.id}
@@ -575,7 +575,7 @@ export default function ExportAnalysis() {
                 >
                   {/* Performance Badge */}
                   <div className="absolute top-4 right-4">
-                    <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                    <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-xl">
                       {feature.performance}
                     </Badge>
                   </div>
@@ -593,7 +593,7 @@ export default function ExportAnalysis() {
                     {/* Action Button */}
                     <Button
                       size="sm"
-                      className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                      className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-xl"
                     >
                       {feature.action}
                       <ArrowRight className="w-4 h-4 ml-2" />
@@ -609,14 +609,14 @@ export default function ExportAnalysis() {
         </Card>
 
         {/* Hızlı Export Seçenekleri */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-100">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+          <Card className="border-0 shadow-mosaic bg-gradient-to-br from-blue-500/10 to-cyan-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-sm font-medium text-blue-600">PDF Rapor</p>
-                  <p className="text-2xl font-bold text-blue-700">Hazır</p>
-                  <p className="text-xs text-blue-600 flex items-center mt-1">
+                  <p className="text-sm font-medium text-blue-400">PDF Rapor</p>
+                  <p className="text-2xl font-bold text-blue-400">Hazır</p>
+                  <p className="text-xs text-blue-400 flex items-center mt-1">
                     <Clock className="w-3 h-3 mr-1" />
                     2.3 MB
                   </p>
@@ -632,13 +632,13 @@ export default function ExportAnalysis() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-100">
+          <Card className="border-0 shadow-mosaic bg-gradient-to-br from-green-500/10 to-emerald-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-sm font-medium text-green-600">Excel Dosyası</p>
-                  <p className="text-2xl font-bold text-green-700">Hazır</p>
-                  <p className="text-xs text-green-600 flex items-center mt-1">
+                  <p className="text-sm font-medium text-green-400">Excel Dosyası</p>
+                  <p className="text-2xl font-bold text-green-400">Hazır</p>
+                  <p className="text-xs text-green-400 flex items-center mt-1">
                     <Clock className="w-3 h-3 mr-1" />
                     1.8 MB
                   </p>
@@ -654,13 +654,13 @@ export default function ExportAnalysis() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-violet-100">
+          <Card className="border-0 shadow-mosaic bg-gradient-to-br from-purple-500/10 to-violet-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-sm font-medium text-purple-600">CSV Veri</p>
+                  <p className="text-sm font-medium text-purple-400">CSV Veri</p>
                   <p className="text-2xl font-bold text-purple-700">Hazır</p>
-                  <p className="text-xs text-purple-600 flex items-center mt-1">
+                  <p className="text-xs text-purple-400 flex items-center mt-1">
                     <Clock className="w-3 h-3 mr-1" />
                     0.9 MB
                   </p>
@@ -676,7 +676,7 @@ export default function ExportAnalysis() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-50 to-red-100">
+          <Card className="border-0 shadow-mosaic bg-gradient-to-br from-orange-500/10 to-red-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -700,7 +700,7 @@ export default function ExportAnalysis() {
         </div>
 
         {/* Son Export Geçmişi */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm mb-8">
+        <Card className="border-0 shadow-mosaic bg-slate-800/80 backdrop-blur-xl mb-8">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <Clock className="w-5 h-5 text-orange-500" />
@@ -748,10 +748,10 @@ export default function ExportAnalysis() {
               ].map((exportItem, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-4 rounded-xl bg-accent/20 hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="p-2 rounded-lg bg-orange-100 text-orange-600">
+                    <div className="p-2 rounded-lg bg-orange-500/15 text-orange-600">
                       <FileText className="w-5 h-5" />
                     </div>
                     <div>
@@ -766,8 +766,8 @@ export default function ExportAnalysis() {
                       variant={exportItem.status === 'ready' ? 'secondary' : 'destructive'}
                       className={
                         exportItem.status === 'ready'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
+                          ? 'bg-green-500/15 text-green-400'
+                          : 'bg-red-500/15 text-red-400'
                       }
                     >
                       {exportItem.status === 'ready' ? 'Hazır' : 'Hata'}
@@ -786,7 +786,7 @@ export default function ExportAnalysis() {
         </Card>
 
         {/* Export İstatistikleri */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <Card className="border-0 shadow-mosaic bg-slate-800/80 backdrop-blur-xl">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-orange-500" />
@@ -794,31 +794,31 @@ export default function ExportAnalysis() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-xl border border-blue-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div className="bg-gradient-to-br from-blue-500/10 to-cyan-50 p-6 rounded-xl border border-blue-200">
                 <h3 className="font-bold text-blue-800 mb-3">📊 Toplam Export</h3>
                 <div className="space-y-2">
-                  <p className="text-2xl font-bold text-blue-700">247</p>
-                  <p className="text-sm text-blue-600">Bu ay oluşturulan rapor</p>
-                  <Badge className="bg-blue-100 text-blue-700">+23% Artış</Badge>
+                  <p className="text-2xl font-bold text-blue-400">247</p>
+                  <p className="text-sm text-blue-400">Bu ay oluşturulan rapor</p>
+                  <Badge className="bg-blue-500/15 text-blue-400">+23% Artış</Badge>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
+              <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 p-6 rounded-xl border border-green-200">
                 <h3 className="font-bold text-green-800 mb-3">💾 Toplam Boyut</h3>
                 <div className="space-y-2">
-                  <p className="text-2xl font-bold text-green-700">12.4 GB</p>
-                  <p className="text-sm text-green-600">Toplam export boyutu</p>
-                  <Badge className="bg-green-100 text-green-700">+8.5% Artış</Badge>
+                  <p className="text-2xl font-bold text-green-400">12.4 GB</p>
+                  <p className="text-sm text-green-400">Toplam export boyutu</p>
+                  <Badge className="bg-green-500/15 text-green-400">+8.5% Artış</Badge>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200">
+              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-200">
                 <h3 className="font-bold text-purple-800 mb-3">🎯 Başarı Oranı</h3>
                 <div className="space-y-2">
                   <p className="text-2xl font-bold text-purple-700">%98.7</p>
-                  <p className="text-sm text-purple-600">Başarılı export oranı</p>
-                  <Badge className="bg-purple-100 text-purple-700">Mükemmel</Badge>
+                  <p className="text-sm text-purple-400">Başarılı export oranı</p>
+                  <Badge className="bg-purple-500/15 text-purple-700">Mükemmel</Badge>
                 </div>
               </div>
             </div>
@@ -836,20 +836,20 @@ export default function ExportAnalysis() {
 function QuickExportModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-xl border border-blue-200">
+      <div className="bg-gradient-to-r from-blue-500/10 to-cyan-50 p-6 rounded-xl border border-blue-200">
         <h3 className="text-lg font-bold text-blue-800 mb-3">⚡ Hızlı Export</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Zap className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">Tek tıkla tüm raporları dışa aktar</span>
+            <Zap className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">Tek tıkla tüm raporları dışa aktar</span>
           </div>
           <div className="flex items-center gap-3">
-            <Zap className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">Otomatik format seçimi</span>
+            <Zap className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">Otomatik format seçimi</span>
           </div>
           <div className="flex items-center gap-3">
-            <Zap className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">Toplu indirme</span>
+            <Zap className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">Toplu indirme</span>
           </div>
         </div>
       </div>
@@ -871,20 +871,20 @@ function QuickExportModal() {
 function CustomReportsModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
+      <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-6 rounded-xl border border-green-200">
         <h3 className="text-lg font-bold text-green-800 mb-3">📋 Özel Rapor Şablonları</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <FileText className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">Kişiselleştirilmiş şablonlar</span>
+            <FileText className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">Kişiselleştirilmiş şablonlar</span>
           </div>
           <div className="flex items-center gap-3">
-            <FileText className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">Özel grafik ve görselleştirmeler</span>
+            <FileText className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">Özel grafik ve görselleştirmeler</span>
           </div>
           <div className="flex items-center gap-3">
-            <FileText className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">Şablon kütüphanesi</span>
+            <FileText className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">Şablon kütüphanesi</span>
           </div>
         </div>
       </div>
@@ -906,19 +906,19 @@ function CustomReportsModal() {
 function ScheduledExportsModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200">
+      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-200">
         <h3 className="text-lg font-bold text-purple-800 mb-3">📅 Otomatik Export</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Calendar className="w-5 h-5 text-purple-600" />
+            <Calendar className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">Zamanlanmış otomatik raporlar</span>
           </div>
           <div className="flex items-center gap-3">
-            <Calendar className="w-5 h-5 text-purple-600" />
+            <Calendar className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">E-posta ile gönderim</span>
           </div>
           <div className="flex items-center gap-3">
-            <Calendar className="w-5 h-5 text-purple-600" />
+            <Calendar className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">Bulut yedekleme</span>
           </div>
         </div>
@@ -941,7 +941,7 @@ function ScheduledExportsModal() {
 function MultiFormatModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-xl border border-orange-200">
+      <div className="bg-gradient-to-r from-orange-500/10 to-red-50 p-6 rounded-xl border border-orange-200">
         <h3 className="text-lg font-bold text-orange-800 mb-3">📄 Çoklu Format Desteği</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
@@ -980,15 +980,15 @@ function SecureSharingModal() {
         <h3 className="text-lg font-bold text-indigo-800 mb-3">🔒 Güvenli Paylaşım</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Shield className="w-5 h-5 text-indigo-600" />
+            <Shield className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">Şifreli dosya paylaşımı</span>
           </div>
           <div className="flex items-center gap-3">
-            <Shield className="w-5 h-5 text-indigo-600" />
+            <Shield className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">Erişim kontrolü</span>
           </div>
           <div className="flex items-center gap-3">
-            <Shield className="w-5 h-5 text-indigo-600" />
+            <Shield className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">Güvenli bağlantılar</span>
           </div>
         </div>
@@ -1046,7 +1046,7 @@ function CloudSyncModal() {
 function AdvancedAnalyticsModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-6 rounded-xl border border-pink-200">
+      <div className="bg-gradient-to-r from-pink-50 to-rose-500/10 p-6 rounded-xl border border-pink-200">
         <h3 className="text-lg font-bold text-pink-800 mb-3">📊 Gelişmiş Analitik</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">

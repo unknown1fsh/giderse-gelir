@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import DataTable from './DataTable'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@/components/mosaic'
 import { formatCurrency } from '@/lib/validators'
 import { getDisplayName } from '@/lib/utils'
 
@@ -103,8 +103,8 @@ export default function AdminSubscriptions() {
       header: 'Kullanıcı',
       render: (sub: Subscription) => (
         <div>
-          <div className="text-sm font-medium text-slate-900">{getDisplayName(sub.user)}</div>
-          <div className="text-sm text-slate-500">{sub.user.email}</div>
+          <div className="text-sm font-medium text-foreground">{getDisplayName(sub.user)}</div>
+          <div className="text-sm text-muted-foreground">{sub.user.email}</div>
         </div>
       ),
     },

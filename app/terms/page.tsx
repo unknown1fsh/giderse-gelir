@@ -6,50 +6,22 @@ import {
   Shield,
   CreditCard,
   AlertTriangle,
-  ArrowLeft,
   Mail,
   Phone,
   MapPin,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+import { Button, LegalPageShell } from '@/components/mosaic'
 
 export default function TermsOfServicePage() {
   const router = useRouter()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Header */}
-      <div className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Button
-            variant="ghost"
-            onClick={() => router.push('/landing')}
-            className="text-slate-300 hover:text-white mb-4 min-h-[48px]"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Ana Sayfaya Dön
-          </Button>
-          <div className="flex items-center space-x-3 mb-2">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600">
-              <Scale className="h-6 w-6 text-white" />
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-white">Kullanım Şartları</h1>
-          </div>
-          <p className="text-slate-400 text-sm sm:text-base">
-            Son Güncelleme:{' '}
-            {new Date().toLocaleDateString('tr-TR', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="space-y-8">
+    <LegalPageShell
+      icon={Scale}
+      title="Kullanım Şartları"
+      accentClassName="bg-gradient-to-br from-blue-500 to-indigo-600"
+    >
           {/* Introduction */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/10">
             <div className="flex items-start space-x-4 mb-4">
@@ -477,8 +449,6 @@ export default function TermsOfServicePage() {
               kullanabilir veya Tüketici Hakem Heyetlerine başvurabilirsiniz.
             </p>
           </div>
-        </div>
-
         {/* Footer Actions */}
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
           <Button
@@ -495,7 +465,6 @@ export default function TermsOfServicePage() {
             Gizlilik Politikası
           </Button>
         </div>
-      </div>
-    </div>
+    </LegalPageShell>
   )
 }

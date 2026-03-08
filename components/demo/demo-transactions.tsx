@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
 import { Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
 import { DemoTransaction } from '@/lib/demo-data'
 

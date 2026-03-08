@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/mosaic'
 import {
   ArrowLeft,
   Home,
@@ -14,9 +14,9 @@ import {
   Trash2,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/validators'
-import { EditNameModal } from '@/components/ui/edit-name-modal'
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
-import PageHeader from '@/components/page-header'
+import { EditNameModal } from '@/components/mosaic'
+import { ConfirmationDialog } from '@/components/mosaic'
+import { PageHeader } from '@/components/mosaic'
 import { useToast } from '@/lib/use-toast'
 
 interface Transaction {
@@ -152,7 +152,7 @@ export default function AccountDetailPage() {
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-accent rounded-lg transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
@@ -195,14 +195,14 @@ export default function AccountDetailPage() {
           <>
             <button
               onClick={() => setShowEditModal(true)}
-              className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2.5 min-h-[44px] bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
               <Edit className="h-4 w-4" />
               Düzenle
             </button>
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2.5 min-h-[44px] bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
             >
               <Trash2 className="h-4 w-4" />
               Sil
@@ -212,7 +212,7 @@ export default function AccountDetailPage() {
       />
 
       {/* Hesap Bilgileri */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         <Card className="bg-gradient-to-br from-slate-500 to-slate-600 text-white">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium opacity-90">Açılış Bakiyesi</CardTitle>
@@ -338,9 +338,9 @@ export default function AccountDetailPage() {
             <div className="space-y-2">
               {/* Açılış Bakiyesi Göster */}
               {openingBalance !== 0 && (
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 rounded-lg border bg-slate-50">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 rounded-lg border bg-muted/50">
                   <div className="min-w-0 flex items-center gap-4">
-                    <div className="p-2 rounded-full bg-slate-100 text-slate-600">
+                    <div className="p-2 rounded-full bg-muted text-muted-foreground">
                       <DollarSign className="h-5 w-5" />
                     </div>
                     <div className="min-w-0">
@@ -381,7 +381,7 @@ export default function AccountDetailPage() {
                       acc.elements.push(
                         <div
                           key={tx.id}
-                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 rounded-lg border hover:bg-gray-50 transition-colors"
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 rounded-lg border hover:bg-accent transition-colors"
                         >
                           <div className="min-w-0 flex items-center gap-4">
                             <div

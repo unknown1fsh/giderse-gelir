@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 
 interface User {
   id: number
-  name: string
+  name?: string
   email: string
   username: string
   usernameChangeCount: number
@@ -14,7 +14,15 @@ interface User {
   plan: string
   role: string
   isActive: boolean
-  emailVerified?: boolean
+  emailVerified: boolean
+  timezone: string
+  language: string
+  currency: string
+  dateFormat: string
+  numberFormat: string
+  theme: string
+  notifications: Record<string, unknown>
+  settings: Record<string, unknown>
   createdAt: Date
   lastLoginAt?: Date
 }
@@ -45,14 +53,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   // Geçerli sayfa korumalı bir sayfa mı kontrol et
   const isProtectedPage = (): boolean => {
     const currentPath = window.location.pathname
-    const publicPaths = ['/landing', '/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password', '/auth/verify-email']
+    const publicPaths = ['/landing', '/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password', '/auth/verify-email', '/privacy', '/terms', '/cookie-policy', '/kvkk', '/demo', '/enterprise', '/enterprise-premium', '/payment']
     return !publicPaths.some(path => currentPath.startsWith(path))
   }
 
   // Geçerli sayfa public bir sayfa mı kontrol et
   const isPublicPage = (): boolean => {
     const currentPath = window.location.pathname
-    const publicPaths = ['/landing', '/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password', '/auth/verify-email']
+    const publicPaths = ['/landing', '/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password', '/auth/verify-email', '/privacy', '/terms', '/cookie-policy', '/kvkk', '/demo', '/enterprise', '/enterprise-premium', '/payment']
     return publicPaths.some(path => currentPath.startsWith(path))
   }
 

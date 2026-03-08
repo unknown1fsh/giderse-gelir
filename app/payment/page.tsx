@@ -3,8 +3,8 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import PaymentCheckout from '@/components/payment-checkout'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
 import { Loader2, ArrowLeft } from 'lucide-react'
 
 function PaymentPageContent() {

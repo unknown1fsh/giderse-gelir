@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getActivePeriod, getCurrentUser } from '@/lib/auth'
 import { Prisma } from '@prisma/client'
+import { getNetWorthSummary } from '@/lib/finance/net-worth'
+import { getBudgetSummary } from '@/lib/finance/budgets'
+import { syncNotificationEvents } from '@/lib/notifications/service'
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,24 +26,22 @@ export async function GET(request: NextRequest) {
       : Prisma.empty
 
     // Where clause'ları hazırla
-    const accountWhere: { userId: number; active: boolean; periodId?: number } = {
-      userId: user.id,
-      active: true,
-    }
     const cardWhere: { userId: number; active: boolean; periodId?: number } = {
       userId: user.id,
       active: true,
     }
-    const goldWhere: { userId: number; periodId?: number } = { userId: user.id }
 
     if (activePeriod) {
-      accountWhere.periodId = activePeriod.id
       cardWhere.periodId = activePeriod.id
-      goldWhere.periodId = activePeriod.id
     }
 
     // Tüm veritabanı sorgularını paralel çalıştır
-    const [kpiData, upcomingPayments, categoryBreakdown, accountsData, cardsData, goldData] =
+    await syncNotificationEvents(prisma, {
+      userId: user.id,
+      activePeriodId: activePeriod?.id,
+    })
+
+    const [kpiData, upcomingPayments, categoryBreakdown, netWorthSummary, budgetSummary, unreadCount] =
       await Promise.all([
         // Son 30 gün KPI'larını al (kullanıcı bazlı)
         prisma.$queryRaw<
@@ -121,44 +122,23 @@ export async function GET(request: NextRequest) {
           GROUP BY tc.name, tt.name, tc.id
           ORDER BY total_amount DESC
         `,
-        // Hesap bakiyeleri toplamı
-        prisma.account.findMany({
-          where: accountWhere,
-          select: { balance: true },
+        getNetWorthSummary(prisma, {
+          userId: user.id,
+          activePeriodId: activePeriod?.id,
         }),
-        // Kredi kartı borçları toplamı
-        prisma.creditCard.findMany({
-          where: cardWhere,
-          select: { limitAmount: true, availableLimit: true },
+        getBudgetSummary(prisma, {
+          userId: user.id,
+          activePeriodId: activePeriod?.id,
+          periodType: 'monthly',
         }),
-        // Altın değeri toplamı
-        prisma.goldItem.findMany({
-          where: goldWhere,
-          select: { currentValueTry: true, purchasePrice: true },
+        prisma.notification.count({
+          where: {
+            userId: user.id,
+            channel: 'in_app',
+            readAt: null,
+          },
         }),
       ])
-
-    // Verileri işle
-    const totalAccountBalance = accountsData.reduce(
-      (sum, acc) => sum + parseFloat(acc.balance.toString()),
-      0
-    )
-
-    const totalCardDebt = cardsData.reduce((sum, card) => {
-      const debt =
-        parseFloat(card.limitAmount.toString()) - parseFloat(card.availableLimit.toString())
-      return sum + debt
-    }, 0)
-
-    const totalGoldValue = goldData.reduce((sum, gold) => {
-      const value = gold.currentValueTry
-        ? parseFloat(gold.currentValueTry.toString())
-        : parseFloat(gold.purchasePrice.toString())
-      return sum + value
-    }, 0)
-
-    const totalAssets = totalAccountBalance + totalGoldValue
-    const netWorth = totalAssets - totalCardDebt
 
     // BigInt değerlerini string'e çevir
     const kpi = kpiData[0]
@@ -195,13 +175,19 @@ export async function GET(request: NextRequest) {
       kpi,
       upcomingPayments: payments,
       categoryBreakdown: categories,
-      // ✅ Toplam Varlık Bilgileri (Transaction'larla senkronize)
       assets: {
-        totalAccountBalance: totalAccountBalance.toString(),
-        totalGoldValue: totalGoldValue.toString(),
-        totalCardDebt: totalCardDebt.toString(),
-        totalAssets: totalAssets.toString(),
-        netWorth: netWorth.toString(),
+        totalAccountBalance: netWorthSummary.breakdown.assets.cash.toString(),
+        totalGoldValue: netWorthSummary.breakdown.assets.gold.toString(),
+        totalCardDebt: netWorthSummary.breakdown.liabilities.creditCards.toString(),
+        totalAssets: netWorthSummary.totalAssets.toString(),
+        totalLiabilities: netWorthSummary.totalLiabilities.toString(),
+        netWorth: netWorthSummary.netWorth.toString(),
+        breakdown: netWorthSummary.breakdown,
+        snapshots: netWorthSummary.snapshots,
+      },
+      budgets: budgetSummary,
+      notifications: {
+        unreadCount,
       },
     })
   } catch (error) {

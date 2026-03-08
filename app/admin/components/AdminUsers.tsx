@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useToast } from '@/lib/use-toast'
 import DataTable from './DataTable'
 import UserDetailModal from './UserDetailModal'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/mosaic'
 import type { UserDetail } from './UserDetailModal'
 import {
   Select,
@@ -12,12 +12,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+  ConfirmDialog
+} from '@/components/mosaic'
 import { Eye, Trash2, AlertCircle, CheckCircle } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils'
 import { trackGoogleAdsConversion } from '@/lib/google-ads'
 import { getPlanPrice } from '@/lib/plan-config'
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 
 interface User {
   id: number
@@ -326,10 +326,10 @@ export default function AdminUsers() {
             {getDisplayName(user).charAt(0).toUpperCase()}
           </div>
           <div className="ml-4 min-w-0">
-            <div className="text-sm font-medium text-slate-900 truncate">
+            <div className="text-sm font-medium text-foreground truncate">
               {getDisplayName(user)}
             </div>
-            <div className="text-sm text-slate-500 truncate">{user.email}</div>
+            <div className="text-sm text-muted-foreground truncate">{user.email}</div>
           </div>
         </div>
       ),
@@ -396,7 +396,7 @@ export default function AdminUsers() {
       key: 'createdAt',
       header: 'Kayıt Tarihi',
       render: (user: User) => (
-        <span className="text-sm text-slate-500">
+        <span className="text-sm text-muted-foreground">
           {new Date(user.createdAt).toLocaleDateString('tr-TR')}
         </span>
       ),
@@ -435,14 +435,14 @@ export default function AdminUsers() {
     <div className="space-y-6">
       {/* Pending Users Section */}
       {!loadingPending && pendingUsers.length > 0 && (
-        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-400 rounded-2xl p-6 shadow-lg">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="h-10 w-10 rounded-full bg-yellow-500 flex items-center justify-center">
-              <AlertCircle className="h-6 w-6 text-white" />
+            <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+              <AlertCircle className="h-6 w-6 text-amber-500" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-900">Onay Bekleyen Kullanıcılar</h3>
-              <p className="text-sm text-slate-600">
+              <h3 className="text-lg font-bold text-amber-600">Onay Bekleyen Kullanıcılar</h3>
+              <p className="text-sm text-amber-600/80">
                 {pendingUsers.length} kullanıcı admin onayı bekliyor
               </p>
             </div>
@@ -452,34 +452,34 @@ export default function AdminUsers() {
             {pendingUsers.map(user => (
               <div
                 key={user.id}
-                className="bg-white rounded-lg p-4 flex items-center justify-between shadow-sm border border-yellow-200"
+                className="bg-card rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between shadow-sm border border-border gap-4"
               >
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="flex-shrink-0 h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                <div className="flex items-center gap-4 flex-1 min-w-0 w-full">
+                  <div className="flex-shrink-0 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
                     {getDisplayName(user).charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-slate-900 truncate">
+                    <div className="font-semibold text-foreground truncate">
                       {getDisplayName(user)}
                     </div>
-                    <div className="text-sm text-slate-600 truncate">{user.email}</div>
-                    <div className="text-xs text-slate-500">
+                    <div className="text-sm text-muted-foreground truncate">{user.email}</div>
+                    <div className="text-xs text-muted-foreground/60">
                       Kayıt: {new Date(user.createdAt).toLocaleString('tr-TR')}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto justify-end">
                   <Button
-                    variant="default"
+                    variant="outline"
                     size="sm"
-                    className="bg-green-600 hover:bg-green-700 text-white"
+                    className="bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-green-600 border-0"
                     onClick={() => {
                       handleApproveUser(user.id)
                     }}
                   >
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    Onayla
+                    <CheckCircle className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Onayla</span>
                   </Button>
                   <Button
                     variant="destructive"
@@ -488,8 +488,8 @@ export default function AdminUsers() {
                       handleRejectUser(user.id)
                     }}
                   >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Reddet
+                    <Trash2 className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Reddet</span>
                   </Button>
                 </div>
               </div>
@@ -499,7 +499,7 @@ export default function AdminUsers() {
       )}
 
       {/* Filtreler */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200/60">
+      <div className="bg-background/80 backdrop-blur-md rounded-2xl p-4 sm:p-6 shadow-md border border-border">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="relative">
             <input
@@ -510,7 +510,7 @@ export default function AdminUsers() {
                 setSearchTerm(e.target.value)
                 setCurrentPage(1)
               }}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <Select
@@ -575,7 +575,7 @@ export default function AdminUsers() {
         }}
       />
 
-      <ConfirmationDialog
+      <ConfirmDialog
         isOpen={showDeleteConfirm}
         onClose={() => {
           setShowDeleteConfirm(false)
@@ -589,7 +589,7 @@ export default function AdminUsers() {
         cancelText="İptal"
       />
 
-      <ConfirmationDialog
+      <ConfirmDialog
         isOpen={showApproveConfirm}
         onClose={() => {
           setShowApproveConfirm(false)
@@ -601,9 +601,10 @@ export default function AdminUsers() {
         warningMessage="Kullanıcı onaylandıktan sonra sisteme giriş yapabilecektir."
         confirmText="Evet, Onayla"
         cancelText="İptal"
+        variant="primary"
       />
 
-      <ConfirmationDialog
+      <ConfirmDialog
         isOpen={showRejectConfirm}
         onClose={() => {
           setShowRejectConfirm(false)

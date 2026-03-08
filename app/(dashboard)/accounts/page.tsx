@@ -2,28 +2,40 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { EditNameModal } from '@/components/ui/edit-name-modal'
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import {
+  AppPageShell,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  ConfirmationDialog,
+  DistributionBar,
+  EditNameModal,
+  EmptyState,
+  Spinner,
+  StatCard,
+  StatsGrid,
+} from '@/components/mosaic'
 import { usePremium } from '@/lib/use-premium'
 import { useToast } from '@/lib/use-toast'
+import { formatCurrency } from '@/lib/validators'
+import { cn } from '@/lib/utils'
 import {
-  Wallet,
-  CreditCard,
-  Coins,
-  ArrowLeft,
-  Home,
-  Plus,
-  Edit2,
-  Trash2,
-  Crown,
-  TrendingUp,
   Banknote,
   Building2,
   ChevronRight,
+  Coins,
+  CreditCard,
+  Edit2,
+  Lock,
+  Plus,
+  Sparkles,
+  Trash2,
+  TrendingUp,
+  Wallet,
 } from 'lucide-react'
-import { formatCurrency } from '@/lib/validators'
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface BankAccount {
   id: number
@@ -47,7 +59,7 @@ interface EWallet {
   createdAt: string
 }
 
-interface CreditCardType {
+interface CreditCardItem {
   id: number
   name: string
   limitAmount: string
@@ -70,36 +82,147 @@ interface GoldItem {
 }
 
 type TabType = 'all' | 'cash' | 'bank' | 'cards' | 'ewallet' | 'gold'
+type ItemType = 'account' | 'ewallet' | 'card'
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function toTRY(amount: number, currencyCode: string) {
+  const rates: Record<string, number> = { USD: 35, EUR: 38, GBP: 44 }
+  return amount * (rates[currencyCode] ?? 1)
+}
+
+function isCash(acc: BankAccount) {
+  return acc.accountNumber === 'CASH' || acc.name.toLowerCase().includes('nakit')
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function SectionHeader({
+  icon: Icon,
+  title,
+  count,
+  color,
+  href,
+  premium,
+}: {
+  icon: React.ElementType
+  title: string
+  count: number
+  color: string
+  href?: string
+  premium?: boolean
+}) {
+  return (
+    <div className="mb-4 flex items-center justify-between">
+      <div className="flex items-center gap-2.5">
+        <div className={cn('rounded-lg p-1.5', color)}>
+          <Icon className="h-4 w-4" />
+        </div>
+        <h3 className="text-base font-semibold text-foreground">{title}</h3>
+        {premium && (
+          <Badge variant="premium" className="text-[10px]">
+            <Sparkles className="mr-1 h-2.5 w-2.5" /> Premium
+          </Badge>
+        )}
+        {count > 0 && (
+          <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+            {count}
+          </span>
+        )}
+      </div>
+      {href && (
+        <Link
+          href={href}
+          className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Tümünü gör <ChevronRight className="h-3.5 w-3.5" />
+        </Link>
+      )}
+    </div>
+  )
+}
+
+function PremiumUpsell({ feature }: { feature: string }) {
+  return (
+    <Card className="border-purple-500/20 bg-gradient-to-br from-purple-950/40 to-pink-950/30">
+      <CardContent className="flex flex-col items-center py-10 text-center">
+        <div className="mb-4 rounded-2xl bg-purple-500/15 p-4">
+          <Lock className="h-8 w-8 text-purple-400" />
+        </div>
+        <h4 className="mb-1.5 text-base font-semibold text-foreground">{feature} — Premium Özellik</h4>
+        <p className="mb-5 max-w-xs text-sm text-muted-foreground">
+          Bu özellik Premium üyelere özeldir. Tüm finansal varlıklarınızı tek yerden yönetin.
+        </p>
+        <Button asChild variant="premium" size="sm">
+          <Link href="/premium">
+            <Sparkles className="mr-2 h-4 w-4" /> Premium&apos;a Geç
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
+function ActionButtons({
+  onEdit,
+  onDelete,
+}: {
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  return (
+    <div className="flex gap-1">
+      <button
+        onClick={onEdit}
+        className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        title="Düzenle"
+      >
+        <Edit2 className="h-3.5 w-3.5" />
+      </button>
+      <button
+        onClick={onDelete}
+        className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-400"
+        title="Sil"
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  )
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AccountsPage() {
-  const router = useRouter()
   const { isPremium, handlePremiumFeature } = usePremium()
   const { success: toastSuccess, error: toastError } = useToast()
 
   const [cashAccounts, setCashAccounts] = useState<BankAccount[]>([])
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
   const [eWallets, setEWallets] = useState<EWallet[]>([])
-  const [creditCards, setCreditCards] = useState<CreditCardType[]>([])
+  const [creditCards, setCreditCards] = useState<CreditCardItem[]>([])
   const [goldItems, setGoldItems] = useState<GoldItem[]>([])
+  const [netWorthSummary, setNetWorthSummary] = useState<{
+    totalAssets: number
+    totalLiabilities: number
+    netWorth: number
+  } | null>(null)
+
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabType>('all')
 
-  // Edit/Delete states
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [selectedItem, setSelectedItem] = useState<{
     id: number
     name: string
-    type: 'account' | 'ewallet' | 'card'
+    type: ItemType
   } | null>(null)
   const [transactionCount, setTransactionCount] = useState(0)
+
   const fetchedRef = useRef(false)
 
   useEffect(() => {
-    // React StrictMode'da çift çağrıyı önle
-    if (fetchedRef.current) {
-      return
-    }
+    if (fetchedRef.current) {return}
     fetchedRef.current = true
     void fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -107,104 +230,59 @@ export default function AccountsPage() {
 
   async function fetchData() {
     try {
-      const [accountsRes, ewalletsRes, cardsRes, goldRes] = await Promise.all([
+      const [accountsRes, ewalletsRes, cardsRes, goldRes, netWorthRes] = await Promise.all([
         fetch('/api/accounts', { credentials: 'include' }),
         fetch('/api/ewallets', { credentials: 'include' }).catch(() => null),
         fetch('/api/cards', { credentials: 'include' }).catch(() => null),
         fetch('/api/gold', { credentials: 'include' }).catch(() => null),
+        fetch('/api/net-worth', { credentials: 'include' }).catch(() => null),
       ])
 
       if (accountsRes.ok) {
-        const accountsData = (await accountsRes.json()) as Array<BankAccount & { accountType?: string }>
-        // Sadece banka hesaplarını al (kredi kartı ve altın kayıtlarını hariç tut)
-        const bankOnly = Array.isArray(accountsData)
-          ? accountsData.filter((a) => a.accountType === 'bank')
-          : []
-        const isCashAccount = (acc: BankAccount) =>
-          acc.accountNumber === 'CASH' || acc.name?.toLowerCase().includes('nakit')
-        setCashAccounts(bankOnly.filter(isCashAccount))
-        setBankAccounts(bankOnly.filter((acc) => !isCashAccount(acc)))
+        const data = (await accountsRes.json()) as Array<BankAccount & { accountType?: string }>
+        const bankOnly = Array.isArray(data) ? data.filter(a => a.accountType === 'bank') : []
+        setCashAccounts(bankOnly.filter(isCash))
+        setBankAccounts(bankOnly.filter(a => !isCash(a)))
       }
 
-      if (ewalletsRes?.ok && isPremium) {
-        const walletsData = (await ewalletsRes.json()) as EWallet[]
-        setEWallets(walletsData)
-      }
-
-      if (cardsRes?.ok) {
-        const cardsData = (await cardsRes.json()) as CreditCardType[]
-        setCreditCards(cardsData)
-      }
-
-      if (goldRes?.ok && isPremium) {
-        const goldData = (await goldRes.json()) as GoldItem[]
-        setGoldItems(goldData)
-      }
-    } catch (error) {
-      console.error('Veriler yüklenirken hata:', error)
+      if (ewalletsRes?.ok) {setEWallets((await ewalletsRes.json()) as EWallet[])}
+      if (cardsRes?.ok) {setCreditCards((await cardsRes.json()) as CreditCardItem[])}
+      if (goldRes?.ok) {setGoldItems((await goldRes.json()) as GoldItem[])}
+      if (netWorthRes?.ok) {setNetWorthSummary(await netWorthRes.json())}
+    } catch (err) {
+      console.error('Veriler yüklenirken hata:', err)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleEdit = (id: number, name: string, type: 'account' | 'ewallet' | 'card') => {
+  // ── Edit / Delete handlers ─────────────────────────────────────────────────
+
+  function openEdit(id: number, name: string, type: ItemType) {
     setSelectedItem({ id, name, type })
     setShowEditModal(true)
   }
 
-  const handleDelete = async (id: number, type: 'account' | 'ewallet' | 'card') => {
-    const countRes = await fetch(
-      `/api/transactions?${type === 'account' ? 'accountId' : type === 'card' ? 'creditCardId' : 'eWalletId'}=${id}`
-    )
-    if (countRes.ok) {
-      const transactions = (await countRes.json()) as Array<{ id: number }>
-      setTransactionCount(transactions.length)
-    } else {
+  async function openDelete(id: number, name: string, type: ItemType) {
+    const param =
+      type === 'account' ? 'accountId' : type === 'card' ? 'creditCardId' : 'eWalletId'
+    try {
+      const res = await fetch(`/api/transactions?${param}=${id}`)
+      if (res.ok) {
+        const data = (await res.json()) as { total?: number; items?: unknown[] }
+        setTransactionCount(data.total ?? data.items?.length ?? 0)
+      } else {
+        setTransactionCount(0)
+      }
+    } catch {
       setTransactionCount(0)
     }
-
-    setSelectedItem({ id, name: '', type })
+    setSelectedItem({ id, name, type })
     setShowDeleteConfirm(true)
   }
 
-  const confirmDelete = async () => {
-    if (!selectedItem) {
-      return
-    }
-
-    try {
-      const endpoint =
-        selectedItem.type === 'account'
-          ? `/api/accounts/${selectedItem.id}`
-          : selectedItem.type === 'card'
-            ? `/api/cards/${selectedItem.id}`
-            : `/api/ewallets/${selectedItem.id}`
-
-      const response = await fetch(endpoint, {
-        method: 'DELETE',
-        credentials: 'include',
-      })
-
-      if (response.ok) {
-        toastSuccess('Başarılı', `${selectedItem.type === 'account' ? 'Hesap' : selectedItem.type === 'card' ? 'Kart' : 'E-Cüzdan'} silindi`)
-        void fetchData()
-      } else {
-        toastError('Hata', 'Silme işlemi başarısız')
-      }
-    } catch (error) {
-      console.error('Silme hatası:', error)
-      toastError('Hata', 'Silme işlemi başarısız')
-    } finally {
-      setShowDeleteConfirm(false)
-      setSelectedItem(null)
-    }
-  }
-
-  const handleSaveEdit = async (newName: string) => {
-    if (!selectedItem) {
-      return
-    }
-
+  async function confirmDelete() {
+    if (!selectedItem) {return}
     const endpoint =
       selectedItem.type === 'account'
         ? `/api/accounts/${selectedItem.id}`
@@ -212,625 +290,647 @@ export default function AccountsPage() {
           ? `/api/cards/${selectedItem.id}`
           : `/api/ewallets/${selectedItem.id}`
 
-    const response = await fetch(endpoint, {
+    const res = await fetch(endpoint, { method: 'DELETE', credentials: 'include' })
+    if (res.ok) {
+      const label =
+        selectedItem.type === 'account' ? 'Hesap' : selectedItem.type === 'card' ? 'Kart' : 'E-Cüzdan'
+      toastSuccess('Başarılı', `${label} silindi`)
+      fetchedRef.current = false
+      void fetchData()
+    } else {
+      toastError('Hata', 'Silme işlemi başarısız')
+    }
+    setShowDeleteConfirm(false)
+    setSelectedItem(null)
+  }
+
+  async function handleSaveEdit(newName: string) {
+    if (!selectedItem) {return}
+    const endpoint =
+      selectedItem.type === 'account'
+        ? `/api/accounts/${selectedItem.id}`
+        : selectedItem.type === 'card'
+          ? `/api/cards/${selectedItem.id}`
+          : `/api/ewallets/${selectedItem.id}`
+
+    const res = await fetch(endpoint, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: newName }),
       credentials: 'include',
     })
-
-    if (response.ok) {
+    if (res.ok) {
       toastSuccess('Başarılı', 'İsim güncellendi')
+      fetchedRef.current = false
       void fetchData()
+    } else {
+      toastError('Hata', 'İsim güncellenemedi')
     }
   }
 
-  // Hesaplamalar
-  const totalCashBalance = cashAccounts.reduce((sum, acc) => {
-    const rate = acc.currency?.code === 'USD' ? 35 : acc.currency?.code === 'EUR' ? 38 : 1
-    return sum + parseFloat(acc.balance) * rate
+  // ── Calculations ───────────────────────────────────────────────────────────
+
+  const totalCash = cashAccounts.reduce(
+    (s, a) => s + toTRY(parseFloat(a.balance), a.currency.code),
+    0
+  )
+  const totalBank = bankAccounts.reduce(
+    (s, a) => s + toTRY(parseFloat(a.balance), a.currency.code),
+    0
+  )
+  const totalEWallet = eWallets.reduce(
+    (s, w) => s + toTRY(parseFloat(w.balance), w.currency.code),
+    0
+  )
+  const totalCardDebt = creditCards.reduce((s, c) => {
+    const used = parseFloat(c.limitAmount) - parseFloat(c.availableLimit)
+    return s + toTRY(used, c.currency.code)
   }, 0)
+  const totalGold = goldItems.reduce(
+    (s, g) => s + parseFloat(g.currentValueTry ?? '0'),
+    0
+  )
 
-  const totalBankBalance = bankAccounts.reduce((sum, acc) => {
-    const rate = acc.currency?.code === 'USD' ? 35 : acc.currency?.code === 'EUR' ? 38 : 1
-    return sum + parseFloat(acc.balance) * rate
-  }, 0)
+  const totalAssets = netWorthSummary?.totalAssets ?? totalCash + totalBank + totalEWallet + totalGold
+  const totalLiabilities = netWorthSummary?.totalLiabilities ?? totalCardDebt
+  const netWorth = netWorthSummary?.netWorth ?? totalAssets - totalLiabilities
+  const assetsPct = totalAssets + totalLiabilities > 0
+    ? (totalAssets / (totalAssets + totalLiabilities)) * 100
+    : 100
 
-  const totalEWalletBalance = eWallets.reduce((sum, wallet) => {
-    const rate = wallet.currency?.code === 'USD' ? 35 : wallet.currency?.code === 'EUR' ? 38 : 1
-    return sum + parseFloat(wallet.balance) * rate
-  }, 0)
+  // ── Tab config ─────────────────────────────────────────────────────────────
 
-  const totalCardDebt = creditCards.reduce((sum, card) => {
-    const rate = card.currency?.code === 'USD' ? 35 : card.currency?.code === 'EUR' ? 38 : 1
-    const used = parseFloat(card.limitAmount) - parseFloat(card.availableLimit)
-    return sum + used * rate
-  }, 0)
+  const allCount =
+    cashAccounts.length +
+    bankAccounts.length +
+    creditCards.length +
+    (isPremium ? eWallets.length + goldItems.length : 0)
 
-  const totalGoldValue = goldItems.reduce((sum, item) => {
-    return sum + parseFloat(item.currentValueTry || '0')
-  }, 0)
-
-  const totalAssets = totalCashBalance + totalBankBalance + totalEWalletBalance + totalGoldValue
-  const netWorth = totalAssets - totalCardDebt
-
-  const tabs = [
-    { id: 'all' as TabType, label: 'Tümü', icon: Wallet, count: cashAccounts.length + bankAccounts.length + creditCards.length + (isPremium ? eWallets.length + goldItems.length : 0) },
-    { id: 'cash' as TabType, label: 'Nakit', icon: Banknote, count: cashAccounts.length, color: 'green' },
-    { id: 'bank' as TabType, label: 'Banka', icon: Building2, count: bankAccounts.length, color: 'blue' },
-    { id: 'cards' as TabType, label: 'Kartlar', icon: CreditCard, count: creditCards.length, color: 'orange' },
-    { id: 'ewallet' as TabType, label: 'E-Cüzdan', icon: Wallet, count: eWallets.length, color: 'purple', premium: true },
-    { id: 'gold' as TabType, label: 'Altın', icon: Coins, count: goldItems.length, color: 'yellow', premium: true },
+  const tabs: { id: TabType; label: string; count: number; premium?: boolean }[] = [
+    { id: 'all', label: 'Tümü', count: allCount },
+    { id: 'cash', label: 'Nakit', count: cashAccounts.length },
+    { id: 'bank', label: 'Banka', count: bankAccounts.length },
+    { id: 'cards', label: 'Kartlar', count: creditCards.length },
+    { id: 'ewallet', label: 'E-Cüzdan', count: eWallets.length, premium: true },
+    { id: 'gold', label: 'Altın', count: goldItems.length, premium: true },
   ]
+
+  const show = (tab: TabType) => activeTab === 'all' || activeTab === tab
+
+  // ─── Render ────────────────────────────────────────────────────────────────
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Hesaplar yükleniyor...</p>
-        </div>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Spinner />
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.back()}
-              className="p-2 hover:bg-white/80 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5 text-slate-600" />
-            </button>
-            <Link href="/dashboard" className="p-2 hover:bg-white/80 rounded-lg transition-colors">
-              <Home className="h-5 w-5 text-slate-600" />
+    <AppPageShell
+      header={{
+        title: 'Hesaplarım',
+        description: 'Tüm finansal varlıklarınız tek ekranda',
+        actions: (
+          <Button asChild variant="glow">
+            <Link href="/accounts/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Yeni Hesap
             </Link>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">Hesaplarım</h1>
-              <p className="text-sm text-slate-600">Tüm finansal varlıklarınız tek ekranda</p>
-            </div>
-          </div>
-          <Link
-            href="/accounts/new"
-            className="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Yeni Hesap Ekle
-          </Link>
-        </div>
+          </Button>
+        ),
+      }}
+    >
 
-        {/* Net Worth Card */}
-        <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl p-6 sm:p-8 shadow-xl mb-6">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+      {/* ── Net Worth Hero ─────────────────────────────────────────────────── */}
+      <Card className="overflow-hidden border-border/60">
+        <div className="relative bg-gradient-to-br from-slate-800/80 via-slate-800/50 to-indigo-950/60 p-6 sm:p-8">
+          {/* decorative blobs */}
+          <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-8 left-8 h-32 w-32 rounded-full bg-violet-500/10 blur-2xl" />
+
+          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-emerald-100 text-sm font-medium mb-1">Net Varlık</p>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
+              <p className="mb-1 text-sm font-medium text-slate-400">Net Varlık</p>
+              <p className={cn(
+                'text-4xl font-black tracking-tight sm:text-5xl',
+                netWorth >= 0 ? 'text-white' : 'text-red-300'
+              )}>
                 {formatCurrency(netWorth, 'TRY')}
-              </h2>
-              <p className="text-emerald-100 text-sm mt-2">
-                Toplam Varlık: {formatCurrency(totalAssets, 'TRY')} • Borç: {formatCurrency(totalCardDebt, 'TRY')}
               </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-full bg-white/20 backdrop-blur-sm">
-                <TrendingUp className="h-8 w-8 text-white" />
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                  <span className="text-xs font-medium text-emerald-300">
+                    Varlık {formatCurrency(totalAssets, 'TRY')}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1">
+                  <span className="h-2 w-2 rounded-full bg-red-400" />
+                  <span className="text-xs font-medium text-red-300">
+                    Borç {formatCurrency(totalLiabilities, 'TRY')}
+                  </span>
+                </div>
               </div>
+            </div>
+
+            <div className="sm:min-w-[260px]">
+              <div className="mb-3 flex justify-between text-xs text-slate-400">
+                <span>Varlık / Toplam</span>
+                <span>%{assetsPct.toFixed(1)}</span>
+              </div>
+              <div className="h-3 w-full overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-700"
+                  style={{ width: `${assetsPct}%` }}
+                />
+              </div>
+              <div className="mt-2 flex justify-between text-[11px] text-slate-500">
+                <span>Liabilite tarafı</span>
+                <span>Aktif varlıklar</span>
+              </div>
+            </div>
+
+            <div className="hidden rounded-xl bg-white/5 p-4 sm:block">
+              <TrendingUp className="h-10 w-10 text-indigo-300" />
             </div>
           </div>
         </div>
+      </Card>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-          <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 shadow-md group-hover:scale-110 transition-transform">
-                  <Banknote className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xs text-slate-500">{cashAccounts.length}</span>
-              </div>
-              <p className="text-xs text-slate-600 mb-1">Nakit</p>
-              <p className="text-lg font-bold text-green-600">{formatCurrency(totalCashBalance, 'TRY')}</p>
-            </CardContent>
-          </Card>
+      {/* ── Stats ──────────────────────────────────────────────────────────── */}
+      <StatsGrid className="xl:grid-cols-5">
+        <StatCard
+          title="Nakit"
+          value={formatCurrency(totalCash, 'TRY')}
+          icon={Banknote}
+          color="emerald"
+          description={`${cashAccounts.length} hesap`}
+        />
+        <StatCard
+          title="Banka"
+          value={formatCurrency(totalBank, 'TRY')}
+          icon={Building2}
+          color="blue"
+          description={`${bankAccounts.length} hesap`}
+        />
+        <StatCard
+          title="Kart Borcu"
+          value={formatCurrency(totalCardDebt, 'TRY')}
+          icon={CreditCard}
+          color="red"
+          description={`${creditCards.length} kart`}
+        />
+        <StatCard
+          title="E-Cüzdan"
+          value={isPremium ? formatCurrency(totalEWallet, 'TRY') : 'Premium'}
+          icon={Wallet}
+          color={isPremium ? 'cyan' : 'purple'}
+          description={isPremium ? `${eWallets.length} cüzdan` : 'Premium üyelik gerekli'}
+        />
+        <StatCard
+          title="Altın"
+          value={isPremium ? formatCurrency(totalGold, 'TRY') : 'Premium'}
+          icon={Coins}
+          color={isPremium ? 'amber' : 'purple'}
+          description={isPremium ? `${goldItems.length} eşya` : 'Premium üyelik gerekli'}
+        />
+      </StatsGrid>
 
-          <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md group-hover:scale-110 transition-transform">
-                  <Building2 className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xs text-slate-500">{bankAccounts.length}</span>
-              </div>
-              <p className="text-xs text-slate-600 mb-1">Banka</p>
-              <p className="text-lg font-bold text-blue-600">{formatCurrency(totalBankBalance, 'TRY')}</p>
-            </CardContent>
-          </Card>
-
-          <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 shadow-md group-hover:scale-110 transition-transform">
-                  <CreditCard className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xs text-slate-500">{creditCards.length}</span>
-              </div>
-              <p className="text-xs text-slate-600 mb-1">Kart Borcu</p>
-              <p className="text-lg font-bold text-orange-600">{formatCurrency(totalCardDebt, 'TRY')}</p>
-            </CardContent>
-          </Card>
-
-          <Card className={`group hover:shadow-lg transition-all duration-300 border-0 ${isPremium ? 'bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100' : 'bg-gradient-to-br from-slate-100 to-slate-200'}`}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className={`p-2 rounded-lg shadow-md group-hover:scale-110 transition-transform ${isPremium ? 'bg-gradient-to-br from-purple-500 to-pink-600' : 'bg-slate-400'}`}>
-                  {isPremium ? <Wallet className="h-4 w-4 text-white" /> : <Crown className="h-4 w-4 text-white" />}
-                </div>
-                <span className="text-xs text-slate-500">{isPremium ? eWallets.length : <Crown className="h-3 w-3 text-purple-500" />}</span>
-              </div>
-              <p className="text-xs text-slate-600 mb-1">E-Cüzdan</p>
-              <p className={`text-lg font-bold ${isPremium ? 'text-purple-600' : 'text-slate-400'}`}>
-                {isPremium ? formatCurrency(totalEWalletBalance, 'TRY') : 'Premium'}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className={`group hover:shadow-lg transition-all duration-300 border-0 ${isPremium ? 'bg-gradient-to-br from-yellow-50 to-amber-50 hover:from-yellow-100 hover:to-amber-100' : 'bg-gradient-to-br from-slate-100 to-slate-200'}`}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className={`p-2 rounded-lg shadow-md group-hover:scale-110 transition-transform ${isPremium ? 'bg-gradient-to-br from-yellow-500 to-amber-600' : 'bg-slate-400'}`}>
-                  {isPremium ? <Coins className="h-4 w-4 text-white" /> : <Crown className="h-4 w-4 text-white" />}
-                </div>
-                <span className="text-xs text-slate-500">{isPremium ? goldItems.length : <Crown className="h-3 w-3 text-purple-500" />}</span>
-              </div>
-              <p className="text-xs text-slate-600 mb-1">Altın</p>
-              <p className={`text-lg font-bold ${isPremium ? 'text-yellow-600' : 'text-slate-400'}`}>
-                {isPremium ? formatCurrency(totalGoldValue, 'TRY') : 'Premium'}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="flex flex-wrap gap-2 mb-6 bg-white/60 backdrop-blur-sm p-2 rounded-xl shadow-sm">
-          {tabs.map(tab => {
-            const Icon = tab.icon
-            const isActive = activeTab === tab.id
-            const isLocked = tab.premium && !isPremium
-
-            return (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  if (isLocked) {
-                    handlePremiumFeature(tab.label)
-                    return
-                  }
-                  setActiveTab(tab.id)
-                }}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${isActive
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                  : isLocked
-                    ? 'text-slate-400 hover:bg-slate-100'
-                    : 'text-slate-600 hover:bg-white hover:shadow-sm'
-                  }`}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-                {isLocked && <Crown className="h-3 w-3 text-purple-400" />}
-                <span className={`text-xs px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20' : 'bg-slate-200'}`}>
+      {/* ── Tab Bar ────────────────────────────────────────────────────────── */}
+      <div className="flex flex-wrap gap-2">
+        {tabs.map(tab => {
+          const isActive = activeTab === tab.id
+          const isLocked = tab.premium && !isPremium
+          return (
+            <button
+              key={tab.id}
+              onClick={() => {
+                if (isLocked) {
+                  handlePremiumFeature(tab.label)
+                  return
+                }
+                setActiveTab(tab.id)
+              }}
+              className={cn(
+                'flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200',
+                isActive
+                  ? 'bg-primary text-primary-foreground shadow-md'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground',
+                isLocked && 'opacity-60'
+              )}
+            >
+              {tab.label}
+              {isLocked && <Lock className="h-3 w-3" />}
+              {!isLocked && tab.count > 0 && (
+                <span
+                  className={cn(
+                    'min-w-[18px] rounded-full px-1.5 py-0.5 text-center text-[10px] font-bold leading-none',
+                    isActive ? 'bg-white/20 text-white' : 'bg-background text-foreground'
+                  )}
+                >
                   {tab.count}
                 </span>
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Account Lists */}
-        <div className="space-y-6">
-          {/* Nakit Hesapları */}
-          {(activeTab === 'all' || activeTab === 'cash') && (
-            <div>
-              {activeTab === 'all' && (
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <Banknote className="h-5 w-5 text-green-600" />
-                  Nakit Hesapları
-                </h3>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {cashAccounts.map(account => (
-                  <Card key={account.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 shadow-md">
-                            <Banknote className="h-4 w-4 text-white" />
-                          </div>
-                          <div>
-                            <CardTitle className="text-base">{account.name}</CardTitle>
-                            <CardDescription>Nakit • {account.currency.code}</CardDescription>
-                          </div>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* ── Sections ───────────────────────────────────────────────────────── */}
+      <div className="space-y-8">
+
+        {/* Nakit */}
+        {show('cash') && (
+          <section>
+            <SectionHeader
+              icon={Banknote}
+              title="Nakit Hesapları"
+              count={cashAccounts.length}
+              color="bg-emerald-500/15 text-emerald-400"
+            />
+            {cashAccounts.length === 0 ? (
+              <EmptyState
+                title="Nakit hesap yok"
+                description="Nakit varlıklarınızı takip etmek için hesap ekleyin."
+                icon={<Banknote className="h-10 w-10" />}
+                action={
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/accounts/new?type=cash">
+                      <Plus className="mr-2 h-4 w-4" /> Nakit Ekle
+                    </Link>
+                  </Button>
+                }
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {cashAccounts.map(acc => (
+                  <Card
+                    key={acc.id}
+                    className="group overflow-hidden border-border/80 bg-card/95 transition-all duration-300 hover:border-emerald-500/30 hover:shadow-md"
+                  >
+                    <div className="flex items-center justify-between border-b border-border/50 p-4 pb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-lg bg-emerald-500/15 p-2 text-emerald-400">
+                          <Banknote className="h-4 w-4" />
                         </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => handleEdit(account.id, account.name, 'account')}
-                            className="p-1.5 hover:bg-slate-100 rounded-lg"
-                          >
-                            <Edit2 className="h-4 w-4 text-slate-500" />
-                          </button>
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">{acc.name}</p>
+                          <p className="text-xs text-muted-foreground">Nakit · {acc.currency.code}</p>
                         </div>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-green-600 mb-3">
-                        {formatCurrency(parseFloat(account.balance), account.currency.code)}
-                      </div>
-                      <Link
-                        href={`/accounts/${account.id}`}
-                        className="flex items-center justify-between w-full px-3 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 text-sm font-medium transition-colors"
-                      >
-                        <span>Detaylar</span>
-                        <ChevronRight className="h-4 w-4" />
+                      <ActionButtons
+                        onEdit={() => openEdit(acc.id, acc.name, 'account')}
+                        onDelete={() => void openDelete(acc.id, acc.name, 'account')}
+                      />
+                    </div>
+                    <CardContent className="p-4">
+                      <p className="mb-3 text-2xl font-bold text-emerald-400">
+                        {formatCurrency(parseFloat(acc.balance), acc.currency.code)}
+                      </p>
+                      <Link href={`/accounts/${acc.id}`}>
+                        <Button variant="outline" size="sm" className="w-full">
+                          Detaylar <ChevronRight className="ml-1 h-3.5 w-3.5" />
+                        </Button>
                       </Link>
                     </CardContent>
                   </Card>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </section>
+        )}
 
-          {/* Banka Hesapları */}
-          {(activeTab === 'all' || activeTab === 'bank') && (
-            <div>
-              {activeTab === 'all' && (
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-blue-600" />
-                  Banka Hesapları
-                </h3>
-              )}
-              {bankAccounts.length === 0 ? (
-                <Card className="border-dashed border-2 border-slate-200 bg-slate-50/50">
-                  <CardContent className="py-12 text-center">
-                    <Building2 className="mx-auto h-12 w-12 text-slate-300 mb-4" />
-                    <p className="text-slate-500 mb-4">Henüz banka hesabı eklenmemiş</p>
-                    <Link
-                      href="/accounts/bank"
-                      className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Banka Hesabı Ekle
+        {/* Banka */}
+        {show('bank') && (
+          <section>
+            <SectionHeader
+              icon={Building2}
+              title="Banka Hesapları"
+              count={bankAccounts.length}
+              color="bg-blue-500/15 text-blue-400"
+            />
+            {bankAccounts.length === 0 ? (
+              <EmptyState
+                title="Banka hesabı yok"
+                description="Banka hesaplarınızı ekleyerek bakiyelerinizi takip edin."
+                icon={<Building2 className="h-10 w-10" />}
+                action={
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/accounts/new?type=bank">
+                      <Plus className="mr-2 h-4 w-4" /> Hesap Ekle
                     </Link>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {bankAccounts.map(account => (
-                    <Card key={account.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <CardHeader className="pb-2">
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md">
-                              <Building2 className="h-4 w-4 text-white" />
-                            </div>
-                            <div>
-                              <CardTitle className="text-base">{account.name}</CardTitle>
-                              <CardDescription>{account.bank.name}</CardDescription>
-                            </div>
+                  </Button>
+                }
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {bankAccounts.map(acc => (
+                  <Card
+                    key={acc.id}
+                    className="group overflow-hidden border-border/80 bg-card/95 transition-all duration-300 hover:border-blue-500/30 hover:shadow-md"
+                  >
+                    <div className="flex items-center justify-between border-b border-border/50 p-4 pb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-lg bg-blue-500/15 p-2 text-blue-400">
+                          <Building2 className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">{acc.name}</p>
+                          <p className="text-xs text-muted-foreground">{acc.bank.name} · {acc.currency.code}</p>
+                        </div>
+                      </div>
+                      <ActionButtons
+                        onEdit={() => openEdit(acc.id, acc.name, 'account')}
+                        onDelete={() => void openDelete(acc.id, acc.name, 'account')}
+                      />
+                    </div>
+                    <CardContent className="p-4">
+                      <p className="mb-1 text-2xl font-bold text-blue-400">
+                        {formatCurrency(parseFloat(acc.balance), acc.currency.code)}
+                      </p>
+                      {acc.iban && (
+                        <p className="mb-3 truncate text-xs text-muted-foreground">
+                          IBAN: {acc.iban}
+                        </p>
+                      )}
+                      {!acc.iban && <div className="mb-3" />}
+                      <Link href={`/accounts/${acc.id}`}>
+                        <Button variant="outline" size="sm" className="w-full">
+                          Detaylar <ChevronRight className="ml-1 h-3.5 w-3.5" />
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Kredi Kartları */}
+        {show('cards') && (
+          <section>
+            <SectionHeader
+              icon={CreditCard}
+              title="Kredi Kartları"
+              count={creditCards.length}
+              color="bg-purple-500/15 text-purple-400"
+              href="/cards"
+            />
+            {creditCards.length === 0 ? (
+              <EmptyState
+                title="Kredi kartı yok"
+                description="Kredi kartı ekleyerek limit ve borç durumunuzu takip edin."
+                icon={<CreditCard className="h-10 w-10" />}
+                action={
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/accounts/new?type=credit_card">
+                      <Plus className="mr-2 h-4 w-4" /> Kart Ekle
+                    </Link>
+                  </Button>
+                }
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {creditCards.map(card => {
+                  const limit = parseFloat(card.limitAmount)
+                  const available = parseFloat(card.availableLimit)
+                  const used = limit - available
+                  const pct = limit > 0 ? (used / limit) * 100 : 0
+                  const barColor =
+                    pct >= 80 ? 'bg-red-500' : pct >= 50 ? 'bg-amber-500' : 'bg-emerald-500'
+
+                  return (
+                    <Card
+                      key={card.id}
+                      className="group overflow-hidden border-border/80 bg-card/95 transition-all duration-300 hover:border-purple-500/30 hover:shadow-md"
+                    >
+                      <div className="flex items-center justify-between border-b border-border/50 p-4 pb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="rounded-lg bg-purple-500/15 p-2 text-purple-400">
+                            <CreditCard className="h-4 w-4" />
                           </div>
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => handleEdit(account.id, account.name, 'account')}
-                              className="p-1.5 hover:bg-slate-100 rounded-lg"
-                            >
-                              <Edit2 className="h-4 w-4 text-slate-500" />
-                            </button>
-                            <button
-                              onClick={() => void handleDelete(account.id, 'account')}
-                              className="p-1.5 hover:bg-slate-100 rounded-lg"
-                            >
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                            </button>
+                          <div>
+                            <p className="text-sm font-semibold text-foreground">{card.name}</p>
+                            <p className="text-xs text-muted-foreground">{card.bank.name} · {card.currency.code}</p>
                           </div>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold text-blue-600 mb-2">
-                          {formatCurrency(parseFloat(account.balance), account.currency.code)}
+                        <ActionButtons
+                          onEdit={() => openEdit(card.id, card.name, 'card')}
+                          onDelete={() => void openDelete(card.id, card.name, 'card')}
+                        />
+                      </div>
+                      <CardContent className="space-y-3 p-4">
+                        <div className="flex items-baseline justify-between">
+                          <div>
+                            <p className="text-[11px] text-muted-foreground">Kullanılabilir</p>
+                            <p className="text-xl font-bold text-emerald-400">
+                              {formatCurrency(available, card.currency.code)}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[11px] text-muted-foreground">Borç</p>
+                            <p className="text-base font-semibold text-red-400">
+                              {formatCurrency(used, card.currency.code)}
+                            </p>
+                          </div>
                         </div>
-                        {account.iban && (
-                          <p className="text-xs text-slate-500 mb-3 truncate">IBAN: {account.iban}</p>
-                        )}
-                        <Link
-                          href={`/accounts/${account.id}`}
-                          className="flex items-center justify-between w-full px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 text-sm font-medium transition-colors"
-                        >
-                          <span>Detaylar</span>
-                          <ChevronRight className="h-4 w-4" />
-                        </Link>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Kredi Kartları */}
-          {(activeTab === 'all' || activeTab === 'cards') && (
-            <div>
-              {activeTab === 'all' && (
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-orange-600" />
-                  Kredi Kartları
-                </h3>
-              )}
-              {creditCards.length === 0 ? (
-                <Card className="border-dashed border-2 border-slate-200 bg-slate-50/50">
-                  <CardContent className="py-12 text-center">
-                    <CreditCard className="mx-auto h-12 w-12 text-slate-300 mb-4" />
-                    <p className="text-slate-500 mb-4">Henüz kredi kartı eklenmemiş</p>
-                    <Link
-                      href="/cards"
-                      className="inline-flex items-center px-4 py-2 rounded-lg bg-orange-600 text-white font-medium hover:bg-orange-700 transition-colors"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Kredi Kartı Ekle
-                    </Link>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {creditCards.map(card => {
-                    const used = parseFloat(card.limitAmount) - parseFloat(card.availableLimit)
-                    const usagePercent = (used / parseFloat(card.limitAmount)) * 100
-
-                    return (
-                      <Card key={card.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <CardHeader className="pb-2">
-                          <div className="flex justify-between items-start">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 shadow-md">
-                                <CreditCard className="h-4 w-4 text-white" />
-                              </div>
-                              <div>
-                                <CardTitle className="text-base">{card.name}</CardTitle>
-                                <CardDescription>{card.bank.name}</CardDescription>
-                              </div>
-                            </div>
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button
-                                onClick={() => handleEdit(card.id, card.name, 'card')}
-                                className="p-1.5 hover:bg-slate-100 rounded-lg"
-                              >
-                                <Edit2 className="h-4 w-4 text-slate-500" />
-                              </button>
-                              <button
-                                onClick={() => void handleDelete(card.id, 'card')}
-                                className="p-1.5 hover:bg-slate-100 rounded-lg"
-                              >
-                                <Trash2 className="h-4 w-4 text-red-500" />
-                              </button>
-                            </div>
+                        <div>
+                          <div className="mb-1 flex justify-between text-[10px] text-muted-foreground">
+                            <span>Kullanım %{pct.toFixed(0)}</span>
+                            <span>Limit {formatCurrency(limit, card.currency.code)}</span>
                           </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex justify-between items-baseline mb-2">
-                            <div>
-                              <p className="text-xs text-slate-500">Kullanılabilir</p>
-                              <div className="text-xl font-bold text-green-600">
-                                {formatCurrency(parseFloat(card.availableLimit), card.currency.code)}
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-xs text-slate-500">Borç</p>
-                              <div className="text-lg font-semibold text-orange-600">
-                                {formatCurrency(used, card.currency.code)}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="relative h-2 bg-slate-200 rounded-full overflow-hidden mb-2">
+                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                             <div
-                              className={`absolute left-0 top-0 h-full rounded-full transition-all ${usagePercent > 80 ? 'bg-red-500' : usagePercent > 50 ? 'bg-orange-500' : 'bg-green-500'
-                                }`}
-                              style={{ width: `${Math.min(usagePercent, 100)}%` }}
+                              className={cn('h-full rounded-full transition-all duration-500', barColor)}
+                              style={{ width: `${Math.min(pct, 100)}%` }}
                             />
                           </div>
-                          <p className="text-xs text-slate-500">
-                            Limit: {formatCurrency(parseFloat(card.limitAmount), card.currency.code)} • Son Ödeme: {card.dueDay}. gün
-                          </p>
-                        </CardContent>
-                      </Card>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* E-Cüzdanlar */}
-          {(activeTab === 'all' || activeTab === 'ewallet') && (
-            <div>
-              {activeTab === 'all' && (
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <Wallet className="h-5 w-5 text-purple-600" />
-                  E-Cüzdanlar
-                  {!isPremium && <Crown className="h-4 w-4 text-purple-500" />}
-                </h3>
-              )}
-              {!isPremium ? (
-                <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
-                  <CardContent className="py-12 text-center">
-                    <Crown className="mx-auto h-16 w-16 text-purple-600 mb-4" />
-                    <h3 className="text-xl font-semibold text-purple-900 mb-2">Premium Özellik</h3>
-                    <p className="text-purple-700 mb-6">E-Cüzdan yönetimi Premium üyelere özeldir</p>
-                    <button
-                      onClick={() => router.push('/premium')}
-                      className="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium shadow-lg hover:shadow-xl transition-all"
-                    >
-                      Premium&apos;a Geç
-                    </button>
-                  </CardContent>
-                </Card>
-              ) : eWallets.length === 0 ? (
-                <Card className="border-dashed border-2 border-slate-200 bg-slate-50/50">
-                  <CardContent className="py-12 text-center">
-                    <Wallet className="mx-auto h-12 w-12 text-slate-300 mb-4" />
-                    <p className="text-slate-500 mb-4">Henüz e-cüzdan eklenmemiş</p>
-                    <button
-                      onClick={() => router.push('/ewallets/new')}
-                      className="inline-flex items-center px-4 py-2 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition-colors"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      E-Cüzdan Ekle
-                    </button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {eWallets.map(wallet => (
-                    <Card key={wallet.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <CardHeader className="pb-2">
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 shadow-md">
-                              <Wallet className="h-4 w-4 text-white" />
-                            </div>
-                            <div>
-                              <CardTitle className="text-base">{wallet.name}</CardTitle>
-                              <CardDescription>{wallet.provider}</CardDescription>
-                            </div>
-                          </div>
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => handleEdit(wallet.id, wallet.name, 'ewallet')}
-                              className="p-1.5 hover:bg-slate-100 rounded-lg"
-                            >
-                              <Edit2 className="h-4 w-4 text-slate-500" />
-                            </button>
-                            <button
-                              onClick={() => void handleDelete(wallet.id, 'ewallet')}
-                              className="p-1.5 hover:bg-slate-100 rounded-lg"
-                            >
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                            </button>
-                          </div>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold text-purple-600">
-                          {formatCurrency(parseFloat(wallet.balance), wallet.currency.code)}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Altın */}
-          {(activeTab === 'all' || activeTab === 'gold') && (
-            <div>
-              {activeTab === 'all' && (
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <Coins className="h-5 w-5 text-yellow-600" />
-                  Altın ve Ziynet
-                  {!isPremium && <Crown className="h-4 w-4 text-purple-500" />}
-                </h3>
-              )}
-              {!isPremium ? (
-                <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
-                  <CardContent className="py-12 text-center">
-                    <Crown className="mx-auto h-16 w-16 text-purple-600 mb-4" />
-                    <h3 className="text-xl font-semibold text-purple-900 mb-2">Premium Özellik</h3>
-                    <p className="text-purple-700 mb-6">Altın ve ziynet takibi Premium üyelere özeldir</p>
-                    <button
-                      onClick={() => router.push('/premium')}
-                      className="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium shadow-lg hover:shadow-xl transition-all"
-                    >
-                      Premium&apos;a Geç
-                    </button>
-                  </CardContent>
-                </Card>
-              ) : goldItems.length === 0 ? (
-                <Card className="border-dashed border-2 border-slate-200 bg-slate-50/50">
-                  <CardContent className="py-12 text-center">
-                    <Coins className="mx-auto h-12 w-12 text-slate-300 mb-4" />
-                    <p className="text-slate-500 mb-4">Henüz altın eşyası eklenmemiş</p>
-                    <Link
-                      href="/gold/new"
-                      className="inline-flex items-center px-4 py-2 rounded-lg bg-yellow-600 text-white font-medium hover:bg-yellow-700 transition-colors"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Altın Eşyası Ekle
-                    </Link>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {goldItems.map(item => (
-                    <Card key={item.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <CardHeader className="pb-2">
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-gradient-to-br from-yellow-500 to-amber-600 shadow-md">
-                              <Coins className="h-4 w-4 text-white" />
-                            </div>
-                            <div>
-                              <CardTitle className="text-base">{item.name}</CardTitle>
-                              <CardDescription>{item.goldType.name} • {item.goldPurity.name}</CardDescription>
-                            </div>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold text-yellow-600 mb-1">
-                          {formatCurrency(parseFloat(item.currentValueTry || '0'), 'TRY')}
-                        </div>
-                        <p className="text-xs text-slate-500">
-                          {item.weightGrams}g • Alış: {formatCurrency(parseFloat(item.purchasePrice), 'TRY')}
+                        <p className="text-[11px] text-muted-foreground">
+                          Son ödeme günü: <span className="font-medium text-foreground">{card.dueDay}.</span>
                         </p>
                       </CardContent>
                     </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+                  )
+                })}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* E-Cüzdan */}
+        {show('ewallet') && (
+          <section>
+            <SectionHeader
+              icon={Wallet}
+              title="E-Cüzdanlar"
+              count={eWallets.length}
+              color="bg-cyan-500/15 text-cyan-400"
+              premium={!isPremium}
+            />
+            {!isPremium ? (
+              <PremiumUpsell feature="E-Cüzdan Yönetimi" />
+            ) : eWallets.length === 0 ? (
+              <EmptyState
+                title="E-cüzdan yok"
+                description="Papara, İyzico gibi dijital cüzdanlarınızı ekleyerek takip edin."
+                icon={<Wallet className="h-10 w-10" />}
+                action={
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/ewallets/new">
+                      <Plus className="mr-2 h-4 w-4" /> E-Cüzdan Ekle
+                    </Link>
+                  </Button>
+                }
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {eWallets.map(wallet => (
+                  <Card
+                    key={wallet.id}
+                    className="group overflow-hidden border-border/80 bg-card/95 transition-all duration-300 hover:border-cyan-500/30 hover:shadow-md"
+                  >
+                    <div className="flex items-center justify-between border-b border-border/50 p-4 pb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-lg bg-cyan-500/15 p-2 text-cyan-400">
+                          <Wallet className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">{wallet.name}</p>
+                          <p className="text-xs text-muted-foreground">{wallet.provider} · {wallet.currency.code}</p>
+                        </div>
+                      </div>
+                      <ActionButtons
+                        onEdit={() => openEdit(wallet.id, wallet.name, 'ewallet')}
+                        onDelete={() => void openDelete(wallet.id, wallet.name, 'ewallet')}
+                      />
+                    </div>
+                    <CardContent className="p-4">
+                      <p className="text-2xl font-bold text-cyan-400">
+                        {formatCurrency(parseFloat(wallet.balance), wallet.currency.code)}
+                      </p>
+                      {wallet.accountEmail && (
+                        <p className="mt-1 truncate text-xs text-muted-foreground">{wallet.accountEmail}</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Altın */}
+        {show('gold') && (
+          <section>
+            <SectionHeader
+              icon={Coins}
+              title="Altın ve Ziynet"
+              count={goldItems.length}
+              color="bg-amber-500/15 text-amber-400"
+              premium={!isPremium}
+              href={isPremium ? '/gold' : undefined}
+            />
+            {!isPremium ? (
+              <PremiumUpsell feature="Altın ve Ziynet Takibi" />
+            ) : goldItems.length === 0 ? (
+              <EmptyState
+                title="Altın eşyası yok"
+                description="Altın ve ziynet eşyalarınızın güncel değerini buradan takip edin."
+                icon={<Coins className="h-10 w-10" />}
+                action={
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/gold/new">
+                      <Plus className="mr-2 h-4 w-4" /> Altın Ekle
+                    </Link>
+                  </Button>
+                }
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {goldItems.map(item => {
+                  const current = parseFloat(item.currentValueTry ?? '0')
+                  const purchase = parseFloat(item.purchasePrice)
+                  const gain = current - purchase
+                  const isProfit = gain >= 0
+
+                  return (
+                    <Card
+                      key={item.id}
+                      className="group overflow-hidden border-border/80 bg-card/95 transition-all duration-300 hover:border-amber-500/30 hover:shadow-md"
+                    >
+                      <div className="flex items-center justify-between border-b border-border/50 p-4 pb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="rounded-lg bg-amber-500/15 p-2 text-amber-400">
+                            <Coins className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-foreground">{item.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {item.goldType.name} · {item.goldPurity.name}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <CardContent className="space-y-2 p-4">
+                        <p className="text-2xl font-bold text-amber-400">
+                          {formatCurrency(current, 'TRY')}
+                        </p>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>{item.weightGrams}g · Alış: {formatCurrency(purchase, 'TRY')}</span>
+                          <span className={isProfit ? 'text-emerald-400' : 'text-red-400'}>
+                            {isProfit ? '+' : ''}{formatCurrency(gain, 'TRY')}
+                          </span>
+                        </div>
+                        <DistributionBar
+                          label="Değer artışı"
+                          value={`%${purchase > 0 ? ((gain / purchase) * 100).toFixed(1) : '0'}`}
+                          percentage={purchase > 0 ? Math.min((current / purchase) * 50, 100) : 50}
+                          tone={isProfit ? 'amber' : 'rose'}
+                        />
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+            )}
+          </section>
+        )}
       </div>
 
-      {/* Modals */}
+      {/* ── Modals ─────────────────────────────────────────────────────────── */}
       <EditNameModal
         isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
-        onSave={async (name) => { await handleSaveEdit(name) }}
-        currentName={selectedItem?.name || ''}
-        title="Hesap Adını Düzenle"
+        onClose={() => {
+          setShowEditModal(false)
+          setSelectedItem(null)
+        }}
+        title={`${selectedItem?.type === 'account' ? 'Hesap' : selectedItem?.type === 'card' ? 'Kart' : 'E-Cüzdan'} Adını Düzenle`}
+        currentName={selectedItem?.name ?? ''}
+        onSave={handleSaveEdit}
       />
 
       <ConfirmationDialog
         isOpen={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
-        onConfirm={async () => { await confirmDelete() }}
-        title="Hesabı Sil"
+        onClose={() => {
+          setShowDeleteConfirm(false)
+          setSelectedItem(null)
+        }}
+        onConfirm={confirmDelete}
+        title="Silmeyi Onayla"
         message={
           transactionCount > 0
-            ? `Bu hesaba bağlı ${transactionCount} işlem bulunmaktadır. Silme işlemi geri alınamaz.`
-            : 'Bu hesabı silmek istediğinizden emin misiniz?'
+            ? `Bu öğeye bağlı ${transactionCount} işlem bulunuyor. Yine de silmek istiyor musunuz?`
+            : `"${selectedItem?.name}" öğesini silmek istediğinizden emin misiniz?`
         }
-        confirmText="Sil"
+        warningMessage="Bu işlem geri alınamaz. İlgili tüm veriler kalıcı olarak silinir."
+        confirmText="Evet, Sil"
         cancelText="İptal"
       />
-    </div>
+    </AppPageShell>
   )
 }

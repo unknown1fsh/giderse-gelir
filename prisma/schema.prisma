@@ -35,6 +35,7 @@ model RefCurrency {
   updatedAt    DateTime      @updatedAt @map("updated_at")
   accounts     Account[]
   autoPayments AutoPayment[]
+  budgetPlans  BudgetPlan[]
   creditCards  CreditCard[]
   eWallets     EWallet[]
   fxRatesFrom  FxRate[]      @relation("FromCurrency")
@@ -88,6 +89,7 @@ model RefTxCategory {
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
   autoPayments AutoPayment[]
+  budgetAllocations BudgetAllocation[]
   txType       RefTxType     @relation(fields: [txTypeId], references: [id])
   transactions Transaction[]
 
@@ -185,6 +187,8 @@ model User {
   aiReportUsages          AIReportUsage[]
   autoPayments            AutoPayment[]
   beneficiaries           Beneficiary[]
+  budgetAlerts            BudgetAlert[]
+  budgetPlans             BudgetPlan[]
   creditCards             CreditCard[]
   eWallets                EWallet[]
   goldItems               GoldItem[]
@@ -194,6 +198,9 @@ model User {
   paymentRequests         PaymentRequest[]
   periods                 Period[]
   portfolioSnapshots      PortfolioSnapshot[]
+  notificationsFeed       Notification[]
+  pushSubscriptions       PushSubscription[]
+  savedViews              SavedView[]
   transactions            Transaction[]
   sessions                UserSession[]
   subscriptions           UserSubscription[]
@@ -277,6 +284,7 @@ model Period {
   accounts      Account[]
   autoPayments  AutoPayment[]
   creditCards   CreditCard[]
+  budgetPlans   BudgetPlan[]
   eWallets      EWallet[]
   goldItems     GoldItem[]
   investments   Investment[]
@@ -458,6 +466,9 @@ model Transaction {
 
   @@index([userId, periodId])
   @@index([periodId, transactionDate])
+  @@index([userId, transactionDate])
+  @@index([userId, categoryId, transactionDate])
+  @@index([userId, txTypeId, transactionDate])
   @@map("transaction")
 }
 
@@ -545,6 +556,133 @@ model PortfolioSnapshot {
 
   @@unique([userId, snapshotDate])
   @@map("portfolio_snapshot")
+}
+
+model BudgetPlan {
+  id             Int                @id @default(autoincrement())
+  userId         Int                @map("user_id")
+  periodId       Int?               @map("period_id")
+  name           String             @default("Varsayilan Butce") @db.VarChar(120)
+  periodType     String             @default("monthly") @map("period_type") @db.VarChar(20)
+  startDate      DateTime           @map("start_date") @db.Date
+  endDate        DateTime           @map("end_date") @db.Date
+  currencyId     Int                @map("currency_id")
+  zeroBased      Boolean            @default(true) @map("zero_based")
+  rolloverMode   String             @default("none") @map("rollover_mode") @db.VarChar(20)
+  totalBudgeted  Decimal            @default(0) @map("total_budgeted") @db.Decimal(15, 2)
+  notes          String?
+  active         Boolean            @default(true)
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
+  allocations    BudgetAllocation[]
+  alerts         BudgetAlert[]
+  currency       RefCurrency        @relation(fields: [currencyId], references: [id])
+  period         Period?            @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, active, periodType])
+  @@index([userId, startDate, endDate])
+  @@map("budget_plan")
+}
+
+model BudgetAllocation {
+  id               Int           @id @default(autoincrement())
+  budgetPlanId     Int           @map("budget_plan_id")
+  categoryId       Int           @map("category_id")
+  amount           Decimal       @db.Decimal(15, 2)
+  alertThreshold   Decimal       @default(80) @map("alert_threshold") @db.Decimal(5, 2)
+  rolloverAmount   Decimal       @default(0) @map("rollover_amount") @db.Decimal(15, 2)
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+  budgetPlan       BudgetPlan    @relation(fields: [budgetPlanId], references: [id], onDelete: Cascade)
+  category         RefTxCategory @relation(fields: [categoryId], references: [id])
+
+  @@unique([budgetPlanId, categoryId])
+  @@index([categoryId])
+  @@map("budget_allocation")
+}
+
+model BudgetAlert {
+  id                Int        @id @default(autoincrement())
+  budgetPlanId      Int        @map("budget_plan_id")
+  userId            Int        @map("user_id")
+  categoryId        Int?       @map("category_id")
+  type              String     @db.VarChar(30)
+  thresholdPercent  Decimal?   @map("threshold_percent") @db.Decimal(5, 2)
+  actualAmount      Decimal?   @map("actual_amount") @db.Decimal(15, 2)
+  budgetAmount      Decimal?   @map("budget_amount") @db.Decimal(15, 2)
+  triggeredAt       DateTime   @default(now()) @map("triggered_at")
+  resolvedAt        DateTime?  @map("resolved_at")
+  metadata          Json?      @default("{}")
+  budgetPlan        BudgetPlan @relation(fields: [budgetPlanId], references: [id], onDelete: Cascade)
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, triggeredAt])
+  @@index([budgetPlanId, triggeredAt])
+  @@map("budget_alert")
+}
+
+model Notification {
+  id               Int       @id @default(autoincrement())
+  userId           Int       @map("user_id")
+  type             String    @db.VarChar(40)
+  channel          String    @default("in_app") @db.VarChar(20)
+  title            String    @db.VarChar(255)
+  body             String    @db.Text
+  status           String    @default("pending") @db.VarChar(20)
+  priority         String    @default("normal") @db.VarChar(20)
+  dedupeKey        String?   @unique @map("dedupe_key") @db.VarChar(200)
+  payload          Json?     @default("{}")
+  scheduledFor     DateTime? @map("scheduled_for")
+  deliveredAt      DateTime? @map("delivered_at")
+  readAt           DateTime? @map("read_at")
+  dismissedAt      DateTime? @map("dismissed_at")
+  sourceEntityType String?   @map("source_entity_type") @db.VarChar(50)
+  sourceEntityId   String?   @map("source_entity_id") @db.VarChar(100)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, channel, readAt])
+  @@index([userId, status, createdAt])
+  @@index([userId, type, createdAt])
+  @@map("notification")
+}
+
+model PushSubscription {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  endpoint   String   @unique @db.Text
+  p256dhKey  String   @map("p256dh_key") @db.Text
+  authKey    String   @map("auth_key") @db.Text
+  userAgent  String?  @map("user_agent") @db.VarChar(255)
+  active     Boolean  @default(true)
+  lastSeenAt DateTime @default(now()) @map("last_seen_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, active])
+  @@map("push_subscription")
+}
+
+model SavedView {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  entityType  String   @map("entity_type") @db.VarChar(30)
+  name        String   @db.VarChar(120)
+  description String?
+  isDefault   Boolean  @default(false) @map("is_default")
+  isSystem    Boolean  @default(false) @map("is_system")
+  filters     Json     @default("{}")
+  sort        Json?    @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, entityType, isDefault])
+  @@index([userId, entityType, isSystem])
+  @@map("saved_view")
 }
 
 model Investment {

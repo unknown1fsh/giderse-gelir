@@ -2,9 +2,9 @@
 
 import { useState, useEffect, type ElementType } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
+import { Badge } from '@/components/mosaic'
 import { usePremium } from '@/lib/use-premium'
 import { useUser } from '@/lib/user-context'
 import PremiumUpgradeModal from '@/components/premium-upgrade-modal'
@@ -276,26 +276,26 @@ export default function CashFlowAnalysis() {
     }
 
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+        <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-full sm:max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className={`h-2 bg-gradient-to-r ${feature.gradient} rounded-t-2xl`} />
 
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-xl bg-gradient-to-r ${feature.gradient} text-white`}>
-                  <feature.icon className="w-6 h-6" />
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl bg-gradient-to-r ${feature.gradient} text-white shrink-0`}>
+                  <feature.icon className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{feature.title}</h2>
-                  <p className="text-gray-600">{feature.description}</p>
+                  <h2 className="text-base sm:text-xl font-bold text-gray-900">{feature.title}</h2>
+                  <p className="text-sm text-gray-600">{feature.description}</p>
                 </div>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedFeature(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 shrink-0"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -337,7 +337,7 @@ export default function CashFlowAnalysis() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-800 to-blue-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -364,11 +364,11 @@ export default function CashFlowAnalysis() {
           </div>
 
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-              <TrendingUp className="w-8 h-8" />
+            <div className="p-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white shrink-0">
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
                 {isEnterpriseUser ? 'Kurumsal Nakit Akışı Analizi' : 'Nakit Akışı Analizi'}
               </h1>
               <p className="text-gray-600">
@@ -381,7 +381,7 @@ export default function CashFlowAnalysis() {
         </div>
 
         {/* Premium Aksiyonlar */}
-        <Card className="mb-8 border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+        <Card className="mb-8 border-0 shadow-mosaic-lg bg-slate-800/80 backdrop-blur-xl">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
               <Crown className="w-6 h-6 text-yellow-500" />
@@ -400,7 +400,7 @@ export default function CashFlowAnalysis() {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
               {premiumFeatures.map(feature => (
                 <div
                   key={feature.id}
@@ -409,7 +409,7 @@ export default function CashFlowAnalysis() {
                 >
                   {/* Performance Badge */}
                   <div className="absolute top-4 right-4">
-                    <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                    <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-xl">
                       {feature.performance}
                     </Badge>
                   </div>
@@ -427,7 +427,7 @@ export default function CashFlowAnalysis() {
                     {/* Action Button */}
                     <Button
                       size="sm"
-                      className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                      className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-xl"
                     >
                       {feature.action}
                       <ArrowRight className="w-4 h-4 ml-2" />
@@ -443,14 +443,14 @@ export default function CashFlowAnalysis() {
         </Card>
 
         {/* Ana Analiz Kartları */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-100">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+          <Card className="border-0 shadow-mosaic bg-gradient-to-br from-green-500/10 to-emerald-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-600">Toplam Gelir</p>
-                  <p className="text-2xl font-bold text-green-700">₺45,230</p>
-                  <p className="text-xs text-green-600 flex items-center mt-1">
+                  <p className="text-sm font-medium text-green-400">Toplam Gelir</p>
+                  <p className="text-2xl font-bold text-green-400">₺45,230</p>
+                  <p className="text-xs text-green-400 flex items-center mt-1">
                     <TrendingUp className="w-3 h-3 mr-1" />
                     +12.5%
                   </p>
@@ -462,13 +462,13 @@ export default function CashFlowAnalysis() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-red-50 to-rose-100">
+          <Card className="border-0 shadow-mosaic bg-gradient-to-br from-red-500/10 to-rose-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-red-600">Toplam Gider</p>
-                  <p className="text-2xl font-bold text-red-700">₺32,180</p>
-                  <p className="text-xs text-red-600 flex items-center mt-1">
+                  <p className="text-sm font-medium text-red-400">Toplam Gider</p>
+                  <p className="text-2xl font-bold text-red-400">₺32,180</p>
+                  <p className="text-xs text-red-400 flex items-center mt-1">
                     <TrendingDown className="w-3 h-3 mr-1" />
                     -8.2%
                   </p>
@@ -480,13 +480,13 @@ export default function CashFlowAnalysis() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-100">
+          <Card className="border-0 shadow-mosaic bg-gradient-to-br from-blue-500/10 to-cyan-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-600">Net Nakit Akışı</p>
-                  <p className="text-2xl font-bold text-blue-700">₺13,050</p>
-                  <p className="text-xs text-blue-600 flex items-center mt-1">
+                  <p className="text-sm font-medium text-blue-400">Net Nakit Akışı</p>
+                  <p className="text-2xl font-bold text-blue-400">₺13,050</p>
+                  <p className="text-xs text-blue-400 flex items-center mt-1">
                     <ArrowRight className="w-3 h-3 mr-1" />
                     +25.3%
                   </p>
@@ -498,13 +498,13 @@ export default function CashFlowAnalysis() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-violet-100">
+          <Card className="border-0 shadow-mosaic bg-gradient-to-br from-purple-500/10 to-violet-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-purple-600">Aylık Trend</p>
+                  <p className="text-sm font-medium text-purple-400">Aylık Trend</p>
                   <p className="text-2xl font-bold text-purple-700">Pozitif</p>
-                  <p className="text-xs text-purple-600 flex items-center mt-1">
+                  <p className="text-xs text-purple-400 flex items-center mt-1">
                     <Sparkles className="w-3 h-3 mr-1" />
                     +18.7%
                   </p>
@@ -518,7 +518,7 @@ export default function CashFlowAnalysis() {
         </div>
 
         {/* Kategori Analizi */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <Card className="border-0 shadow-mosaic bg-slate-800/80 backdrop-blur-xl">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <PieChart className="w-5 h-5 text-blue-500" />
@@ -605,7 +605,7 @@ export default function CashFlowAnalysis() {
               ).map((category, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-4 rounded-xl bg-accent/20 hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-4 h-4 rounded-full bg-gradient-to-r ${category.color}`} />
@@ -618,7 +618,7 @@ export default function CashFlowAnalysis() {
                     <div className="text-right">
                       <p className="font-medium text-gray-900">%{category.percentage}</p>
                       <p
-                        className={`text-sm flex items-center ${category.trend > 0 ? 'text-green-600' : 'text-red-600'}`}
+                        className={`text-sm flex items-center ${category.trend > 0 ? 'text-green-400' : 'text-red-400'}`}
                       >
                         {category.trend > 0 ? (
                           <TrendingUp className="w-3 h-3 mr-1" />
@@ -693,20 +693,20 @@ function IncomeBoostModal() {
 function SavingsPlanModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-xl border border-blue-200">
+      <div className="bg-gradient-to-r from-blue-500/10 to-cyan-50 p-6 rounded-xl border border-blue-200">
         <h3 className="text-lg font-bold text-blue-800 mb-3">🎯 Tasarruf Optimizasyonu</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">Gereksiz abonelikleri iptal et</span>
+            <Target className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">Gereksiz abonelikleri iptal et</span>
           </div>
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">Otomatik tasarruf planı kur</span>
+            <Target className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">Otomatik tasarruf planı kur</span>
           </div>
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">Alışveriş alışkanlıklarını optimize et</span>
+            <Target className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">Alışveriş alışkanlıklarını optimize et</span>
           </div>
         </div>
       </div>
@@ -728,19 +728,19 @@ function SavingsPlanModal() {
 function AIAdviceModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200">
+      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-200">
         <h3 className="text-lg font-bold text-purple-800 mb-3">🤖 AI Finansal Danışmanlık</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Brain className="w-5 h-5 text-purple-600" />
+            <Brain className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">Kişiselleştirilmiş yatırım önerileri</span>
           </div>
           <div className="flex items-center gap-3">
-            <Brain className="w-5 h-5 text-purple-600" />
+            <Brain className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">Risk analizi ve portföy optimizasyonu</span>
           </div>
           <div className="flex items-center gap-3">
-            <Brain className="w-5 h-5 text-purple-600" />
+            <Brain className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">24/7 finansal rehberlik</span>
           </div>
         </div>
@@ -763,7 +763,7 @@ function AIAdviceModal() {
 function ReportDownloadModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-xl border border-orange-200">
+      <div className="bg-gradient-to-r from-orange-500/10 to-red-50 p-6 rounded-xl border border-orange-200">
         <h3 className="text-lg font-bold text-orange-800 mb-3">📊 Premium Rapor Seçenekleri</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
@@ -802,15 +802,15 @@ function AutoTrackingModal() {
         <h3 className="text-lg font-bold text-indigo-800 mb-3">⚡ Otomatik İzleme</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Activity className="w-5 h-5 text-indigo-600" />
+            <Activity className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">Gerçek zamanlı nakit akışı takibi</span>
           </div>
           <div className="flex items-center gap-3">
-            <Activity className="w-5 h-5 text-indigo-600" />
+            <Activity className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">Otomatik bildirimler</span>
           </div>
           <div className="flex items-center gap-3">
-            <Activity className="w-5 h-5 text-indigo-600" />
+            <Activity className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">Hedef takibi ve uyarılar</span>
           </div>
         </div>
@@ -833,20 +833,20 @@ function AutoTrackingModal() {
 function SmartGoalsModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
+      <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-6 rounded-xl border border-green-200">
         <h3 className="text-lg font-bold text-green-800 mb-3">🎯 Akıllı Hedef Belirleme</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">SMART hedef metodolojisi</span>
+            <Target className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">SMART hedef metodolojisi</span>
           </div>
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">İlerleme takibi</span>
+            <Target className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">İlerleme takibi</span>
           </div>
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">Motivasyon ve ödül sistemi</span>
+            <Target className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">Motivasyon ve ödül sistemi</span>
           </div>
         </div>
       </div>
@@ -941,20 +941,20 @@ function RevenueOptimizationModal() {
 function CostOptimizationModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-xl border border-blue-200">
+      <div className="bg-gradient-to-r from-blue-500/10 to-cyan-50 p-6 rounded-xl border border-blue-200">
         <h3 className="text-lg font-bold text-blue-800 mb-3">🎯 Kurumsal Maliyet Optimizasyonu</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">Operasyonel maliyetleri analiz et ve azalt</span>
+            <Target className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">Operasyonel maliyetleri analiz et ve azalt</span>
           </div>
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">Tedarik zinciri optimizasyonu</span>
+            <Target className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">Tedarik zinciri optimizasyonu</span>
           </div>
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">Enerji ve kaynak verimliliği artır</span>
+            <Target className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">Enerji ve kaynak verimliliği artır</span>
           </div>
         </div>
       </div>
@@ -976,19 +976,19 @@ function CostOptimizationModal() {
 function EnterpriseAIModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200">
+      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-200">
         <h3 className="text-lg font-bold text-purple-800 mb-3">🤖 Enterprise AI Danışmanlık</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Brain className="w-5 h-5 text-purple-600" />
+            <Brain className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">Kurumsal finansal strateji önerileri</span>
           </div>
           <div className="flex items-center gap-3">
-            <Brain className="w-5 h-5 text-purple-600" />
+            <Brain className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">Risk analizi ve kurumsal portföy optimizasyonu</span>
           </div>
           <div className="flex items-center gap-3">
-            <Brain className="w-5 h-5 text-purple-600" />
+            <Brain className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">24/7 kurumsal finansal rehberlik</span>
           </div>
         </div>
@@ -1011,7 +1011,7 @@ function EnterpriseAIModal() {
 function EnterpriseReportsModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-xl border border-orange-200">
+      <div className="bg-gradient-to-r from-orange-500/10 to-red-50 p-6 rounded-xl border border-orange-200">
         <h3 className="text-lg font-bold text-orange-800 mb-3">📊 Enterprise Rapor Seçenekleri</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
@@ -1050,15 +1050,15 @@ function EnterpriseAutomationModal() {
         <h3 className="text-lg font-bold text-indigo-800 mb-3">⚡ Enterprise Otomasyon</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Activity className="w-5 h-5 text-indigo-600" />
+            <Activity className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">Kurumsal nakit akışı otomatik izleme</span>
           </div>
           <div className="flex items-center gap-3">
-            <Activity className="w-5 h-5 text-indigo-600" />
+            <Activity className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">RPA ve iş süreci otomasyonu</span>
           </div>
           <div className="flex items-center gap-3">
-            <Activity className="w-5 h-5 text-indigo-600" />
+            <Activity className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">Kurumsal hedef takibi ve uyarılar</span>
           </div>
         </div>
@@ -1081,20 +1081,20 @@ function EnterpriseAutomationModal() {
 function EnterpriseGoalsModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
+      <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-6 rounded-xl border border-green-200">
         <h3 className="text-lg font-bold text-green-800 mb-3">🎯 Kurumsal Hedef Belirleme</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">Kurumsal KPI ve OKR metodolojisi</span>
+            <Target className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">Kurumsal KPI ve OKR metodolojisi</span>
           </div>
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">Departman bazlı hedef takibi</span>
+            <Target className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">Departman bazlı hedef takibi</span>
           </div>
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">Performans değerlendirme sistemi</span>
+            <Target className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">Performans değerlendirme sistemi</span>
           </div>
         </div>
       </div>

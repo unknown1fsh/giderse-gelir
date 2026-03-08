@@ -2,8 +2,8 @@
 
 import { useState, useRef } from 'react'
 import { Upload, X, File, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/mosaic'
+import { Card, CardContent } from '@/components/mosaic'
 
 interface FileUploadProps {
   ticketId: number
@@ -132,14 +132,14 @@ export default function FileUpload({ ticketId, onUploadSuccess }: FileUploadProp
             <div>
               <label className="block text-sm font-medium mb-2">Dosya Ekle</label>
               <div
-                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 transition-colors"
+                className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-sm text-gray-600 mb-2">
+                <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-sm text-muted-foreground mb-2">
                   Dosyaları buraya sürükleyin veya tıklayarak seçin
                 </p>
-                <p className="text-xs text-gray-500">Maksimum 10MB • JPG, PNG, PDF, DOC, DOCX</p>
+                <p className="text-xs text-muted-foreground">Maksimum 10MB • JPG, PNG, PDF, DOC, DOCX</p>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -157,13 +157,13 @@ export default function FileUpload({ ticketId, onUploadSuccess }: FileUploadProp
                 {files.map((file, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    className="flex items-center justify-between p-3 bg-muted rounded-lg"
                   >
                     <div className="flex items-center space-x-2">
-                      <File className="h-4 w-4 text-gray-500" />
+                      <File className="h-4 w-4 text-muted-foreground" />
                       <div>
                         <p className="text-sm font-medium">{file.name}</p>
-                        <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                        <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
                       </div>
                     </div>
                     <Button
@@ -201,20 +201,20 @@ export default function FileUpload({ ticketId, onUploadSuccess }: FileUploadProp
                 {uploadedFiles.map(file => (
                   <div
                     key={file.id}
-                    className="flex items-center justify-between p-3 bg-green-50 rounded-lg"
+                    className="flex items-center justify-between p-3 bg-muted rounded-lg"
                   >
                     <div className="flex items-center space-x-2">
-                      <File className="h-4 w-4 text-green-600" />
+                      <File className="h-4 w-4 text-primary" />
                       <div>
                         <p className="text-sm font-medium">{file.fileName}</p>
-                        <p className="text-xs text-gray-500">{formatFileSize(file.fileSize)}</p>
+                        <p className="text-xs text-muted-foreground">{formatFileSize(file.fileSize)}</p>
                       </div>
                     </div>
                     <a
                       href={file.filePath}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline"
+                      className="text-sm text-primary hover:underline"
                     >
                       Görüntüle
                     </a>

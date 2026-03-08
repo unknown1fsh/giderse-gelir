@@ -54,8 +54,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (userLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
       </div>
     )
   }
@@ -81,24 +81,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-20 pt-[env(safe-area-inset-top)]">
+      <div className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-20 pt-[env(safe-area-inset-top)]">
         <div className="p-4 sm:p-6 lg:p-8">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden min-h-[44px] min-w-[44px] p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center flex-shrink-0"
+                className="lg:hidden min-h-[44px] min-w-[44px] p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors flex items-center justify-center flex-shrink-0"
               >
-                {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {sidebarOpen ? <X className="h-5 w-5 text-muted-foreground" /> : <Menu className="h-5 w-5 text-muted-foreground" />}
               </button>
               <div className="hidden md:flex">
-                <BrandLogo size={28} withText={false} variant="light" priority />
+                <BrandLogo size={28} withText={false} variant="dark" priority />
               </div>
               <Link
                 href="/dashboard"
-                className="hidden sm:flex items-center space-x-2 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors text-slate-700"
+                className="hidden sm:flex items-center space-x-2 px-3 py-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors text-muted-foreground hover:text-foreground"
                 title="Dashboard'a Dön"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -108,8 +108,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Shield className="h-6 w-6 text-white" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-xl sm:text-3xl font-bold text-slate-800 truncate">Admin Paneli</h1>
-                <p className="text-xs sm:text-base text-slate-600 hidden sm:block">
+                <h1 className="text-xl sm:text-3xl font-bold text-foreground truncate">Admin Paneli</h1>
+                <p className="text-xs sm:text-base text-muted-foreground hidden sm:block">
                   Sistem yönetimi ve istatistikler
                 </p>
               </div>
@@ -119,10 +119,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 onClick={() => {
                   window.location.reload()
                 }}
-                className="min-h-[44px] min-w-[44px] p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center"
+                className="min-h-[44px] min-w-[44px] p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors flex items-center justify-center"
                 title="Yenile"
               >
-                <RefreshCw className="h-5 w-5 text-slate-700" />
+                <RefreshCw className="h-5 w-5 text-muted-foreground" />
               </button>
             </div>
           </div>
@@ -133,7 +133,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Sidebar */}
         <aside
           className={cn(
-            'fixed lg:sticky top-[88px] left-0 h-[calc(100vh-88px)] h-[calc(100dvh-88px)] w-64 bg-white/80 backdrop-blur-sm border-r border-slate-200/60 z-10 transition-transform duration-300',
+            'fixed lg:sticky top-[88px] left-0 h-[calc(100vh-88px)] h-[calc(100dvh-88px)] w-64 bg-background border-r border-border z-10 transition-transform duration-300',
             sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
           )}
         >
@@ -152,8 +152,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   className={cn(
                     'flex items-center space-x-3 px-4 min-h-[44px] py-3 rounded-lg transition-colors',
                     isActive
-                      ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-md'
-                      : 'text-slate-700 hover:bg-slate-100'
+                      ? 'bg-primary/10 text-primary shadow-sm border border-primary/20'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   )}
                 >
                   <Icon className="h-5 w-5" />

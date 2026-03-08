@@ -76,6 +76,7 @@
     "resend": "^3.5.0",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7",
+    "web-push": "^3.6.7",
     "xlsx": "^0.18.5",
     "zod": "^3.22.4"
   },
@@ -91,6 +92,7 @@
     "@types/node": "^20.10.5",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
+    "@types/web-push": "^3.6.4",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "@vitest/coverage-v8": "^1.1.0",

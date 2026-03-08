@@ -8,10 +8,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ChevronLeft, ChevronRight, Search, Download } from 'lucide-react'
+  Button,
+  SearchBox,
+  FilterBar,
+  Spinner,
+  EmptyState,
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/mosaic'
+import { Download, FileQuestion } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Column<T> {
@@ -39,7 +47,7 @@ interface DataTableProps<T> {
   className?: string
 }
 
-export default function DataTable<T extends { id: number | string }>({
+export default function AdminDataTable<T extends { id: number | string }>({
   data,
   columns,
   loading = false,
@@ -65,57 +73,51 @@ export default function DataTable<T extends { id: number | string }>({
       : String((item as Record<string, unknown>)[column.key] ?? '')
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn('space-y-4 w-full', className)}>
       {(searchable || exportable) && (
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          {searchable && (
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
-              <Input
-                type="text"
-                placeholder={searchPlaceholder}
-                value={searchValue}
-                onChange={e => handleSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          )}
-          {exportable && onExport && (
-            <Button variant="outline" size="sm" onClick={onExport} className="w-full sm:w-auto">
-              <Download className="h-4 w-4 mr-2" />
-              Dışa Aktar
-            </Button>
-          )}
-        </div>
+        <FilterBar className="p-0 border-0 shadow-none bg-transparent">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 w-full">
+            {searchable && (
+              <div className="flex-1 max-w-sm">
+                <SearchBox
+                  placeholder={searchPlaceholder}
+                  onSearch={handleSearch}
+                  defaultValue={searchValue}
+                />
+              </div>
+            )}
+            {exportable && onExport && (
+              <Button variant="outline" size="default" onClick={onExport} className="w-full sm:w-auto">
+                <Download className="h-4 w-4 mr-2" />
+                Dışa Aktar
+              </Button>
+            )}
+          </div>
+        </FilterBar>
       )}
 
       {/* Mobil kart görünümü */}
       <div className="sm:hidden">
         {loading ? (
-          <div className="border rounded-lg bg-white p-4">
-            <div className="flex items-center gap-2 text-slate-600">
-              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500" />
-              <span>Yükleniyor...</span>
-            </div>
+          <div className="border border-border rounded-xl bg-card p-8 flex items-center justify-center">
+            <Spinner variant="primary" className="mr-3" /> Yükleniyor...
           </div>
         ) : data.length === 0 ? (
-          <div className="border rounded-lg bg-white p-4 text-center text-slate-500">
-            {emptyMessage}
-          </div>
+          <EmptyState title={emptyMessage} icon={<FileQuestion />} />
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {data.map(item => {
               const primary = columns[0]
               const rest = columns.slice(1)
               return (
-                <div key={item.id} className="border rounded-lg bg-white p-4 space-y-3">
-                  {primary && <div className="min-w-0">{renderCell(primary, item)}</div>}
+                <div key={item.id} className="border border-border rounded-xl bg-card p-5 space-y-4">
+                  {primary && <div className="font-semibold">{renderCell(primary, item)}</div>}
                   {rest.length > 0 && (
                     <div className="space-y-3">
                       {rest.map(column => (
-                        <div key={column.key} className="min-w-0">
-                          <div className="text-xs text-slate-500">{column.header}</div>
-                          <div className="text-sm text-slate-900 break-words">
+                        <div key={column.key} className="flex flex-col gap-1">
+                          <span className="text-xs text-muted-foreground">{column.header}</span>
+                          <div className="text-sm text-foreground break-words">
                             {renderCell(column, item)}
                           </div>
                         </div>
@@ -130,7 +132,7 @@ export default function DataTable<T extends { id: number | string }>({
       </div>
 
       {/* Masaüstü tablo görünümü */}
-      <div className="hidden sm:block border rounded-lg overflow-hidden bg-white">
+      <div className="hidden sm:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -142,22 +144,21 @@ export default function DataTable<T extends { id: number | string }>({
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="text-center py-8">
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
-                    <span className="ml-2 text-slate-600">Yükleniyor...</span>
+                <TableCell colSpan={columns.length} className="text-center py-12">
+                  <div className="flex items-center justify-center text-muted-foreground">
+                    <Spinner variant="primary" className="mr-3" /> Yükleniyor...
                   </div>
                 </TableCell>
               </TableRow>
             ) : data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="text-center py-8 text-slate-500">
-                  {emptyMessage}
+                <TableCell colSpan={columns.length} className="text-center py-12 text-muted-foreground">
+                  <EmptyState title={emptyMessage} icon={<FileQuestion />} className="border-0 bg-transparent" />
                 </TableCell>
               </TableRow>
             ) : (
               data.map(item => (
-                <TableRow key={item.id} className="hover:bg-slate-50">
+                <TableRow key={item.id}>
                   {columns.map(column => (
                     <TableCell key={column.key}>{renderCell(column, item)}</TableCell>
                   ))}
@@ -169,31 +170,27 @@ export default function DataTable<T extends { id: number | string }>({
       </div>
 
       {pagination && pagination.totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-sm text-slate-600">
+        <Pagination className="justify-between">
+          <div className="text-sm text-muted-foreground hidden sm:block">
             Sayfa {pagination.page} / {pagination.totalPages}
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => pagination.onPageChange(pagination.page - 1)}
-              disabled={pagination.page === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Önceki</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => pagination.onPageChange(pagination.page + 1)}
-              disabled={pagination.page === pagination.totalPages}
-            >
-              <span className="hidden sm:inline">Sonraki</span>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => pagination.onPageChange(Math.max(1, pagination.page - 1))}
+                aria-disabled={pagination.page === 1}
+                className={pagination.page === 1 ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => pagination.onPageChange(Math.min(pagination.totalPages, pagination.page + 1))}
+                aria-disabled={pagination.page === pagination.totalPages}
+                className={pagination.page === pagination.totalPages ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
     </div>
   )

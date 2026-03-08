@@ -2,17 +2,17 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/mosaic'
+import { Input } from '@/components/mosaic'
+import { Textarea } from '@/components/mosaic'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
+} from '@/components/mosaic'
+import { Label } from '@/components/mosaic'
 import { Loader2, Plus } from 'lucide-react'
 
 interface Category {
@@ -226,9 +226,9 @@ export default function TicketForm({ onSuccess, prefill }: TicketFormProps) {
         <div className="space-y-2">
           <Label htmlFor="category">Kategori *</Label>
           {categoriesLoading ? (
-            <div className="flex items-center gap-2 p-3 border border-gray-300 rounded-md">
-              <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
-              <span className="text-sm text-gray-600">Kategoriler yükleniyor...</span>
+            <div className="flex items-center gap-2 p-3 border border-border rounded-md">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              <span className="text-sm text-muted-foreground">Kategoriler yükleniyor...</span>
             </div>
           ) : (
             <Select
@@ -250,15 +250,15 @@ export default function TicketForm({ onSuccess, prefill }: TicketFormProps) {
                     </SelectItem>
                   ))
                 ) : (
-                  <div className="px-2 py-1.5 text-sm text-gray-500">Kategori bulunamadı</div>
+                  <div className="px-2 py-1.5 text-sm text-muted-foreground">Kategori bulunamadı</div>
                 )}
               </SelectContent>
             </Select>
           )}
-          {autoCategoryNote && <p className="text-xs text-slate-500">{autoCategoryNote}</p>}
-          {categoriesError && <p className="text-xs text-red-600">{categoriesError}</p>}
+          {autoCategoryNote && <p className="text-xs text-muted-foreground">{autoCategoryNote}</p>}
+          {categoriesError && <p className="text-xs text-destructive">{categoriesError}</p>}
           {!categoriesLoading && categories.length === 0 && !categoriesError && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-destructive">
               Destek kategorisi bulunamadı. Lütfen admin panelinden en az bir destek kategorisi
               ekleyin.
             </p>
@@ -312,7 +312,7 @@ export default function TicketForm({ onSuccess, prefill }: TicketFormProps) {
         <Button
           type="submit"
           disabled={loading || categories.length === 0}
-          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
         >
           {loading ? (
             <>
@@ -327,7 +327,7 @@ export default function TicketForm({ onSuccess, prefill }: TicketFormProps) {
           )}
         </Button>
         {categories.length === 0 && (
-          <p className="text-xs text-red-600">
+          <p className="text-xs text-destructive">
             Destek kategorisi bulunamadı. Lütfen admin panelinden en az bir destek kategorisi
             ekleyin.
           </p>

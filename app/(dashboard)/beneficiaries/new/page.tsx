@@ -2,296 +2,295 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Save, Users, Building2, CreditCard, Phone, Mail } from 'lucide-react'
+import {
+  AppPageShell,
+  Button,
+  Card,
+  CardContent,
+  FormField,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
+} from '@/components/mosaic'
+import { Users, Building2, CreditCard, Phone, Mail, Info } from 'lucide-react'
 import { useToast } from '@/lib/use-toast'
 
 interface ReferenceData {
   banks: Array<{ id: number; name: string }>
 }
 
-export default function NewBeneficiaryPage() {
+export default function YeniAliciSayfasi() {
   const router = useRouter()
   const { success: toastSuccess, error: toastError } = useToast()
   const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [yukleniyor, setYukleniyor] = useState(true)
+  const [kaydediliyor, setKaydediliyor] = useState(false)
+  const [hatalar, setHatalar] = useState<Record<string, string>>({})
 
-  const [formData, setFormData] = useState({
-    name: '',
+  const [form, setForm] = useState({
+    ad: '',
     iban: '',
-    accountNo: '',
-    bankId: 0,
-    phoneNumber: '',
-    email: '',
-    description: '',
+    hesapNo: '',
+    bankaId: '',
+    telefon: '',
+    eposta: '',
+    aciklama: '',
   })
 
   useEffect(() => {
-    async function fetchReferenceData() {
+    async function veriGetir() {
       try {
-        const response = await fetch('/api/reference-data')
-        if (response.ok) {
-          const data = await response.json()
-          setReferenceData(data)
+        const res = await fetch('/api/reference-data')
+        if (res.ok) {
+          const veri = (await res.json()) as ReferenceData
+          setReferenceData(veri)
         }
-      } catch (error) {
-        console.error('Referans verileri alınamadı:', error)
+      } catch {
+        // sessizce devam
       } finally {
-        setLoading(false)
+        setYukleniyor(false)
       }
     }
-
-    fetchReferenceData()
+    void veriGetir()
   }, [])
+
+  const guncelle = (alan: string, deger: string) => {
+    setForm(f => ({ ...f, [alan]: deger }))
+    if (hatalar[alan]) {setHatalar(h => ({ ...h, [alan]: '' }))}
+  }
+
+  const dogrula = () => {
+    const yeni: Record<string, string> = {}
+    if (!form.ad.trim()) {yeni.ad = 'Alıcı adı zorunludur'}
+    if (!form.iban && !form.hesapNo && !form.telefon && !form.eposta)
+      {yeni.iletisim = 'En az bir iletişim bilgisi (IBAN, Hesap No, Telefon veya E-posta) girilmelidir'}
+    setHatalar(yeni)
+    return Object.keys(yeni).length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    // Validasyon
-    if (!formData.name.trim()) {
-      toastError('Hata', 'Alıcı adı zorunludur')
-      return
-    }
-
-    // En az bir iletişim bilgisi olmalı
-    if (!formData.iban && !formData.accountNo && !formData.phoneNumber && !formData.email) {
-      toastError('Hata', 'En az bir iletişim bilgisi (IBAN, Hesap No, Telefon veya E-posta) girilmelidir')
-      return
-    }
-
-    setSaving(true)
-
+    if (!dogrula()) {return}
+    setKaydediliyor(true)
     try {
-      const submitData = {
-        name: formData.name.trim(),
-        iban: formData.iban.trim() || null,
-        accountNo: formData.accountNo.trim() || null,
-        bankId: formData.bankId > 0 ? formData.bankId : null,
-        phoneNumber: formData.phoneNumber.trim() || null,
-        email: formData.email.trim() || null,
-        description: formData.description.trim() || null,
-      }
-
-      const response = await fetch('/api/beneficiaries', {
+      const res = await fetch('/api/beneficiaries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(submitData),
         credentials: 'include',
+        body: JSON.stringify({
+          name: form.ad.trim(),
+          iban: form.iban.trim() || null,
+          accountNo: form.hesapNo.trim() || null,
+          bankId: form.bankaId ? parseInt(form.bankaId) : null,
+          phoneNumber: form.telefon.trim() || null,
+          email: form.eposta.trim() || null,
+          description: form.aciklama.trim() || null,
+        }),
       })
-
-      if (response.ok) {
+      if (res.ok) {
         toastSuccess('Başarılı', 'Alıcı başarıyla eklendi')
         router.push('/beneficiaries')
       } else {
-        const errorData = await response.json()
-        toastError('Hata', errorData.error || 'Alıcı eklenemedi')
+        const hata = (await res.json()) as { error?: string }
+        toastError('Hata', hata.error || 'Alıcı eklenemedi')
       }
-    } catch (error) {
-      console.error('Alıcı eklenirken hata:', error)
+    } catch {
       toastError('Hata', 'Alıcı eklenirken hata oluştu')
     } finally {
-      setSaving(false)
+      setKaydediliyor(false)
     }
   }
 
-  if (loading) {
-    return <div className="p-6">Yükleniyor...</div>
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-lg">
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <div>
-          <div className="flex items-center gap-2">
-            <Users className="h-6 w-6 text-green-500" />
-            <h1 className="text-3xl font-bold text-green-600">Yeni Alıcı Ekle</h1>
-          </div>
-          <p className="text-muted-foreground">Havale/EFT yapacağınız kişi bilgilerini girin</p>
-        </div>
-      </div>
-
-      <Card className="max-w-3xl">
-        <CardHeader>
-          <CardTitle className="text-green-600">Alıcı Bilgileri</CardTitle>
-          <CardDescription>
-            Havale/EFT yapacağınız kişinin bilgilerini doldurun. En az bir iletişim bilgisi
-            zorunludur.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Temel Bilgiler */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-slate-700 flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Temel Bilgiler
-              </h3>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Alıcı Adı / Ünvanı *</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Ahmet Yılmaz veya ABC A.Ş."
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1">Kişi veya kurum adı</p>
+    <AppPageShell
+      header={{
+        title: 'Yeni Alıcı',
+        description: 'Havale/EFT yapacağınız kişi veya kurumu ekleyin',
+        onBack: () => router.back(),
+      }}
+    >
+      <div className="max-w-2xl">
+        <form onSubmit={e => void handleSubmit(e)} className="space-y-6">
+          {/* Temel Bilgiler */}
+          <Card>
+            <CardContent className="p-6 space-y-5">
+              <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+                <Users className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Temel Bilgiler
+                </h2>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">Açıklama / Not</label>
-                <textarea
-                  value={formData.description}
-                  onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              <FormField label="Alıcı Adı / Ünvanı" required error={hatalar.ad} htmlFor="ad">
+                <Input
+                  id="ad"
+                  value={form.ad}
+                  onChange={e => guncelle('ad', e.target.value)}
+                  placeholder="Ahmet Yılmaz veya ABC Şirketi A.Ş."
+                  variant={hatalar.ad ? 'error' : 'default'}
+                />
+              </FormField>
+
+              <FormField label="Açıklama / Not" htmlFor="aciklama">
+                <Textarea
+                  id="aciklama"
+                  value={form.aciklama}
+                  onChange={e => guncelle('aciklama', e.target.value)}
                   placeholder="Bu alıcı hakkında notlarınız..."
                   rows={2}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
+              </FormField>
+            </CardContent>
+          </Card>
+
+          {/* Banka Bilgileri */}
+          <Card>
+            <CardContent className="p-6 space-y-5">
+              <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+                <Building2 className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Banka Bilgileri
+                </h2>
+                <span className="ml-auto text-xs text-muted-foreground">İsteğe bağlı</span>
               </div>
-            </div>
 
-            {/* Banka Bilgileri */}
-            <div className="space-y-4 border-t pt-6">
-              <h3 className="text-lg font-semibold text-slate-700 flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
-                Banka Bilgileri
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Banka</label>
-                  <select
-                    value={formData.bankId}
-                    onChange={e =>
-                      setFormData(prev => ({ ...prev, bankId: parseInt(e.target.value) }))
-                    }
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value={0}>Banka seçiniz (opsiyonel)</option>
-                    {referenceData?.banks.map(bank => (
-                      <option key={bank.id} value={bank.id}>
-                        {bank.name}
-                      </option>
+              <FormField label="Banka" htmlFor="banka">
+                <Select
+                  value={form.bankaId}
+                  onValueChange={v => guncelle('bankaId', v)}
+                  disabled={yukleniyor}
+                >
+                  <SelectTrigger id="banka">
+                    <SelectValue placeholder={yukleniyor ? 'Yükleniyor...' : 'Banka seçin (isteğe bağlı)'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {referenceData?.banks.map(b => (
+                      <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
                     ))}
-                  </select>
-                </div>
+                  </SelectContent>
+                </Select>
+              </FormField>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <div className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4" />
-                      IBAN
-                    </div>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.iban}
-                    onChange={e => setFormData(prev => ({ ...prev, iban: e.target.value }))}
-                    placeholder="TR00 0000 0000 0000 0000 0000 00"
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              <FormField
+                label="IBAN"
+                hint="Uluslararası banka hesap numarası"
+                htmlFor="iban"
+              >
+                <div className="relative">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
+                    TR
+                  </span>
+                  <Input
+                    id="iban"
+                    value={form.iban}
+                    onChange={e => guncelle('iban', e.target.value)}
+                    placeholder="00 0000 0000 0000 0000 0000 00"
+                    className="pl-9 sm:pl-9"
                     maxLength={34}
                   />
-                  <p className="text-xs text-gray-500 mt-1">Uluslararası banka hesap numarası</p>
                 </div>
-              </div>
+              </FormField>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">Hesap Numarası</label>
-                <input
-                  type="text"
-                  value={formData.accountNo}
-                  onChange={e => setFormData(prev => ({ ...prev, accountNo: e.target.value }))}
-                  placeholder="1234567890"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-                <p className="text-xs text-gray-500 mt-1">Varsa hesap numarasını girin</p>
-              </div>
-            </div>
-
-            {/* İletişim Bilgileri */}
-            <div className="space-y-4 border-t pt-6">
-              <h3 className="text-lg font-semibold text-slate-700 flex items-center gap-2">
-                <Phone className="h-5 w-5" />
-                İletişim Bilgileri
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
-                      Telefon Numarası
-                    </div>
-                  </label>
-                  <input
-                    type="tel"
-                    value={formData.phoneNumber}
-                    onChange={e => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-                    placeholder="05XX XXX XX XX"
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              <FormField
+                label="Hesap Numarası"
+                hint="IBAN yoksa hesap numarasını girin"
+                htmlFor="hesapNo"
+              >
+                <div className="relative">
+                  <CreditCard className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="hesapNo"
+                    value={form.hesapNo}
+                    onChange={e => guncelle('hesapNo', e.target.value)}
+                    placeholder="1234567890"
+                    className="pl-9 sm:pl-9"
                   />
                 </div>
+              </FormField>
+            </CardContent>
+          </Card>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      E-posta Adresi
-                    </div>
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="ornek@email.com"
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
+          {/* İletişim Bilgileri */}
+          <Card>
+            <CardContent className="p-6 space-y-5">
+              <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+                <Phone className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  İletişim Bilgileri
+                </h2>
               </div>
-            </div>
 
-            {/* Bilgilendirme */}
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800">
-                ℹ️ <strong>Not:</strong> Alıcı adı zorunludur. Ayrıca en az bir iletişim bilgisi
-                (IBAN, Hesap No, Telefon veya E-posta) girilmelidir.
-              </p>
-            </div>
+              {hatalar.iletisim && (
+                <p className="text-sm font-medium text-destructive">{hatalar.iletisim}</p>
+              )}
 
-            {/* Butonlar */}
-            <div className="flex gap-4 pt-4">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="flex-1 px-6 py-3 border border-gray-300 rounded-md hover:bg-gray-50 font-medium"
-                disabled={saving}
-              >
-                İptal
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="flex-1 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 flex items-center justify-center gap-2 font-medium"
-              >
-                {saving ? (
-                  'Kaydediliyor...'
-                ) : (
-                  <>
-                    <Save className="h-5 w-5" />
-                    Alıcı Ekle
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField label="Telefon Numarası" htmlFor="telefon">
+                  <div className="relative">
+                    <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="telefon"
+                      type="tel"
+                      value={form.telefon}
+                      onChange={e => guncelle('telefon', e.target.value)}
+                      placeholder="05XX XXX XX XX"
+                      className="pl-9 sm:pl-9"
+                    />
+                  </div>
+                </FormField>
+
+                <FormField label="E-posta Adresi" htmlFor="eposta">
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="eposta"
+                      type="email"
+                      value={form.eposta}
+                      onChange={e => guncelle('eposta', e.target.value)}
+                      placeholder="ornek@eposta.com"
+                      className="pl-9 sm:pl-9"
+                    />
+                  </div>
+                </FormField>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Bilgi Notu */}
+          <div className="flex items-start gap-3 rounded-xl border border-blue-500/20 bg-blue-500/8 px-4 py-3">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
+            <p className="text-sm text-muted-foreground">
+              Alıcı adı zorunludur. Banka, IBAN, Hesap No, Telefon veya E-posta bilgilerinden en az biri girilmelidir.
+            </p>
+          </div>
+
+          {/* Butonlar */}
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => router.back()}
+              disabled={kaydediliyor}
+            >
+              İptal
+            </Button>
+            <Button
+              type="submit"
+              variant="glow"
+              className="flex-1"
+              loading={kaydediliyor}
+              disabled={kaydediliyor}
+            >
+              Alıcı Ekle
+            </Button>
+          </div>
+        </form>
+      </div>
+    </AppPageShell>
   )
 }

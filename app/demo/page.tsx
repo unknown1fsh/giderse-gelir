@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/mosaic'
 import { Rocket, ArrowLeft, RefreshCw } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import BrandLogo from '@/components/brand-logo'
 import DemoDashboard from '@/components/demo/demo-dashboard'
 import DemoTransactions from '@/components/demo/demo-transactions'
 import DemoAccounts from '@/components/demo/demo-accounts'
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import { ConfirmationDialog } from '@/components/mosaic'
 import {
   demoAccounts as initialDemoAccounts,
   demoTransactions as initialDemoTransactions,

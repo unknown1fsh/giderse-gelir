@@ -1,11 +1,11 @@
 'use client'
 
 import { useUser } from '@/lib/user-context'
-import { useRouter } from 'next/navigation'
+import { usePremiumModal } from '@/lib/premium-context'
 
 export function usePremium() {
   const { user, loading } = useUser()
-  const router = useRouter()
+  const { showModal } = usePremiumModal()
 
   const isPremium = user?.plan === 'premium'
   const isEnterprise = user?.plan === 'enterprise'
@@ -18,8 +18,8 @@ export function usePremium() {
     }
 
     if (!isPremium && !isEnterprise && !isEnterprisePremium) {
-      // Free kullanıcıyı premium sayfasına yönlendir
-      router.push('/premium')
+      // Free kullanıcıya premium modalı göster
+      showModal('Premium Özellik', { current: 0, limit: 0, type: 'analysis' })
       return false
     }
 
@@ -37,8 +37,8 @@ export function usePremium() {
     }
 
     if (!isPremium && !isEnterprise && !isEnterprisePremium) {
-      // Free kullanıcıyı premium sayfasına yönlendir
-      router.push(`/premium?feature=${encodeURIComponent(featureName)}`)
+      // Free kullanıcıya premium modalı göster
+      showModal(featureName)
       return false
     }
 

@@ -91,14 +91,9 @@ export async function getRemainingReports(
 /**
  * Plan türüne göre rapor seviyesini belirler
  */
-export function getReportLevelForPlan(
-  planId: string
-): 'premium' | 'enterprise' | 'enterprise_premium' {
-  if (planId === PLAN_IDS.ENTERPRISE_PREMIUM) {
-    return 'enterprise_premium'
-  }
-  if (planId === PLAN_IDS.ENTERPRISE) {
-    return 'enterprise'
+export function getReportLevelForPlan(planId: string): 'premium' | 'family' {
+  if (planId === PLAN_IDS.FAMILY) {
+    return 'family'
   }
   return 'premium'
 }

@@ -2,9 +2,21 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Home, Coins, Save, Loader2 } from 'lucide-react'
+import {
+  AppPageShell,
+  Button,
+  Card,
+  CardContent,
+  FormField,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
+} from '@/components/mosaic'
+import { Coins, Info } from 'lucide-react'
 import { useToast } from '@/lib/use-toast'
 
 interface ReferenceData {
@@ -22,239 +34,262 @@ interface ReferenceData {
   }>
 }
 
-export default function NewGoldItemPage() {
+export default function YeniAltinSayfasi() {
   const router = useRouter()
   const { success: toastSuccess, error: toastError } = useToast()
   const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [formData, setFormData] = useState({
-    name: '',
-    goldTypeId: '',
-    goldPurityId: '',
-    weight: '',
-    purchasePrice: '',
-    description: '',
+  const [yukleniyor, setYukleniyor] = useState(true)
+  const [kaydediliyor, setKaydediliyor] = useState(false)
+  const [hatalar, setHatalar] = useState<Record<string, string>>({})
+
+  const [form, setForm] = useState({
+    ad: '',
+    altinTuruId: '',
+    altinAyarId: '',
+    agirlik: '',
+    alisUcreti: '',
+    aciklama: '',
   })
 
   useEffect(() => {
-    async function fetchReferenceData() {
+    async function veriGetir() {
       try {
-        const response = await fetch('/api/reference-data')
-        if (response.ok) {
-          const data = (await response.json()) as ReferenceData
-          setReferenceData(data)
+        const res = await fetch('/api/reference-data')
+        if (res.ok) {
+          const veri = (await res.json()) as ReferenceData
+          setReferenceData(veri)
         }
-      } catch (error) {
-        console.error('Reference data yüklenirken hata:', error)
+      } catch {
+        // sessizce devam
       } finally {
-        setLoading(false)
+        setYukleniyor(false)
       }
     }
-
-    void fetchReferenceData()
+    void veriGetir()
   }, [])
+
+  const guncelle = (alan: string, deger: string) => {
+    setForm(f => ({ ...f, [alan]: deger }))
+    if (hatalar[alan]) {setHatalar(h => ({ ...h, [alan]: '' }))}
+  }
+
+  const dogrula = () => {
+    const yeni: Record<string, string> = {}
+    if (!form.ad.trim()) {yeni.ad = 'Eşya adı zorunludur'}
+    if (!form.altinTuruId) {yeni.altinTuruId = 'Altın türü seçimi zorunludur'}
+    if (!form.altinAyarId) {yeni.altinAyarId = 'Ayar seçimi zorunludur'}
+    if (!form.agirlik || parseFloat(form.agirlik) <= 0) {yeni.agirlik = 'Geçerli bir ağırlık girin'}
+    if (!form.alisUcreti || parseFloat(form.alisUcreti) <= 0) {yeni.alisUcreti = 'Geçerli bir alış fiyatı girin'}
+    setHatalar(yeni)
+    return Object.keys(yeni).length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSaving(true)
-
+    if (!dogrula()) {return}
+    setKaydediliyor(true)
     try {
-      const submitData = {
-        ...formData,
-        weight: parseFloat(formData.weight) || 0,
-        purchasePrice: parseFloat(formData.purchasePrice) || 0,
-        goldTypeId: parseInt(formData.goldTypeId),
-        goldPurityId: parseInt(formData.goldPurityId),
-      }
-
-      const response = await fetch('/api/gold', {
+      const res = await fetch('/api/gold', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submitData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.ad.trim(),
+          goldTypeId: parseInt(form.altinTuruId),
+          goldPurityId: parseInt(form.altinAyarId),
+          weight: parseFloat(form.agirlik),
+          purchasePrice: parseFloat(form.alisUcreti),
+          description: form.aciklama.trim() || null,
+        }),
       })
-
-      if (response.ok) {
+      if (res.ok) {
         toastSuccess('Başarılı', 'Altın eşyası başarıyla eklendi')
         router.push('/gold')
       } else {
-        const errorData = (await response.json()) as { error?: string }
-        toastError('Hata', errorData.error || 'Altın eşyası eklenemedi')
+        const hata = (await res.json()) as { error?: string }
+        toastError('Hata', hata.error || 'Altın eşyası eklenemedi')
       }
-    } catch (error) {
-      console.error('Altın eşyası eklenirken hata:', error)
+    } catch {
       toastError('Hata', 'Altın eşyası eklenirken hata oluştu')
     } finally {
-      setSaving(false)
+      setKaydediliyor(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="p-6">
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Veriler yükleniyor...</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={() => router.back()}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <Link href="/dashboard" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <Home className="h-5 w-5" />
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold">Yeni Altın Eşyası</h1>
-          <p className="text-muted-foreground">Altın veya ziynet eşyası ekleyin</p>
-        </div>
+    <AppPageShell
+      header={{
+        title: 'Yeni Altın Eşyası',
+        description: 'Altın, bilezik, kolye veya ziynet eşyası ekleyin',
+        onBack: () => router.back(),
+      }}
+    >
+      <div className="max-w-2xl">
+        <form onSubmit={e => void handleSubmit(e)} className="space-y-6">
+          {/* Temel Bilgiler */}
+          <Card>
+            <CardContent className="p-6 space-y-5">
+              <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+                <Coins className="h-4 w-4 text-yellow-400" />
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Eşya Bilgileri
+                </h2>
+              </div>
+
+              <FormField label="Eşya Adı" required error={hatalar.ad} htmlFor="ad">
+                <Input
+                  id="ad"
+                  value={form.ad}
+                  onChange={e => guncelle('ad', e.target.value)}
+                  placeholder="22 Ayar Altın Bilezik, Cumhuriyet Altını..."
+                  variant={hatalar.ad ? 'error' : 'default'}
+                />
+              </FormField>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  label="Altın Türü"
+                  required
+                  error={hatalar.altinTuruId}
+                  hint="Bilezik, Kolye, Küpe, Cumhuriyet Altını vb."
+                  htmlFor="altinTuru"
+                >
+                  <Select
+                    value={form.altinTuruId}
+                    onValueChange={v => guncelle('altinTuruId', v)}
+                    disabled={yukleniyor}
+                  >
+                    <SelectTrigger id="altinTuru" className={hatalar.altinTuruId ? 'border-destructive' : ''}>
+                      <SelectValue placeholder={yukleniyor ? 'Yükleniyor...' : 'Tür seçin'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {referenceData?.goldTypes.map(t => (
+                        <SelectItem key={t.id} value={String(t.id)}>{t.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
+
+                <FormField
+                  label="Ayar"
+                  required
+                  error={hatalar.altinAyarId}
+                  hint="24K (Saf), 22K, 18K, 14K, 8K"
+                  htmlFor="altinAyar"
+                >
+                  <Select
+                    value={form.altinAyarId}
+                    onValueChange={v => guncelle('altinAyarId', v)}
+                    disabled={yukleniyor}
+                  >
+                    <SelectTrigger id="altinAyar" className={hatalar.altinAyarId ? 'border-destructive' : ''}>
+                      <SelectValue placeholder={yukleniyor ? 'Yükleniyor...' : 'Ayar seçin'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {referenceData?.goldPurities.map(p => (
+                        <SelectItem key={p.id} value={String(p.id)}>
+                          {p.name} ({p.purity} ayar)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Değer Bilgileri */}
+          <Card>
+            <CardContent className="p-6 space-y-5">
+              <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+                <span className="text-base font-bold text-yellow-400">₺</span>
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Değer Bilgileri
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  label="Ağırlık (gram)"
+                  required
+                  error={hatalar.agirlik}
+                  hint="Ondalıklı girilebilir: 15,50"
+                  htmlFor="agirlik"
+                >
+                  <Input
+                    id="agirlik"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={form.agirlik}
+                    onChange={e => guncelle('agirlik', e.target.value)}
+                    placeholder="15,50"
+                    variant={hatalar.agirlik ? 'error' : 'default'}
+                  />
+                </FormField>
+
+                <FormField
+                  label="Alış Fiyatı (₺)"
+                  required
+                  error={hatalar.alisUcreti}
+                  hint="Satın alım toplam tutarı"
+                  htmlFor="alisUcreti"
+                >
+                  <Input
+                    id="alisUcreti"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={form.alisUcreti}
+                    onChange={e => guncelle('alisUcreti', e.target.value)}
+                    placeholder="25000,00"
+                    variant={hatalar.alisUcreti ? 'error' : 'default'}
+                  />
+                </FormField>
+              </div>
+
+              <FormField label="Açıklama" hint="İsteğe bağlı notlar" htmlFor="aciklama">
+                <Textarea
+                  id="aciklama"
+                  value={form.aciklama}
+                  onChange={e => guncelle('aciklama', e.target.value)}
+                  placeholder="Eşya hakkında ek bilgiler, satın alma yeri vb."
+                  rows={3}
+                />
+              </FormField>
+            </CardContent>
+          </Card>
+
+          {/* Bilgi Notu */}
+          <div className="flex items-start gap-3 rounded-xl border border-yellow-500/20 bg-yellow-500/8 px-4 py-3">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />
+            <p className="text-sm text-muted-foreground">
+              Altın eşyalarınızın güncel değeri, sistem tarafından otomatik olarak hesaplanır. Ağırlık ve ayar bilgisinin doğru girilmesi önemlidir.
+            </p>
+          </div>
+
+          {/* Butonlar */}
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => router.back()}
+              disabled={kaydediliyor}
+            >
+              İptal
+            </Button>
+            <Button
+              type="submit"
+              variant="glow"
+              className="flex-1"
+              loading={kaydediliyor}
+              disabled={kaydediliyor}
+            >
+              Altın Eşyası Ekle
+            </Button>
+          </div>
+        </form>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Coins className="h-5 w-5 text-yellow-600" />
-            Altın Eşyası Bilgileri
-          </CardTitle>
-          <CardDescription>Altın veya ziynet eşyasının detaylarını girin</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={e => void handleSubmit(e)} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">Eşya Adı *</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Örn: 22 Ayar Altın Bilezik"
-                className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Altın Türü * (13 Tür)</label>
-                <select
-                  value={formData.goldTypeId}
-                  onChange={e => setFormData(prev => ({ ...prev, goldTypeId: e.target.value }))}
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
-                  <option value="">Altın türü seçin</option>
-                  {referenceData?.goldTypes.map(type => (
-                    <option key={type.id} value={type.id} title={type.description || ''}>
-                      {type.name}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  Bilezik, Kolye, Küpe, Cumhuriyet Altını, Yarım/Çeyrek Altın, vb.
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Ayar * (5 Ayar)</label>
-                <select
-                  value={formData.goldPurityId}
-                  onChange={e => setFormData(prev => ({ ...prev, goldPurityId: e.target.value }))}
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
-                  <option value="">Ayar seçin</option>
-                  {referenceData?.goldPurities.map(purity => (
-                    <option key={purity.id} value={purity.id}>
-                      {purity.name} ({purity.purity} ayar)
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  24K (Saf), 22K (Cumhuriyet), 18K, 14K, 8K
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Ağırlık (Gram) *</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.weight}
-                  onChange={e => setFormData(prev => ({ ...prev, weight: e.target.value }))}
-                  placeholder="Örn: 15.50"
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Alış Fiyatı (₺) *</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.purchasePrice}
-                  onChange={e => setFormData(prev => ({ ...prev, purchasePrice: e.target.value }))}
-                  placeholder="Örn: 25000.00"
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Açıklama</label>
-              <textarea
-                value={formData.description}
-                onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Eşya hakkında ek bilgiler..."
-                rows={3}
-                className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                type="submit"
-                disabled={saving}
-                className="flex items-center justify-center px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {saving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Kaydediliyor...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Kaydet
-                  </>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                İptal
-              </button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+    </AppPageShell>
   )
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/mosaic'
 import { formatPeriodName, getPeriodTypeLabel } from '@/lib/period-helpers'
 import {
   ArrowLeft,
@@ -17,9 +17,9 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import Link from 'next/link'
-import PageHeader from '@/components/page-header'
+import { PageHeader } from '@/components/mosaic'
 import { useToast } from '@/lib/use-toast'
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import { ConfirmationDialog } from '@/components/mosaic'
 
 interface PeriodDetail {
   id: number
@@ -183,7 +183,7 @@ export default function PeriodDetailPage() {
       />
 
       {/* İstatistikler */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">

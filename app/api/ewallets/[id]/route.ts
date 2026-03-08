@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth'
 
-// E-cüzdan güncelle (sadece isim)
+function parseBalance(value: unknown) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+// E-cüzdan güncelle
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser(request)
@@ -18,13 +23,44 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'E-cüzdan adı boş olamaz' }, { status: 400 })
     }
 
-    const wallet = await prisma.eWallet.update({
+    if (!body.provider || body.provider.trim() === '') {
+      return NextResponse.json({ error: 'Sağlayıcı seçimi zorunludur' }, { status: 400 })
+    }
+
+    if (!body.currencyId || Number(body.currencyId) <= 0) {
+      return NextResponse.json({ error: 'Geçerli bir para birimi seçiniz' }, { status: 400 })
+    }
+
+    if (!body.accountEmail?.trim() && !body.accountPhone?.trim()) {
+      return NextResponse.json(
+        { error: 'En az bir iletişim bilgisi (E-posta veya Telefon) girilmelidir' },
+        { status: 400 }
+      )
+    }
+
+    const existingWallet = await prisma.eWallet.findFirst({
       where: {
         id: walletId,
         userId: user.id,
+        active: true,
+      },
+    })
+
+    if (!existingWallet) {
+      return NextResponse.json({ error: 'E-cüzdan bulunamadı' }, { status: 404 })
+    }
+
+    const wallet = await prisma.eWallet.update({
+      where: {
+        id: walletId,
       },
       data: {
         name: body.name.trim(),
+        provider: body.provider.trim(),
+        accountEmail: body.accountEmail?.trim() || null,
+        accountPhone: body.accountPhone?.trim() || null,
+        balance: parseBalance(body.balance),
+        currencyId: Number(body.currencyId),
       },
       include: {
         currency: true,

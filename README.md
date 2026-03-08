@@ -335,7 +335,7 @@ giderseGelir/
 │   ├── investments/       # Yatırım yönetimi
 │   └── ...
 ├── components/            # React bileşenleri
-│   ├── ui/               # UI bileşenleri (Radix UI)
+│   ├── mosaic/           # Ortak UI katmanı ve page pattern'leri
 │   └── ...
 ├── lib/                   # Utility fonksiyonları
 │   ├── auth.ts           # Authentication logic
@@ -738,7 +738,7 @@ giderseGelir/
 │   ├── investments/       # Investment management
 │   └── ...
 ├── components/            # React components
-│   ├── ui/               # UI components (Radix UI)
+│   ├── mosaic/           # Canonical UI layer and page patterns
 │   └── ...
 ├── lib/                   # Utility functions
 │   ├── auth.ts           # Authentication logic

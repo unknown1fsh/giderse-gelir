@@ -1,11 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Mail, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
-import Link from 'next/link'
+import { AuthCardShell, AuthShell, Button, CardDescription, CardHeader, CardTitle, Input } from '@/components/mosaic'
+import { Mail, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import BrandLogo from '@/components/brand-logo'
 
 export default function ForgotPasswordPage() {
@@ -43,39 +40,28 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 sm:p-6 py-8">
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
-
-      <div className="relative w-full max-w-md">
-        <div className="mb-6">
-          <Link
-            href="/auth/login"
-            className="inline-flex items-center min-h-[44px] text-white/70 hover:text-white transition-colors py-2"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Girişe Dön
-          </Link>
-        </div>
-
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center space-x-3 mb-4">
-            <BrandLogo
-              size={48}
-              priority
-              variant="dark"
-              textClassName="text-2xl font-bold text-white"
-            />
-          </div>
-        </div>
-
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl">
-          <CardHeader className="text-center pb-4">
-            <CardTitle className="text-2xl font-bold text-white">Şifremi Unuttum</CardTitle>
-            <CardDescription className="text-slate-300">
-              E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
+    <AuthShell
+      title="Şifremi Unuttum"
+      description="E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim."
+      backHref="/auth/login"
+      backLabel="Girişe Dön"
+      hero={(
+        <BrandLogo
+          size={48}
+          priority
+          variant="dark"
+          textClassName="text-2xl font-bold text-white"
+        />
+      )}
+    >
+      <AuthCardShell className="mx-auto max-w-md">
+        <CardHeader className="px-0 pb-4 text-center">
+          <CardTitle className="text-2xl font-bold text-white">Şifremi Unuttum</CardTitle>
+          <CardDescription className="text-slate-300">
+            E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.
+          </CardDescription>
+        </CardHeader>
+        <div className="space-y-6">
             {status === 'success' ? (
               <div className="text-center space-y-4">
                 <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4 flex flex-col items-center">
@@ -133,9 +119,8 @@ export default function ForgotPasswordPage() {
                 </Button>
               </form>
             )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        </div>
+      </AuthCardShell>
+    </AuthShell>
   )
 }

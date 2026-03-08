@@ -1,19 +1,18 @@
 'use client'
 
 import { Suspense } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import NavigationButtons from '@/components/help/navigation-buttons'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, PageHeader } from '@/components/mosaic'
 import TicketForm, { TicketFormPrefill, TicketPriority } from '@/components/help/ticket-form'
 import { useSearchParams } from 'next/navigation'
-import { getPlanById, getPlanPrice, isValidPlanId } from '@/lib/plan-config'
-import { MessageSquare, Plus, Loader2 } from 'lucide-react'
+import { getPlanById, getPlanPrice } from '@/lib/plan-config'
+import { MessageSquare, Loader2, ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 
 function NewTicketPageContent() {
   const searchParams = useSearchParams()
 
   const intent = (searchParams.get('intent') || '').toLowerCase()
-  const planIdRaw = searchParams.get('planId') || ''
-  const planId = isValidPlanId(planIdRaw) ? planIdRaw : ''
+  const planId = searchParams.get('planId') || ''
 
   const company = searchParams.get('company') || ''
   const phone = searchParams.get('phone') || ''
@@ -88,33 +87,23 @@ function NewTicketPageContent() {
 
   return (
     <div className="space-y-6 pb-8">
-      {/* Navigation Buttons */}
-      <NavigationButtons backHref="/help/tickets" backLabel="Destek Taleplerine Dön" />
-
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600 via-pink-600 to-rose-600 p-8 md:p-12 text-white shadow-2xl">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20" />
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-              <Plus className="h-8 w-8" />
-            </div>
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-2">Yeni Destek Talebi</h1>
-              <p className="text-lg md:text-xl text-white/90">
-                Sorununuzu detaylı bir şekilde açıklayın, size en kısa sürede yardımcı olacağız
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Yeni Destek Talebi"
+        description="Sorununuzu detaylı bir şekilde açıklayın, size en kısa sürede yardımcı olacağız"
+        breadcrumbs={
+          <Link href="/help/tickets" className="flex items-center hover:text-foreground transition-colors">
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Destek Taleplerine Dön
+          </Link>
+        }
+      />
 
       {/* Form Card */}
-      <Card className="border-2 shadow-lg">
+      <Card className="border-2 shadow-sm">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
-              <MessageSquare className="h-5 w-5 text-white" />
+            <div className="p-2 rounded-lg bg-primary/10">
+              <MessageSquare className="h-5 w-5 text-primary" />
             </div>
             <div>
               <CardTitle className="text-2xl">Talep Bilgileri</CardTitle>
@@ -135,7 +124,7 @@ export default function NewTicketPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
         </div>
       }
     >

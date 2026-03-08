@@ -2,20 +2,20 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Input } from '@/components/ui/input'
+import { Button } from '@/components/mosaic'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/mosaic'
+import { Badge } from '@/components/mosaic'
+import { Skeleton } from '@/components/mosaic'
+import { Input } from '@/components/mosaic'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/mosaic'
 import { Plus, MessageSquare, Search, Filter, Clock, CheckCircle, AlertCircle } from 'lucide-react'
-import NavigationButtons from '@/components/help/navigation-buttons'
+import { PageHeader } from '@/components/mosaic'
 
 function formatDate(dateString: string) {
   const date = new Date(dateString)
@@ -50,17 +50,17 @@ const statusLabels: Record<string, string> = {
 }
 
 const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  in_progress: 'bg-blue-100 text-blue-800',
-  resolved: 'bg-green-100 text-green-800',
-  closed: 'bg-gray-100 text-gray-800',
+  pending: 'bg-yellow-500/15 text-yellow-800',
+  in_progress: 'bg-blue-500/15 text-blue-800',
+  resolved: 'bg-green-500/15 text-green-800',
+  closed: 'bg-muted text-muted-foreground border border-border',
 }
 
 const priorityColors: Record<string, string> = {
-  low: 'bg-gray-100 text-gray-800',
-  medium: 'bg-blue-100 text-blue-800',
-  high: 'bg-orange-100 text-orange-800',
-  urgent: 'bg-red-100 text-red-800',
+  low: 'bg-muted text-muted-foreground border border-border',
+  medium: 'bg-blue-500/15 text-blue-800',
+  high: 'bg-orange-500/15 text-orange-800',
+  urgent: 'bg-red-500/15 text-red-800',
 }
 
 interface Category {
@@ -161,84 +161,69 @@ export default function TicketsPage() {
 
   return (
     <div className="space-y-6 pb-8">
-      {/* Navigation Buttons */}
-      <NavigationButtons backHref="/help" backLabel="Yardım Merkezine Dön" />
-
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-600 via-emerald-600 to-teal-600 p-8 md:p-12 text-white shadow-2xl">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20" />
-        <div className="relative z-10 flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-2 flex items-center gap-3">
-              <MessageSquare className="h-10 w-10" />
-              Destek Taleplerim
-            </h1>
-            <p className="text-lg md:text-xl text-white/90">
-              Tüm destek taleplerinizi buradan görüntüleyebilir ve yönetebilirsiniz
-            </p>
-          </div>
+      <PageHeader
+        title="Destek Taleplerim"
+        description="Tüm destek taleplerinizi buradan görüntüleyebilir ve yönetebilirsiniz"
+        actions={
           <Link href="/help/tickets/new">
-            <Button
-              size="lg"
-              className="bg-white text-green-600 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all"
-            >
+            <Button size="lg" className="shadow-sm">
               <Plus className="h-5 w-5 mr-2" />
               Yeni Talep
             </Button>
           </Link>
-        </div>
-      </div>
+        }
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="border-2 hover:shadow-lg transition-all">
+        <Card className="border-2 hover:shadow-mosaic transition-all">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">Toplam</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
               </div>
-              <div className="p-2 rounded-lg bg-blue-100">
-                <MessageSquare className="h-5 w-5 text-blue-600" />
+              <div className="p-2 rounded-lg bg-blue-500/15">
+                <MessageSquare className="h-5 w-5 text-blue-400" />
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-2 hover:shadow-lg transition-all">
+        <Card className="border-2 hover:shadow-mosaic transition-all">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">Beklemede</p>
                 <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
               </div>
-              <div className="p-2 rounded-lg bg-yellow-100">
+              <div className="p-2 rounded-lg bg-yellow-500/15">
                 <Clock className="h-5 w-5 text-yellow-600" />
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-2 hover:shadow-lg transition-all">
+        <Card className="border-2 hover:shadow-mosaic transition-all">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">İşlemde</p>
-                <p className="text-2xl font-bold text-blue-600">{stats.inProgress}</p>
+                <p className="text-2xl font-bold text-blue-400">{stats.inProgress}</p>
               </div>
-              <div className="p-2 rounded-lg bg-blue-100">
-                <AlertCircle className="h-5 w-5 text-blue-600" />
+              <div className="p-2 rounded-lg bg-blue-500/15">
+                <AlertCircle className="h-5 w-5 text-blue-400" />
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-2 hover:shadow-lg transition-all">
+        <Card className="border-2 hover:shadow-mosaic transition-all">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">Çözülen</p>
-                <p className="text-2xl font-bold text-green-600">{stats.resolved}</p>
+                <p className="text-2xl font-bold text-green-400">{stats.resolved}</p>
               </div>
-              <div className="p-2 rounded-lg bg-green-100">
-                <CheckCircle className="h-5 w-5 text-green-600" />
+              <div className="p-2 rounded-lg bg-green-500/15">
+                <CheckCircle className="h-5 w-5 text-green-400" />
               </div>
             </div>
           </CardContent>
@@ -262,7 +247,7 @@ export default function TicketsPage() {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Konu, açıklama veya talep no ile ara..."
-                className="pl-10"
+                className="pl-10 sm:pl-10"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -354,12 +339,12 @@ export default function TicketsPage() {
           )}
           {filteredTickets.map(ticket => (
             <Link key={ticket.id} href={`/help/tickets/${ticket.id}`}>
-              <Card className="border-2 hover:border-green-300 hover:shadow-xl transition-all duration-300 cursor-pointer group">
+              <Card className="border-2 hover:border-green-300 hover:shadow-mosaic-lg transition-all duration-300 cursor-pointer group">
                 <CardHeader>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center flex-wrap gap-2 mb-3">
-                        <CardTitle className="text-lg group-hover:text-green-600 transition-colors">
+                        <CardTitle className="text-lg group-hover:text-green-400 transition-colors">
                           {ticket.subject}
                         </CardTitle>
                         <Badge className={`${statusColors[ticket.status]} border-2 font-semibold`}>
@@ -394,7 +379,7 @@ export default function TicketsPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
+                  <p className="text-sm text-foreground line-clamp-2 leading-relaxed">
                     {ticket.description}
                   </p>
                 </CardContent>

@@ -1,13 +1,13 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/mosaic'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion'
+} from '@/components/mosaic'
 import { Calculator } from 'lucide-react'
 import InflationCalculator from '@/components/landing/calculators/inflation-calculator'
 import CompoundCalculator from '@/components/landing/calculators/compound-calculator'

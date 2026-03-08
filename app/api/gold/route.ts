@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth'
 
+function parseDecimal(value: unknown) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Kullanıcı doğrulama
@@ -58,16 +63,26 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
 
+    if (!body.name || !body.goldTypeId || !body.goldPurityId) {
+      return NextResponse.json({ error: 'Zorunlu alanlar eksik' }, { status: 400 })
+    }
+
+    const weightGrams = parseDecimal(body.weightGrams ?? body.weight)
+    const purchasePrice = parseDecimal(body.purchasePrice)
+    const currentValueTry = body.currentValueTry !== undefined
+      ? parseDecimal(body.currentValueTry)
+      : purchasePrice
+
     const goldItem = await prisma.goldItem.create({
       data: {
         userId: user.id,
         name: body.name,
         goldTypeId: body.goldTypeId,
         goldPurityId: body.goldPurityId,
-        weightGrams: body.weight || 0,
-        purchasePrice: body.purchasePrice || 0,
+        weightGrams,
+        purchasePrice,
         purchaseDate: new Date(),
-        currentValueTry: body.purchasePrice || 0, // Başlangıçta alış fiyatı ile aynı
+        currentValueTry,
         description: body.description || null,
       },
       include: {

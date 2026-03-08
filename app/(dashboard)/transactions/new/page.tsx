@@ -2,40 +2,38 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { parseCurrencyInput } from '@/lib/validators'
+import {
+  AppPageShell,
+  Button,
+  Card,
+  CardContent,
+  FormField,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
+} from '@/components/mosaic'
 import PremiumUpgradeModal from '@/components/premium-upgrade-modal'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowDownCircle, ArrowUpCircle, Tag, Info } from 'lucide-react'
+import { parseCurrencyInput } from '@/lib/validators'
 import { useToast } from '@/lib/use-toast'
 
 interface ReferenceData {
-  txTypes: Array<{
-    id: number
-    code: string
-    name: string
-    icon?: string | null
-    color?: string | null
-  }>
+  txTypes: Array<{ id: number; code: string; name: string }>
   categories: Array<{
     id: number
     name: string
     code: string
     txTypeId: number
     txTypeName: string
-    icon?: string | null
-    color?: string | null
-    isDefault: boolean
   }>
-  paymentMethods: Array<{
-    id: number
-    code: string
-    name: string
-    description?: string | null
-  }>
+  paymentMethods: Array<{ id: number; code: string; name: string }>
   accounts: Array<{
     id: number
     name: string
-    accountType: { id: number; name: string } | null
     bank: { id: number; name: string }
     currency: { id: number; code: string; name: string }
   }>
@@ -48,12 +46,13 @@ interface ReferenceData {
   currencies: Array<{ id: number; code: string; name: string; symbol: string }>
 }
 
-export default function NewTransactionPage() {
+export default function YeniIslemSayfasi() {
   const router = useRouter()
   const { error: toastError } = useToast()
-  const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [refData, setRefData] = useState<ReferenceData | null>(null)
+  const [yukleniyor, setYukleniyor] = useState(true)
+  const [kaydediliyor, setKaydediliyor] = useState(false)
+  const [hatalar, setHatalar] = useState<Record<string, string>>({})
   const [showPremiumModal, setShowPremiumModal] = useState(false)
   const [limitInfo, setLimitInfo] = useState<{
     current: number
@@ -61,425 +60,391 @@ export default function NewTransactionPage() {
     type: 'transaction' | 'analysis' | 'export'
   } | null>(null)
 
-  const [formData, setFormData] = useState({
-    txTypeId: 0,
-    categoryId: 0,
-    paymentMethodId: 0,
-    accountId: 0,
-    creditCardId: 0,
-    amount: '',
-    currencyId: 0,
-    transactionDate: new Date().toISOString().split('T')[0],
-    description: '',
-    tags: '',
+  const [form, setForm] = useState({
+    islemTuruId: '',
+    kategoriId: '',
+    odemeYontemiId: '',
+    hesapId: '',
+    krediKartiId: '',
+    tutar: '',
+    paraBirimiId: '',
+    tarih: new Date().toISOString().split('T')[0],
+    aciklama: '',
+    etiketler: '',
   })
 
   useEffect(() => {
-    async function fetchReferenceData() {
+    async function veriGetir() {
       try {
-        const response = await fetch('/api/reference-data')
-        if (response.ok) {
-          const data = (await response.json()) as ReferenceData
-          setReferenceData(data)
-
-          // Varsayılan para birimini TRY yap
-          if (data.currencies.length > 0) {
-            const tryCurrency = data.currencies.find(c => c.code === 'TRY')
-            if (tryCurrency) {
-              setFormData(prev => ({ ...prev, currencyId: tryCurrency.id }))
-            }
-          }
-          // NOT: txTypeId varsayılan YAPILMADI - kullanıcı seçmek zorunda!
+        const res = await fetch('/api/reference-data')
+        if (res.ok) {
+          const veri = (await res.json()) as ReferenceData
+          setRefData(veri)
+          const try_ = veri.currencies.find(c => c.code === 'TRY')
+          if (try_) {setForm(f => ({ ...f, paraBirimiId: String(try_.id) }))}
         }
-      } catch (error) {
-        console.error('Referans verileri alınamadı:', error)
+      } catch {
+        // sessizce devam
       } finally {
-        setLoading(false)
+        setYukleniyor(false)
       }
     }
-
-    void fetchReferenceData()
+    void veriGetir()
   }, [])
+
+  const guncelle = (alan: string, deger: string) => {
+    setForm(f => ({ ...f, [alan]: deger }))
+    if (hatalar[alan]) {setHatalar(h => ({ ...h, [alan]: '' }))}
+  }
+
+  const filtreliKategoriler = refData?.categories.filter(
+    k => k.txTypeId === parseInt(form.islemTuruId)
+  ) ?? []
+
+  const seciliTur = refData?.txTypes.find(t => t.id === parseInt(form.islemTuruId))
+
+  const dogrula = () => {
+    const yeni: Record<string, string> = {}
+    if (!form.islemTuruId) {yeni.islemTuruId = 'İşlem türü seçimi zorunludur'}
+    if (!form.kategoriId) {yeni.kategoriId = 'Kategori seçimi zorunludur'}
+    if (!form.odemeYontemiId) {yeni.odemeYontemiId = 'Ödeme yöntemi seçimi zorunludur'}
+    if (!form.tutar || parseFloat(form.tutar.replace(',', '.')) <= 0)
+      {yeni.tutar = 'Geçerli bir tutar girin'}
+    if (!form.paraBirimiId) {yeni.paraBirimiId = 'Para birimi seçimi zorunludur'}
+    if (!form.hesapId && !form.krediKartiId)
+      {yeni.hesapId = 'Hesap veya kredi kartı seçimi zorunludur'}
+    setHatalar(yeni)
+    return Object.keys(yeni).length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    // Validation kontrolü
-    if (!formData.txTypeId || formData.txTypeId === 0) {
-      toastError('Hata', 'Lütfen işlem türünü seçiniz (Gelir veya Gider)')
-      return
-    }
-
-    if (!formData.categoryId || formData.categoryId === 0) {
-      toastError('Hata', 'Lütfen kategori seçiniz')
-      return
-    }
-
-    if (!formData.paymentMethodId || formData.paymentMethodId === 0) {
-      toastError('Hata', 'Lütfen ödeme yöntemini seçiniz')
-      return
-    }
-
-    if (!formData.accountId && !formData.creditCardId) {
-      toastError('Hata', 'Lütfen hesap veya kredi kartı seçiniz')
-      return
-    }
-
-    setSaving(true)
-
+    if (!dogrula()) {return}
+    setKaydediliyor(true)
     try {
-      const submitData: Record<string, unknown> = {
-        txTypeId: formData.txTypeId,
-        categoryId: formData.categoryId,
-        paymentMethodId: formData.paymentMethodId,
-        amount: parseCurrencyInput(formData.amount),
-        currencyId: formData.currencyId,
-        transactionDate: formData.transactionDate,
-        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
+      const govde: Record<string, unknown> = {
+        txTypeId: parseInt(form.islemTuruId),
+        categoryId: parseInt(form.kategoriId),
+        paymentMethodId: parseInt(form.odemeYontemiId),
+        amount: parseCurrencyInput(form.tutar),
+        currencyId: parseInt(form.paraBirimiId),
+        transactionDate: form.tarih,
+        tags: form.etiketler ? form.etiketler.split(',').map(t => t.trim()).filter(Boolean) : [],
       }
+      if (form.hesapId) {govde.accountId = parseInt(form.hesapId)}
+      if (form.krediKartiId) {govde.creditCardId = parseInt(form.krediKartiId)}
+      if (form.aciklama.trim()) {govde.description = form.aciklama.trim()}
 
-      // Sadece seçiliyse ekle (0 değilse)
-      if (formData.accountId > 0) {
-        submitData.accountId = formData.accountId
-      }
-      if (formData.creditCardId > 0) {
-        submitData.creditCardId = formData.creditCardId
-      }
-      if (formData.description) {
-        submitData.description = formData.description
-      }
-
-      const response = await fetch('/api/transactions', {
+      const res = await fetch('/api/transactions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submitData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(govde),
       })
 
-      if (response.ok) {
+      if (res.ok) {
         router.push('/transactions')
       } else {
-        const error = (await response.json()) as {
+        const hata = (await res.json()) as {
           limitReached?: boolean
           currentCount?: number
           limit?: number
           error?: string
         }
-        if (error.limitReached) {
-          // Limit aşıldığında çekici modal göster
+        if (hata.limitReached) {
           setLimitInfo({
-            current: error.currentCount || 50,
-            limit: error.limit || 50,
+            current: hata.currentCount || 50,
+            limit: hata.limit || 50,
             type: 'transaction',
           })
           setShowPremiumModal(true)
         } else {
-          toastError('Hata', error.error || 'İşlem eklenemedi')
+          toastError('Hata', hata.error || 'İşlem eklenemedi')
         }
       }
-    } catch (error) {
-      console.error('İşlem kaydedilemedi:', error)
+    } catch {
       toastError('Hata', 'İşlem kaydedilemedi')
     } finally {
-      setSaving(false)
+      setKaydediliyor(false)
     }
   }
 
-  const filteredCategories =
-    referenceData?.categories.filter(cat => cat.txTypeId === formData.txTypeId) || []
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Yükleniyor...</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
-        <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-lg w-fit">
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Yeni İşlem</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Gelir veya gider işlemi ekleyin</p>
-        </div>
+    <AppPageShell
+      header={{
+        title: 'Yeni İşlem',
+        description: 'Gelir veya gider işlemi ekleyin',
+        onBack: () => router.back(),
+      }}
+    >
+      <div className="max-w-2xl">
+        <form onSubmit={e => void handleSubmit(e)} className="space-y-6">
+
+          {/* İşlem Türü Seçimi */}
+          <div className="grid grid-cols-2 gap-3">
+            {refData?.txTypes.map(tur => {
+              const secili = form.islemTuruId === String(tur.id)
+              const gelir = tur.code === 'INCOME' || tur.name.toLowerCase().includes('gelir')
+              return (
+                <button
+                  key={tur.id}
+                  type="button"
+                  onClick={() => {
+                    guncelle('islemTuruId', String(tur.id))
+                    guncelle('kategoriId', '')
+                  }}
+                  className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-4 font-semibold text-sm transition-all ${
+                    secili
+                      ? gelir
+                        ? 'border-green-500 bg-green-500/15 text-green-400'
+                        : 'border-red-500 bg-red-500/15 text-red-400'
+                      : 'border-border/60 bg-muted/20 text-muted-foreground hover:border-border hover:bg-muted/40'
+                  }`}
+                >
+                  {gelir ? (
+                    <ArrowUpCircle className="h-5 w-5" />
+                  ) : (
+                    <ArrowDownCircle className="h-5 w-5" />
+                  )}
+                  {tur.name}
+                </button>
+              )
+            })}
+            {hatalar.islemTuruId && (
+              <p className="col-span-2 text-sm font-medium text-destructive">{hatalar.islemTuruId}</p>
+            )}
+          </div>
+
+          {/* Tutar ve Tarih */}
+          <Card>
+            <CardContent className="p-6 space-y-5">
+              <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+                <span className="text-base font-bold text-primary">₺</span>
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Tutar ve Tarih
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <FormField
+                  label="Tutar"
+                  required
+                  error={hatalar.tutar}
+                  htmlFor="tutar"
+                  className="sm:col-span-2"
+                >
+                  <Input
+                    id="tutar"
+                    value={form.tutar}
+                    onChange={e => guncelle('tutar', e.target.value)}
+                    placeholder="0,00"
+                    variant={hatalar.tutar ? 'error' : 'default'}
+                  />
+                </FormField>
+
+                <FormField label="Para Birimi" required error={hatalar.paraBirimiId} htmlFor="paraBirimi">
+                  <Select
+                    value={form.paraBirimiId}
+                    onValueChange={v => guncelle('paraBirimiId', v)}
+                    disabled={yukleniyor}
+                  >
+                    <SelectTrigger id="paraBirimi" className={hatalar.paraBirimiId ? 'border-destructive' : ''}>
+                      <SelectValue placeholder="Seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {refData?.currencies.map(c => (
+                        <SelectItem key={c.id} value={String(c.id)}>{c.code}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
+              </div>
+
+              <FormField label="İşlem Tarihi" required htmlFor="tarih">
+                <Input
+                  id="tarih"
+                  type="date"
+                  value={form.tarih}
+                  onChange={e => guncelle('tarih', e.target.value)}
+                />
+              </FormField>
+            </CardContent>
+          </Card>
+
+          {/* Kategori ve Ödeme Yöntemi */}
+          <Card>
+            <CardContent className="p-6 space-y-5">
+              <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+                <Tag className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Kategori ve Ödeme
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField label="Kategori" required error={hatalar.kategoriId} htmlFor="kategori">
+                  <Select
+                    value={form.kategoriId}
+                    onValueChange={v => guncelle('kategoriId', v)}
+                    disabled={!form.islemTuruId}
+                  >
+                    <SelectTrigger id="kategori" className={hatalar.kategoriId ? 'border-destructive' : ''}>
+                      <SelectValue
+                        placeholder={
+                          !form.islemTuruId
+                            ? 'Önce işlem türü seçin'
+                            : filtreliKategoriler.length === 0
+                              ? 'Kategori bulunamadı'
+                              : 'Kategori seçin'
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filtreliKategoriler.map(k => (
+                        <SelectItem key={k.id} value={String(k.id)}>{k.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
+
+                <FormField label="Ödeme Yöntemi" required error={hatalar.odemeYontemiId} htmlFor="odemeYontemi">
+                  <Select
+                    value={form.odemeYontemiId}
+                    onValueChange={v => guncelle('odemeYontemiId', v)}
+                    disabled={yukleniyor}
+                  >
+                    <SelectTrigger id="odemeYontemi" className={hatalar.odemeYontemiId ? 'border-destructive' : ''}>
+                      <SelectValue placeholder="Ödeme yöntemi seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {refData?.paymentMethods.map(m => (
+                        <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  label="Hesap"
+                  error={hatalar.hesapId}
+                  hint="Hesap veya kart seçin"
+                  htmlFor="hesap"
+                >
+                  <Select
+                    value={form.hesapId}
+                    onValueChange={v => {
+                      guncelle('hesapId', v)
+                      guncelle('krediKartiId', '')
+                    }}
+                    disabled={yukleniyor}
+                  >
+                    <SelectTrigger id="hesap" className={hatalar.hesapId ? 'border-destructive' : ''}>
+                      <SelectValue placeholder="Hesap seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {refData?.accounts.map(h => (
+                        <SelectItem key={h.id} value={String(h.id)}>
+                          {h.name} ({h.bank.name} · {h.currency.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
+
+                <FormField label="Kredi Kartı" htmlFor="krediKarti">
+                  <Select
+                    value={form.krediKartiId}
+                    onValueChange={v => {
+                      guncelle('krediKartiId', v)
+                      guncelle('hesapId', '')
+                    }}
+                    disabled={yukleniyor}
+                  >
+                    <SelectTrigger id="krediKarti">
+                      <SelectValue placeholder="Kredi kartı seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {refData?.creditCards.map(k => (
+                        <SelectItem key={k.id} value={String(k.id)}>
+                          {k.name} ({k.bank.name} · {k.currency.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Ek Bilgiler */}
+          <Card>
+            <CardContent className="p-6 space-y-5">
+              <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+                <Info className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Ek Bilgiler
+                </h2>
+                <span className="ml-auto text-xs text-muted-foreground">İsteğe bağlı</span>
+              </div>
+
+              <FormField label="Açıklama" htmlFor="aciklama">
+                <Textarea
+                  id="aciklama"
+                  value={form.aciklama}
+                  onChange={e => guncelle('aciklama', e.target.value)}
+                  placeholder="İşlem açıklaması..."
+                  rows={2}
+                />
+              </FormField>
+
+              <FormField
+                label="Etiketler"
+                hint="Virgülle ayırın: market, fatura, eğlence"
+                htmlFor="etiketler"
+              >
+                <Input
+                  id="etiketler"
+                  value={form.etiketler}
+                  onChange={e => guncelle('etiketler', e.target.value)}
+                  placeholder="market, fatura, eğlence..."
+                />
+              </FormField>
+            </CardContent>
+          </Card>
+
+          {/* Butonlar */}
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => router.back()}
+              disabled={kaydediliyor}
+            >
+              İptal
+            </Button>
+            <Button
+              type="submit"
+              variant="glow"
+              className="flex-1"
+              loading={kaydediliyor}
+              disabled={kaydediliyor}
+            >
+              {seciliTur
+                ? `${seciliTur.name} Ekle`
+                : 'İşlem Ekle'}
+            </Button>
+          </div>
+        </form>
       </div>
 
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>İşlem Bilgileri</CardTitle>
-          <CardDescription>İşlem detaylarını doldurun</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            onSubmit={e => {
-              void handleSubmit(e)
-            }}
-            className="space-y-6"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">İşlem Türü *</label>
-                <select
-                  value={formData.txTypeId}
-                  onChange={e =>
-                    setFormData(prev => ({
-                      ...prev,
-                      txTypeId: parseInt(e.target.value),
-                      categoryId: 0, // Kategoriyi sıfırla
-                    }))
-                  }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
-                  <option value={0}>Seçiniz</option>
-                  {referenceData?.txTypes.map(type => (
-                    <option key={type.id} value={type.id}>
-                      {type.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Kategori *</label>
-                <select
-                  value={formData.categoryId}
-                  onChange={e =>
-                    setFormData(prev => ({
-                      ...prev,
-                      categoryId: parseInt(e.target.value),
-                    }))
-                  }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
-                  <option value={0}>Seçiniz</option>
-                  {filteredCategories.map(category => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Tutar *</label>
-                <input
-                  type="text"
-                  value={formData.amount}
-                  onChange={e =>
-                    setFormData(prev => ({
-                      ...prev,
-                      amount: e.target.value,
-                    }))
-                  }
-                  placeholder="0,00"
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Para Birimi *</label>
-                <select
-                  value={formData.currencyId}
-                  onChange={e =>
-                    setFormData(prev => ({
-                      ...prev,
-                      currencyId: parseInt(e.target.value),
-                    }))
-                  }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                  disabled={!referenceData?.currencies || referenceData.currencies.length === 0}
-                >
-                  <option value={0}>Seçiniz</option>
-                  {referenceData?.currencies && referenceData.currencies.length > 0 ? (
-                    referenceData.currencies.map(currency => (
-                      <option key={currency.id} value={currency.id}>
-                        {currency.code} - {currency.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option value={0} disabled>
-                      Para birimleri yükleniyor...
-                    </option>
-                  )}
-                </select>
-                {(!referenceData?.currencies || referenceData.currencies.length === 0) && (
-                  <p className="text-xs text-red-600 mt-1">
-                    Para birimleri yüklenemedi. Lütfen sayfayı yenileyin.
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Ödeme Yöntemi *</label>
-                <select
-                  value={formData.paymentMethodId}
-                  onChange={e =>
-                    setFormData(prev => ({
-                      ...prev,
-                      paymentMethodId: parseInt(e.target.value),
-                    }))
-                  }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
-                  <option value={0}>Seçiniz</option>
-                  {referenceData?.paymentMethods.map(method => (
-                    <option key={method.id} value={method.id}>
-                      {method.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Tarih *</label>
-                <input
-                  type="date"
-                  value={formData.transactionDate}
-                  onChange={e =>
-                    setFormData(prev => ({
-                      ...prev,
-                      transactionDate: e.target.value,
-                    }))
-                  }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Hesap</label>
-                <select
-                  value={formData.accountId}
-                  onChange={e =>
-                    setFormData(prev => ({
-                      ...prev,
-                      accountId: parseInt(e.target.value),
-                      creditCardId: 0, // Kredi kartını sıfırla
-                    }))
-                  }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value={0}>Seçiniz</option>
-                  {referenceData?.accounts.map(account => (
-                    <option key={account.id} value={account.id}>
-                      {account.name} ({account.bank.name} - {account.currency.code})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Kredi Kartı</label>
-                <select
-                  value={formData.creditCardId}
-                  onChange={e =>
-                    setFormData(prev => ({
-                      ...prev,
-                      creditCardId: parseInt(e.target.value),
-                      accountId: 0, // Hesabı sıfırla
-                    }))
-                  }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value={0}>Seçiniz</option>
-                  {referenceData?.creditCards.map(card => (
-                    <option key={card.id} value={card.id}>
-                      {card.name} ({card.bank.name} - {card.currency.code})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Açıklama</label>
-              <textarea
-                value={formData.description}
-                onChange={e =>
-                  setFormData(prev => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
-                rows={3}
-                className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="İşlem açıklaması..."
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Etiketler</label>
-              <input
-                type="text"
-                value={formData.tags}
-                onChange={e =>
-                  setFormData(prev => ({
-                    ...prev,
-                    tags: e.target.value,
-                  }))
-                }
-                placeholder="etiket1, etiket2, etiket3"
-                className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-              <p className="text-xs text-muted-foreground mt-1">Etiketleri virgülle ayırın</p>
-            </div>
-
-            <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="w-full sm:w-auto px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
-              >
-                İptal
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 transition-colors"
-              >
-                {saving ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Kaydediliyor...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Kaydet
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-
-      {/* Premium Upgrade Modal */}
       <PremiumUpgradeModal
         isOpen={showPremiumModal}
         onClose={() => setShowPremiumModal(false)}
         featureName="Sınırsız İşlem"
         limitInfo={limitInfo ?? undefined}
       />
-    </div>
+    </AppPageShell>
   )
 }

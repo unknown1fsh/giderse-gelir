@@ -1,132 +1,243 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getActivePeriod, getCurrentUser } from '@/lib/auth'
+import {
+  buildAutoPaymentInput,
+  serializeAutoPaymentRecord,
+} from '@/lib/finance/auto-payments'
+import { syncNotificationEvents } from '@/lib/notifications/service'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth'
+
+const AUTO_PAYMENT_INCLUDE = {
+  category: true,
+  currency: true,
+  paymentMethod: true,
+  account: {
+    include: {
+      bank: true,
+      currency: true,
+    },
+  },
+  creditCard: {
+    include: {
+      bank: true,
+      currency: true,
+    },
+  },
+  eWallet: true,
+  beneficiary: {
+    include: {
+      bank: true,
+    },
+  },
+} as const
+
+async function ensurePremiumAccess(userId: number) {
+  const subscription = await prisma.userSubscription.findFirst({
+    where: {
+      userId,
+      status: 'active',
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  return (subscription?.planId || 'free') !== 'free'
+}
+
+async function resolvePaymentMethodId(inputId: number) {
+  const directMatch = await prisma.refPaymentMethod.findFirst({
+    where: {
+      id: inputId,
+      active: true,
+    },
+  })
+
+  if (directMatch) {
+    return directMatch.id
+  }
+
+  const systemParam = await prisma.systemParameter.findFirst({
+    where: {
+      id: inputId,
+      paramGroup: 'PAYMENT_METHOD',
+      isActive: true,
+    },
+  })
+
+  if (!systemParam?.paramCode) {
+    return null
+  }
+
+  const mapped = await prisma.refPaymentMethod.findFirst({
+    where: {
+      code: systemParam.paramCode,
+      active: true,
+    },
+  })
+
+  return mapped?.id ?? null
+}
+
+async function validateRelations(
+  userId: number,
+  input: {
+    currencyId: number
+    categoryId: number
+    accountId: number | null
+    creditCardId: number | null
+    eWalletId: number | null
+    beneficiaryId: number | null
+  }
+) {
+  const [currency, category, account, creditCard, eWallet, beneficiary] = await Promise.all([
+    prisma.refCurrency.findFirst({
+      where: { id: input.currencyId, active: true },
+      select: { id: true },
+    }),
+    prisma.refTxCategory.findFirst({
+      where: { id: input.categoryId, active: true },
+      select: { id: true },
+    }),
+    input.accountId
+      ? prisma.account.findFirst({
+          where: { id: input.accountId, userId, active: true },
+          select: { id: true },
+        })
+      : Promise.resolve(null),
+    input.creditCardId
+      ? prisma.creditCard.findFirst({
+          where: { id: input.creditCardId, userId, active: true },
+          select: { id: true },
+        })
+      : Promise.resolve(null),
+    input.eWalletId
+      ? prisma.eWallet.findFirst({
+          where: { id: input.eWalletId, userId, active: true },
+          select: { id: true },
+        })
+      : Promise.resolve(null),
+    input.beneficiaryId
+      ? prisma.beneficiary.findFirst({
+          where: { id: input.beneficiaryId, userId, active: true },
+          select: { id: true },
+        })
+      : Promise.resolve(null),
+  ])
+
+  if (!currency) {
+    return 'Gecerli bir para birimi secin.'
+  }
+  if (!category) {
+    return 'Gecerli bir kategori secin.'
+  }
+  if (input.accountId && !account) {
+    return 'Secilen hesap size ait degil veya aktif degil.'
+  }
+  if (input.creditCardId && !creditCard) {
+    return 'Secilen kredi karti size ait degil veya aktif degil.'
+  }
+  if (input.eWalletId && !eWallet) {
+    return 'Secilen e-cuzdan size ait degil veya aktif degil.'
+  }
+  if (input.beneficiaryId && !beneficiary) {
+    return 'Secilen lehtar size ait degil veya aktif degil.'
+  }
+
+  return null
+}
 
 export async function GET(request: NextRequest) {
   try {
-    // Kullanıcı doğrulama
     const user = await getCurrentUser(request)
     if (!user) {
       return NextResponse.json({ error: 'Oturum bulunamadı' }, { status: 401 })
     }
 
+    const activePeriod = await getActivePeriod(request)
+    const { searchParams } = new URL(request.url)
+    const includeInactive = searchParams.get('includeInactive') === 'true'
+
     const autoPayments = await prisma.autoPayment.findMany({
-      include: {
-        account: {
-          include: {
-            bank: true,
-            currency: true,
-          },
-        },
-        creditCard: {
-          include: {
-            bank: true,
-            currency: true,
-          },
-        },
-        category: true,
-      },
       where: {
         userId: user.id,
-        active: true,
+        ...(activePeriod?.id ? { periodId: activePeriod.id } : {}),
+        ...(includeInactive ? {} : { active: true }),
       },
-      orderBy: {
-        nextPaymentDate: 'asc',
-      },
+      include: AUTO_PAYMENT_INCLUDE,
+      orderBy: [{ active: 'desc' }, { nextPaymentDate: 'asc' }, { createdAt: 'desc' }],
     })
 
-    return NextResponse.json(autoPayments)
+    return NextResponse.json(autoPayments.map(serializeAutoPaymentRecord))
   } catch (error) {
-    console.error('Auto payments API error:', error)
-    return NextResponse.json({ error: 'Otomatik ödemeler alınamadı' }, { status: 500 })
+    console.error('Auto payments GET error:', error)
+    return NextResponse.json({ error: 'Otomatik odemeler alinamadi' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Kullanıcı doğrulama
     const user = await getCurrentUser(request)
     if (!user) {
       return NextResponse.json({ error: 'Oturum bulunamadı' }, { status: 401 })
     }
 
-    // Premium kontrolü
-    const subscription = await prisma.userSubscription.findFirst({
-      where: {
-        userId: user.id,
-        status: 'active',
-      },
-      orderBy: { createdAt: 'desc' },
-    })
-
-    const currentPlan = subscription?.planId || 'free'
-
-    if (currentPlan === 'free') {
+    const hasPremiumAccess = await ensurePremiumAccess(user.id)
+    if (!hasPremiumAccess) {
       return NextResponse.json(
         {
-          error: 'Otomatik Ödemeler/Düzenli Gelir özelliği Premium üyelik gerektirir.',
+          error: 'Otomatik odemeler premium uyelik gerektirir.',
           requiresPremium: true,
-          feature: 'Otomatik Ödemeler',
+          feature: 'Otomatik Odemeler',
         },
         { status: 403 }
       )
     }
 
     const body = await request.json()
-
-    // Frequency'den cron schedule oluştur
-    const getCronSchedule = (frequency: string) => {
-      switch (frequency.toLowerCase()) {
-        case 'daily':
-          return '0 0 * * *' // Her gün
-        case 'weekly':
-          return '0 0 * * 0' // Her pazar
-        case 'monthly':
-          return '0 0 1 * *' // Her ayın 1'i
-        case 'yearly':
-          return '0 0 1 1 *' // Her yılın 1 Ocak'ı
-        default:
-          return '0 0 1 * *' // Varsayılan aylık
-      }
+    const parsed = buildAutoPaymentInput(body)
+    if (!parsed.data) {
+      return NextResponse.json({ error: parsed.error || 'Geçersiz istek' }, { status: 400 })
     }
 
+    const paymentMethodId = await resolvePaymentMethodId(parsed.data.paymentMethodId)
+    if (!paymentMethodId) {
+      return NextResponse.json({ error: 'Gecerli bir odeme yontemi secin.' }, { status: 400 })
+    }
+
+    const relationError = await validateRelations(user.id, parsed.data)
+    if (relationError) {
+      return NextResponse.json({ error: relationError }, { status: 400 })
+    }
+
+    const activePeriod = await getActivePeriod(request)
     const autoPayment = await prisma.autoPayment.create({
       data: {
         userId: user.id,
-        name: body.name,
-        description: body.description || null,
-        amount: body.amount || 0,
-        currencyId: body.currencyId || 1,
-        paymentMethodId: body.paymentMethodId || 1,
-        cronSchedule: getCronSchedule(body.frequency || 'monthly'),
-        nextPaymentDate: body.nextPaymentDate ? new Date(body.nextPaymentDate) : null,
-        categoryId: body.categoryId,
-        accountId: body.accountId || null,
-        creditCardId: body.creditCardId || null,
-        eWalletId: body.eWalletId || null,
-        beneficiaryId: body.beneficiaryId || null,
-        active: true,
+        periodId: activePeriod?.id ?? null,
+        name: parsed.data.name,
+        description: parsed.data.description,
+        amount: parsed.data.amount,
+        currencyId: parsed.data.currencyId,
+        paymentMethodId,
+        cronSchedule: parsed.data.cronSchedule,
+        nextPaymentDate: parsed.data.nextPaymentDate,
+        categoryId: parsed.data.categoryId,
+        accountId: parsed.data.accountId,
+        creditCardId: parsed.data.creditCardId,
+        eWalletId: parsed.data.eWalletId,
+        beneficiaryId: parsed.data.beneficiaryId,
+        active: parsed.data.active,
       },
-      include: {
-        account: {
-          include: {
-            bank: true,
-            currency: true,
-          },
-        },
-        creditCard: {
-          include: {
-            bank: true,
-            currency: true,
-          },
-        },
-        category: true,
-      },
+      include: AUTO_PAYMENT_INCLUDE,
     })
 
-    return NextResponse.json(autoPayment, { status: 201 })
+    await syncNotificationEvents(prisma, {
+      userId: user.id,
+      activePeriodId: activePeriod?.id,
+    })
+
+    return NextResponse.json(serializeAutoPaymentRecord(autoPayment), { status: 201 })
   } catch (error) {
-    console.error('Auto payment creation error:', error)
+    console.error('Auto payment POST error:', error)
     return NextResponse.json({ error: 'Otomatik ödeme oluşturulamadı' }, { status: 500 })
   }
 }

@@ -110,7 +110,7 @@ export class AIAnalysisService {
     planId: string,
     activePeriod?: { startDate: Date; endDate: Date; name: string } | null
   ): Promise<AIReportData> {
-    const reportLevel = getReportLevelForPlan(planId)
+    const reportLevel: string = getReportLevelForPlan(planId)
 
     // Kullanıcının tüm finansal verilerini topla
     const financialData = await this.collectFinancialData(userId)
@@ -515,7 +515,7 @@ export class AIAnalysisService {
    * Timeout veya network hatası mı kontrol eder
    */
   private isTimeoutOrNetworkError(error: unknown): boolean {
-    if (!(error instanceof Error)) return false
+    if (!(error instanceof Error)) {return false}
     const msg = error.message.toLowerCase()
     return (
       msg.includes('timeout') ||

@@ -20,11 +20,11 @@ export async function PUT(request: NextRequest) {
       'phone',
       'avatar',
       'timezone',
-      // 'language', // TODO: Prisma User modelinde yok
-      // 'currency', // TODO: Prisma User modelinde yok
-      // 'dateFormat', // TODO: Prisma User modelinde yok
-      // 'numberFormat', // TODO: Prisma User modelinde yok
-      // 'theme', // TODO: Prisma User modelinde yok
+      'language',
+      'currency',
+      'dateFormat',
+      'numberFormat',
+      'theme',
       'notifications',
       'settings',
     ]

@@ -1,10 +1,10 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/mosaic'
+import { Input } from '@/components/mosaic'
+import { Label } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
 import { formatCurrency } from '@/lib/validators'
 import {
   inflationRealValue,

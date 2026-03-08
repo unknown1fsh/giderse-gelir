@@ -3,12 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
+import { Badge } from '@/components/mosaic'
 import { useUser } from '@/lib/user-context'
 import { usePremium } from '@/lib/use-premium'
-import PremiumUpgradeModal from '@/components/premium-upgrade-modal'
 import {
   Brain,
   FileText,
@@ -57,7 +56,6 @@ export default function AIAnalysisPage() {
   const [reportStatus, setReportStatus] = useState<ReportStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
-  const [showPremiumModal, setShowPremiumModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Rapor durumunu yükle
@@ -98,7 +96,6 @@ export default function AIAnalysisPage() {
   // Rapor oluştur
   const handleGenerateReport = async () => {
     if (!requirePremium()) {
-      setShowPremiumModal(true)
       return
     }
 
@@ -150,7 +147,7 @@ export default function AIAnalysisPage() {
 
   if (loading || userLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-800 via-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
       </div>
     )
@@ -168,7 +165,7 @@ export default function AIAnalysisPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-10">
+      <div className="bg-slate-800/80 backdrop-blur-xl border-b border-slate-200/60 sticky top-0 z-10">
         <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex items-center gap-3">
@@ -187,14 +184,14 @@ export default function AIAnalysisPage() {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg">
+                <div className="p-3 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 shadow-mosaic">
                   <Brain className="h-6 w-6 text-white" />
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     AI Destekli Finansal Analiz
                   </h1>
-                  <p className="text-slate-600">
+                  <p className="text-slate-300">
                     Yapay zeka ile detaylı finansal analiz raporlarınız
                   </p>
                 </div>
@@ -209,7 +206,7 @@ export default function AIAnalysisPage() {
         {!isPremiumUser && (
           <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-300 mb-8">
             <CardContent className="p-8 text-center">
-              <Brain className="h-16 w-16 text-purple-600 mx-auto mb-4 animate-pulse" />
+              <Brain className="h-16 w-16 text-purple-400 mx-auto mb-4 animate-pulse" />
               <h2 className="text-2xl font-bold text-purple-900 mb-4">
                 AI Destekli Finansal Analiz Raporu
               </h2>
@@ -219,7 +216,7 @@ export default function AIAnalysisPage() {
                 <span className="font-semibold">Ayda 4 kez detaylı rapor oluşturabilirsiniz.</span>
               </p>
               <Button
-                onClick={() => setShowPremiumModal(true)}
+                onClick={() => requirePremium()}
                 size="lg"
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-6 text-lg font-semibold shadow-2xl"
               >
@@ -234,7 +231,7 @@ export default function AIAnalysisPage() {
         {isPremiumUser && reportStatus && (
           <div className="space-y-6">
             {/* Limit Bilgisi ve Rapor Oluştur Butonu */}
-            <Card className="bg-white/80 backdrop-blur-sm border-2 border-purple-200">
+            <Card className="bg-slate-800/80 backdrop-blur-xl border-2 border-purple-200">
               <CardContent className="p-6">
                 <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                   <div className="flex-1">
@@ -243,8 +240,8 @@ export default function AIAnalysisPage() {
                         <Sparkles className="h-6 w-6 text-white" />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold text-slate-900">AI Analiz Raporu</h2>
-                        <p className="text-slate-600">
+                        <h2 className="text-2xl font-bold text-white">AI Analiz Raporu</h2>
+                        <p className="text-slate-300">
                           {isEnterprisePremium
                             ? 'Ultra AI analiz raporu - En detaylı analiz ve öneriler'
                             : isEnterprise
@@ -255,17 +252,17 @@ export default function AIAnalysisPage() {
                     </div>
 
                     {/* Limit Gösterimi */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-3">
                       <div className="flex items-center gap-2">
-                        <div className="text-3xl font-bold text-purple-600">
+                        <div className="text-3xl font-bold text-purple-400">
                           {reportStatus.limitInfo.remaining}
                         </div>
-                        <div className="text-slate-600">
+                        <div className="text-slate-300">
                           / {reportStatus.limitInfo.total} rapor kaldı
                         </div>
                       </div>
-                      <div className="flex-1 max-w-xs">
-                        <div className="w-full bg-slate-200 rounded-full h-3">
+                      <div className="flex-1 min-w-[120px] max-w-full sm:max-w-xs">
+                        <div className="w-full bg-slate-700 rounded-full h-3">
                           <div
                             className="bg-gradient-to-r from-purple-500 to-pink-600 h-3 rounded-full transition-all duration-300"
                             style={{
@@ -307,18 +304,18 @@ export default function AIAnalysisPage() {
 
                 {error && (
                   <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-                    <AlertCircle className="h-5 w-5 text-red-600" />
-                    <p className="text-red-700">{error}</p>
+                    <AlertCircle className="h-5 w-5 text-red-400" />
+                    <p className="text-red-400">{error}</p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
             {/* Plan Özellikleri */}
-            <Card className="bg-white/80 backdrop-blur-sm">
+            <Card className="bg-slate-800/80 backdrop-blur-xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
-                  <Award className="h-5 w-5 text-purple-600" />
+                  <Award className="h-5 w-5 text-purple-400" />
                   {planName} Plan Özellikleri
                 </CardTitle>
                 <CardDescription>
@@ -329,7 +326,7 @@ export default function AIAnalysisPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {isEnterprisePremium ? (
                     <>
-                      <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+                      <div className="p-4 bg-gradient-to-br from-amber-500/10 to-orange-50 rounded-lg border border-amber-200">
                         <h3 className="font-semibold text-amber-900 mb-2">Ultra AI Analiz</h3>
                         <ul className="text-sm text-amber-800 space-y-1">
                           <li className="flex items-center gap-2">
@@ -375,7 +372,7 @@ export default function AIAnalysisPage() {
                     </>
                   ) : (
                     <>
-                      <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                      <div className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-200">
                         <h3 className="font-semibold text-purple-900 mb-2">Temel AI Analiz</h3>
                         <ul className="text-sm text-purple-800 space-y-1">
                           <li className="flex items-center gap-2">
@@ -404,10 +401,10 @@ export default function AIAnalysisPage() {
 
             {/* Bu Ayki Raporlar */}
             {reportStatus.thisMonthReports.length > 0 && (
-              <Card className="bg-white/80 backdrop-blur-sm">
+              <Card className="bg-slate-800/80 backdrop-blur-xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
-                    <Calendar className="h-5 w-5 text-purple-600" />
+                    <Calendar className="h-5 w-5 text-purple-400" />
                     Bu Ayki Raporlar ({reportStatus.thisMonthReports.length})
                   </CardTitle>
                 </CardHeader>
@@ -416,18 +413,18 @@ export default function AIAnalysisPage() {
                     {reportStatus.thisMonthReports.map(report => (
                       <div
                         key={report.id}
-                        className="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors"
                       >
                         <div className="flex items-center gap-4">
                           <div className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600">
                             <FileText className="h-5 w-5 text-white" />
                           </div>
                           <div>
-                            <div className="font-semibold text-slate-900">
+                            <div className="font-semibold text-white">
                               AI Analiz Raporu -{' '}
                               {new Date(report.reportDate).toLocaleDateString('tr-TR')}
                             </div>
-                            <div className="text-sm text-slate-600 flex items-center gap-2 mt-1">
+                            <div className="text-sm text-slate-300 flex items-center gap-2 mt-1">
                               <Clock className="h-3 w-3" />
                               {new Date(report.createdAt).toLocaleString('tr-TR')}
                             </div>
@@ -471,10 +468,10 @@ export default function AIAnalysisPage() {
 
             {/* Geçmiş Raporlar */}
             {reportStatus.recentReports.length > 0 && (
-              <Card className="bg-white/80 backdrop-blur-sm">
+              <Card className="bg-slate-800/80 backdrop-blur-xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-purple-600" />
+                    <FileText className="h-5 w-5 text-purple-400" />
                     Geçmiş Raporlar
                   </CardTitle>
                 </CardHeader>
@@ -483,18 +480,18 @@ export default function AIAnalysisPage() {
                     {reportStatus.recentReports.slice(0, 5).map(report => (
                       <div
                         key={report.id}
-                        className="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors"
                       >
                         <div className="flex items-center gap-4">
                           <div className="p-2 rounded-lg bg-slate-400">
                             <FileText className="h-5 w-5 text-white" />
                           </div>
                           <div>
-                            <div className="font-semibold text-slate-900">
+                            <div className="font-semibold text-white">
                               AI Analiz Raporu -{' '}
                               {new Date(report.reportDate).toLocaleDateString('tr-TR')}
                             </div>
-                            <div className="text-sm text-slate-600 flex items-center gap-2 mt-1">
+                            <div className="text-sm text-slate-300 flex items-center gap-2 mt-1">
                               <Calendar className="h-3 w-3" />
                               {new Date(report.createdAt).toLocaleDateString('tr-TR')}
                             </div>
@@ -523,31 +520,19 @@ export default function AIAnalysisPage() {
 
         {/* Rapor Yoksa */}
         {isPremiumUser && reportStatus && reportStatus.thisMonthReports.length === 0 && (
-          <Card className="bg-white/80 backdrop-blur-sm">
+          <Card className="bg-slate-800/80 backdrop-blur-xl">
             <CardContent className="p-12 text-center">
               <Brain className="h-16 w-16 text-purple-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-slate-700 mb-2">
+              <h3 className="text-xl font-semibold text-slate-200 mb-2">
                 Henüz AI Analiz Raporu Oluşturulmamış
               </h3>
-              <p className="text-slate-600 mb-6">
+              <p className="text-slate-300 mb-6">
                 İlk AI destekli finansal analiz raporunuzu oluşturarak başlayın
               </p>
             </CardContent>
           </Card>
         )}
       </div>
-
-      {/* Premium Upgrade Modal */}
-      <PremiumUpgradeModal
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-        featureName="AI Destekli Finansal Analiz Raporu"
-        limitInfo={{
-          current: 0,
-          limit: 4,
-          type: 'analysis',
-        }}
-      />
     </div>
   )
 }

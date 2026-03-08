@@ -1,36 +1,47 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import {
+  AppPageShell,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  FilterBar,
+  Input,
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  SearchBox,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  StatCard,
+  StatsGrid,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/mosaic'
 import { useToast } from '@/lib/use-toast'
 import { formatCurrency } from '@/lib/validators'
 import {
-  Plus,
-  TrendingUp,
-  TrendingDown,
-  Calendar,
-  Tag,
-  Wallet,
-  CreditCard,
-  ArrowLeft,
-  Home,
-  Search,
-  ChevronRight,
-  ArrowUpRight,
   ArrowDownRight,
-  Receipt,
-  Sparkles,
+  ArrowUpRight,
+  CalendarRange,
   RefreshCw,
-  Trash2,
-  Edit3,
-  X,
-  DollarSign,
-  PiggyBank,
+  Save,
+  Search,
+  SlidersHorizontal,
+  Tag,
 } from 'lucide-react'
 
-interface Transaction {
+interface TransactionItem {
   id: number
   amount: string
   transactionDate: string
@@ -49,538 +60,544 @@ interface Transaction {
     id: number
     name: string
   }
-  account: {
-    id: number
-    name: string
-    bank: {
-      name: string
-    }
-    currency: {
-      code: string
-    }
-  } | null
-  creditCard: {
-    id: number
-    name: string
-    bank: {
-      name: string
-    }
-    currency: {
-      code: string
-    }
-  } | null
   currency: {
-    id: number
     code: string
-    name: string
   }
 }
 
-type FilterType = 'all' | 'income' | 'expense'
+interface TransactionResponse {
+  items: TransactionItem[]
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+  categories: Array<{ id: number; name: string }>
+  txTypes: Array<{ id: number; name: string; code: string }>
+}
 
-export default function TransactionsPage() {
+interface SavedView {
+  id: number
+  name: string
+  description: string | null
+  filters: {
+    search?: string
+    categoryId?: number | null
+    txTypeId?: number | null
+    minAmount?: number | null
+    maxAmount?: number | null
+    startDate?: string | null
+    endDate?: string | null
+  }
+  sort?: {
+    sortBy?: 'transactionDate' | 'amount' | 'createdAt'
+    sortDirection?: 'asc' | 'desc'
+  }
+  isDefault: boolean
+  isSystem: boolean
+}
+
+interface FilterState {
+  search: string
+  categoryId: string
+  txTypeId: string
+  startDate: string
+  endDate: string
+  minAmount: string
+  maxAmount: string
+  sortBy: 'transactionDate' | 'amount' | 'createdAt'
+  sortDirection: 'asc' | 'desc'
+}
+
+const defaultFilters: FilterState = {
+  search: '',
+  categoryId: 'all',
+  txTypeId: 'all',
+  startDate: '',
+  endDate: '',
+  minAmount: '',
+  maxAmount: '',
+  sortBy: 'transactionDate',
+  sortDirection: 'desc',
+}
+
+function TransactionsPageContent() {
   const router = useRouter()
-  const { error: toastError } = useToast()
-  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const searchParams = useSearchParams()
+  const { success: toastSuccess, error: toastError } = useToast()
+  const [filters, setFilters] = useState<FilterState>(defaultFilters)
+  const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterType, setFilterType] = useState<FilterType>('all')
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const fetchedRef = useRef(false)
+  const [data, setData] = useState<TransactionResponse | null>(null)
+  const [savedViews, setSavedViews] = useState<SavedView[]>([])
 
   useEffect(() => {
-    if (fetchedRef.current) {
-      return
-    }
-    fetchedRef.current = true
-    void fetchTransactions()
-  }, [])
+    setFilters({
+      search: searchParams.get('search') || '',
+      categoryId: searchParams.get('categoryId') || 'all',
+      txTypeId: searchParams.get('txTypeId') || 'all',
+      startDate: searchParams.get('startDate') || '',
+      endDate: searchParams.get('endDate') || '',
+      minAmount: searchParams.get('minAmount') || '',
+      maxAmount: searchParams.get('maxAmount') || '',
+      sortBy:
+        searchParams.get('sortBy') === 'amount' || searchParams.get('sortBy') === 'createdAt'
+          ? (searchParams.get('sortBy') as FilterState['sortBy'])
+          : 'transactionDate',
+      sortDirection: searchParams.get('sortDirection') === 'asc' ? 'asc' : 'desc',
+    })
+    setPage(Number(searchParams.get('page') || '1'))
+  }, [searchParams])
 
-  async function fetchTransactions() {
+  const buildQueryString = (nextFilters: FilterState, nextPage: number) => {
+    const params = new URLSearchParams()
+
+    if (nextFilters.search) {
+      params.set('search', nextFilters.search)
+    }
+    if (nextFilters.categoryId !== 'all') {
+      params.set('categoryId', nextFilters.categoryId)
+    }
+    if (nextFilters.txTypeId !== 'all') {
+      params.set('txTypeId', nextFilters.txTypeId)
+    }
+    if (nextFilters.startDate) {
+      params.set('startDate', nextFilters.startDate)
+    }
+    if (nextFilters.endDate) {
+      params.set('endDate', nextFilters.endDate)
+    }
+    if (nextFilters.minAmount) {
+      params.set('minAmount', nextFilters.minAmount)
+    }
+    if (nextFilters.maxAmount) {
+      params.set('maxAmount', nextFilters.maxAmount)
+    }
+    params.set('sortBy', nextFilters.sortBy)
+    params.set('sortDirection', nextFilters.sortDirection)
+    params.set('page', String(nextPage))
+    params.set('limit', '20')
+
+    return params.toString()
+  }
+
+  const fetchSavedViews = async () => {
     try {
-      setLoading(true)
-      const response = await fetch('/api/transactions', {
+      const response = await fetch('/api/saved-views?entityType=transactions', {
         credentials: 'include',
       })
       if (response.ok) {
-        const data = (await response.json()) as Transaction[]
-        setTransactions(data)
-      } else {
-        toastError('Hata', 'İşlemler yüklenemedi')
+        const views = (await response.json()) as SavedView[]
+        setSavedViews(views)
       }
     } catch (error) {
-      console.error('İşlemler yüklenirken hata:', error)
-      toastError('Hata', 'İşlemler yüklenirken hata oluştu')
+      console.error('Saved views error:', error)
+    }
+  }
+
+  const fetchTransactions = async (queryString: string) => {
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/transactions?${queryString}`, {
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        throw new Error('Islemler yuklenemedi')
+      }
+
+      const result = (await response.json()) as TransactionResponse
+      setData(result)
+    } catch (error) {
+      console.error('Transactions fetch error:', error)
+      toastError('Hata', 'Islemler yuklenemedi')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleRefresh = () => {
-    fetchedRef.current = false
-    void fetchTransactions()
+  useEffect(() => {
+    const queryString = buildQueryString(filters, page)
+    router.replace(`/transactions?${queryString}`)
+    void fetchTransactions(queryString)
+    void fetchSavedViews()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, page])
+
+  const handleApplySavedView = (view: SavedView) => {
+    setFilters({
+      search: view.filters.search || '',
+      categoryId: view.filters.categoryId ? String(view.filters.categoryId) : 'all',
+      txTypeId: view.filters.txTypeId ? String(view.filters.txTypeId) : 'all',
+      startDate: view.filters.startDate || '',
+      endDate: view.filters.endDate || '',
+      minAmount: view.filters.minAmount ? String(view.filters.minAmount) : '',
+      maxAmount: view.filters.maxAmount ? String(view.filters.maxAmount) : '',
+      sortBy: view.sort?.sortBy || 'transactionDate',
+      sortDirection: view.sort?.sortDirection || 'desc',
+    })
+    setPage(1)
   }
 
-  // Özet istatistikler
-  const stats = useMemo(() => {
-    const totalIncome = transactions
-      .filter(t => t.txType.code === 'GELIR')
-      .reduce((sum, t) => sum + parseFloat(t.amount), 0)
+  const handleSaveView = async () => {
+    const name = window.prompt('Kayitli filtre adi')
+    if (!name) {
+      return
+    }
 
-    const totalExpense = transactions
-      .filter(t => t.txType.code === 'GIDER')
-      .reduce((sum, t) => sum + parseFloat(t.amount), 0)
-
-    const netAmount = totalIncome - totalExpense
-    const incomeCount = transactions.filter(t => t.txType.code === 'GELIR').length
-    const expenseCount = transactions.filter(t => t.txType.code === 'GIDER').length
-
-    return { totalIncome, totalExpense, netAmount, incomeCount, expenseCount, total: transactions.length }
-  }, [transactions])
-
-  // Kategoriler
-  const categories = useMemo(() => {
-    const cats = new Set<string>()
-    transactions.forEach(t => cats.add(t.category.name))
-    return Array.from(cats).sort()
-  }, [transactions])
-
-  // Filtrelenmiş işlemler
-  const filteredTransactions = useMemo(() => {
-    return transactions.filter(t => {
-      // Tip filtresi
-      if (filterType === 'income' && t.txType.code !== 'GELIR') {
-        return false
-      }
-      if (filterType === 'expense' && t.txType.code !== 'GIDER') {
-        return false
-      }
-
-      // Kategori filtresi
-      if (selectedCategory !== 'all' && t.category.name !== selectedCategory) {
-        return false
-      }
-
-      // Arama filtresi
-      if (searchTerm) {
-        const search = searchTerm.toLowerCase()
-        return (
-          t.category.name.toLowerCase().includes(search) ||
-          (t.description && t.description.toLowerCase().includes(search)) ||
-          t.tags.some(tag => tag.toLowerCase().includes(search))
-        )
-      }
-
-      return true
-    })
-  }, [transactions, filterType, selectedCategory, searchTerm])
-
-  // Tarihe göre grupla
-  const groupedTransactions = useMemo(() => {
-    const groups: Record<string, Transaction[]> = {}
-
-    filteredTransactions.forEach(t => {
-      const date = new Date(t.transactionDate).toLocaleDateString('tr-TR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
+    try {
+      const response = await fetch('/api/saved-views', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          entityType: 'transactions',
+          name,
+          filters: {
+            search: filters.search,
+            categoryId: filters.categoryId !== 'all' ? Number(filters.categoryId) : null,
+            txTypeId: filters.txTypeId !== 'all' ? Number(filters.txTypeId) : null,
+            startDate: filters.startDate || null,
+            endDate: filters.endDate || null,
+            minAmount: filters.minAmount ? Number(filters.minAmount) : null,
+            maxAmount: filters.maxAmount ? Number(filters.maxAmount) : null,
+          },
+          sort: {
+            sortBy: filters.sortBy,
+            sortDirection: filters.sortDirection,
+          },
+        }),
       })
-      if (!groups[date]) {
-        groups[date] = []
-      }
-      groups[date].push(t)
-    })
 
-    return groups
-  }, [filteredTransactions])
+      if (!response.ok) {
+        throw new Error('Kayitli filtre olusturulamadi')
+      }
+
+      toastSuccess('Basarili', 'Filtre gorunumu kaydedildi')
+      void fetchSavedViews()
+    } catch (error) {
+      console.error('Save view error:', error)
+      toastError('Hata', 'Filtre gorunumu kaydedilemedi')
+    }
+  }
+
+  const stats = useMemo(() => {
+    const items = data?.items || []
+    const totalIncome = items
+      .filter(item => item.txType.code === 'GELIR')
+      .reduce((sum, item) => sum + Number(item.amount), 0)
+    const totalExpense = items
+      .filter(item => item.txType.code === 'GIDER')
+      .reduce((sum, item) => sum + Number(item.amount), 0)
+
+    return {
+      totalIncome,
+      totalExpense,
+      totalNet: totalIncome - totalExpense,
+      totalItems: data?.total || 0,
+    }
+  }, [data])
+
+  const activeFilterCount = [
+    filters.search,
+    filters.categoryId !== 'all' ? filters.categoryId : '',
+    filters.txTypeId !== 'all' ? filters.txTypeId : '',
+    filters.startDate,
+    filters.endDate,
+    filters.minAmount,
+    filters.maxAmount,
+  ].filter(Boolean).length
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-10">
-        <div className="px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => router.back()}
-                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                >
-                  <ArrowLeft className="h-5 w-5 text-slate-600" />
-                </button>
-                <Link
-                  href="/dashboard"
-                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                >
-                  <Home className="h-5 w-5 text-slate-600" />
-                </Link>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                  <Receipt className="h-6 w-6 text-blue-600" />
-                  İşlemler
-                </h1>
-                <p className="text-sm text-slate-600">Gelir ve giderlerinizi yönetin</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleRefresh}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+    <AppPageShell
+      header={{
+        title: 'Islem Merkezi',
+        description: 'Global arama, coklu filtreleme ve kayitli gorunumlerle tum hareketlerinizi yonetin.',
+        breadcrumbs: [{ label: 'Islemler' }],
+        actions: (
+          <>
+            <Button variant="outline" onClick={() => void fetchTransactions(buildQueryString(filters, page))}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Yenile
+            </Button>
+            <Button variant="glow" onClick={() => void handleSaveView()}>
+              <Save className="mr-2 h-4 w-4" />
+              Filtreyi Kaydet
+            </Button>
+          </>
+        ),
+      }}
+    >
+      <StatsGrid>
+        <StatCard
+          title="Gorunen Kayit"
+          value={data?.total || 0}
+          icon={Search}
+          color="indigo"
+          subtitle="Server-side filtre sonucu"
+          variant="premium"
+        />
+        <StatCard
+          title="Gelir"
+          value={formatCurrency(stats.totalIncome, 'TRY')}
+          icon={TrendingIcon(true)}
+          color="green"
+          subtitle="Secili gorunum"
+          variant="premium"
+        />
+        <StatCard
+          title="Gider"
+          value={formatCurrency(stats.totalExpense, 'TRY')}
+          icon={TrendingIcon(false)}
+          color="red"
+          subtitle="Secili gorunum"
+          variant="premium"
+        />
+        <StatCard
+          title="Aktif Filtre"
+          value={activeFilterCount}
+          icon={SlidersHorizontal}
+          color={activeFilterCount > 0 ? 'amber' : 'cyan'}
+          subtitle="Kombine filtre sayisi"
+          variant="premium"
+        />
+      </StatsGrid>
+
+      <Card variant="premium" className="border-white/10 bg-white/5">
+        <CardContent className="p-4">
+          <div className="flex flex-wrap gap-2">
+            {savedViews.map(view => (
+              <Button
+                key={view.id}
+                variant={view.isSystem ? 'outline' : 'secondary'}
+                size="sm"
+                onClick={() => handleApplySavedView(view)}
               >
-                <RefreshCw className="h-5 w-5 text-slate-600" />
-              </button>
-              <Link
-                href="/transactions/new"
-                className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-3 sm:py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium text-sm hover:shadow-lg hover:scale-105 transition-all"
-              >
-                <Plus className="h-4 w-4" />
-                Yeni İşlem
-              </Link>
-            </div>
+                {view.name}
+              </Button>
+            ))}
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="space-y-6">
-        {/* Özet Kartları */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-green-200/30 rounded-full -mr-10 -mt-10" />
-            <CardContent className="p-4 relative">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 shadow-md group-hover:scale-110 transition-transform">
-                  <ArrowUpRight className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xs text-slate-500">{stats.incomeCount} işlem</span>
-              </div>
-              <p className="text-xs text-slate-600 mb-1">Toplam Gelir</p>
-              <p className="text-xl font-bold text-green-600">{formatCurrency(stats.totalIncome, 'TRY')}</p>
-            </CardContent>
-          </Card>
+      <FilterBar>
+        <SearchBox
+          value={filters.search}
+          onSearch={value => {
+            setFilters(prev => ({ ...prev, search: value }))
+            setPage(1)
+          }}
+          placeholder="Aciklama, kategori veya etiket ara..."
+        />
+        <Select
+          value={filters.txTypeId}
+          onValueChange={value => {
+            setFilters(prev => ({ ...prev, txTypeId: value }))
+            setPage(1)
+          }}
+        >
+          <SelectTrigger className="max-w-[180px]">
+            <SelectValue placeholder="Islem tipi" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tum tipler</SelectItem>
+            {data?.txTypes.map(type => (
+              <SelectItem key={type.id} value={String(type.id)}>
+                {type.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={filters.categoryId}
+          onValueChange={value => {
+            setFilters(prev => ({ ...prev, categoryId: value }))
+            setPage(1)
+          }}
+        >
+          <SelectTrigger className="max-w-[220px]">
+            <SelectValue placeholder="Kategori" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tum kategoriler</SelectItem>
+            {data?.categories.map(category => (
+              <SelectItem key={category.id} value={String(category.id)}>
+                {category.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Input
+          type="date"
+          value={filters.startDate}
+          onChange={event => {
+            setFilters(prev => ({ ...prev, startDate: event.target.value }))
+            setPage(1)
+          }}
+          className="max-w-[180px]"
+        />
+        <Input
+          type="date"
+          value={filters.endDate}
+          onChange={event => {
+            setFilters(prev => ({ ...prev, endDate: event.target.value }))
+            setPage(1)
+          }}
+          className="max-w-[180px]"
+        />
+        <Input
+          type="number"
+          value={filters.minAmount}
+          onChange={event => {
+            setFilters(prev => ({ ...prev, minAmount: event.target.value }))
+            setPage(1)
+          }}
+          placeholder="Min tutar"
+          className="max-w-[150px]"
+        />
+        <Input
+          type="number"
+          value={filters.maxAmount}
+          onChange={event => {
+            setFilters(prev => ({ ...prev, maxAmount: event.target.value }))
+            setPage(1)
+          }}
+          placeholder="Max tutar"
+          className="max-w-[150px]"
+        />
+        <Select
+          value={`${filters.sortBy}:${filters.sortDirection}`}
+          onValueChange={value => {
+            const [sortBy, sortDirection] = value.split(':') as [
+              FilterState['sortBy'],
+              FilterState['sortDirection'],
+            ]
+            setFilters(prev => ({ ...prev, sortBy, sortDirection }))
+            setPage(1)
+          }}
+        >
+          <SelectTrigger className="max-w-[180px]">
+            <SelectValue placeholder="Sirala" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="transactionDate:desc">Tarih (yeni-eski)</SelectItem>
+            <SelectItem value="transactionDate:asc">Tarih (eski-yeni)</SelectItem>
+            <SelectItem value="amount:desc">Tutar (buyuk-kucuk)</SelectItem>
+            <SelectItem value="amount:asc">Tutar (kucuk-buyuk)</SelectItem>
+          </SelectContent>
+        </Select>
+      </FilterBar>
 
-          <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-red-50 to-rose-50 hover:from-red-100 hover:to-rose-100 overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-red-200/30 rounded-full -mr-10 -mt-10" />
-            <CardContent className="p-4 relative">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-red-500 to-rose-600 shadow-md group-hover:scale-110 transition-transform">
-                  <ArrowDownRight className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xs text-slate-500">{stats.expenseCount} işlem</span>
-              </div>
-              <p className="text-xs text-slate-600 mb-1">Toplam Gider</p>
-              <p className="text-xl font-bold text-red-600">{formatCurrency(stats.totalExpense, 'TRY')}</p>
-            </CardContent>
-          </Card>
-
-          <Card className={`group hover:shadow-lg transition-all duration-300 border-0 overflow-hidden relative ${stats.netAmount >= 0 ? 'bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100' : 'bg-gradient-to-br from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100'
-            }`}>
-            <div className="absolute top-0 right-0 w-20 h-20 bg-blue-200/30 rounded-full -mr-10 -mt-10" />
-            <CardContent className="p-4 relative">
-              <div className="flex items-center justify-between mb-2">
-                <div className={`p-2 rounded-lg shadow-md group-hover:scale-110 transition-transform ${stats.netAmount >= 0 ? 'bg-gradient-to-br from-blue-500 to-indigo-600' : 'bg-gradient-to-br from-orange-500 to-red-600'
-                  }`}>
-                  <DollarSign className="h-4 w-4 text-white" />
-                </div>
-              </div>
-              <p className="text-xs text-slate-600 mb-1">Net Durum</p>
-              <p className={`text-xl font-bold ${stats.netAmount >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                {stats.netAmount >= 0 ? '+' : ''}{formatCurrency(stats.netAmount, 'TRY')}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-purple-200/30 rounded-full -mr-10 -mt-10" />
-            <CardContent className="p-4 relative">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 shadow-md group-hover:scale-110 transition-transform">
-                  <PiggyBank className="h-4 w-4 text-white" />
-                </div>
-              </div>
-              <p className="text-xs text-slate-600 mb-1">Tasarruf Oranı</p>
-              <p className={`text-xl font-bold ${stats.totalIncome > 0 ? (stats.netAmount >= 0 ? 'text-purple-600' : 'text-red-600') : 'text-slate-400'}`}>
-                {stats.totalIncome > 0 ? `%${((stats.netAmount / stats.totalIncome) * 100).toFixed(1)}` : '—'}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Hızlı İşlem Butonları */}
-        <div className="grid grid-cols-2 gap-4">
-          <Link href="/transactions/new-income" className="group">
-            <Card className="border-0 bg-gradient-to-r from-green-500 to-emerald-600 hover:shadow-xl hover:scale-105 transition-all">
-              <CardContent className="p-5 flex items-center gap-4">
-                <div className="p-3 bg-white/20 rounded-xl group-hover:scale-110 transition-transform">
-                  <TrendingUp className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-white">
-                  <h3 className="font-bold text-lg">Gelir Ekle</h3>
-                  <p className="text-sm text-white/80">Maaş, freelance, yatırım</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-white/60 ml-auto" />
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/transactions/new-expense" className="group">
-            <Card className="border-0 bg-gradient-to-r from-red-500 to-rose-600 hover:shadow-xl hover:scale-105 transition-all">
-              <CardContent className="p-5 flex items-center gap-4">
-                <div className="p-3 bg-white/20 rounded-xl group-hover:scale-110 transition-transform">
-                  <TrendingDown className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-white">
-                  <h3 className="font-bold text-lg">Gider Ekle</h3>
-                  <p className="text-sm text-white/80">Market, fatura, kira</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-white/60 ml-auto" />
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
-
-        {/* Filtreler */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardContent className="p-4">
-            <div className="flex flex-col lg:flex-row gap-4">
-              {/* Arama */}
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="İşlem ara (kategori, açıklama, etiket)..."
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  className="w-full min-h-[48px] pl-10 pr-12 py-3 sm:py-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm"
-                />
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-slate-100 rounded-full"
-                    aria-label="Aramayı temizle"
-                  >
-                    <X className="h-3 w-3 text-slate-400" />
-                  </button>
-                )}
-              </div>
-
-              {/* Tip Filtresi */}
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { value: 'all', label: 'Tümü', count: stats.total },
-                  { value: 'income', label: 'Gelir', count: stats.incomeCount },
-                  { value: 'expense', label: 'Gider', count: stats.expenseCount },
-                ].map(filter => (
-                  <button
-                    key={filter.value}
-                    onClick={() => setFilterType(filter.value as FilterType)}
-                    className={`min-h-[44px] px-4 py-2 rounded-lg text-sm font-medium transition-all ${filterType === filter.value
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+      <Card variant="premium" className="border-white/10 bg-white/5">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Aciklama</TableHead>
+                <TableHead>Kategori</TableHead>
+                <TableHead>Tarih</TableHead>
+                <TableHead>Etiketler</TableHead>
+                <TableHead className="text-right">Tutar</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
+                    Islemler yukleniyor...
+                  </TableCell>
+                </TableRow>
+              ) : data?.items.length ? (
+                data.items.map(item => (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium text-foreground">
+                          {item.description || item.category.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{item.paymentMethod.name}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{item.category.name}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <CalendarRange className="h-4 w-4" />
+                        {new Date(item.transactionDate).toLocaleDateString('tr-TR')}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {item.tags.length > 0 ? (
+                          item.tags.map(tag => (
+                            <Badge key={tag} variant="secondary">
+                              <Tag className="mr-1 h-3 w-3" />
+                              {tag}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Etiket yok</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell
+                      className={`text-right font-semibold ${
+                        item.txType.code === 'GELIR' ? 'text-emerald-400' : 'text-red-400'
                       }`}
-                  >
-                    {filter.label}
-                    <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-xs ${filterType === filter.value ? 'bg-white/20' : 'bg-slate-200'
-                      }`}>
-                      {filter.count}
-                    </span>
-                  </button>
-                ))}
-              </div>
+                    >
+                      {item.txType.code === 'GELIR' ? '+' : '-'}
+                      {formatCurrency(Number(item.amount), item.currency.code)}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
+                    Secili filtrelerle eslesen hareket bulunamadi.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
-              {/* Kategori Filtresi */}
-              <select
-                value={selectedCategory}
-                onChange={e => setSelectedCategory(e.target.value)}
-                className="w-full min-h-[48px] sm:w-auto px-4 py-3 sm:py-2.5 border border-slate-200 rounded-xl bg-white text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">Tüm Kategoriler</option>
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
-          </CardContent>
-        </Card>
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(prev => prev - 1)}>
+              Onceki
+            </Button>
+          </PaginationItem>
+          <PaginationItem>
+            <span className="px-3 text-sm text-muted-foreground">
+              Sayfa {data?.page || page} / {data?.totalPages || 1}
+            </span>
+          </PaginationItem>
+          <PaginationItem>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= (data?.totalPages || 1)}
+              onClick={() => setPage(prev => prev + 1)}
+            >
+              Sonraki
+            </Button>
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    </AppPageShell>
+  )
+}
 
-        {/* İşlem Listesi */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader className="border-b border-slate-100">
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Receipt className="h-5 w-5 text-blue-600" />
-                İşlem Listesi
-              </div>
-              <span className="text-sm font-normal text-slate-500">
-                {filteredTransactions.length} işlem gösteriliyor
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-slate-600">İşlemler yükleniyor...</p>
-              </div>
-            ) : filteredTransactions.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                  <Sparkles className="h-8 w-8 text-slate-400" />
-                </div>
-                <p className="text-slate-600 font-medium">
-                  {searchTerm || filterType !== 'all' || selectedCategory !== 'all'
-                    ? 'Filtreye uygun işlem bulunamadı'
-                    : 'Henüz işlem bulunmuyor'}
-                </p>
-                <p className="text-sm text-slate-400 mt-1">
-                  {searchTerm || filterType !== 'all' || selectedCategory !== 'all'
-                    ? 'Filtreleri temizleyerek tüm işlemleri görün'
-                    : 'İlk işleminizi eklemek için yukarıdaki butonları kullanın'}
-                </p>
-                    {(searchTerm || filterType !== 'all' || selectedCategory !== 'all') && (
-                  <button
-                    onClick={() => {
-                      setSearchTerm('')
-                      setFilterType('all')
-                      setSelectedCategory('all')
-                    }}
-                    className="mt-4 min-h-[48px] px-4 py-3 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
-                  >
-                    Filtreleri Temizle
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-100">
-                {Object.entries(groupedTransactions).map(([date, txList]) => (
-                  <div key={date}>
-                    {/* Tarih Başlığı */}
-                    <div className="px-4 sm:px-6 py-3 bg-slate-50 sticky top-0">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-slate-400" />
-                        <span className="text-sm font-medium text-slate-600">{date}</span>
-                        <span className="text-xs text-slate-400">({txList.length} işlem)</span>
-                      </div>
-                    </div>
+function TrendingIcon(isPositive: boolean) {
+  return isPositive ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />
+}
 
-                    {/* İşlemler */}
-                    {txList.map(transaction => (
-                      <div
-                        key={transaction.id}
-                        className="group px-4 sm:px-6 py-4 hover:bg-slate-50 transition-colors"
-                      >
-                        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                          {/* İkon */}
-                          <div className={`p-3 rounded-xl ${transaction.txType.code === 'GELIR'
-                            ? 'bg-gradient-to-br from-green-100 to-emerald-100'
-                            : 'bg-gradient-to-br from-red-100 to-rose-100'
-                            }`}>
-                            {transaction.txType.code === 'GELIR' ? (
-                              <ArrowUpRight className="h-5 w-5 text-green-600" />
-                            ) : (
-                              <ArrowDownRight className="h-5 w-5 text-red-600" />
-                            )}
-                          </div>
-
-                          {/* İçerik */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-slate-800 truncate">
-                                {transaction.category.name}
-                              </h3>
-                              <span className={`text-xs px-2 py-0.5 rounded-full ${transaction.txType.code === 'GELIR'
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-red-100 text-red-700'
-                                }`}>
-                                {transaction.txType.name}
-                              </span>
-                            </div>
-
-                            {transaction.description && (
-                              <p className="text-sm text-slate-600 truncate mb-1">
-                                {transaction.description}
-                              </p>
-                            )}
-
-                            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                              <div className="flex items-center gap-1">
-                                <Tag className="h-3 w-3" />
-                                {transaction.paymentMethod.name}
-                              </div>
-                              {transaction.account && (
-                                <div className="flex items-center gap-1">
-                                  <Wallet className="h-3 w-3" />
-                                  <span className="truncate max-w-[100px]">{transaction.account.name}</span>
-                                </div>
-                              )}
-                              {transaction.creditCard && (
-                                <div className="flex items-center gap-1">
-                                  <CreditCard className="h-3 w-3" />
-                                  <span className="truncate max-w-[100px]">{transaction.creditCard.name}</span>
-                                </div>
-                              )}
-                            </div>
-
-                            {transaction.tags && transaction.tags.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-2">
-                                {transaction.tags.slice(0, 3).map((tag, index) => (
-                                  <span
-                                    key={index}
-                                    className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full"
-                                  >
-                                    #{tag}
-                                  </span>
-                                ))}
-                                {transaction.tags.length > 3 && (
-                                  <span className="text-xs text-slate-400">
-                                    +{transaction.tags.length - 3}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Tutar */}
-                          <div className="text-right">
-                            <p className={`text-lg font-bold ${transaction.txType.code === 'GELIR' ? 'text-green-600' : 'text-red-600'
-                              }`}>
-                              {transaction.txType.code === 'GELIR' ? '+' : '-'}
-                              {formatCurrency(parseFloat(transaction.amount), transaction.currency.code)}
-                            </p>
-                            <p className="text-xs text-slate-500">
-                              {new Date(transaction.transactionDate).toLocaleTimeString('tr-TR', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </p>
-                          </div>
-
-                          {/* Actions - mobilde her zaman görünür, desktop'ta hover'da */}
-                          <div className="flex opacity-100 sm:opacity-0 sm:group-hover:opacity-100 items-center gap-1 flex-shrink-0 transition-opacity">
-                            <button className="min-h-[44px] min-w-[44px] p-2 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center" aria-label="Düzenle">
-                              <Edit3 className="h-4 w-4 text-slate-500" />
-                            </button>
-                            <button className="min-h-[44px] min-w-[44px] p-2 hover:bg-red-100 rounded-lg transition-colors flex items-center justify-center" aria-label="Sil">
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Pagination veya Load More */}
-        {filteredTransactions.length > 0 && (
-          <div className="flex items-center justify-center gap-3 text-sm text-slate-500">
-            <span>{filteredTransactions.length} işlem gösteriliyor</span>
-          </div>
-        )}
-      </div>
-    </div>
+export default function TransactionsPage() {
+  return (
+    <Suspense>
+      <TransactionsPageContent />
+    </Suspense>
   )
 }

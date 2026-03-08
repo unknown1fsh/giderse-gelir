@@ -1,317 +1,242 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Home } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import PremiumUpgradeModal from '@/components/premium-upgrade-modal'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-
-interface ReferenceData {
-  categories: Array<{
-    id: number
-    name: string
-    code: string
-    txTypeId: number
-    txTypeName: string
-    icon?: string | null
-    color?: string | null
-    isDefault: boolean
-  }>
-  paymentMethods: Array<{
-    id: number
-    code: string
-    name: string
-    description?: string | null
-  }>
-  accounts: Array<{
-    id: number
-    name: string
-    accountType: { id: number; name: string } | null
-    bank: { id: number; name: string }
-    currency: { id: number; code: string; name: string }
-  }>
-  creditCards: Array<{
-    id: number
-    name: string
-    bank: { id: number; name: string }
-    currency: { id: number; code: string; name: string }
-  }>
-  currencies: Array<{ id: number; code: string; name: string; symbol: string }>
-}
+  Button,
+  Card,
+  CardContent,
+  FormPageShell,
+} from '@/components/mosaic'
+import {
+  AutoPaymentForm,
+  createAutoPaymentFormState,
+  type AutoPaymentFormState,
+  type AutoPaymentReferenceData,
+} from '../components/auto-payment-form'
+import {
+  buildAutoPaymentPayload,
+  buildAutoPaymentReferenceData,
+  getDefaultAutoPaymentSelections,
+  type AutoPaymentReferenceApiResponse,
+} from '../components/auto-payment-client'
+import { isPremiumPlan } from '@/lib/plan-config'
+import { useToast } from '@/lib/use-toast'
+import { useUser } from '@/lib/user-context'
+import { ArrowLeftRight, CalendarPlus, Home } from 'lucide-react'
 
 export default function NewAutoPaymentPage() {
   const router = useRouter()
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    amount: '',
-    frequency: '',
-    nextPaymentDate: '',
-    endDate: '',
-    categoryId: '',
-    accountId: '',
-    creditCardId: '',
+  const { user } = useUser()
+  const { success: toastSuccess, error: toastError } = useToast()
+  const isPremium = isPremiumPlan(user?.plan || 'free')
+
+  const [referenceData, setReferenceData] = useState<AutoPaymentReferenceData>({
+    categories: [],
+    paymentMethods: [],
+    currencies: [],
+    accounts: [],
+    creditCards: [],
+    eWallets: [],
+    beneficiaries: [],
   })
-  const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
+  const [formData, setFormData] = useState<AutoPaymentFormState>(
+    createAutoPaymentFormState({ record: null })
+  )
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPremiumModal, setShowPremiumModal] = useState(false)
 
   useEffect(() => {
-    async function fetchReferenceData() {
-      try {
-        const response = await fetch('/api/reference-data')
-        if (response.ok) {
-          const data = await response.json()
-          setReferenceData({
-            categories: data.categories || [],
-            paymentMethods: data.paymentMethods || [],
-            accounts: data.accounts || [],
-            creditCards: data.creditCards || [],
-            currencies: data.currencies || [],
-          })
-        } else {
-          setError('Referans verileri yüklenemedi')
-        }
-      } catch (error) {
-        console.error('Referans verileri yüklenirken hata:', error)
-        setError('Referans verileri yüklenirken hata oluştu')
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchReferenceData()
+    void fetchReferenceData()
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    setError(null)
+  const fetchReferenceData = async () => {
+    try {
+      setError(null)
+      setLoading(true)
+
+      const response = await fetch('/api/reference-data', { credentials: 'include' })
+      const payload = (await response.json()) as AutoPaymentReferenceApiResponse & { error?: string }
+
+      if (!response.ok) {
+        throw new Error(payload.error || 'Referans verileri alınamadı')
+      }
+
+      const nextReferenceData = buildAutoPaymentReferenceData(payload)
+      const defaults = getDefaultAutoPaymentSelections(nextReferenceData)
+
+      setReferenceData(nextReferenceData)
+      setFormData(
+        createAutoPaymentFormState({
+          record: null,
+          fallbackCurrencyId: defaults.currencyId,
+          fallbackPaymentMethodId: defaults.paymentMethodId,
+          fallbackCategoryId: defaults.categoryId,
+        })
+      )
+    } catch (fetchError) {
+      console.error('Auto payment reference fetch error:', fetchError)
+      setError(
+        fetchError instanceof Error
+          ? fetchError.message
+          : 'Referans verileri yüklenirken bir hata oluştu.'
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (!isPremium) {
+      setShowPremiumModal(true)
+      return
+    }
 
     try {
-      const submitData = {
-        ...formData,
-        amount: parseFloat(formData.amount) || 0,
-        categoryId: parseInt(formData.categoryId),
-        accountId: formData.accountId ? parseInt(formData.accountId) : null,
-        creditCardId: formData.creditCardId ? parseInt(formData.creditCardId) : null,
-        endDate: formData.endDate || null,
-      }
+      setSaving(true)
+      setError(null)
 
       const response = await fetch('/api/auto-payments', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submitData),
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(buildAutoPaymentPayload(formData)),
       })
 
-      if (response.ok) {
-        router.push('/auto-payments')
-      } else {
-        const errorData = await response.json()
-        setError(errorData.error || 'Otomatik ödeme oluşturulamadı')
+      const payload = (await response.json()) as { error?: string; requiresPremium?: boolean }
+      if (!response.ok) {
+        if (payload.requiresPremium) {
+          setShowPremiumModal(true)
+          return
+        }
+
+        throw new Error(payload.error || 'Otomatik ödeme oluşturulamadı')
       }
-    } catch (error) {
-      console.error('Otomatik ödeme oluşturulurken hata:', error)
-      setError('Otomatik ödeme oluşturulurken bir hata oluştu.')
+
+      toastSuccess('Başarılı', 'Yeni otomatik ödeme oluşturuldu')
+      router.push('/auto-payments')
+    } catch (submitError) {
+      console.error('Auto payment create error:', submitError)
+      const message =
+        submitError instanceof Error
+          ? submitError.message
+          : 'Otomatik ödeme oluşturulamadı.'
+      setError(message)
+      toastError('Hata', message)
     } finally {
       setSaving(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    )
-  }
-
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={() => router.back()}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <Link href="/dashboard" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <Home className="h-5 w-5" />
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold">Yeni Otomatik Ödeme</h1>
-          <p className="text-muted-foreground">Yeni bir otomatik ödeme talimatı ekleyin</p>
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Otomatik Ödeme Bilgileri</CardTitle>
-          <CardDescription>Lütfen otomatik ödeme talimatının detaylarını girin</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">Ödeme Adı *</label>
-              <Input
-                type="text"
-                value={formData.name}
-                onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Örn: Kira Ödemesi"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Açıklama (Opsiyonel)</label>
-              <Textarea
-                value={formData.description}
-                onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Ek bilgiler, notlar..."
-                rows={3}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Tutar (TRY) *</label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={formData.amount}
-                  onChange={e => setFormData(prev => ({ ...prev, amount: e.target.value }))}
-                  placeholder="Örn: 5000.00"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Sıklık *</label>
-                <Select
-                  value={formData.frequency}
-                  onValueChange={value => setFormData(prev => ({ ...prev, frequency: value }))}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sıklık seçin" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="WEEKLY">Haftalık</SelectItem>
-                    <SelectItem value="MONTHLY">Aylık</SelectItem>
-                    <SelectItem value="YEARLY">Yıllık</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">İlk Ödeme Tarihi *</label>
-                <Input
-                  type="date"
-                  value={formData.nextPaymentDate}
-                  onChange={e =>
-                    setFormData(prev => ({ ...prev, nextPaymentDate: e.target.value }))
-                  }
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Bitiş Tarihi (Opsiyonel)</label>
-                <Input
-                  type="date"
-                  value={formData.endDate}
-                  onChange={e => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Kategori *</label>
-              <Select
-                value={formData.categoryId}
-                onValueChange={value => setFormData(prev => ({ ...prev, categoryId: value }))}
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Kategori seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  {referenceData?.categories.map(category => (
-                    <SelectItem key={category.id} value={category.id.toString()}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Hesap (Opsiyonel)</label>
-                <Select
-                  value={formData.accountId}
-                  onValueChange={value =>
-                    setFormData(prev => ({ ...prev, accountId: value, creditCardId: '' }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Hesap seçin" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {referenceData?.accounts.map(account => (
-                      <SelectItem key={account.id} value={account.id.toString()}>
-                        {account.name} - {account.bank.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Kredi Kartı (Opsiyonel)</label>
-                <Select
-                  value={formData.creditCardId}
-                  onValueChange={value =>
-                    setFormData(prev => ({ ...prev, creditCardId: value, accountId: '' }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Kredi kartı seçin" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {referenceData?.creditCards.map(card => (
-                      <SelectItem key={card.id} value={card.id.toString()}>
-                        {card.name} - {card.bank.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {error && <div className="p-3 bg-red-100 text-red-700 rounded-md text-sm">{error}</div>}
-
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors"
-              disabled={saving}
-            >
-              {saving ? 'Kaydediliyor...' : 'Otomatik Ödeme Oluştur'}
+    <>
+      <FormPageShell
+        header={{
+          title: 'Yeni Otomatik Ödeme',
+          description: 'Otomatik ödeme kaynağı, takvimi ve ödeme yöntemini tanımlayın.',
+          breadcrumbs: [
+            { label: 'Gösterge Paneli', href: '/dashboard' },
+            { label: 'Otomatik Ödemeler', href: '/auto-payments' },
+            { label: 'Yeni Kayıt' },
+          ],
+          onBack: () => router.back(),
+          leadingActions: [
+            {
+              href: '/dashboard',
+              ariaLabel: 'Gösterge Paneli',
+              icon: <Home className="h-4 w-4" />,
+            },
+          ],
+          actions: (
+            <Button variant="outline" onClick={() => router.push('/auto-payments')}>
+              <ArrowLeftRight className="mr-2 h-4 w-4" />
+              Listeye Dön
             </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+          ),
+        }}
+      >
+        {loading ? (
+          <Card variant="premium" className="border-white/10 bg-white/5">
+            <CardContent className="p-8">
+              <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 text-center">
+                <div className="h-10 w-10 animate-spin rounded-full border-2 border-cyan-400/20 border-t-cyan-400" />
+                <div>
+                  <p className="text-lg font-semibold text-white">Form Hazırlanıyor</p>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Kaynaklar, kategoriler ve ödeme yöntemleri yükleniyor.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : error ? (
+          <Card variant="premium" className="border-rose-500/20 bg-rose-500/10">
+            <CardContent className="space-y-4 p-6">
+              <div>
+                <p className="text-lg font-semibold text-white">Form Yüklenemedi</p>
+                <p className="mt-2 text-sm text-slate-300">{error}</p>
+              </div>
+              <Button variant="outline" onClick={() => void fetchReferenceData()}>
+                Tekrar Dene
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {!isPremium ? (
+              <Card variant="premium" className="border-amber-500/20 bg-amber-500/10">
+                <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-amber-200">Premium Gerekli</p>
+                    <p className="mt-1 text-sm text-slate-300">
+                      Kaydı tamamlamak için premium plana geçmeniz gerekir.
+                    </p>
+                  </div>
+                  <Button variant="premium" onClick={() => setShowPremiumModal(true)}>
+                    Premium'u Gör
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : null}
+
+            <Card variant="premium" className="border-white/10 bg-slate-950/70">
+              <CardContent className="p-6">
+                <div className="mb-6 flex items-center gap-3 rounded-2xl border border-cyan-500/15 bg-cyan-500/10 p-4">
+                  <CalendarPlus className="h-5 w-5 text-cyan-300" />
+                  <div>
+                    <p className="text-sm font-semibold text-white">Otomatik Ödeme Formu</p>
+                    <p className="text-xs text-slate-400">
+                      Kaynağı, takvimi ve ödeme yöntemini aşağıdan tanımlayın.
+                    </p>
+                  </div>
+                </div>
+
+                <AutoPaymentForm
+                  mode="create"
+                  formData={formData}
+                  referenceData={referenceData}
+                  onChange={setFormData}
+                  onSubmit={handleSubmit}
+                  onCancel={() => router.push('/auto-payments')}
+                  submitLabel="Otomatik Ödemeyi Oluştur"
+                  submitting={saving}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </FormPageShell>
+
+      <PremiumUpgradeModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+        featureName="Otomatik Ödemeler"
+      />
+    </>
   )
 }

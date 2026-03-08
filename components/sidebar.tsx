@@ -10,7 +10,6 @@ import BrandLogo from '@/components/brand-logo'
 import {
   Wallet,
   Settings,
-  Plus,
   BarChart3,
   Sparkles,
   PieChart,
@@ -23,23 +22,78 @@ import {
   Shield,
   Brain,
   HelpCircle,
+  LayoutDashboard,
+  Receipt,
+  Target,
+  CalendarClock,
+  Coins,
+  TrendingUp,
+  Landmark,
+  Banknote,
+  BadgeDollarSign,
 } from 'lucide-react'
 
-const navigation = [
-  { name: 'Toplam Varlık', href: '/portfolio', icon: PieChart, color: 'text-emerald-500' },
-  { name: 'İşlemler', href: '/transactions', icon: Plus, color: 'text-green-500' },
-  { name: 'Hesaplar', href: '/accounts', icon: Wallet, color: 'text-purple-500' },
-  { name: 'Krediler', href: '/loans', icon: CreditCard, color: 'text-blue-400' },
-  { name: 'Diğer Yatırım Araçları', href: '/investments', icon: Building2, color: 'text-cyan-500' },
-  { name: 'Analiz ve Raporlar', href: '/analysis', icon: BarChart3, color: 'text-indigo-500' },
+interface NavSection {
+  label: string
+  items: NavItem[]
+}
+
+interface NavItem {
+  name: string
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  color: string
+  premium?: boolean
+}
+
+const navSections: NavSection[] = [
   {
-    name: 'AI Analiz Raporu',
-    href: '/ai-analysis',
-    icon: Brain,
-    color: 'text-pink-500',
-    premium: true,
+    label: 'Ana Menü',
+    items: [
+      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, color: 'text-indigo-400' },
+      { name: 'İşlemler', href: '/transactions', icon: Receipt, color: 'text-green-400' },
+      { name: 'Toplam Varlık', href: '/portfolio', icon: PieChart, color: 'text-emerald-400' },
+    ],
   },
-  { name: 'Yardım', href: '/help', icon: HelpCircle, color: 'text-blue-500' },
+  {
+    label: 'Finans',
+    items: [
+      { name: 'Hesaplar', href: '/accounts', icon: Wallet, color: 'text-blue-400' },
+      { name: 'Kartlar', href: '/cards', icon: CreditCard, color: 'text-purple-400' },
+      { name: 'Krediler', href: '/loans', icon: Landmark, color: 'text-cyan-400' },
+      { name: 'Bütçeler', href: '/budgets', icon: Target, color: 'text-amber-400' },
+      { name: 'Taksitler', href: '/installments', icon: CalendarClock, color: 'text-orange-400' },
+      { name: 'Otomatik Ödemeler', href: '/auto-payments', icon: BadgeDollarSign, color: 'text-teal-400' },
+    ],
+  },
+  {
+    label: 'Yatırım',
+    items: [
+      { name: 'Yatırım Araçları', href: '/investments', icon: Building2, color: 'text-violet-400' },
+      { name: 'Altın', href: '/gold', icon: Coins, color: 'text-yellow-400' },
+      { name: 'E-Cüzdanlar', href: '/ewallets', icon: Banknote, color: 'text-lime-400' },
+    ],
+  },
+  {
+    label: 'Raporlar',
+    items: [
+      { name: 'Analiz ve Raporlar', href: '/analysis', icon: BarChart3, color: 'text-indigo-400' },
+      {
+        name: 'AI Analiz Raporu',
+        href: '/ai-analysis',
+        icon: Brain,
+        color: 'text-pink-400',
+        premium: true,
+      },
+      { name: 'Hedefler', href: '/goals', icon: TrendingUp, color: 'text-emerald-400' },
+    ],
+  },
+  {
+    label: 'Destek',
+    items: [
+      { name: 'Yardım', href: '/help', icon: HelpCircle, color: 'text-blue-400' },
+    ],
+  },
 ]
 
 interface SidebarProps {
@@ -79,7 +133,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
       {/* Backdrop Overlay - Sadece mobilde ve sidebar açıkken */}
       {isOpen && onClose && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-300"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-300"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -90,200 +144,178 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         className={`
           fixed lg:static inset-y-0 left-0 z-50
           flex h-screen h-[100dvh] w-72 max-w-[85vw] flex-col 
-          bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white shadow-2xl
+          bg-background border-r border-border text-foreground
           transform transition-transform duration-300 ease-smooth
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
-        {/* Logo ve Başlık - Dashboard'a Yönlendirme */}
-        <div className="shrink-0 border-b border-slate-700/50">
+        <div className="shrink-0 border-b border-border">
           <div className="relative">
             {/* Close Button - Sadece mobilde */}
             {onClose && (
               <button
                 onClick={onClose}
-                className="absolute right-4 top-6 lg:hidden z-10 min-h-[44px] min-w-[44px] p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-all duration-200 hover:scale-110 flex items-center justify-center"
-                aria-label="Close menu"
+                className="absolute right-3 top-5 lg:hidden z-10 min-h-[44px] min-w-[44px] p-2 rounded-lg bg-muted hover:bg-muted/80 transition-all duration-200 flex items-center justify-center"
+                aria-label="Menüyü kapat"
               >
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5 text-muted-foreground" />
               </button>
             )}
 
             <Link
               href="/dashboard"
               onClick={handleLinkClick}
-              className="flex h-20 items-center justify-center bg-gradient-to-r from-blue-600/20 to-purple-600/20 hover:from-blue-600/30 hover:to-purple-600/30 transition-all duration-300 group cursor-pointer"
+              className="flex h-16 items-center px-6 hover:bg-muted/50 transition-all duration-300 group cursor-pointer"
             >
-              <div className="flex items-center space-x-3">
-                <div>
-                  <BrandLogo
-                    size={40}
-                    priority
-                    variant="dark"
-                    textClassName="text-xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent group-hover:from-blue-300 group-hover:to-purple-300 transition-all duration-300"
-                  />
-                  <p className="text-xs text-slate-400 group-hover:text-slate-300 transition-colors duration-300">
-                    Finans Yönetimi
-                  </p>
-                </div>
-              </div>
+              <BrandLogo
+                size={36}
+                priority
+                variant="dark"
+                textClassName="text-lg bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent group-hover:from-indigo-300 group-hover:to-violet-300 transition-all duration-300"
+              />
             </Link>
           </div>
 
-          {/* Kullanıcı Plan Bilgisi */}
+          {/* Plan Badge */}
           {user && (
-            <div className="flex items-center justify-center py-3 px-6">
+            <div className="flex items-center px-6 pb-3">
               {user.plan === 'premium' ||
                 user.plan === 'enterprise' ||
                 user.plan === 'enterprise_premium' ? (
                 <Link
                   href="/premium-features"
                   onClick={handleLinkClick}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-500/30 shadow-md hover:shadow-glow hover:from-yellow-500/30 hover:to-amber-500/30 hover:scale-105 transition-all duration-300 cursor-pointer group"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-500/25 hover:from-amber-500/25 hover:to-orange-500/25 transition-all duration-300 group"
                 >
-                  <Crown className="h-4 w-4 text-yellow-400 group-hover:animate-bounce" />
-                  <span className="text-sm font-bold bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent group-hover:from-yellow-200 group-hover:via-yellow-300 group-hover:to-amber-200">
+                  <Crown className="h-3.5 w-3.5 text-amber-400" />
+                  <span className="text-xs font-semibold text-amber-300">
                     {user.plan === 'enterprise_premium'
                       ? 'Kurumsal Premium'
                       : user.plan === 'enterprise'
                         ? 'Enterprise'
                         : 'Premium'}
                   </span>
-                  <Sparkles className="h-3 w-3 text-yellow-400 group-hover:text-yellow-300" />
+                  <Sparkles className="h-3 w-3 text-amber-500/50" />
                 </Link>
               ) : (
-                <div className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-slate-700/30 border border-slate-600/50">
-                  <User className="h-4 w-4 text-slate-400" />
-                  <span className="text-sm font-medium text-slate-300">Free</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border border-border">
+                  <User className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground">Free</span>
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* Free kullanıcı için Premium Satın Al butonu */}
+        {/* Premium Upgrade Banner - Free users only */}
         {user && (user.plan === 'free' || !user.plan) && (
-          <div className="mx-6 my-4 shrink-0">
+          <div className="mx-4 mt-4 shrink-0">
             <Link
               href="/help/tickets/new?intent=membership&planId=premium&source=sidebar"
               onClick={handleLinkClick}
-              className="block p-4 bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-xl border border-purple-500/30 hover:from-purple-600/30 hover:to-pink-600/30 hover:shadow-glow transition-all duration-300 group"
+              className="block p-3 bg-gradient-to-r from-indigo-600/20 to-violet-600/20 rounded-lg border border-indigo-500/20 hover:from-indigo-600/30 hover:to-violet-600/30 transition-all duration-300 group"
             >
-              <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 group-hover:scale-110 transition-transform duration-300">
-                  <Crown className="h-4 w-4 text-white" />
+              <div className="flex items-center gap-3">
+                <div className="p-1.5 rounded-lg bg-indigo-500/20 group-hover:bg-indigo-500/30 transition-colors">
+                  <Crown className="h-4 w-4 text-indigo-400" />
                 </div>
-                <div className="flex-1">
-                  <p className="text-white font-semibold text-sm">Premium Talebi Oluştur</p>
-                  <p className="text-xs text-purple-200">Destek ekibine mesaj gönder</p>
-                </div>
-                <div className="text-purple-300 group-hover:text-white transition-colors duration-300">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white">Premium&apos;a Geç</p>
+                  <p className="text-xs text-indigo-300/70 truncate">Tüm özellikleri aç</p>
                 </div>
               </div>
             </Link>
           </div>
         )}
 
-        {/* Dönem Seçici */}
+        {/* Period Selector */}
         {user && (
-          <div className="px-6 mb-4 shrink-0">
+          <div className="px-4 mt-4 mb-2 shrink-0">
             <PeriodSelector />
           </div>
         )}
 
-        {/* Navigasyon - Scrollable */}
-        <nav className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 space-y-2 p-6 scrollbar-thin">
-          {navigation.map(item => {
-            // Premium özellik kontrolü
-            if (item.premium && user && !isPremiumPlan(user.plan)) {
-              return null
-            }
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 px-3 py-3 scrollbar-thin">
+          {navSections.map(section => {
+            // Filter items based on premium status
+            const visibleItems = section.items.filter(item => {
+              if (item.premium && user && !isPremiumPlan(user.plan)) {
+                return false
+              }
+              return true
+            })
 
-            const isActive = pathname === item.href
+            if (visibleItems.length === 0) { return null }
+
             return (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={handleLinkClick}
-                className={`group flex items-center space-x-3 rounded-xl px-4 min-h-[48px] py-3 text-sm font-medium transition-all duration-300 ${isActive
-                  ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white shadow-lg border border-blue-500/30 scale-[1.02]'
-                  : 'text-slate-300 hover:bg-slate-700/50 hover:text-white hover:shadow-md hover:scale-[1.01]'
-                  }`}
-              >
-                <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 ${isActive
-                    ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-md scale-110'
-                    : 'bg-slate-700/50 group-hover:bg-slate-600/50 group-hover:scale-110'
-                    }`}
-                >
-                  <item.icon className={`h-4 w-4 ${isActive ? 'text-white' : item.color}`} />
+              <div key={section.label} className="mb-4">
+                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  {section.label}
+                </p>
+                <div className="space-y-0.5">
+                  {visibleItems.map(item => {
+                    const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        onClick={handleLinkClick}
+                        className={`group flex items-center gap-3 rounded-lg px-3 min-h-[40px] py-2 text-sm font-medium transition-all duration-200 ${isActive
+                          ? 'bg-primary/10 text-primary border-l-2 border-primary ml-0'
+                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                          }`}
+                      >
+                        <item.icon
+                          className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-primary' : item.color + ' group-hover:text-foreground'
+                            }`}
+                        />
+                        <span className="truncate">{item.name}</span>
+                        {item.premium && <Crown className="h-3 w-3 text-amber-400 flex-shrink-0 ml-auto" />}
+                      </Link>
+                    )
+                  })}
                 </div>
-                <span className="flex-1">{item.name}</span>
-                {item.premium && <Crown className="h-3 w-3 text-yellow-400" />}
-                {isActive && (
-                  <div className="h-2 w-2 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 animate-pulse"></div>
-                )}
-              </Link>
+              </div>
             )
           })}
         </nav>
 
-        {/* Alt Kısım - Sabit */}
-        <div className="border-t border-slate-700/50 p-6 shrink-0">
-          <div className="space-y-2">
-            {user && user.role === 'ADMIN' && (
-              <Link
-                href="/admin"
-                onClick={handleLinkClick}
-                className={`flex items-center space-x-3 rounded-xl px-4 min-h-[48px] py-3 text-sm font-medium transition-all duration-300 ${pathname === '/admin'
-                  ? 'bg-gradient-to-r from-red-600/20 to-pink-600/20 text-white shadow-lg border border-red-500/30'
-                  : 'text-slate-300 hover:bg-red-600/20 hover:text-red-400'
-                  }`}
-              >
-                <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 ${pathname === '/admin'
-                    ? 'bg-gradient-to-br from-red-500 to-pink-600 text-white shadow-md'
-                    : 'bg-slate-700/50 group-hover:scale-110'
-                    }`}
-                >
-                  <Shield className="h-4 w-4" />
-                </div>
-                <span>Admin Paneli</span>
-                {pathname === '/admin' && (
-                  <div className="h-2 w-2 rounded-full bg-gradient-to-r from-red-400 to-pink-400"></div>
-                )}
-              </Link>
-            )}
-
+        {/* Bottom Section */}
+        <div className="border-t border-border p-3 shrink-0 space-y-0.5">
+          {user && user.role === 'ADMIN' && (
             <Link
-              href="/settings"
+              href="/admin"
               onClick={handleLinkClick}
-              className="flex items-center space-x-3 rounded-xl px-4 min-h-[48px] py-3 text-sm font-medium text-slate-300 transition-all duration-300 hover:bg-slate-700/50 hover:text-white hover:scale-[1.01]"
+              className={`flex items-center gap-3 rounded-lg px-3 min-h-[40px] py-2 text-sm font-medium transition-all duration-200 ${pathname === '/admin' || pathname.startsWith('/admin/')
+                ? 'bg-destructive/15 text-destructive'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-700/50 group-hover:scale-110 transition-transform duration-300">
-                <Settings className="h-4 w-4" />
-              </div>
-              <span>Ayarlar</span>
+              <Shield className="h-4 w-4" />
+              <span>Admin Paneli</span>
             </Link>
+          )}
 
-            <button
-              onClick={() => void handleLogout()}
-              className="w-full flex items-center space-x-3 rounded-xl px-4 min-h-[48px] py-3 text-sm font-medium text-slate-300 transition-all duration-300 hover:bg-red-600/20 hover:text-red-400 hover:scale-[1.01]"
-            >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-700/50 group-hover:scale-110 transition-transform duration-300">
-                <LogOut className="h-4 w-4" />
-              </div>
-              <span>Çıkış Yap</span>
-            </button>
-          </div>
+          <Link
+            href="/settings"
+            onClick={handleLinkClick}
+            className={`flex items-center gap-3 rounded-lg px-3 min-h-[40px] py-2 text-sm font-medium transition-all duration-200 ${pathname === '/settings'
+              ? 'bg-primary/15 text-primary'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+              }`}
+          >
+            <Settings className="h-4 w-4" />
+            <span>Ayarlar</span>
+          </Link>
+
+          <button
+            onClick={() => void handleLogout()}
+            className="w-full flex items-center gap-3 rounded-lg px-3 min-h-[40px] py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Çıkış Yap</span>
+          </button>
         </div>
       </div>
     </>

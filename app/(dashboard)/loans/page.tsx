@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, PageHeader } from '@/components/mosaic'
 import { useToast } from '@/lib/use-toast'
 import {
     Building2,
@@ -82,15 +81,16 @@ export default function LoansPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">Kredi ve Borç Yönetimi</h1>
-                    <p className="text-muted-foreground">Kredilerinizi takip edin ve ödemelerinizi planlayın</p>
-                </div>
-                <Button onClick={() => router.push('/loans/new')} className="bg-blue-600 hover:bg-blue-700">
-                    <Plus className="mr-2 h-4 w-4" /> Yeni Kredi Ekle
-                </Button>
-            </div>
+            <PageHeader
+                title="Kredi ve Borç Yönetimi"
+                description="Kredilerinizi takip edin, ödeme planınızı görün ve yeni kredi ekleyin."
+                breadcrumbs={[{ label: 'Krediler' }]}
+                actions={(
+                    <Button onClick={() => router.push('/loans/new')}>
+                        <Plus className="mr-2 h-4 w-4" /> Yeni Kredi Ekle
+                    </Button>
+                )}
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {loans.map((loan) => (
@@ -104,11 +104,11 @@ export default function LoansPage() {
                                     </CardDescription>
                                 </div>
                                 <div className="flex gap-2">
-                                    <div className={`px-2 py-1 rounded text-xs font-medium ${loan.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                                    <div className={`px-2 py-1 rounded text-xs font-medium ${loan.isActive ? 'bg-green-500/15 text-green-400' : 'bg-gray-100 text-gray-700'}`}>
                                         {loan.isActive ? 'Aktif' : 'Tamamlandı'}
                                     </div>
                                     {loan.isFictional && (
-                                        <div className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
+                                        <div className="px-2 py-1 rounded text-xs font-medium bg-blue-500/15 text-blue-400">
                                             📋 Kurgu
                                         </div>
                                     )}
@@ -119,7 +119,7 @@ export default function LoansPage() {
                             <div className="flex justify-between items-end">
                                 <div>
                                     <p className="text-sm text-muted-foreground">Toplam Tutar</p>
-                                    <p className="text-2xl font-bold text-blue-600">
+                                    <p className="text-2xl font-bold text-blue-400">
                                         {new Intl.NumberFormat('tr-TR', { style: 'currency', currency: loan.currencyCode }).format(loan.totalAmount)}
                                     </p>
                                 </div>
@@ -131,7 +131,7 @@ export default function LoansPage() {
 
                             {/* Aylık Ödeme */}
                             {loan.monthlyPayment && (
-                                <div className="p-3 bg-gray-50 rounded-lg">
+                                <div className="p-3 bg-accent/20 rounded-lg">
                                     <p className="text-xs text-muted-foreground mb-1">Aylık Ödeme</p>
                                     <p className="text-lg font-semibold text-gray-900">
                                         {new Intl.NumberFormat('tr-TR', { style: 'currency', currency: loan.currencyCode }).format(loan.monthlyPayment)}
@@ -176,7 +176,7 @@ export default function LoansPage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    className="text-red-400 hover:text-red-400 hover:bg-red-50"
                                     onClick={() => handleDelete(loan.id)}
                                 >
                                     <Trash2 className="h-4 w-4" />
@@ -187,7 +187,7 @@ export default function LoansPage() {
                 ))}
 
                 {loans.length === 0 && (
-                    <div className="col-span-full py-12 text-center bg-gray-50 rounded-lg border-2 border-dashed">
+                    <div className="col-span-full py-12 text-center bg-accent/20 rounded-lg border-2 border-dashed">
                         <CreditCard className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                         <h3 className="text-lg font-semibold">Henüz kredi eklenmemiş</h3>
                         <p className="text-muted-foreground mb-6">Hemen ilk kredinizi ekleyerek taksitlerinizi takip etmeye başlayın.</p>

@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
 import { Mail, Loader2, CheckCircle2 } from 'lucide-react'
 import { useUser } from '@/lib/user-context'
 

@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Download, MessageSquare } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, PageHeader } from '@/components/mosaic'
+import { Badge } from '@/components/mosaic'
+import { Skeleton } from '@/components/mosaic'
+import { Download, ArrowLeft } from 'lucide-react'
 import FileUpload from '@/components/help/file-upload'
-import NavigationButtons from '@/components/help/navigation-buttons'
+import Link from 'next/link'
 import { getDisplayName } from '@/lib/utils'
 
 interface Ticket {
@@ -50,10 +50,10 @@ const statusLabels: Record<string, string> = {
 }
 
 const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  in_progress: 'bg-blue-100 text-blue-800',
-  resolved: 'bg-green-100 text-green-800',
-  closed: 'bg-gray-100 text-gray-800',
+  pending: 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20',
+  in_progress: 'bg-blue-500/10 text-blue-500 border border-primary/20',
+  resolved: 'bg-green-500/10 text-green-500 border border-green-500/20',
+  closed: 'bg-muted text-muted-foreground border border-border',
 }
 
 function formatDate(dateString: string) {
@@ -135,26 +135,16 @@ export default function TicketDetailPage() {
 
   return (
     <div className="space-y-6 pb-8">
-      {/* Navigation Buttons */}
-      <NavigationButtons backHref="/help/tickets" backLabel="Destek Taleplerine Dön" />
-
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 p-6 sm:p-8 md:p-12 text-white shadow-2xl">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20" />
-        <div className="relative z-10">
-          <div className="flex flex-col sm:flex-row sm:items-center items-start gap-3 mb-4">
-            <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-              <MessageSquare className="h-8 w-8" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-2 break-words">
-                {ticket.subject}
-              </h1>
-              <p className="text-lg md:text-xl text-white/90">Talep No: {ticket.ticketNumber}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title={ticket.subject}
+        description={`Talep No: ${ticket.ticketNumber}`}
+        breadcrumbs={
+          <Link href="/help/tickets" className="flex items-center hover:text-foreground transition-colors">
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Destek Taleplerine Dön
+          </Link>
+        }
+      />
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-2 space-y-6">
@@ -169,7 +159,7 @@ export default function TicketDetailPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-wrap text-gray-700">{ticket.description}</p>
+              <p className="whitespace-pre-wrap text-foreground">{ticket.description}</p>
             </CardContent>
           </Card>
 
@@ -183,11 +173,11 @@ export default function TicketDetailPage() {
                   {ticket.attachments.map(attachment => (
                     <div
                       key={attachment.id}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 bg-gray-50 rounded-lg"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 bg-muted rounded-lg"
                     >
                       <div className="min-w-0">
                         <p className="text-sm font-medium break-words">{attachment.fileName}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {formatFileSize(attachment.fileSize)}
                         </p>
                       </div>
@@ -195,7 +185,7 @@ export default function TicketDetailPage() {
                         href={attachment.filePath}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="self-start sm:self-auto text-blue-600 hover:underline"
+                        className="self-start sm:self-auto text-primary hover:underline"
                       >
                         <Download className="h-4 w-4" />
                       </a>
@@ -213,7 +203,7 @@ export default function TicketDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {ticket.replies.map(reply => (
-                  <div key={reply.id} className="border-l-4 border-blue-500 pl-4">
+                  <div key={reply.id} className="border-l-4 border-primary pl-4">
                     <div className="flex items-center justify-between mb-2">
                       <div>
                         <p className="font-semibold">
@@ -221,10 +211,10 @@ export default function TicketDetailPage() {
                             ? '👨‍💼 Destek Ekibi'
                             : getDisplayName(reply.user)}
                         </p>
-                        <p className="text-xs text-gray-500">{formatDate(reply.createdAt)}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(reply.createdAt)}</p>
                       </div>
                     </div>
-                    <p className="whitespace-pre-wrap text-gray-700">{reply.message}</p>
+                    <p className="whitespace-pre-wrap text-foreground">{reply.message}</p>
                   </div>
                 ))}
               </CardContent>
@@ -258,11 +248,11 @@ export default function TicketDetailPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="text-sm text-gray-500">Durum</p>
+                <p className="text-sm text-muted-foreground">Durum</p>
                 <Badge className={statusColors[ticket.status]}>{statusLabels[ticket.status]}</Badge>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Öncelik</p>
+                <p className="text-sm text-muted-foreground">Öncelik</p>
                 <p className="text-sm font-medium">
                   {ticket.priority === 'low'
                     ? 'Düşük'
@@ -274,11 +264,11 @@ export default function TicketDetailPage() {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Kategori</p>
+                <p className="text-sm text-muted-foreground">Kategori</p>
                 <p className="text-sm font-medium">{ticket.category.name}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Oluşturulma Tarihi</p>
+                <p className="text-sm text-muted-foreground">Oluşturulma Tarihi</p>
                 <p className="text-sm font-medium">{formatDate(ticket.createdAt)}</p>
               </div>
             </CardContent>

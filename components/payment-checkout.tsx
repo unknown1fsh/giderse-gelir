@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
 import { Loader2, CreditCard, AlertCircle, CheckCircle2 } from 'lucide-react'
 
 interface PaymentCheckoutProps {

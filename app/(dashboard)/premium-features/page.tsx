@@ -183,7 +183,7 @@ export default function PremiumFeaturesPage() {
               <Link
                 key={index}
                 href={feature.href}
-                className="group relative overflow-hidden rounded-2xl bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 p-6 transition-all duration-300 hover:bg-slate-800/80 hover:border-slate-600 hover:shadow-2xl hover:scale-105"
+                className="group relative overflow-hidden rounded-2xl bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 p-6 transition-all duration-300 hover:bg-slate-800/80 hover:border-slate-600 hover:shadow-2xl hover:scale-105"
               >
                 <div className="relative z-10">
                   <div className={`mb-4 inline-flex rounded-xl ${feature.iconBg} p-3`}>
@@ -218,7 +218,7 @@ export default function PremiumFeaturesPage() {
                 <Link
                   key={index}
                   href={feature.href}
-                  className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800/80 to-purple-900/20 backdrop-blur-sm border border-purple-500/30 p-6 transition-all duration-300 hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-105"
+                  className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800/80 to-purple-900/20 backdrop-blur-xl border border-purple-500/30 p-6 transition-all duration-300 hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-105"
                 >
                   <div className="relative z-10">
                     <div className={`mb-4 inline-flex rounded-xl ${feature.iconBg} p-3`}>
@@ -245,7 +245,7 @@ export default function PremiumFeaturesPage() {
         {/* Free Kullanıcı için Yükseltme Çağrısı */}
         {!isPremium && (
           <div className="mt-12 text-center">
-            <div className="rounded-2xl bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm border border-purple-500/30 p-8">
+            <div className="rounded-2xl bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-xl border border-purple-500/30 p-8">
               <Crown className="mx-auto mb-4 h-16 w-16 text-yellow-400 animate-bounce" />
               <h3 className="mb-4 text-3xl font-bold text-white">
                 Premium'a Geçin, Tüm Özelliklerin Kilidini Açın!
@@ -255,7 +255,7 @@ export default function PremiumFeaturesPage() {
               </p>
               <Link
                 href="/premium"
-                className="inline-flex items-center space-x-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 text-lg font-bold text-white shadow-lg hover:from-purple-700 hover:to-pink-700 transition-all hover:scale-105"
+                className="inline-flex items-center space-x-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 text-lg font-bold text-white shadow-mosaic hover:from-purple-700 hover:to-pink-700 transition-all hover:scale-105"
               >
                 <span>Premium Satın Al</span>
                 <ArrowRight className="h-5 w-5" />

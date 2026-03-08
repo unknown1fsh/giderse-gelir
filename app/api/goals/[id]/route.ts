@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth'
+import { syncNotificationEvents } from '@/lib/notifications/service'
 
 export async function PATCH(
     request: NextRequest,
@@ -40,6 +41,10 @@ export async function PATCH(
                 status
             },
             include: { currency: true }
+        })
+
+        await syncNotificationEvents(prisma, {
+            userId: user.id,
         })
 
         return NextResponse.json(updated)

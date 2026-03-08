@@ -23,6 +23,7 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
     refTxTypes,
     refTxCategories,
     paymentMethodParams,
+    refPaymentMethods,
     currencyParams,
     refCurrencies,
     refBanks,
@@ -38,6 +39,7 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
       orderBy: { name: 'asc' },
     }),
     parameterService.getByGroup('PAYMENT_METHOD'),
+    prisma.refPaymentMethod.findMany({ where: { active: true }, orderBy: { name: 'asc' } }),
     parameterService.getByGroup('CURRENCY'),
     // Para birimleri için: SystemParameter boşsa refCurrency tablosundan fallback
     prisma.refCurrency.findMany({ where: { active: true }, orderBy: { code: 'asc' } }),
@@ -121,6 +123,12 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
       code: p.paramCode,
       name: p.displayName,
       description: p.description,
+    })),
+    refPaymentMethods: refPaymentMethods.map(method => ({
+      id: method.id,
+      code: method.code,
+      name: method.name,
+      description: method.description,
     })),
 
     // ESKİ REF TABLOLARINDAN (Foreign Key uyumu için)
@@ -208,6 +216,7 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
       totalGoldPurities: refGoldPurities.length,
       totalCategories: refTxCategories.length,
       totalPaymentMethods: paymentMethodParams.length,
+      totalRefPaymentMethods: refPaymentMethods.length,
       totalCurrencies: currencyParams.length > 0 ? currencyParams.length : refCurrencies.length,
       timestamp: new Date().toISOString(),
     },
@@ -218,6 +227,7 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
     txTypes: response.txTypes.length,
     categories: response.categories.length,
     paymentMethods: response.paymentMethods.length,
+    refPaymentMethods: response.refPaymentMethods.length,
     currencies: response.currencies.length,
     accounts: response.accounts.length,
   })

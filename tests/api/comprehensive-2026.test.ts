@@ -29,7 +29,7 @@ describe('2026 Kapsamlı Entegrasyon Testi', () => {
   let authToken: string
   let periodId: number
   let refs: Awaited<ReturnType<typeof getReferenceIds>>
-  let accountIds: { anaHesap: number; birikim: number } = { anaHesap: 0, birikim: 0 }
+  const accountIds: { anaHesap: number; birikim: number } = { anaHesap: 0, birikim: 0 }
   let beneficiaryIds: { evSahibi: number; bedas: number } = { evSahibi: 0, bedas: 0 }
 
   beforeAll(async () => {
@@ -352,14 +352,14 @@ describe('2026 Kapsamlı Entegrasyon Testi', () => {
 
   describe('9. Gelir İşlemleri', () => {
     it('Hesapları al (gerekirse)', async () => {
-      if (accountIds.anaHesap > 0) return
+      if (accountIds.anaHesap > 0) {return}
       const res = await testFetch(`${BASE_URL}/accounts`, {
         headers: { Cookie: createAuthCookie(authToken) },
       })
       if (res.status === 200) {
         const accounts = await res.json()
         const bankAcc = accounts.find((a: { accountType: string }) => a.accountType === 'bank')
-        if (bankAcc) accountIds.anaHesap = bankAcc.id
+        if (bankAcc) {accountIds.anaHesap = bankAcc.id}
       }
     })
 
@@ -420,14 +420,14 @@ describe('2026 Kapsamlı Entegrasyon Testi', () => {
 
   describe('10. Gider İşlemleri', () => {
     it('Alıcıları al (gerekirse)', async () => {
-      if (beneficiaryIds.evSahibi > 0) return
+      if (beneficiaryIds.evSahibi > 0) {return}
       const res = await testFetch(`${BASE_URL}/beneficiaries`, {
         headers: { Cookie: createAuthCookie(authToken) },
       })
       if (res.status === 200) {
         const bens = await res.json()
         const ev = bens.find((b: { name: string }) => b.name?.includes('Ev Sahibi'))
-        if (ev) beneficiaryIds.evSahibi = ev.id
+        if (ev) {beneficiaryIds.evSahibi = ev.id}
       }
     })
 
@@ -472,10 +472,12 @@ describe('2026 Kapsamlı Entegrasyon Testi', () => {
         { category: refs.categoryUlasim, amount: 3500, desc: 'Ulaşım' },
         { category: refs.categorySaglik, amount: 1500, desc: 'Sağlık sigortası' },
         { category: refs.categoryAbonelik, amount: 350, desc: 'Netflix, Spotify' },
-      ].filter((g) => g.category != null)
+      ].filter((g) => g.category !== null && g.category !== undefined)
 
       for (const g of giderler) {
-        if (!g.category) continue
+        if (!g.category) {
+          continue
+        }
         const res = await testFetch(`${BASE_URL}/transactions`, {
           method: 'POST',
           headers: {

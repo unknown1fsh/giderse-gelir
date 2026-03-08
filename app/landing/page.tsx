@@ -1,379 +1,292 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
+import { useState, useEffect } from 'react'
 import {
-  BrainCircuit,
-  Play,
-  Rocket,
-  ShieldCheck,
-  Sparkles,
-  Target,
-  TrendingUp,
-  Lock,
-  EyeOff,
-  Database,
-  CheckCircle2,
+  ArrowRight, BrainCircuit, TrendingUp, TrendingDown,
+  CreditCard, Wallet, Bell, Gift, X, Play,
+  CheckCircle2, Lock, EyeOff, Database, ShieldCheck,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import BrandLogo from '@/components/brand-logo'
-import LandingCalculators from '@/components/landing/landing-calculators'
-import FeatureCarousel from '@/components/landing/feature-carousel'
-import FeedbackForm from '@/components/landing/feedback-form'
 
+function useMouseParallax(i = 0.012) {
+  const [o, setO] = useState({ x: 0, y: 0 })
+  useEffect(() => {
+    const h = (e: MouseEvent) => setO({ x: (e.clientX - window.innerWidth / 2) * i, y: (e.clientY - window.innerHeight / 2) * i })
+    window.addEventListener('mousemove', h); return () => window.removeEventListener('mousemove', h)
+  }, [i])
+  return o
+}
+
+function LiveTicker() {
+  const [v, setV] = useState('₺248.750')
+  useEffect(() => {
+    const vs = ['₺248.750', '₺248.912', '₺248.831', '₺249.104', '₺248.990']
+    let i = 0; const t = setInterval(() => { i = (i + 1) % vs.length; setV(vs[i]) }, 2200)
+    return () => clearInterval(t)
+  }, [])
+  return <span className="font-mono tabular-nums text-emerald-400/80 text-[11px]">{v}</span>
+}
+
+function AIBar() {
+  const [hs, setHs] = useState([40, 65, 30, 55, 45])
+  useEffect(() => {
+    const t = setInterval(() => setHs(prev => prev.map(() => 20 + Math.random() * 75)), 1400)
+    return () => clearInterval(t)
+  }, [])
+  return (
+    <div className="flex items-end gap-[3px] h-3">
+      {hs.map((h, i) => <div key={i} className="w-[3px] rounded-sm bg-violet-400/60 transition-all duration-700" style={{ height: `${h}%` }} />)}
+    </div>
+  )
+}
+
+function DashboardMock() {
+  const bars = [55, 80, 45, 92, 67, 73, 58]
+  const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem']
+  return (
+    <div className="relative">
+      <div className="absolute -inset-8 bg-gradient-to-br from-violet-600/12 via-fuchsia-600/6 to-cyan-600/8 blur-3xl rounded-full" />
+      <div className="relative rounded-2xl border border-white/[0.07] bg-slate-900/70 backdrop-blur-2xl shadow-2xl overflow-hidden">
+        <div className="flex items-center gap-1.5 border-b border-white/[0.05] px-4 py-2.5">
+          <div className="h-2 w-2 rounded-full bg-red-500/50" />
+          <div className="h-2 w-2 rounded-full bg-yellow-500/50" />
+          <div className="h-2 w-2 rounded-full bg-emerald-500/50" />
+          <span className="ml-3 text-[10px] text-slate-600">giderse-gelir.com/dashboard</span>
+        </div>
+        <div className="p-4 space-y-3">
+          <div className="rounded-xl border border-white/[0.05] bg-gradient-to-br from-violet-900/30 to-slate-900/50 p-4">
+            <p className="text-[9px] uppercase tracking-widest text-slate-600 mb-0.5">Net Varlık</p>
+            <p className="text-xl font-extrabold text-white">₺248.750</p>
+            <div className="flex items-center gap-1 mt-1">
+              <TrendingUp className="h-2.5 w-2.5 text-emerald-400" />
+              <span className="text-[10px] text-emerald-400 font-medium">+%12.4 bu ay</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {[{ icon: TrendingUp, l: 'Gelir', v: '₺18.500', c: 'text-emerald-400' }, { icon: TrendingDown, l: 'Gider', v: '₺11.230', c: 'text-rose-400' }].map(({ icon: I, l, v, c }) => (
+              <div key={l} className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-3">
+                <div className="flex items-center gap-1 mb-0.5"><I className={`h-2.5 w-2.5 ${c}`} /><p className="text-[9px] text-slate-600">{l}</p></div>
+                <p className={`text-xs font-bold ${c}`}>{v}</p>
+              </div>
+            ))}
+          </div>
+          <div className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[9px] font-medium text-slate-500">Aylık Harcama</p>
+              <span className="text-[9px] text-violet-400">2025</span>
+            </div>
+            <div className="flex items-end gap-1 h-12">
+              {bars.map((h, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
+                  <div className="w-full rounded-sm bg-gradient-to-t from-violet-600/60 to-violet-400/40" style={{ height: `${h}%` }} />
+                  <span className="text-[7px] text-slate-700">{months[i]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-1">
+            {[
+              { icon: CreditCard, l: 'Market alışverişi', a: '-₺320', c: 'text-rose-400' },
+              { icon: Wallet, l: 'Maaş', a: '+₺18.500', c: 'text-emerald-400' },
+              { icon: Bell, l: 'Netflix', a: '-₺89', c: 'text-rose-400' },
+            ].map((t, i) => {
+              const I = t.icon
+              return (
+                <div key={i} className="flex items-center justify-between rounded-lg bg-white/[0.02] px-2.5 py-1.5">
+                  <div className="flex items-center gap-2">
+                    <div className="rounded-md border border-white/[0.04] bg-white/[0.03] p-1"><I className="h-2.5 w-2.5 text-slate-600" /></div>
+                    <span className="text-[10px] text-slate-400">{t.l}</span>
+                  </div>
+                  <span className={`text-[10px] font-semibold ${t.c}`}>{t.a}</span>
+                </div>
+              )
+            })}
+          </div>
+          <div className="flex items-center gap-2 rounded-xl border border-violet-500/15 bg-violet-500/8 px-3 py-2">
+            <BrainCircuit className="h-3 w-3 text-violet-400 shrink-0" />
+            <p className="text-[10px] text-violet-300 leading-snug"><span className="font-semibold">AI:</span> Market harcamalarını %15 azaltırsan ₺1.200 tasarruf edersin.</p>
+          </div>
+        </div>
+      </div>
+      <div className="mt-2.5 grid grid-cols-2 gap-2">
+        <div className="flex items-center gap-2.5 rounded-xl border border-emerald-500/12 bg-emerald-950/40 px-3 py-2.5 backdrop-blur-sm">
+          <div className="relative shrink-0">
+            <div className="h-2 w-2 rounded-full bg-emerald-400" />
+            <div className="absolute inset-0 animate-ping rounded-full bg-emerald-400 opacity-40" />
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold text-emerald-300">Canlı güncelleniyor</p>
+            <LiveTicker />
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5 rounded-xl border border-violet-500/12 bg-violet-950/40 px-3 py-2.5 backdrop-blur-sm">
+          <div className="shrink-0 rounded-lg bg-violet-500/15 p-1">
+            <BrainCircuit className="h-2.5 w-2.5 text-violet-400" />
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold text-violet-300">AI analiz aktif</p>
+            <AIBar />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ══════════════════════════════════════════════════════════════ */
 export default function LandingPage() {
   const router = useRouter()
+  const mouse = useMouseParallax()
+  const [promoDismissed, setPromoDismissed] = useState(false)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated Background Mesh */}
-      <div className="absolute inset-0 bg-gradient-mesh opacity-50 pointer-events-none"></div>
+    <div className="min-h-screen bg-[#050816] text-white overflow-x-hidden">
 
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 animate-gradient-x"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-12 sm:pb-16">
-          <div className="text-center">
-            {/* Logo */}
-            <div className="flex justify-center mb-6 sm:mb-8 animate-scale-up">
-              <div className="flex items-center space-x-2 sm:space-x-3 bg-white/10 backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105">
-                <BrandLogo
-                  size={32}
-                  priority
-                  variant="dark"
-                  textClassName="text-white font-medium text-sm sm:text-base"
-                />
-              </div>
+      {/* Aurora */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute rounded-full blur-[160px] opacity-[0.15]"
+          style={{ width: 800, height: 800, background: 'radial-gradient(circle, #7c3aed 0%, #a855f7 50%, transparent 70%)', top: '-10%', left: '-8%', transform: `translate(${mouse.x * 2}px,${mouse.y * 2}px)` }} />
+        <div className="absolute rounded-full blur-[130px] opacity-[0.09]"
+          style={{ width: 600, height: 600, background: 'radial-gradient(circle, #06b6d4 0%, #3b82f6 60%, transparent 70%)', bottom: '0%', right: '-5%', transform: `translate(${-mouse.x}px,${-mouse.y}px)` }} />
+      </div>
+
+      {/* Promo */}
+      {!promoDismissed && (
+        <div className="relative z-50 flex items-center justify-center gap-3 bg-gradient-to-r from-amber-500 via-orange-400 to-amber-500 px-4 py-2 text-xs font-medium text-black sm:text-sm">
+          <Gift className="h-3.5 w-3.5 shrink-0" />
+          <span><strong>Yeni üyelere özel:</strong> İlk 30 gün Premium tamamen ücretsiz.</span>
+          <button onClick={() => router.push('/auth/register')} className="inline-flex items-center gap-1 rounded-full bg-black/15 px-2.5 py-0.5 text-xs font-bold hover:bg-black/25 transition">
+            Başla <ArrowRight className="h-3 w-3" />
+          </button>
+          <button onClick={() => setPromoDismissed(true)} className="absolute right-3 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 transition" aria-label="Kapat">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* Nav */}
+      <nav className="relative z-50 border-b border-white/[0.05]">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
+          <BrandLogo size={24} priority variant="dark" textClassName="text-white font-bold text-sm sm:text-base" />
+          <div className="hidden items-center gap-7 text-sm text-slate-400 sm:flex">
+            <Link href="/features" className="transition hover:text-white">Özellikler</Link>
+            <Link href="/pricing" className="transition hover:text-white">Fiyatlar</Link>
+            <Link href="/demo" className="transition hover:text-white">Demo</Link>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <button onClick={() => router.push('/auth/login')} className="px-3 py-1.5 text-slate-400 hover:text-white transition">Giriş</button>
+            <button onClick={() => router.push('/auth/register')} className="rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 px-4 py-1.5 font-semibold text-white hover:opacity-90 transition shadow-[0_0_18px_rgba(139,92,246,0.3)]">
+              Ücretsiz Başla
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <section className="relative z-10 mx-auto max-w-7xl px-5 pb-24 pt-20 sm:px-8 sm:pt-28 lg:pt-36 lg:pb-32">
+        <div className="grid items-center gap-16 lg:grid-cols-2">
+
+          {/* Left */}
+          <div className="text-center lg:text-left">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/8 px-3.5 py-1.5 text-xs font-medium text-violet-300">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-violet-500" />
+              </span>
+              Yapay Zekâ Destekli Finans Yönetimi
             </div>
 
-            {/* Main Heading */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 px-4 animate-scale-up">
-              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-gradient-x">
-                Finansal
+            <h1 className="mb-6 text-5xl font-extrabold leading-[1.06] tracking-tight text-white sm:text-6xl lg:text-[5.5rem]">
+              Paranın gerçek<br />
+              <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+                sahibi ol.
               </span>
-              <br />
-              <span className="text-white">Özgürlüğünüz</span>
             </h1>
 
-            {/* Slogan */}
-            <div className="mb-6 animate-scale-up" style={{ animationDelay: '200ms' }}>
-              <p className="inline-block px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 text-purple-200 font-medium text-lg sm:text-xl">
-                &quot;GiderSE-Gelir Üzülme...&quot; 🚀
-              </p>
-            </div>
-
-            {/* Subtitle */}
-            <p className="text-lg sm:text-xl md:text-2xl text-slate-300 mb-6 sm:mb-8 max-w-2xl mx-auto px-4 animate-scale-up">
-              Gelir–gider alışkanlıklarınızı anlayan yapay zekâ ile harcamalarınızı netleştirin,
-              tasarruf fırsatlarını yakalayın ve hedeflerinize daha hızlı yaklaşın.
+            <p className="mx-auto mb-9 max-w-md text-base leading-relaxed text-slate-400 sm:text-lg lg:mx-0">
+              Gelir, gider, yatırım ve hedeflerini tek platformda yönet.
+              Yapay zekâ ne yapman gerektiğini söyler — sen karar verirsin.
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 px-4 animate-scale-up">
-              <Button
-                size="lg"
-                variant="premium"
-                className="w-full sm:w-auto"
-                onClick={() => router.push('/auth/register')}
-              >
-                <Rocket className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                Ücretsiz Başla
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/30 text-white hover:bg-white/10 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold w-full sm:w-auto"
-                onClick={() => router.push('/auth/login')}
-              >
-                <Play className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                Giriş Yap
-              </Button>
-            </div>
-            {/* Privacy Note */}
-            <div className="max-w-2xl mx-auto mb-8 sm:mb-12 animate-scale-up" style={{ animationDelay: '300ms' }}>
-              <div className="flex items-center justify-center gap-3 px-4 py-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-200">
-                <ShieldCheck className="h-5 w-5 flex-shrink-0" />
-                <p className="text-sm sm:text-base text-left">
-                  <span className="font-bold">Gizliliğiniz Önceliğimiz:</span> Kayıt olurken ad-soyad girişi <span className="text-white underline underline-offset-4 decoration-emerald-400">opsiyoneldir</span>. Sadece kullanıcı adı ve e-posta ile hemen başlayabilirsiniz.
-                </p>
-              </div>
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
+              <button onClick={() => router.push('/auth/register')}
+                className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-7 py-3.5 font-semibold text-white shadow-[0_0_28px_rgba(139,92,246,0.35)] transition hover:shadow-[0_0_45px_rgba(139,92,246,0.55)] sm:w-auto">
+                Ücretsiz başla
+                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+              </button>
+              <button onClick={() => router.push('/demo')}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 px-7 py-3.5 font-medium text-slate-300 transition hover:border-white/20 hover:text-white sm:w-auto">
+                <Play className="h-4 w-4 text-violet-400" /> Demo
+              </button>
             </div>
 
-            {/* AI Highlights */}
-            <div className="max-w-5xl mx-auto px-4 pb-6 sm:pb-10 animate-scale-up">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-4 sm:p-5 text-left">
-                  <div className="flex items-center gap-2 text-white mb-2">
-                    <BrainCircuit className="h-5 w-5 text-purple-300" />
-                    <span className="font-semibold">AI Tavsiyeler</span>
-                  </div>
-                  <p className="text-sm sm:text-[15px] text-slate-300 leading-relaxed">
-                    İşlem geçmişinize göre kişiselleştirilmiş öneriler: gereksiz giderler, tekrar
-                    eden ödemeler ve optimizasyon fırsatları.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-4 sm:p-5 text-left">
-                  <div className="flex items-center gap-2 text-white mb-2">
-                    <TrendingUp className="h-5 w-5 text-blue-300" />
-                    <span className="font-semibold">Trend & İçgörü</span>
-                  </div>
-                  <p className="text-sm sm:text-[15px] text-slate-300 leading-relaxed">
-                    Aylık karşılaştırmalar, kategori bazlı eğilimler ve “bu ay neden arttı?”
-                    sorusuna hızlı, anlaşılır cevaplar.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-4 sm:p-5 text-left">
-                  <div className="flex items-center gap-2 text-white mb-2">
-                    <Target className="h-5 w-5 text-pink-300" />
-                    <span className="font-semibold">Hedef Odaklı</span>
-                  </div>
-                  <p className="text-sm sm:text-[15px] text-slate-300 leading-relaxed">
-                    Hedefinize göre bütçe önerisi ve aksiyon planı: “Bu ay şuradan kısarsan hedefe
-                    şu kadar yaklaşır.”
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-4 sm:p-5 text-left border-emerald-500/30">
-                  <div className="flex items-center gap-2 text-white mb-2">
-                    <ShieldCheck className="h-5 w-5 text-emerald-300" />
-                    <span className="font-semibold text-emerald-300">İsimsiz Kayıt</span>
-                  </div>
-                  <p className="text-sm sm:text-[15px] text-slate-300 leading-relaxed">
-                    Gizliliğiniz bizim için her şeyden önemli. İsterseniz adınızı soyadınızı
-                    paylaşmadan, sadece kullanıcı adı ile anonim olarak kayıt olabilirsiniz.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 sm:mt-6 flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-400">
-                <Sparkles className="h-4 w-4 text-purple-300" />
-                <span>
-                  Daha akıllı harcama kararları için{' '}
-                  <span className="text-slate-200 font-medium">veri + AI</span> birleşimi.
-                </span>
-              </div>
+            <div className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-1.5 text-xs text-slate-600 lg:justify-start">
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500/80" />Anonim kayıt</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500/80" />Kredi kartı gerekmez</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500/80" />30 gün ücretsiz Premium</span>
             </div>
+          </div>
+
+          {/* Right */}
+          <div className="lg:pl-6">
+            <DashboardMock />
+          </div>
+        </div>
+      </section>
+
+      {/* Feature nav strip — tek satır, arka plan yok */}
+      <div className="relative z-10 border-t border-white/[0.04]">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 py-5 text-xs text-slate-600">
+            <Link href="/features#ai"        className="transition hover:text-slate-300">AI Finansal Asistan</Link>
+            <span className="text-white/10">·</span>
+            <Link href="/features#analytics" className="transition hover:text-slate-300">Gelişmiş Analizler</Link>
+            <span className="text-white/10">·</span>
+            <Link href="/features#budget"    className="transition hover:text-slate-300">Akıllı Bütçe</Link>
+            <span className="text-white/10">·</span>
+            <Link href="/features#portfolio" className="transition hover:text-slate-300">Portföy Takibi</Link>
+            <span className="text-white/10">·</span>
+            <Link href="/features#security"  className="transition hover:text-slate-300">Güvenlik</Link>
+            <span className="text-white/10">·</span>
+            <Link href="/features" className="font-medium text-violet-400/70 transition hover:text-violet-300">
+              Tüm özellikler →
+            </Link>
           </div>
         </div>
       </div>
-
-      {/* Veri Gizliliği ve Güvenlik Bölümü */}
-      <div className="relative py-16 sm:py-20 border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center mb-4">
-              <div className="p-3 rounded-full bg-gradient-to-br from-emerald-500/20 to-blue-500/20 border border-emerald-400/30">
-                <ShieldCheck className="h-8 w-8 text-emerald-400" />
-              </div>
-            </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
-              <span className="bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Verileriniz Sadece Sizindir
-              </span>
-            </h2>
-            <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto">
-              Finansal verilerinizin gizliliği ve güvenliği bizim için en önemli önceliktir.
-              Verileriniz şifrelenir, korunur ve yalnızca sizin kontrolünüzdedir.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {/* Şifreleme */}
-            <div className="bg-gradient-to-br from-emerald-500/10 via-blue-500/10 to-purple-500/10 backdrop-blur-sm rounded-2xl border-2 border-emerald-400/30 p-6 sm:p-8 hover:border-emerald-400/50 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-emerald-500/20 border border-emerald-400/30">
-                  <Lock className="h-6 w-6 text-emerald-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white">End-to-End Şifreleme</h3>
-              </div>
-              <p className="text-slate-300 leading-relaxed">
-                Tüm finansal verileriniz endüstri standardı şifreleme ile korunur. Verileriniz
-                sadece sizin erişebileceğiniz şekilde saklanır.
-              </p>
-            </div>
-
-            {/* Veri Sahipliği */}
-            <div className="bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border-2 border-blue-400/30 p-6 sm:p-8 hover:border-blue-400/50 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-400/30">
-                  <Database className="h-6 w-6 text-blue-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white">Tam Veri Sahipliği</h3>
-              </div>
-              <p className="text-slate-300 leading-relaxed">
-                Verileriniz size aittir. İstediğiniz zaman verilerinizi silebilir, dışa aktarabilir
-                veya gizlilik ayarlarınızı değiştirebilirsiniz.
-              </p>
-            </div>
-
-            {/* Gizlilik Kontrolü */}
-            <div className="bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-red-500/10 backdrop-blur-sm rounded-2xl border-2 border-purple-400/30 p-6 sm:p-8 hover:border-purple-400/50 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-purple-500/20 border border-purple-400/30">
-                  <EyeOff className="h-6 w-6 text-purple-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white">Gizlilik Kontrolü</h3>
-              </div>
-              <p className="text-slate-300 leading-relaxed">
-                Verileriniz üçüncü taraflarla paylaşılmaz. Reklam verileri toplanmaz. Sadece size
-                hizmet etmek için gerekli minimum veri işlenir.
-              </p>
-            </div>
-          </div>
-
-          {/* Güvenlik Özellikleri Listesi */}
-          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-3xl border-2 border-white/10 p-8 sm:p-12">
-            <h3 className="text-2xl sm:text-3xl font-bold text-white text-center mb-8">
-              Güvenlik ve Gizlilik Taahhütlerimiz
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-1 flex-shrink-0" />
-                <div>
-                  <p className="text-white font-semibold mb-1">KVKK ve GDPR Uyumlu</p>
-                  <p className="text-slate-300 text-sm">
-                    Kişisel Verilerin Korunması Kanunu ve GDPR standartlarına tam uyumluluk
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-1 flex-shrink-0" />
-                <div>
-                  <p className="text-white font-semibold mb-1">Güvenli Sunucular</p>
-                  <p className="text-slate-300 text-sm">
-                    Verileriniz güvenli, şifrelenmiş sunucularda saklanır ve düzenli yedeklenir
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-1 flex-shrink-0" />
-                <div>
-                  <p className="text-white font-semibold mb-1">İki Faktörlü Doğrulama</p>
-                  <p className="text-slate-300 text-sm">
-                    Hesabınızı ekstra güvenlik katmanı ile koruyun (isteğe bağlı)
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-1 flex-shrink-0" />
-                <div>
-                  <p className="text-white font-semibold mb-1">Veri Dışa Aktarma</p>
-                  <p className="text-slate-300 text-sm">
-                    İstediğiniz zaman tüm verilerinizi standart formatta dışa aktarabilirsiniz
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-1 flex-shrink-0" />
-                <div>
-                  <p className="text-white font-semibold mb-1">Anonim Kullanım</p>
-                  <p className="text-slate-300 text-sm">
-                    İsim-soyisim vermeden, sadece kullanıcı adı ile uygulamayı kullanabilirsiniz
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-1 flex-shrink-0" />
-                <div>
-                  <p className="text-white font-semibold mb-1">Şeffaf Gizlilik Politikası</p>
-                  <p className="text-slate-300 text-sm">
-                    Verilerinizin nasıl kullanıldığını açık ve net bir şekilde paylaşıyoruz
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="mt-8 text-center">
-              <Link
-                href="/privacy"
-                className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 font-semibold transition-colors underline"
-              >
-                <ShieldCheck className="h-4 w-4" />
-                Detaylı Gizlilik Politikamızı İnceleyin
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Feature Carousel */}
-      <FeatureCarousel />
-
-      {/* Demo CTA Section */}
-      <div className="relative py-12 sm:py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-blue-600/20 backdrop-blur-sm rounded-3xl border border-white/10 p-8 sm:p-12 shadow-2xl">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
-              Uygulamayı Denemek İster misiniz?
-            </h2>
-            <p className="text-lg sm:text-xl text-slate-300 mb-6 max-w-2xl mx-auto">
-              Demo sayfasında uygulamanın özelliklerini keşfedin, işlemler ekleyin ve finansal
-              yönetimin nasıl çalıştığını görün.
-            </p>
-            <Button
-              size="lg"
-              variant="premium"
-              className="w-full sm:w-auto"
-              onClick={() => router.push('/demo')}
-            >
-              <Play className="h-5 w-5 mr-2" />
-              Demo'yu Hemen Dene
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <LandingCalculators />
-
-      {/* Feedback Form Section */}
-      <FeedbackForm />
 
       {/* Footer */}
-      <div className="relative z-10 py-8 sm:py-12 border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
-              <BrandLogo
-                size={36}
-                variant="dark"
-                priority
-                textClassName="text-xl sm:text-2xl font-bold text-white"
-              />
+      <footer className="relative z-10 border-t border-white/[0.04] py-10">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between">
+            <div className="flex flex-col items-center gap-3 sm:items-start">
+              <BrandLogo size={22} variant="dark" priority textClassName="text-sm font-bold text-white" />
+              <div className="flex items-center gap-4 text-[10px] text-slate-600">
+                {[
+                  { icon: Lock,       l: 'Şifreli'    },
+                  { icon: EyeOff,     l: 'Reklam yok' },
+                  { icon: Database,   l: 'Verin sende' },
+                  { icon: ShieldCheck,l: 'KVKK'       },
+                ].map(({ icon: I, l }) => (
+                  <span key={l} className="flex items-center gap-1"><I className="h-3 w-3 text-emerald-600/60" />{l}</span>
+                ))}
+              </div>
+              <p className="text-[10px] text-slate-700">© {new Date().getFullYear()} GiderSE-Gelir</p>
             </div>
-            <p className="text-slate-400 mb-3 sm:mb-4 text-sm sm:text-base">
-              Finansal özgürlüğünüz için güvenilir partneriniz
-            </p>
-            <div className="flex flex-wrap justify-center items-center gap-y-2 gap-x-4 sm:gap-x-6 text-xs sm:text-sm text-slate-400">
-              <span>© 2025 GiderSE-Gelir</span>
-              <Link
-                href="/privacy"
-                className="text-purple-400 hover:text-purple-300 transition-colors underline"
-              >
-                Gizlilik Politikası
-              </Link>
-              <Link
-                href="/terms"
-                className="text-purple-400 hover:text-purple-300 transition-colors underline"
-              >
-                Kullanım Şartları
-              </Link>
-              <Link
-                href="/cookie-policy"
-                className="text-purple-400 hover:text-purple-300 transition-colors underline"
-              >
-                Çerez Politikası
-              </Link>
-              <Link
-                href="/kvkk"
-                className="text-purple-400 hover:text-purple-300 transition-colors underline"
-              >
-                KVKK
-              </Link>
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-slate-600 sm:justify-end">
+              <Link href="/features"  className="hover:text-slate-300 transition">Özellikler</Link>
+              <Link href="/pricing"   className="hover:text-slate-300 transition">Fiyatlar</Link>
+              <Link href="/demo"      className="hover:text-slate-300 transition">Demo</Link>
+              <Link href="/privacy"   className="hover:text-slate-300 transition">Gizlilik</Link>
+              <Link href="/terms"     className="hover:text-slate-300 transition">Kullanım Şartları</Link>
+              <Link href="/kvkk"      className="hover:text-slate-300 transition">KVKK</Link>
             </div>
           </div>
         </div>
-      </div>
+      </footer>
+
     </div>
   )
 }

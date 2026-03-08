@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
 import { MessageSquare, Send, CheckCircle2 } from 'lucide-react'
 
 export default function FeedbackForm() {

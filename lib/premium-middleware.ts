@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
-import { isPremiumPlan, isEnterprisePlan, PLAN_IDS, getPlanLimits } from './plan-config'
+import { isPremiumPlan, isFamilyPlan, PLAN_IDS, getPlanLimits } from './plan-config'
 
 const prisma = new PrismaClient()
 
 // Premium özellik gereksinimleri
-export type PremiumRequirement = 'premium' | 'enterprise' | 'enterprise_premium'
+export type PremiumRequirement = 'premium' | 'family'
 
 export interface PremiumCheckResult {
   allowed: boolean
@@ -22,7 +22,6 @@ export async function checkPremiumAccess(
   request: NextRequest,
   requirement: PremiumRequirement = 'premium'
 ): Promise<PremiumCheckResult> {
-  // Kullanıcı authentication kontrolü
   const user = await getCurrentUser(request)
 
   if (!user) {
@@ -34,7 +33,6 @@ export async function checkPremiumAccess(
     }
   }
 
-  // Aktif subscription kontrolü
   const subscription = await prisma.userSubscription.findFirst({
     where: {
       userId: user.id,
@@ -45,33 +43,24 @@ export async function checkPremiumAccess(
 
   const currentPlan = subscription?.planId || PLAN_IDS.FREE
 
-  // Plan gereksinimi kontrolü
   let allowed = false
   let message = ''
 
   switch (requirement) {
     case 'premium':
-      // Premium, Enterprise veya Enterprise Premium planı gerekiyor
+      // Premium veya Aile planı gerekiyor
       allowed = isPremiumPlan(currentPlan)
       message = allowed
         ? ''
         : 'Bu özellik Premium üyelik gerektirir. Premium plana geçerek bu özelliği kullanabilirsiniz.'
       break
 
-    case 'enterprise':
-      // Enterprise veya Enterprise Premium planı gerekiyor
-      allowed = isEnterprisePlan(currentPlan)
+    case 'family':
+      // Sadece Aile planı gerekiyor
+      allowed = isFamilyPlan(currentPlan)
       message = allowed
         ? ''
-        : 'Bu özellik Enterprise üyelik gerektirir. Enterprise plana geçerek bu özelliği kullanabilirsiniz.'
-      break
-
-    case 'enterprise_premium':
-      // Sadece Enterprise Premium planı gerekiyor
-      allowed = currentPlan === PLAN_IDS.ENTERPRISE_PREMIUM
-      message = allowed
-        ? ''
-        : 'Bu özellik Enterprise Premium üyelik gerektirir. Ekibimizle iletişime geçerek Enterprise Premium plana geçebilirsiniz.'
+        : 'Bu özellik Aile paketi gerektirir. Aile paketine geçerek bu özelliği kullanabilirsiniz.'
       break
 
     default:
@@ -89,13 +78,6 @@ export async function checkPremiumAccess(
 
 /**
  * Premium API route'ları için middleware wrapper
- *
- * Kullanım:
- * ```typescript
- * export const GET = withPremium(async (request: NextRequest) => {
- *   // Premium kullanıcılar için kod
- * })
- * ```
  */
 export function withPremium(
   handler: (request: NextRequest) => Promise<NextResponse>,
@@ -133,15 +115,12 @@ export function withPremiumPost(
 
 /**
  * Özellik bazlı premium kontrol helper'ı
- * Frontend'de kullanılabilir şekilde plan bilgisini döner
  */
 export function getPremiumFeatureAccess(currentPlan: string) {
   const isPremium = isPremiumPlan(currentPlan)
-  const isEnterprise = isEnterprisePlan(currentPlan)
-  const isEnterprisePremium = currentPlan === PLAN_IDS.ENTERPRISE_PREMIUM
+  const isFamily = isFamilyPlan(currentPlan)
 
   return {
-    // Özellik erişimleri
     hasAIAssistant: isPremium,
     hasAdvancedReports: isPremium,
     hasExportFeature: isPremium,
@@ -150,25 +129,15 @@ export function getPremiumFeatureAccess(currentPlan: string) {
     hasInvestmentTracking: isPremium,
     hasGoalTracking: isPremium,
 
-    // Enterprise özellikleri
-    hasMultiUser: isEnterprise,
-    hasAPIAccess: isEnterprise,
-    hasDepartmentManagement: isEnterprise,
-    hasCustomIntegrations: isEnterprise,
-    hasDedicatedSupport: isEnterprise,
+    // Aile paketi özellikleri
+    hasMultiUser: isFamily,
+    hasFamilyBudget: isFamily,
+    hasFamilyGoals: isFamily,
+    hasPhoneSupport: isFamily,
 
-    // Enterprise Premium özellikleri
-    hasConsolidation: isEnterprisePremium,
-    hasGlobalNetwork: isEnterprisePremium,
-    hasQuantumSecurity: isEnterprisePremium,
-    hasWhiteLabel: isEnterprisePremium,
-    hasVIPSupport: isEnterprisePremium,
-
-    // Plan bilgileri
     currentPlan,
     isPremium,
-    isEnterprise,
-    isEnterprisePremium,
+    isFamily,
   }
 }
 
@@ -190,11 +159,10 @@ export async function checkFeatureLimit(
 
   const currentPlan = subscription?.planId || PLAN_IDS.FREE
 
-  // Premium planlar için limit yok
   if (isPremiumPlan(currentPlan)) {
     return {
       allowed: true,
-      limit: -1, // Sınırsız
+      limit: -1,
       current: currentCount,
     }
   }

@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
+import { Badge } from '@/components/mosaic'
 import { usePremium } from '@/lib/use-premium'
 import { useUser } from '@/lib/user-context'
 import {
@@ -521,26 +521,26 @@ export default function CategoriesAnalysis() {
     }
 
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+        <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-full sm:max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className={`h-2 bg-gradient-to-r ${feature.gradient} rounded-t-2xl`} />
 
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-xl bg-gradient-to-r ${feature.gradient} text-white`}>
-                  <feature.icon className="w-6 h-6" />
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl bg-gradient-to-r ${feature.gradient} text-white shrink-0`}>
+                  <feature.icon className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{feature.title}</h2>
-                  <p className="text-gray-600">{feature.description}</p>
+                  <h2 className="text-base sm:text-xl font-bold text-gray-900">{feature.title}</h2>
+                  <p className="text-sm text-gray-600">{feature.description}</p>
                 </div>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedFeature(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 shrink-0"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -567,7 +567,7 @@ export default function CategoriesAnalysis() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-green-50 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-800 to-green-50 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
@@ -578,7 +578,7 @@ export default function CategoriesAnalysis() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-green-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-800 to-green-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -605,11 +605,11 @@ export default function CategoriesAnalysis() {
           </div>
 
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white">
-              <PieChart className="w-8 h-8" />
+            <div className="p-2.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white shrink-0">
+              <PieChart className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
                 {isEnterpriseUser ? 'Kurumsal Kategori Analizi' : 'Kategori Analizi'}
               </h1>
               <p className="text-gray-600">
@@ -622,7 +622,7 @@ export default function CategoriesAnalysis() {
         </div>
 
         {/* Premium Aksiyonlar */}
-        <Card className="mb-8 border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+        <Card className="mb-8 border-0 shadow-mosaic-lg bg-slate-800/80 backdrop-blur-xl">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
               <Crown className="w-6 h-6 text-yellow-500" />
@@ -643,7 +643,7 @@ export default function CategoriesAnalysis() {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
               {premiumFeatures.map(feature => (
                 <div
                   key={feature.id}
@@ -652,7 +652,7 @@ export default function CategoriesAnalysis() {
                 >
                   {/* Performance Badge */}
                   <div className="absolute top-4 right-4">
-                    <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                    <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-xl">
                       {feature.performance}
                     </Badge>
                   </div>
@@ -670,7 +670,7 @@ export default function CategoriesAnalysis() {
                     {/* Action Button */}
                     <Button
                       size="sm"
-                      className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                      className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-xl"
                     >
                       {feature.action}
                       <ArrowRight className="w-4 h-4 ml-2" />
@@ -686,21 +686,21 @@ export default function CategoriesAnalysis() {
         </Card>
 
         {/* Ana Kategori Kartları */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
           {categoryData.map((category, index) => (
             <Card
               key={index}
-              className="border-0 shadow-lg bg-gradient-to-br from-slate-50 to-slate-100 hover:shadow-xl transition-all duration-300"
+              className="border-0 shadow-mosaic bg-gradient-to-br from-slate-800 to-slate-100 hover:shadow-mosaic-lg transition-all duration-300"
             >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <p className="text-sm font-medium text-slate-600">{category.name}</p>
-                    <p className="text-2xl font-bold text-slate-700">
+                    <p className="text-sm font-medium text-slate-300">{category.name}</p>
+                    <p className="text-2xl font-bold text-slate-200">
                       ₺{category.amount.toLocaleString()}
                     </p>
                     <p
-                      className={`text-xs flex items-center mt-1 ${category.trend > 0 ? 'text-green-600' : 'text-red-600'}`}
+                      className={`text-xs flex items-center mt-1 ${category.trend > 0 ? 'text-green-400' : 'text-red-400'}`}
                     >
                       {category.trend > 0 ? (
                         <TrendingUp className="w-3 h-3 mr-1" />
@@ -727,7 +727,7 @@ export default function CategoriesAnalysis() {
                     ></div>
                   </div>
                   <p
-                    className={`text-xs ${category.status === 'over' ? 'text-red-600' : 'text-green-600'}`}
+                    className={`text-xs ${category.status === 'over' ? 'text-red-400' : 'text-green-400'}`}
                   >
                     {category.status === 'over'
                       ? `%${Math.round(category.percentage - 100)} aşım`
@@ -740,7 +740,7 @@ export default function CategoriesAnalysis() {
         </div>
 
         {/* Detaylı Kategori Analizi */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <Card className="border-0 shadow-mosaic bg-slate-800/80 backdrop-blur-xl">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-green-500" />
@@ -752,7 +752,7 @@ export default function CategoriesAnalysis() {
               {categoryData.map((category, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-4 rounded-xl bg-accent/20 hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-4 h-4 rounded-full bg-gradient-to-r ${category.color}`} />
@@ -761,11 +761,11 @@ export default function CategoriesAnalysis() {
                       <p className="text-sm text-gray-600">₺{category.amount.toLocaleString()}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-6">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-6">
                     <div className="text-right">
                       <p className="font-medium text-gray-900">%{category.percentage}</p>
                       <p
-                        className={`text-sm flex items-center ${category.trend > 0 ? 'text-green-600' : 'text-red-600'}`}
+                        className={`text-sm flex items-center ${category.trend > 0 ? 'text-green-400' : 'text-red-400'}`}
                       >
                         {category.trend > 0 ? (
                           <TrendingUp className="w-3 h-3 mr-1" />
@@ -783,8 +783,8 @@ export default function CategoriesAnalysis() {
                         variant={category.status === 'over' ? 'destructive' : 'secondary'}
                         className={
                           category.status === 'over'
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-green-100 text-green-700'
+                            ? 'bg-red-500/15 text-red-400'
+                            : 'bg-green-500/15 text-green-400'
                         }
                       >
                         {category.status === 'over' ? 'Aşım' : 'İyi'}
@@ -808,20 +808,20 @@ export default function CategoriesAnalysis() {
 function SmartBudgetModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-xl border border-blue-200">
+      <div className="bg-gradient-to-r from-blue-500/10 to-cyan-50 p-6 rounded-xl border border-blue-200">
         <h3 className="text-lg font-bold text-blue-800 mb-3">🎯 Akıllı Bütçe Optimizasyonu</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">AI destekli bütçe önerileri</span>
+            <Target className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">AI destekli bütçe önerileri</span>
           </div>
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">Otomatik bütçe ayarlamaları</span>
+            <Target className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">Otomatik bütçe ayarlamaları</span>
           </div>
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-700">Kişiselleştirilmiş hedefler</span>
+            <Target className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400">Kişiselleştirilmiş hedefler</span>
           </div>
         </div>
       </div>
@@ -843,20 +843,20 @@ function SmartBudgetModal() {
 function ExpenseTrackingModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
+      <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-6 rounded-xl border border-green-200">
         <h3 className="text-lg font-bold text-green-800 mb-3">📊 Otomatik Harcama Takibi</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Activity className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">Gerçek zamanlı kategori tanıma</span>
+            <Activity className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">Gerçek zamanlı kategori tanıma</span>
           </div>
           <div className="flex items-center gap-3">
-            <Activity className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">Akıllı harcama sınıflandırması</span>
+            <Activity className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">Akıllı harcama sınıflandırması</span>
           </div>
           <div className="flex items-center gap-3">
-            <Activity className="w-5 h-5 text-green-600" />
-            <span className="text-green-700">Otomatik bildirimler</span>
+            <Activity className="w-5 h-5 text-green-400" />
+            <span className="text-green-400">Otomatik bildirimler</span>
           </div>
         </div>
       </div>
@@ -913,19 +913,19 @@ function SavingOpportunitiesModal() {
 function CategoryInsightsModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200">
+      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-200">
         <h3 className="text-lg font-bold text-purple-800 mb-3">📈 Kategori Performans Analizi</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <BarChart3 className="w-5 h-5 text-purple-600" />
+            <BarChart3 className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">Detaylı performans metrikleri</span>
           </div>
           <div className="flex items-center gap-3">
-            <BarChart3 className="w-5 h-5 text-purple-600" />
+            <BarChart3 className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">Trend analizi ve tahminler</span>
           </div>
           <div className="flex items-center gap-3">
-            <BarChart3 className="w-5 h-5 text-purple-600" />
+            <BarChart3 className="w-5 h-5 text-purple-400" />
             <span className="text-purple-700">Karşılaştırmalı analiz</span>
           </div>
         </div>
@@ -948,20 +948,20 @@ function CategoryInsightsModal() {
 function BudgetAlertsModal() {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-red-50 to-rose-50 p-6 rounded-xl border border-red-200">
+      <div className="bg-gradient-to-r from-red-500/10 to-rose-500/10 p-6 rounded-xl border border-red-200">
         <h3 className="text-lg font-bold text-red-800 mb-3">🚨 Akıllı Bütçe Uyarıları</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Bell className="w-5 h-5 text-red-600" />
-            <span className="text-red-700">Bütçe aşım uyarıları</span>
+            <Bell className="w-5 h-5 text-red-400" />
+            <span className="text-red-400">Bütçe aşım uyarıları</span>
           </div>
           <div className="flex items-center gap-3">
-            <Bell className="w-5 h-5 text-red-600" />
-            <span className="text-red-700">Anormal harcama tespiti</span>
+            <Bell className="w-5 h-5 text-red-400" />
+            <span className="text-red-400">Anormal harcama tespiti</span>
           </div>
           <div className="flex items-center gap-3">
-            <Bell className="w-5 h-5 text-red-600" />
-            <span className="text-red-700">Kişiselleştirilmiş bildirimler</span>
+            <Bell className="w-5 h-5 text-red-400" />
+            <span className="text-red-400">Kişiselleştirilmiş bildirimler</span>
           </div>
         </div>
       </div>
@@ -987,15 +987,15 @@ function SpendingPatternsModal() {
         <h3 className="text-lg font-bold text-indigo-800 mb-3">🧠 AI Harcama Kalıbı Analizi</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Brain className="w-5 h-5 text-indigo-600" />
+            <Brain className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">Harcama kalıbı tespiti</span>
           </div>
           <div className="flex items-center gap-3">
-            <Brain className="w-5 h-5 text-indigo-600" />
+            <Brain className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">Tahminleme ve öneriler</span>
           </div>
           <div className="flex items-center gap-3">
-            <Brain className="w-5 h-5 text-indigo-600" />
+            <Brain className="w-5 h-5 text-indigo-400" />
             <span className="text-indigo-700">Anomali tespiti</span>
           </div>
         </div>

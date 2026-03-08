@@ -4,7 +4,6 @@ import { getCurrentUser } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    // Kullanıcı doğrulama
     const user = await getCurrentUser(request)
     if (!user) {
       return NextResponse.json({ error: 'Oturum bulunamadı' }, { status: 401 })
@@ -24,7 +23,14 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(creditCards)
+    const serialized = creditCards.map(card => ({
+      ...card,
+      limitAmount: card.limitAmount.toString(),
+      availableLimit: card.availableLimit.toString(),
+      minPaymentPercent: card.minPaymentPercent.toString(),
+    }))
+
+    return NextResponse.json(serialized)
   } catch (error) {
     console.error('Credit cards API error:', error)
     return NextResponse.json({ error: 'Kredi kartları alınamadı' }, { status: 500 })

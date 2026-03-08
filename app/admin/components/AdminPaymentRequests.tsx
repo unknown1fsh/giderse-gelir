@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useToast } from '@/lib/use-toast'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
+import { Badge } from '@/components/mosaic'
+import { Textarea } from '@/components/mosaic'
 import {
   Table,
   TableBody,
@@ -13,15 +13,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/mosaic'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+  Modal,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from '@/components/mosaic'
 import { CheckCircle2, XCircle, Clock, Eye, Loader2 } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils'
 import { trackGoogleAdsConversion } from '@/lib/google-ads'
@@ -252,12 +252,12 @@ export default function AdminPaymentRequests() {
       </Card>
 
       {/* Detay Modal */}
-      <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Ödeme Talebi Detayları</DialogTitle>
-            <DialogDescription>Talep ID: {selectedRequest?.id}</DialogDescription>
-          </DialogHeader>
+      <Modal open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
+        <ModalContent className="max-w-2xl">
+          <ModalHeader>
+            <ModalTitle>Ödeme Talebi Detayları</ModalTitle>
+            <ModalDescription>Talep ID: {selectedRequest?.id}</ModalDescription>
+          </ModalHeader>
 
           {selectedRequest && (
             <div className="space-y-4">
@@ -290,7 +290,7 @@ export default function AdminPaymentRequests() {
               {selectedRequest.description && (
                 <div>
                   <label className="text-sm font-medium text-gray-700">Açıklama</label>
-                  <p className="text-sm mt-1 p-3 bg-gray-50 rounded border whitespace-pre-wrap">
+                  <p className="text-sm mt-1 p-3 bg-accent/20 rounded border whitespace-pre-wrap">
                     {selectedRequest.description}
                   </p>
                 </div>
@@ -310,7 +310,7 @@ export default function AdminPaymentRequests() {
             </div>
           )}
 
-          <DialogFooter>
+          <ModalFooter>
             {selectedRequest?.status === 'pending' && (
               <div className="flex space-x-2">
                 <Button
@@ -345,9 +345,9 @@ export default function AdminPaymentRequests() {
                 Kapat
               </Button>
             )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   )
 }

@@ -1,480 +1,338 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription, AuthCardShell, AuthShell, Button, Input } from '@/components/mosaic'
 import {
-  Eye,
-  EyeOff,
-  ArrowLeft,
-  Mail,
-  Lock,
-  User,
-  Phone,
-  AlertCircle,
-  CheckCircle,
-  Loader2,
-  Crown,
-  Sparkles,
+  Eye, EyeOff, Mail, Lock, User, AlertCircle, Loader2, Sparkles,
+  ShieldCheck, Gift, CheckCircle2,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import BrandLogo from '@/components/brand-logo'
 import { useToast } from '@/lib/use-toast'
 
+/* ── Şifre güç göstergesi ─────────────────────────────────── */
+function passwordStrength(pwd: string): { score: number; label: string; color: string } {
+  if (pwd.length === 0) {return { score: 0, label: '', color: '' }}
+  let score = 0
+  if (pwd.length >= 8) {score++}
+  if (pwd.length >= 12) {score++}
+  if (/[A-Z]/.test(pwd)) {score++}
+  if (/[0-9]/.test(pwd)) {score++}
+  if (/[^A-Za-z0-9]/.test(pwd)) {score++}
+  if (score <= 1) {return { score, label: 'Çok zayıf', color: 'bg-red-500' }}
+  if (score === 2) {return { score, label: 'Zayıf', color: 'bg-orange-500' }}
+  if (score === 3) {return { score, label: 'Orta', color: 'bg-yellow-500' }}
+  if (score === 4) {return { score, label: 'Güçlü', color: 'bg-emerald-500' }}
+  return { score, label: 'Çok güçlü', color: 'bg-emerald-400' }
+}
+
+/* ── Username kuralları ────────────────────────────────────── */
+const USERNAME_RE = /^[a-zA-Z0-9][a-zA-Z0-9_-]{1,48}[a-zA-Z0-9]$/
+
+function validateUsername(v: string): string {
+  if (v.length < 3) {return 'En az 3 karakter'}
+  if (v.length > 50) {return 'En fazla 50 karakter'}
+  if (!USERNAME_RE.test(v)) {return 'Harf/rakam ile başlayıp bitmeli; sadece _, - kullanılabilir'}
+  return ''
+}
+
 export default function RegisterPage() {
   const router = useRouter()
   const { success, error: toastError } = useToast()
-  const [formData, setFormData] = useState({
-    username: '',
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    plan: 'free',
+
+  const [form, setForm] = useState({
+    username: '', email: '', password: '', confirmPassword: '',
   })
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [showPwd, setShowPwd] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const pwd = passwordStrength(form.password)
+  const usernameError = form.username ? validateUsername(form.username) : ''
+  const passwordMismatch = form.confirmPassword && form.password !== form.confirmPassword
+
+  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm(prev => ({ ...prev, [key]: e.target.value }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
     setError('')
 
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      const msg = 'Şifreler eşleşmiyor'
-      setError(msg)
-      toastError('Doğrulama Hatası', msg)
-      setIsLoading(false)
-      return
-    }
+    const uErr = validateUsername(form.username)
+    if (uErr) { setError(uErr); return }
+    if (form.password.length < 8) { setError('Şifre en az 8 karakter olmalıdır'); return }
+    if (form.password !== form.confirmPassword) { setError('Şifreler eşleşmiyor'); return }
+    if (!agreedToTerms) { setError('Kullanım şartlarını kabul etmelisiniz'); return }
 
-    if (!agreedToTerms) {
-      const msg = 'Kullanım şartlarını kabul etmelisiniz'
-      setError(msg)
-      toastError('Doğrulama Hatası', msg)
-      setIsLoading(false)
-      return
-    }
-
-    // Frontend şifre validasyonu
-    if (formData.password.length < 8) {
-      const msg = 'Şifre en az 8 karakter olmalıdır'
-      setError(msg)
-      toastError('Doğrulama Hatası', msg)
-      setIsLoading(false)
-      return
-    }
-
-    // Username validasyonu
-    if (formData.username.length < 3 || formData.username.length > 50) {
-      const msg = 'Kullanıcı adı 3-50 karakter arasında olmalıdır'
-      setError(msg)
-      toastError('Doğrulama Hatası', msg)
-      setIsLoading(false)
-      return
-    }
-
-    const usernameRegex = /^[a-zA-Z0-9_-]+$/
-    if (!usernameRegex.test(formData.username)) {
-      const msg = 'Kullanıcı adı sadece harf, rakam, alt çizgi ve tire içerebilir'
-      setError(msg)
-      toastError('Doğrulama Hatası', msg)
-      setIsLoading(false)
-      return
-    }
-
-    if (!/^[a-zA-Z0-9]/.test(formData.username) || !/[a-zA-Z0-9]$/.test(formData.username)) {
-      const msg = 'Kullanıcı adı harf veya rakam ile başlayıp bitmelidir'
-      setError(msg)
-      toastError('Doğrulama Hatası', msg)
-      setIsLoading(false)
-      return
-    }
-
+    setLoading(true)
     try {
-      const response = await fetch('/api/auth/register', {
+      const res = await fetch('/api/auth/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: formData.username,
-          name: formData.name || undefined,
-          email: formData.email,
-          phone: formData.phone || undefined,
-          password: formData.password,
-          plan: formData.plan,
+          username: form.username,
+          email: form.email,
+          password: form.password,
+          plan: 'free',
         }),
       })
+      const data = (await res.json()) as { success?: boolean; message?: string; error?: string }
 
-      const data = (await response.json()) as {
-        success?: boolean
-        message?: string
-        error?: string
-        errorCode?: string
-        premiumRequestCreated?: boolean
-      }
-
-      if (!response.ok) {
-        // API'den gelen hata mesajını al
-        const errorMessage = data.error || data.message || 'Kayıt olurken bir hata oluştu'
-        setError(errorMessage)
-        toastError('Kayıt Hatası', errorMessage)
-        setIsLoading(false)
+      if (!res.ok) {
+        const msg = data.error || data.message || 'Kayıt olurken bir hata oluştu'
+        setError(msg)
+        toastError('Kayıt Hatası', msg)
         return
       }
 
       if (data.success) {
-        // success(title, description, duration, dismissLabel)
         success(
           'Kayıt Başarılı',
-          data.message || 'İlginize teşekkür ederiz. Kaydınız admin onayından sonra aktif olacaktır. Genelde en fazla 1 saat sürmektedir.',
+          data.message || 'Hesabınız oluşturuldu. Yönlendiriliyorsunuz...',
           Infinity,
           'Tamam'
         )
-
-        // Formu temizle
-        setFormData({
-          username: '',
-          name: '',
-          email: '',
-          phone: '',
-          password: '',
-          confirmPassword: '',
-          plan: 'free',
-        })
-
-        // Toast'ın görünmesi için client-side redirect kullanıyoruz (state korunur)
         router.push('/auth/login')
       } else {
         const msg = data.message || data.error || 'Kayıt olurken bir hata oluştu'
         setError(msg)
         toastError('Kayıt Başarısız', msg)
       }
-    } catch (err) {
-      console.error('Register error:', err)
+    } catch {
       const msg = 'Kayıt olurken bir hata oluştu. Lütfen tekrar deneyin.'
       setError(msg)
       toastError('Sistem Hatası', msg)
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
-
-  const plans = [
-    {
-      id: 'free',
-      name: 'Ücretsiz',
-      price: '0',
-      description: 'Temel özellikler',
-      features: ['Aylık 50 işlem', 'Temel raporlar', 'Mobil erişim'],
-    },
-    {
-      id: 'premium',
-      name: 'Premium',
-      price: '250',
-      description: 'Tüm özellikler',
-      features: ['Sınırsız işlem', 'Gelişmiş analizler', 'Öncelikli destek', 'Veri dışa aktarma'],
-      popular: true,
-    },
-  ]
-
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 sm:p-6 py-8 overflow-y-auto">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
+    <AuthShell
+      title=""
+      hero={(
+        <BrandLogo
+          size={36}
+          priority
+          variant="dark"
+          textClassName="text-xl font-bold text-white"
+        />
+      )}
+    >
+      <AuthCardShell className="mx-auto max-w-lg">
+        <div className="space-y-6">
 
-      <div className="relative w-full max-w-2xl">
-        {/* Back Button */}
-        <div className="mb-6">
-          <Link
-            href="/landing"
-            className="inline-flex items-center min-h-[44px] text-white/70 hover:text-white transition-colors py-2"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Geri Dön
-          </Link>
-        </div>
-
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center space-x-3 mb-4">
-            <div>
-              <BrandLogo
-                size={48}
-                priority
-                variant="dark"
-                textClassName="text-2xl font-bold text-white"
-              />
-              <p className="text-sm text-slate-400">Finans Yönetimi</p>
-            </div>
+          {/* Promo badge */}
+          <div className="flex items-center gap-2 rounded-xl border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm text-amber-300">
+            <Gift className="h-4 w-4 shrink-0" />
+            <span><strong>Yeni üyelere özel:</strong> İlk 30 gün Premium ücretsiz.</span>
           </div>
-        </div>
 
-        {/* Register Card */}
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl">
-          <CardHeader className="text-center pb-4">
-            <CardTitle className="text-2xl font-bold text-white">Hesap Oluşturun</CardTitle>
-            <CardDescription className="text-slate-300">
-              Finansal özgürlüğünüze ilk adımı atın
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {error && (
-              <div className="flex items-center space-x-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
-                <AlertCircle className="h-4 w-4 text-red-400" />
-                <span className="text-red-400 text-sm">{error}</span>
-              </div>
-            )}
+          {/* Heading */}
+          <div>
+            <h1 className="text-2xl font-bold text-white">Hesabını oluştur</h1>
+            <p className="mt-1 text-sm text-slate-400">
+              Anonim kayıt · Kredi kartı gerekmez · İstediğin zaman sil
+            </p>
+          </div>
 
-            <form onSubmit={e => void handleSubmit(e)} className="space-y-4">
-              {/* Plan Selection */}
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-slate-300">Plan Seçin</label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {plans.map(plan => (
-                    <div
-                      key={plan.id}
-                      className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all ${formData.plan === plan.id
-                        ? 'border-purple-500 bg-purple-500/20'
-                        : 'border-white/20 bg-white/5 hover:border-white/40'
-                        }`}
-                      onClick={() => setFormData(prev => ({ ...prev, plan: plan.id }))}
-                    >
-                      {plan.popular && (
-                        <div className="absolute -top-2 -right-2">
-                          <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center">
-                            <Crown className="h-3 w-3 mr-1" />
-                            Popüler
-                          </div>
-                        </div>
-                      )}
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold text-white">{plan.name}</h3>
-                        <div className="text-right">
-                          <span className="text-2xl font-bold text-white">₺{plan.price}</span>
-                          <span className="text-slate-400 text-sm">/ay</span>
-                        </div>
-                      </div>
-                      <p className="text-slate-300 text-sm mb-3">{plan.description}</p>
-                      <ul className="space-y-1">
-                        {plan.features.map((feature, index) => (
-                          <li
-                            key={index}
-                            className="flex items-center space-x-2 text-xs text-slate-400"
-                          >
-                            <CheckCircle className="h-3 w-3 text-green-400" />
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {/* Error */}
+          {error && (
+            <Alert className="border-red-500/30 bg-red-500/15">
+              <AlertCircle className="h-4 w-4 text-red-400" />
+              <AlertDescription className="text-sm text-red-300">{error}</AlertDescription>
+            </Alert>
+          )}
 
-              {/* Username - Zorunlu */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">
-                  Kullanıcı Adı <span className="text-red-400">*</span>
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <Input
-                    type="text"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleInputChange}
-                    placeholder="kullanici_adi"
-                    minLength={3}
-                    maxLength={50}
-                    className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-slate-400 focus:border-purple-500"
-                    required
-                  />
-                </div>
-                <p className="text-xs text-slate-400">
-                  3-50 karakter, sadece harf, rakam, alt çizgi ve tire. Harf/rakam ile başlayıp
-                  bitmeli.
-                </p>
-              </div>
+          <form onSubmit={e => void handleSubmit(e)} className="space-y-4">
 
-              {/* Personal Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-300">
-                    Ad Soyad <span className="text-slate-500 text-xs">(Opsiyonel)</span>
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="Adınızı girin (isteğe bağlı)"
-                      className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-slate-400 focus:border-purple-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-300">
-                    Telefon <span className="text-slate-500 text-xs">(Opsiyonel)</span>
-                  </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      placeholder="+90 555 123 45 67"
-                      className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-slate-400 focus:border-purple-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">E-posta</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <Input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="ornek@email.com"
-                    className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-slate-400 focus:border-purple-500"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-300">
-                    Şifre <span className="text-slate-500 text-xs">(en az 8 karakter)</span>
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      placeholder="En az 8 karakter"
-                      minLength={8}
-                      className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-slate-400 focus:border-purple-500"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2 text-slate-400 hover:text-slate-300"
-                      aria-label={showPassword ? 'Şifreyi gizle' : 'Şifreyi göster'}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-300">Şifre Tekrar</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange}
-                      placeholder="Şifrenizi tekrar girin"
-                      className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-slate-400 focus:border-purple-500"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2 text-slate-400 hover:text-slate-300"
-                      aria-label={showConfirmPassword ? 'Şifreyi gizle' : 'Şifreyi göster'}
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3 gap-2">
-                <input
-                  type="checkbox"
-                  checked={agreedToTerms}
-                  onChange={e => setAgreedToTerms(e.target.checked)}
-                  className="mt-1 rounded border-white/20 bg-white/5 text-purple-600 focus:ring-purple-500 min-w-[20px] min-h-[20px] flex-shrink-0"
+            {/* Username */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-300">
+                Kullanıcı adı <span className="text-red-400">*</span>
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  type="text"
+                  value={form.username}
+                  onChange={set('username')}
+                  placeholder="kullanici_adi"
+                  className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-slate-500 focus:border-violet-500"
+                  required
+                  suppressHydrationWarning
                 />
-                <label className="text-sm text-slate-300">
-                  <Link href="/terms" className="text-purple-400 hover:text-purple-300">
-                    Kullanım şartlarını
-                  </Link>{' '}
-                  ve{' '}
-                  <Link href="/privacy" className="text-purple-400 hover:text-purple-300">
-                    gizlilik politikasını
-                  </Link>{' '}
-                  kabul ediyorum.
-                </label>
+              </div>
+              {form.username && (
+                <p className={`flex items-center gap-1 text-xs ${usernameError ? 'text-red-400' : 'text-emerald-400'}`}>
+                  {usernameError
+                    ? <><AlertCircle className="h-3 w-3" />{usernameError}</>
+                    : <><CheckCircle2 className="h-3 w-3" />Kullanıcı adı uygun</>
+                  }
+                </p>
+              )}
+              {!form.username && (
+                <p className="text-xs text-slate-500">
+                  3–50 karakter · harf, rakam, _ ve - kullanılabilir
+                </p>
+              )}
+            </div>
+
+            {/* Email */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-300">
+                E-posta <span className="text-red-400">*</span>
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={set('email')}
+                  placeholder="ornek@email.com"
+                  className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-slate-500 focus:border-violet-500"
+                  required
+                  suppressHydrationWarning
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-300">
+                Şifre <span className="text-red-400">*</span>
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  type={showPwd ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={set('password')}
+                  placeholder="En az 8 karakter"
+                  minLength={8}
+                  className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-slate-500 focus:border-violet-500"
+                  required
+                  suppressHydrationWarning
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-200"
+                  aria-label={showPwd ? 'Şifreyi gizle' : 'Şifreyi göster'}
+                >
+                  {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
 
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full min-h-[48px] bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 text-base sm:text-lg font-semibold shadow-lg"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Hesap oluşturuluyor...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Hesap Oluştur
-                  </>
-                )}
-              </Button>
-            </form>
-
-            <div className="text-center">
-              <p className="text-slate-300 text-sm">
-                Zaten hesabınız var mı?{' '}
-                <Link
-                  href="/auth/login"
-                  className="text-purple-400 hover:text-purple-300 font-semibold transition-colors"
-                >
-                  Giriş yapın
-                </Link>
-              </p>
+              {/* Strength meter */}
+              {form.password && (
+                <div className="space-y-1">
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <div
+                        key={i}
+                        className={`h-1 flex-1 rounded-full transition-all ${i <= pwd.score ? pwd.color : 'bg-white/10'}`}
+                      />
+                    ))}
+                  </div>
+                  <p className={`text-xs ${pwd.score <= 2 ? 'text-orange-400' : pwd.score === 3 ? 'text-yellow-400' : 'text-emerald-400'}`}>
+                    {pwd.label}
+                  </p>
+                </div>
+              )}
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+
+            {/* Confirm password */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-300">
+                Şifre tekrar <span className="text-red-400">*</span>
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  type={showConfirm ? 'text' : 'password'}
+                  value={form.confirmPassword}
+                  onChange={set('confirmPassword')}
+                  placeholder="Şifrenizi tekrar girin"
+                  className={`pl-10 pr-10 bg-white/5 text-white placeholder:text-slate-500 focus:border-violet-500 ${passwordMismatch ? 'border-red-500/60' : 'border-white/20'}`}
+                  required
+                  suppressHydrationWarning
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-200"
+                  aria-label={showConfirm ? 'Şifreyi gizle' : 'Şifreyi göster'}
+                >
+                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {passwordMismatch && (
+                <p className="flex items-center gap-1 text-xs text-red-400">
+                  <AlertCircle className="h-3 w-3" /> Şifreler eşleşmiyor
+                </p>
+              )}
+              {form.confirmPassword && !passwordMismatch && (
+                <p className="flex items-center gap-1 text-xs text-emerald-400">
+                  <CheckCircle2 className="h-3 w-3" /> Şifreler eşleşiyor
+                </p>
+              )}
+            </div>
+
+            {/* Terms */}
+            <label className="flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                checked={agreedToTerms}
+                onChange={e => setAgreedToTerms(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-white/20 bg-white/5 accent-violet-600"
+              />
+              <span className="text-sm text-slate-400 leading-snug">
+                <Link href="/terms" className="text-violet-400 hover:text-violet-300 underline underline-offset-2">
+                  Kullanım şartlarını
+                </Link>{' '}
+                ve{' '}
+                <Link href="/privacy" className="text-violet-400 hover:text-violet-300 underline underline-offset-2">
+                  gizlilik politikasını
+                </Link>{' '}
+                okudum, kabul ediyorum.
+              </span>
+            </label>
+
+            {/* Submit */}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full min-h-[48px] bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white text-base font-semibold shadow-lg"
+            >
+              {loading ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Hesap oluşturuluyor...</>
+              ) : (
+                <><Sparkles className="mr-2 h-4 w-4" />Hesabımı Oluştur</>
+              )}
+            </Button>
+          </form>
+
+          {/* Trust row */}
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-slate-500">
+            <span className="flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />KVKK Uyumlu</span>
+            <span className="flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />Veriler şifreli</span>
+            <span className="flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />İstediğin zaman sil</span>
+          </div>
+
+          {/* Login link */}
+          <p className="text-center text-sm text-slate-400">
+            Zaten hesabın var mı?{' '}
+            <Link href="/auth/login" className="font-semibold text-violet-400 hover:text-violet-300 transition-colors">
+              Giriş yap
+            </Link>
+          </p>
+
+        </div>
+      </AuthCardShell>
+    </AuthShell>
   )
 }

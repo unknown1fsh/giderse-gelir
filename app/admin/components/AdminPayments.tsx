@@ -3,18 +3,18 @@
 import { useState, useEffect } from 'react'
 import { useToast } from '@/lib/use-toast'
 import DataTable from './DataTable'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
 import { formatCurrency } from '@/lib/validators'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
+  Modal,
+  ModalContent,
+  ModalDescription,
+  ModalHeader,
+  ModalTitle,
+} from '@/components/mosaic'
+import { Textarea } from '@/components/mosaic'
+import { Label } from '@/components/mosaic'
 import { CheckCircle, XCircle, Clock, MessageSquare } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils'
 import { trackGoogleAdsConversion } from '@/lib/google-ads'
@@ -213,8 +213,8 @@ export default function AdminPayments() {
       header: 'Kullanıcı',
       render: (pr: PaymentRequest) => (
         <div>
-          <div className="text-sm font-medium text-slate-900">{getDisplayName(pr.user)}</div>
-          <div className="text-sm text-slate-500">{pr.user.email}</div>
+          <div className="text-sm font-medium text-foreground">{getDisplayName(pr.user)}</div>
+          <div className="text-sm text-muted-foreground">{pr.user.email}</div>
         </div>
       ),
     },
@@ -239,7 +239,7 @@ export default function AdminPayments() {
       key: 'description',
       header: 'Açıklama',
       render: (pr: PaymentRequest) => (
-        <span className="text-sm text-slate-600 max-w-xs truncate block">
+        <span className="text-sm text-muted-foreground max-w-xs truncate block">
           {pr.description || '-'}
         </span>
       ),
@@ -248,7 +248,7 @@ export default function AdminPayments() {
       key: 'date',
       header: 'Tarih',
       render: (pr: PaymentRequest) => (
-        <span className="text-sm text-slate-500">
+        <span className="text-sm text-muted-foreground">
           {new Date(pr.createdAt).toLocaleDateString('tr-TR', {
             year: 'numeric',
             month: 'short',
@@ -337,13 +337,13 @@ export default function AdminPayments() {
       />
 
       {/* Action Modal */}
-      <Dialog open={showActionModal} onOpenChange={setShowActionModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
+      <Modal open={showActionModal} onOpenChange={setShowActionModal}>
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>
               {actionType === 'approve' ? 'Ödeme Talebini Onayla' : 'Ödeme Talebini Reddet'}
-            </DialogTitle>
-            <DialogDescription>
+            </ModalTitle>
+            <ModalDescription>
               {selectedRequest && (
                 <div className="mt-2 space-y-1 text-sm">
                   <p>
@@ -359,8 +359,8 @@ export default function AdminPayments() {
                   </p>
                 </div>
               )}
-            </DialogDescription>
-          </DialogHeader>
+            </ModalDescription>
+          </ModalHeader>
 
           <div className="space-y-4 mt-4">
             <div className="space-y-2">
@@ -408,8 +408,8 @@ export default function AdminPayments() {
               </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </ModalContent>
+      </Modal>
     </div>
   )
 }

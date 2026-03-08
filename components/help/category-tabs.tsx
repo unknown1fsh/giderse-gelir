@@ -1,7 +1,7 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/mosaic'
+import { Badge } from '@/components/mosaic'
 import { cn } from '@/lib/utils'
 
 interface Category {
@@ -31,8 +31,8 @@ export default function CategoryTabs({
           className={cn(
             'rounded-full transition-all duration-200',
             selectedCategory === null
-              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl hover:scale-105'
-              : 'hover:bg-gray-100 hover:scale-105'
+              ? 'bg-primary text-primary-foreground text-white shadow-lg hover:shadow-xl hover:scale-105'
+              : 'hover:bg-muted hover:scale-105'
           )}
         >
           Tümü
@@ -49,8 +49,8 @@ export default function CategoryTabs({
           className={cn(
             'rounded-full transition-all duration-200',
             selectedCategory === category.name
-              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl hover:scale-105'
-              : 'hover:bg-gray-100 hover:scale-105'
+              ? 'bg-primary text-primary-foreground text-white shadow-lg hover:shadow-xl hover:scale-105'
+              : 'hover:bg-muted hover:scale-105'
           )}
         >
           {category.name}

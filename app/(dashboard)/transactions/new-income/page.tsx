@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { EditNameModal } from '@/components/ui/edit-name-modal'
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/mosaic'
+import { EditNameModal } from '@/components/mosaic'
+import { ConfirmationDialog } from '@/components/mosaic'
 import { usePremium } from '@/lib/use-premium'
 import { parseCurrencyInput } from '@/lib/validators'
 import { useToast } from '@/lib/use-toast'
@@ -523,13 +523,13 @@ export default function NewIncomePage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-lg">
+        <button onClick={() => router.back()} className="p-2 hover:bg-accent hover:text-accent-foreground rounded-lg">
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
           <div className="flex items-center gap-2">
             <TrendingUp className="h-6 w-6 text-green-500" />
-            <h1 className="text-3xl font-bold text-green-600">Yeni Gelir Ekle</h1>
+            <h1 className="text-3xl font-bold text-green-400">Yeni Gelir Ekle</h1>
           </div>
           <p className="text-muted-foreground">Gelir işleminizin detaylarını girin</p>
         </div>
@@ -537,7 +537,7 @@ export default function NewIncomePage() {
 
       <Card className="max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-green-600">Gelir Bilgileri</CardTitle>
+          <CardTitle className="text-green-400">Gelir Bilgileri</CardTitle>
           <CardDescription>Gelir işleminizin detaylarını doldurun</CardDescription>
         </CardHeader>
         <CardContent>
@@ -548,7 +548,7 @@ export default function NewIncomePage() {
             className="space-y-6"
           >
             {/* Düzenli Gelir Checkbox */}
-            <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center gap-3 p-4 bg-green-950/20 border border-green-900/50 rounded-lg">
               <input
                 type="checkbox"
                 id="recurring"
@@ -560,17 +560,17 @@ export default function NewIncomePage() {
                   }
                   setIsRecurring(e.target.checked)
                 }}
-                className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                className="w-5 h-5 text-green-400 border-border rounded focus:ring-green-500"
               />
-              <label htmlFor="recurring" className="flex-1 text-sm font-medium text-gray-900">
+              <label htmlFor="recurring" className="flex-1 text-sm font-medium text-foreground">
                 Bu tekrar eden bir gelir
-                {!isPremium && <Crown className="inline ml-2 h-4 w-4 text-purple-600" />}
+                {!isPremium && <Crown className="inline ml-2 h-4 w-4 text-purple-400" />}
               </label>
             </div>
 
             {/* Düzenli Gelir Formu */}
             {isRecurring && (
-              <div className="space-y-4 p-4 bg-green-50 border border-green-200 rounded-lg animate-in slide-in-from-top duration-300">
+              <div className="space-y-4 p-4 bg-green-950/20 border border-green-900/50 rounded-lg animate-in slide-in-from-top duration-300">
                 <h3 className="font-semibold text-green-900">Düzenli Gelir Ayarları</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -580,7 +580,7 @@ export default function NewIncomePage() {
                       value={recurringData.name}
                       onChange={e => setRecurringData(prev => ({ ...prev, name: e.target.value }))}
                       placeholder="Örn: Maaş"
-                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                      className="w-full form-input-mobile"
                       required={isRecurring}
                     />
                   </div>
@@ -591,7 +591,7 @@ export default function NewIncomePage() {
                       onChange={e =>
                         setRecurringData(prev => ({ ...prev, frequency: e.target.value }))
                       }
-                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                      className="w-full form-input-mobile"
                     >
                       <option value="daily">Günlük</option>
                       <option value="weekly">Haftalık</option>
@@ -609,7 +609,7 @@ export default function NewIncomePage() {
                       onChange={e =>
                         setRecurringData(prev => ({ ...prev, endDate: e.target.value }))
                       }
-                      className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                      className="w-full form-input-mobile"
                     />
                     <p className="text-xs text-gray-500 mt-1">
                       Boş bırakırsanız süresiz devam eder
@@ -627,7 +627,7 @@ export default function NewIncomePage() {
                   onChange={e =>
                     setFormData(prev => ({ ...prev, categoryId: parseInt(e.target.value) }))
                   }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full form-input-mobile"
                   required
                 >
                   <option value={0}>Gelir kategorisi seçiniz</option>
@@ -651,7 +651,7 @@ export default function NewIncomePage() {
                       : null}
                 </select>
                 {!referenceData || referenceData.categories.length === 0 ? (
-                  <p className="text-xs text-red-600 mt-1">
+                  <p className="text-xs text-red-400 mt-1">
                     ❌ Kategoriler yüklenemedi. Lütfen sayfayı yenileyin.
                   </p>
                 ) : null}
@@ -664,7 +664,7 @@ export default function NewIncomePage() {
                   value={formData.amount}
                   onChange={e => setFormData(prev => ({ ...prev, amount: e.target.value }))}
                   placeholder="0,00"
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full form-input-mobile"
                   required
                 />
               </div>
@@ -686,7 +686,7 @@ export default function NewIncomePage() {
                       beneficiaryId: 0,
                     }))
                   }}
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full form-input-mobile"
                   required
                 >
                   <option value={0}>Ödeme yöntemi seçiniz</option>
@@ -706,7 +706,7 @@ export default function NewIncomePage() {
                   onChange={e =>
                     setFormData(prev => ({ ...prev, transactionDate: e.target.value }))
                   }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full form-input-mobile"
                   required
                 />
               </div>
@@ -720,7 +720,7 @@ export default function NewIncomePage() {
                   onChange={e =>
                     setFormData(prev => ({ ...prev, accountId: parseInt(e.target.value) }))
                   }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full form-input-mobile"
                   required
                 >
                   <option value={0}>Hesap seçiniz</option>
@@ -742,7 +742,7 @@ export default function NewIncomePage() {
                   onChange={e =>
                     setFormData(prev => ({ ...prev, creditCardId: parseInt(e.target.value) }))
                   }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full form-input-mobile"
                   required
                 >
                   <option value={0}>Kredi kartı seçiniz</option>
@@ -765,7 +765,7 @@ export default function NewIncomePage() {
                     onChange={e =>
                       setFormData(prev => ({ ...prev, accountId: parseInt(e.target.value) }))
                     }
-                    className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full form-input-mobile"
                     required
                   >
                     <option value={0}>Hesap seçiniz</option>
@@ -786,7 +786,7 @@ export default function NewIncomePage() {
                       onChange={e =>
                         setFormData(prev => ({ ...prev, beneficiaryId: parseInt(e.target.value) }))
                       }
-                      className="flex-1 form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="flex-1 form-input-mobile"
                       required
                     >
                       <option value={0}>Gönderici seçiniz</option>
@@ -820,7 +820,7 @@ export default function NewIncomePage() {
                     onChange={e =>
                       setFormData(prev => ({ ...prev, eWalletId: parseInt(e.target.value) }))
                     }
-                    className="flex-1 form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="flex-1 form-input-mobile"
                     required
                   >
                     <option value={0}>E-cüzdan seçiniz</option>
@@ -858,7 +858,7 @@ export default function NewIncomePage() {
                 onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Gelir hakkında notlarınız..."
                 rows={3}
-                className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full form-input-mobile"
               />
             </div>
 
@@ -871,7 +871,7 @@ export default function NewIncomePage() {
                 value={formData.tags}
                 onChange={e => setFormData(prev => ({ ...prev, tags: e.target.value }))}
                 placeholder="maaş, düzenli, aylık"
-                className="w-full form-input-mobile border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full form-input-mobile"
               />
             </div>
 
@@ -880,11 +880,11 @@ export default function NewIncomePage() {
               <button
                 type="button"
                 onClick={() => setShowBeneficiariesSection(!showBeneficiariesSection)}
-                className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                className="w-full flex items-center justify-between p-4 bg-accent/20 hover:bg-accent hover:text-accent-foreground rounded-lg transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-gray-600" />
-                  <span className="font-semibold text-gray-900">Alıcılar / Kişiler Yönetimi</span>
+                  <span className="font-semibold text-foreground">Alıcılar / Kişiler Yönetimi</span>
                   <span className="text-xs text-gray-500">
                     ({referenceData?.beneficiaries.length || 0} kayıt)
                   </span>
@@ -897,9 +897,9 @@ export default function NewIncomePage() {
               </button>
 
               {showBeneficiariesSection && (
-                <div className="mt-4 space-y-4 p-4 bg-gray-50 rounded-lg animate-in slide-in-from-top duration-300">
+                <div className="mt-4 space-y-4 p-4 bg-accent/20 rounded-lg animate-in slide-in-from-top duration-300">
                   <div className="flex justify-between items-center">
-                    <h3 className="font-semibold text-gray-900">Kayıtlı Gönderenler / Alıcılar</h3>
+                    <h3 className="font-semibold text-foreground">Kayıtlı Gönderenler / Alıcılar</h3>
                     <button
                       type="button"
                       onClick={() => setShowBeneficiaryModal(true)}
@@ -917,7 +917,7 @@ export default function NewIncomePage() {
                       <button
                         type="button"
                         onClick={() => setShowBeneficiaryModal(true)}
-                        className="mt-2 text-sm text-blue-600 hover:underline"
+                        className="mt-2 text-sm text-blue-400 hover:underline"
                       >
                         İlk kişiyi ekleyin
                       </button>
@@ -927,10 +927,10 @@ export default function NewIncomePage() {
                       {referenceData?.beneficiaries.map(beneficiary => (
                         <div
                           key={beneficiary.id}
-                          className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-md hover:shadow-sm transition-shadow"
+                          className="flex items-center justify-between p-3 bg-slate-800 border border-gray-200 rounded-md hover:shadow-sm transition-shadow"
                         >
                           <div className="flex-1">
-                            <div className="font-medium text-gray-900">{beneficiary.name}</div>
+                            <div className="font-medium text-foreground">{beneficiary.name}</div>
                             {beneficiary.iban && (
                               <div className="text-xs text-gray-500">IBAN: {beneficiary.iban}</div>
                             )}
@@ -947,7 +947,7 @@ export default function NewIncomePage() {
                                   name: beneficiary.name,
                                 })
                               }
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                              className="p-2 text-blue-400 hover:bg-blue-50 rounded"
                             >
                               <Edit className="h-4 w-4" />
                             </button>
@@ -959,7 +959,7 @@ export default function NewIncomePage() {
                                   name: beneficiary.name,
                                 })
                               }
-                              className="p-2 text-red-600 hover:bg-red-50 rounded"
+                              className="p-2 text-red-400 hover:bg-red-50 rounded"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -976,7 +976,7 @@ export default function NewIncomePage() {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                className="flex-1 px-4 py-2 border border-border rounded-md hover:bg-accent hover:text-accent-foreground"
                 disabled={saving}
               >
                 İptal
@@ -1003,7 +1003,7 @@ export default function NewIncomePage() {
       {/* Yeni Alıcı/Gönderici Modal */}
       {showBeneficiaryModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md bg-white shadow-xl">
+          <Card className="w-full max-w-md bg-slate-800 shadow-mosaic-lg">
             <CardHeader>
               <CardTitle>Yeni Gönderici Ekle</CardTitle>
               <CardDescription>Havale/EFT gönderen kişi bilgilerini girin</CardDescription>
@@ -1015,7 +1015,7 @@ export default function NewIncomePage() {
                   type="text"
                   value={beneficiaryForm.name}
                   onChange={e => setBeneficiaryForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full form-input-mobile border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile"
                   placeholder="Ahmet Yılmaz"
                 />
               </div>
@@ -1026,7 +1026,7 @@ export default function NewIncomePage() {
                   type="text"
                   value={beneficiaryForm.iban}
                   onChange={e => setBeneficiaryForm(prev => ({ ...prev, iban: e.target.value }))}
-                  className="w-full form-input-mobile border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile"
                   placeholder="TR00 0000 0000 0000 0000 0000 00"
                 />
               </div>
@@ -1039,7 +1039,7 @@ export default function NewIncomePage() {
                   onChange={e =>
                     setBeneficiaryForm(prev => ({ ...prev, accountNo: e.target.value }))
                   }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile"
                   placeholder="12345678"
                 />
               </div>
@@ -1051,7 +1051,7 @@ export default function NewIncomePage() {
                   onChange={e =>
                     setBeneficiaryForm(prev => ({ ...prev, bankId: parseInt(e.target.value) }))
                   }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile"
                 >
                   <option value={0}>Banka seçiniz</option>
                   {referenceData?.banks.map(bank => (
@@ -1070,7 +1070,7 @@ export default function NewIncomePage() {
                   onChange={e =>
                     setBeneficiaryForm(prev => ({ ...prev, phoneNumber: e.target.value }))
                   }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile"
                   placeholder="05XX XXX XX XX"
                 />
               </div>
@@ -1079,7 +1079,7 @@ export default function NewIncomePage() {
                 <button
                   type="button"
                   onClick={() => setShowBeneficiaryModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-border rounded-md hover:bg-accent hover:text-accent-foreground"
                 >
                   İptal
                 </button>
@@ -1101,7 +1101,7 @@ export default function NewIncomePage() {
       {/* Yeni E-Cüzdan Modal */}
       {showEWalletModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md bg-white shadow-xl">
+          <Card className="w-full max-w-md bg-slate-800 shadow-mosaic-lg">
             <CardHeader>
               <CardTitle>Yeni E-Cüzdan Ekle</CardTitle>
               <CardDescription>PayPal, Papara, Ininal vb. e-cüzdan bilgileri</CardDescription>
@@ -1113,7 +1113,7 @@ export default function NewIncomePage() {
                   type="text"
                   value={eWalletForm.name}
                   onChange={e => setEWalletForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full form-input-mobile border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile"
                   placeholder="Papara Hesabım"
                 />
               </div>
@@ -1123,7 +1123,7 @@ export default function NewIncomePage() {
                 <select
                   value={eWalletForm.provider}
                   onChange={e => setEWalletForm(prev => ({ ...prev, provider: e.target.value }))}
-                  className="w-full form-input-mobile border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile"
                 >
                   <option value="">Seçiniz</option>
                   <option value="PayPal">PayPal</option>
@@ -1142,7 +1142,7 @@ export default function NewIncomePage() {
                   onChange={e =>
                     setEWalletForm(prev => ({ ...prev, accountEmail: e.target.value }))
                   }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile"
                   placeholder="ornek@email.com"
                 />
               </div>
@@ -1155,7 +1155,7 @@ export default function NewIncomePage() {
                   onChange={e =>
                     setEWalletForm(prev => ({ ...prev, accountPhone: e.target.value }))
                   }
-                  className="w-full form-input-mobile border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile"
                   placeholder="05XX XXX XX XX"
                 />
               </div>
@@ -1166,7 +1166,7 @@ export default function NewIncomePage() {
                   type="text"
                   value={eWalletForm.balance}
                   onChange={e => setEWalletForm(prev => ({ ...prev, balance: e.target.value }))}
-                  className="w-full form-input-mobile border border-gray-300 rounded-md"
+                  className="w-full form-input-mobile"
                   placeholder="0,00"
                 />
               </div>
@@ -1175,7 +1175,7 @@ export default function NewIncomePage() {
                 <button
                   type="button"
                   onClick={() => setShowEWalletModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-border rounded-md hover:bg-accent hover:text-accent-foreground"
                 >
                   İptal
                 </button>

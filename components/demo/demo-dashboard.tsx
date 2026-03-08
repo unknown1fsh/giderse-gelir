@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/mosaic'
 import { TrendingUp, TrendingDown, Wallet, Target } from 'lucide-react'
 import { DemoSummary } from '@/lib/demo-data'
 

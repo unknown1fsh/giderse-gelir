@@ -1,10 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Eye, EyeOff, ArrowLeft, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react'
+import { Alert, AlertDescription, AuthCardShell, AuthShell, Button, CardDescription, CardHeader, CardTitle, Checkbox, FormField, Input, Label } from '@/components/mosaic'
+import { Eye, EyeOff, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import BrandLogo from '@/components/brand-logo'
@@ -69,57 +67,42 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 sm:p-6 py-8">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
-
-      <div className="relative w-full max-w-md">
-        {/* Back Button */}
-        <div className="mb-6">
-          <Link
-            href="/landing"
-            className="inline-flex items-center min-h-[44px] text-white/70 hover:text-white transition-colors py-2"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Geri Dön
-          </Link>
-        </div>
-
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center space-x-3 mb-4">
-            <div>
-              <BrandLogo
-                size={48}
-                priority
-                variant="dark"
-                textClassName="text-2xl font-bold text-white"
-              />
-              <p className="text-sm text-slate-400">Finans Yönetimi</p>
-            </div>
+    <AuthShell
+      title="Hoş Geldiniz"
+      description="Hesabınıza giriş yapın"
+      hero={(
+        <div className="inline-flex items-center space-x-3">
+          <div>
+            <BrandLogo
+              size={48}
+              priority
+              variant="dark"
+              textClassName="text-2xl font-bold text-white"
+            />
+            <p className="text-sm text-slate-400">Finans Yönetimi</p>
           </div>
         </div>
-
-        {/* Login Card */}
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl">
-          <CardHeader className="text-center pb-4">
-            <CardTitle className="text-2xl font-bold text-white">Hoş Geldiniz</CardTitle>
-            <CardDescription className="text-slate-300">Hesabınıza giriş yapın</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
+      )}
+    >
+      <AuthCardShell className="mx-auto max-w-md">
+        <CardHeader className="px-0 pb-4 text-center">
+          <CardTitle className="text-2xl font-bold text-white">Hoş Geldiniz</CardTitle>
+          <CardDescription className="text-slate-300">Hesabınıza giriş yapın</CardDescription>
+        </CardHeader>
+        <div className="space-y-6">
             {error && (
-              <div className="flex items-center space-x-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
+              <Alert className="border-red-500/30 bg-red-500/20 text-red-100">
                 <AlertCircle className="h-4 w-4 text-red-400" />
-                <span className="text-red-400 text-sm">{error}</span>
-              </div>
+                <AlertDescription className="text-sm text-red-200">{error}</AlertDescription>
+              </Alert>
             )}
 
             <form onSubmit={e => void handleSubmit(e)} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">E-posta</label>
+              <FormField label="E-posta" htmlFor="login-email" className="space-y-2">
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input
+                    id="login-email"
                     type="email"
                     name="email"
                     value={formData.email}
@@ -130,13 +113,13 @@ export default function LoginPage() {
                     suppressHydrationWarning
                   />
                 </div>
-              </div>
+              </FormField>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">Şifre</label>
+              <FormField label="Şifre" htmlFor="login-password" className="space-y-2">
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input
+                    id="login-password"
                     type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
@@ -155,18 +138,17 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-              </div>
+              </FormField>
 
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <label className="flex items-center space-x-2 cursor-pointer min-h-[44px]">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={rememberMe}
-                    onChange={e => setRememberMe(e.target.checked)}
-                    className="rounded border-white/20 bg-white/5 text-purple-600 focus:ring-purple-500"
+                    onCheckedChange={setRememberMe}
+                    className="border-white/20 bg-white/5 text-purple-600"
                     suppressHydrationWarning
                   />
-                  <span className="text-sm text-slate-300">Beni hatırla</span>
+                  <Label className="cursor-pointer text-sm text-slate-300">Beni hatırla</Label>
                 </label>
                 <Link
                   href="/auth/forgot-password"
@@ -203,9 +185,8 @@ export default function LoginPage() {
                 </Link>
               </p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        </div>
+      </AuthCardShell>
+    </AuthShell>
   )
 }

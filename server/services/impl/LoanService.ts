@@ -16,7 +16,7 @@ export class LoanService extends BaseService<LoanDTO> {
 
     async findById(id: number): Promise<LoanDTO | null> {
         const loan = await this.loanRepository.findByIdWithRelations(id)
-        if (!loan) return null
+        if (!loan) {return null}
         return LoanMapper.prismaToDTO(loan)
     }
 
@@ -68,17 +68,17 @@ export class LoanService extends BaseService<LoanDTO> {
     async update(id: number, data: Partial<CreateLoanDTO>): Promise<LoanDTO> {
         const updateData: Prisma.LoanUpdateInput = {}
 
-        if (data.name) updateData.name = data.name
-        if (data.bankId) updateData.bank = { connect: { id: data.bankId } }
-        if (data.loanType) updateData.loanType = data.loanType
-        if (data.totalAmount) updateData.totalAmount = new Prisma.Decimal(data.totalAmount)
-        if (data.installmentCount) updateData.installmentCount = data.installmentCount
-        if (data.remainingInstallments !== undefined) updateData.remainingInstallments = data.remainingInstallments
-        if (data.interestRate !== undefined) updateData.interestRate = data.interestRate ? new Prisma.Decimal(data.interestRate) : null
-        if (data.paymentDay) updateData.paymentDay = data.paymentDay
-        if (data.currencyId) updateData.currency = { connect: { id: data.currencyId } }
-        if (data.startDate) updateData.startDate = data.startDate
-        if (data.description) updateData.description = data.description
+        if (data.name) {updateData.name = data.name}
+        if (data.bankId) {updateData.bank = { connect: { id: data.bankId } }}
+        if (data.loanType) {updateData.loanType = data.loanType}
+        if (data.totalAmount) {updateData.totalAmount = new Prisma.Decimal(data.totalAmount)}
+        if (data.installmentCount) {updateData.installmentCount = data.installmentCount}
+        if (data.remainingInstallments !== undefined) {updateData.remainingInstallments = data.remainingInstallments}
+        if (data.interestRate !== undefined) {updateData.interestRate = data.interestRate ? new Prisma.Decimal(data.interestRate) : null}
+        if (data.paymentDay) {updateData.paymentDay = data.paymentDay}
+        if (data.currencyId) {updateData.currency = { connect: { id: data.currencyId } }}
+        if (data.startDate) {updateData.startDate = data.startDate}
+        if (data.description) {updateData.description = data.description}
 
         const loan = await this.prisma.loan.update({
             where: { id },

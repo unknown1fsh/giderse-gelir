@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Users, ArrowLeft, Home, Edit, Trash2, Plus, Mail, Phone } from 'lucide-react'
-import { EditNameModal } from '@/components/ui/edit-name-modal'
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, PageHeader } from '@/components/mosaic'
+import { Users, Edit, Trash2, Plus, Mail, Phone } from 'lucide-react'
+import { EditNameModal } from '@/components/mosaic'
+import { ConfirmationDialog } from '@/components/mosaic'
 import { useToast } from '@/lib/use-toast'
 
 interface Beneficiary {
@@ -24,7 +23,6 @@ interface Beneficiary {
 }
 
 export default function BeneficiariesPage() {
-  const router = useRouter()
   const { success: toastSuccess, error: toastError } = useToast()
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([])
   const [loading, setLoading] = useState(true)
@@ -115,25 +113,20 @@ export default function BeneficiariesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-lg">
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <Link href="/dashboard" className="p-2 hover:bg-gray-100 rounded-lg">
-          <Home className="h-5 w-5" />
-        </Link>
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold">Alıcılar / Kişiler</h1>
-          <p className="text-muted-foreground">Havale/EFT işlemleriniz için kayıtlı kişiler</p>
-        </div>
-        <Link
-          href="/beneficiaries/new"
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4" />
-          Yeni Alıcı
-        </Link>
-      </div>
+      <PageHeader
+        title="Alıcılar / Kişiler"
+        description="Havale ve EFT işlemleriniz için kayıtlı kişileri yönetin."
+        breadcrumbs={[{ label: 'Alıcılar' }]}
+        actions={(
+          <Link
+            href="/beneficiaries/new"
+            className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4" />
+            Yeni Alıcı
+          </Link>
+        )}
+      />
 
       <Card>
         <CardHeader>
@@ -144,11 +137,11 @@ export default function BeneficiariesPage() {
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-slate-600">Alıcılar yükleniyor...</p>
+              <p className="text-slate-300">Alıcılar yükleniyor...</p>
             </div>
           ) : error ? (
             <div className="text-center py-8">
-              <p className="text-red-600">{error}</p>
+              <p className="text-red-400">{error}</p>
             </div>
           ) : beneficiaries.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
@@ -161,15 +154,15 @@ export default function BeneficiariesPage() {
               {beneficiaries.map(beneficiary => (
                 <div
                   key={beneficiary.id}
-                  className="group p-4 border border-slate-200 rounded-xl hover:shadow-md transition-all duration-200 bg-gradient-to-r from-slate-50 to-slate-100/50"
+                  className="group p-4 border border-slate-700 rounded-xl hover:shadow-md transition-all duration-200 bg-gradient-to-r from-slate-800 to-slate-100/50"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-3 h-3 rounded-full bg-green-500" />
-                        <h3 className="font-semibold text-slate-800">{beneficiary.name}</h3>
+                        <h3 className="font-semibold text-slate-100">{beneficiary.name}</h3>
                         {beneficiary.bank && (
-                          <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
+                          <span className="text-xs px-2 py-1 rounded-full bg-green-500/15 text-green-400">
                             {beneficiary.bank.name}
                           </span>
                         )}
@@ -211,7 +204,7 @@ export default function BeneficiariesPage() {
                           setSelectedBeneficiary(beneficiary)
                           setShowEditModal(true)
                         }}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-2 text-blue-400 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Düzenle"
                       >
                         <Edit className="h-4 w-4" />
@@ -221,7 +214,7 @@ export default function BeneficiariesPage() {
                           setSelectedBeneficiary(beneficiary)
                           setShowDeleteConfirm(true)
                         }}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"
                         title="Sil"
                       >
                         <Trash2 className="h-4 w-4" />

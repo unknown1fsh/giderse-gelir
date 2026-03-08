@@ -2,320 +2,409 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import {
+  AppPageShell,
+  Button,
+  Card,
+  CardContent,
+  FormField,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/mosaic'
+import { CreditCard, Calculator, AlertTriangle, Info } from 'lucide-react'
 import { useToast } from '@/lib/use-toast'
-import { ArrowLeft, Save, CreditCard } from 'lucide-react'
 
 interface ReferenceData {
-    banks: Array<{ id: number; name: string }>
-    currencies: Array<{ id: number; code: string; name: string }>
+  banks: Array<{ id: number; name: string }>
+  currencies: Array<{ id: number; code: string; name: string }>
 }
 
-export default function NewLoanPage() {
-    const router = useRouter()
-    const { success, error } = useToast()
-    const [loading, setLoading] = useState(true)
-    const [saving, setSaving] = useState(false)
-    const [refData, setRefData] = useState<ReferenceData | null>(null)
+const KREDI_TURLERI = [
+  { deger: 'PERSONAL', etiket: 'İhtiyaç Kredisi' },
+  { deger: 'HOUSING', etiket: 'Konut Kredisi' },
+  { deger: 'VEHICLE', etiket: 'Taşıt Kredisi' },
+  { deger: 'CREDIT_CARD', etiket: 'Kredi Kartı Borcu' },
+  { deger: 'OTHER', etiket: 'Diğer' },
+]
 
-    const [formData, setFormData] = useState({
-        name: '',
-        bankId: 0,
-        loanType: 'PERSONAL',
-        totalAmount: '',
-        installmentCount: '',
-        remainingInstallments: '',
-        interestRate: '',
-        paymentDay: 15,
-        currencyId: 0,
-        startDate: new Date().toISOString().split('T')[0],
-        description: '',
-        isFictional: false
-    })
+export default function YeniKrediSayfasi() {
+  const router = useRouter()
+  const { success: toastSuccess, error: toastError } = useToast()
+  const [refData, setRefData] = useState<ReferenceData | null>(null)
+  const [yukleniyor, setYukleniyor] = useState(true)
+  const [kaydediliyor, setKaydediliyor] = useState(false)
+  const [hatalar, setHatalar] = useState<Record<string, string>>({})
 
-    // Aylık ödeme hesaplama
-    const calculateMonthlyPayment = () => {
-        const total = Number(formData.totalAmount)
-        const count = Number(formData.installmentCount)
-        const rate = Number(formData.interestRate)
+  const [form, setForm] = useState({
+    ad: '',
+    bankaId: '',
+    krediTuru: 'PERSONAL',
+    toplamTutar: '',
+    taksitSayisi: '',
+    kalanTaksit: '',
+    faizOrani: '',
+    odemeGunu: '15',
+    paraBirimiId: '',
+    baslangicTarihi: new Date().toISOString().split('T')[0],
+    kurgusal: false,
+  })
 
-        if (!total || !count || count <= 0) {
-            return 0
+  useEffect(() => {
+    async function veriGetir() {
+      try {
+        const res = await fetch('/api/reference-data')
+        if (res.ok) {
+          const veri = (await res.json()) as ReferenceData
+          setRefData(veri)
+          const try_ = veri.currencies.find(c => c.code === 'TRY')
+          if (try_) {setForm(f => ({ ...f, paraBirimiId: String(try_.id) }))}
         }
-
-        // Faiz yoksa basit bölme
-        if (!rate || rate === 0) {
-            return total / count
-        }
-
-        // Faizli kredi hesaplama
-        const monthlyRate = rate / 100 / 12
-        const numerator = monthlyRate * Math.pow(1 + monthlyRate, count)
-        const denominator = Math.pow(1 + monthlyRate, count) - 1
-        return total * (numerator / denominator)
+      } catch {
+        // sessizce devam
+      } finally {
+        setYukleniyor(false)
+      }
     }
+    void veriGetir()
+  }, [])
 
-    const monthlyPayment = calculateMonthlyPayment()
+  const guncelle = (alan: string, deger: string | boolean) => {
+    setForm(f => ({ ...f, [alan]: deger }))
+    if (typeof deger === 'string' && hatalar[alan]) {setHatalar(h => ({ ...h, [alan]: '' }))}
+  }
 
-    useEffect(() => {
-        fetchReferenceData()
-    }, [])
+  // Aylık ödeme hesaplama
+  const aylikOdeme = (() => {
+    const toplam = Number(form.toplamTutar)
+    const sayi = Number(form.taksitSayisi)
+    const faiz = Number(form.faizOrani)
+    if (!toplam || !sayi || sayi <= 0) {return 0}
+    if (!faiz || faiz === 0) {return toplam / sayi}
+    const aylikFaiz = faiz / 100 / 12
+    const pay = aylikFaiz * Math.pow(1 + aylikFaiz, sayi)
+    const payda = Math.pow(1 + aylikFaiz, sayi) - 1
+    return toplam * (pay / payda)
+  })()
 
-    const fetchReferenceData = async () => {
-        try {
-            const res = await fetch('/api/reference-data')
-            if (res.ok) {
-                setRefData(await res.json())
-            }
-        } catch (err) {
-            console.error('Referans verileri alınamadı:', err)
-        } finally {
-            setLoading(false)
-        }
+  const secilenPara = refData?.currencies.find(c => c.id === parseInt(form.paraBirimiId))
+
+  const dogrula = () => {
+    const yeni: Record<string, string> = {}
+    if (!form.ad.trim()) {yeni.ad = 'Kredi adı zorunludur'}
+    if (!form.bankaId) {yeni.bankaId = 'Banka seçimi zorunludur'}
+    if (!form.paraBirimiId) {yeni.paraBirimiId = 'Para birimi seçimi zorunludur'}
+    if (!form.toplamTutar || Number(form.toplamTutar) <= 0) {yeni.toplamTutar = 'Geçerli bir tutar girin'}
+    if (!form.taksitSayisi || Number(form.taksitSayisi) <= 0) {yeni.taksitSayisi = 'Geçerli bir taksit sayısı girin'}
+    const gun = Number(form.odemeGunu)
+    if (!form.odemeGunu || gun < 1 || gun > 31) {yeni.odemeGunu = 'Ödeme günü 1-31 arasında olmalıdır'}
+    setHatalar(yeni)
+    return Object.keys(yeni).length === 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!dogrula()) {return}
+    setKaydediliyor(true)
+    try {
+      const res = await fetch('/api/loans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.ad,
+          bankId: parseInt(form.bankaId),
+          loanType: form.krediTuru,
+          totalAmount: Number(form.toplamTutar),
+          installmentCount: Number(form.taksitSayisi),
+          remainingInstallments: form.kalanTaksit ? Number(form.kalanTaksit) : Number(form.taksitSayisi),
+          interestRate: form.faizOrani ? Number(form.faizOrani) : null,
+          paymentDay: Number(form.odemeGunu),
+          currencyId: parseInt(form.paraBirimiId),
+          startDate: form.baslangicTarihi,
+          isFictional: form.kurgusal,
+        }),
+      })
+      if (res.ok) {
+        toastSuccess('Başarılı', 'Kredi başarıyla eklendi')
+        router.push('/loans')
+      } else {
+        const hata = (await res.json()) as { error?: string }
+        toastError('Hata', hata.error || 'Kredi eklenemedi')
+      }
+    } catch {
+      toastError('Hata', 'Kredi eklenirken hata oluştu')
+    } finally {
+      setKaydediliyor(false)
     }
+  }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setSaving(true)
+  return (
+    <AppPageShell
+      header={{
+        title: 'Yeni Kredi',
+        description: 'Banka kredisi veya borç takibini başlatın',
+        onBack: () => router.back(),
+      }}
+    >
+      <div className="max-w-2xl">
+        <form onSubmit={e => void handleSubmit(e)} className="space-y-6">
+          {/* Temel Bilgiler */}
+          <Card>
+            <CardContent className="p-6 space-y-5">
+              <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+                <CreditCard className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Kredi Bilgileri
+                </h2>
+              </div>
 
-        try {
-            const res = await fetch('/api/loans', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...formData,
-                    bankId: Number(formData.bankId),
-                    currencyId: Number(formData.currencyId),
-                    totalAmount: Number(formData.totalAmount),
-                    installmentCount: Number(formData.installmentCount),
-                    remainingInstallments: Number(formData.remainingInstallments || formData.installmentCount),
-                    interestRate: formData.interestRate ? Number(formData.interestRate) : null,
-                    paymentDay: Number(formData.paymentDay),
-                })
-            })
+              <FormField label="Kredi Adı" required error={hatalar.ad} htmlFor="ad">
+                <Input
+                  id="ad"
+                  value={form.ad}
+                  onChange={e => guncelle('ad', e.target.value)}
+                  placeholder="Konut Kredisi, Taşıt Kredisi, Garanti Borç..."
+                  variant={hatalar.ad ? 'error' : 'default'}
+                />
+              </FormField>
 
-            if (res.ok) {
-                success('Başarılı', 'Kredi başarıyla eklendi')
-                router.push('/loans')
-            } else {
-                const errorData = await res.json()
-                error('Hata', errorData.error || 'Kredi eklenirken bir hata oluştu')
-            }
-        } catch (err) {
-            error('Hata', 'Kredi eklenirken bir hata oluştu')
-        } finally {
-            setSaving(false)
-        }
-    }
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField label="Banka" required error={hatalar.bankaId} htmlFor="banka">
+                  <Select
+                    value={form.bankaId}
+                    onValueChange={v => guncelle('bankaId', v)}
+                    disabled={yukleniyor}
+                  >
+                    <SelectTrigger id="banka" className={hatalar.bankaId ? 'border-destructive' : ''}>
+                      <SelectValue placeholder={yukleniyor ? 'Yükleniyor...' : 'Banka seçin'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {refData?.banks.map(b => (
+                        <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
 
-    if (loading) {
-        return <div className="p-6">Yükleniyor...</div>
-    }
+                <FormField label="Kredi Türü" required htmlFor="krediTuru">
+                  <Select
+                    value={form.krediTuru}
+                    onValueChange={v => guncelle('krediTuru', v)}
+                  >
+                    <SelectTrigger id="krediTuru">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {KREDI_TURLERI.map(t => (
+                        <SelectItem key={t.deger} value={t.deger}>{t.etiket}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
+              </div>
 
-    return (
-        <div className="space-y-6 max-w-2xl mx-auto">
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.back()}>
-                    <ArrowLeft className="h-5 w-5" />
-                </Button>
+              {/* Kurgusal Kredi */}
+              <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-border/60 bg-muted/20 p-4 hover:bg-muted/40 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={form.kurgusal}
+                  onChange={e => guncelle('kurgusal', e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
+                />
                 <div>
-                    <h1 className="text-3xl font-bold">Yeni Kredi Ekle</h1>
-                    <p className="text-muted-foreground">Kredi detaylarını doldurarak takip etmeye başlayın</p>
+                  <p className="text-sm font-medium">Kurgu / Planlama Kredisi</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    İşaretlenirse aylık ödeme nakit bakiyenizden otomatik düşülür (gerçek ödeme değil)
+                  </p>
                 </div>
-            </div>
+              </label>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <CreditCard className="h-5 w-5 text-blue-600" />
-                        Kredi Bilgileri
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium mb-1">Kredi Adı *</label>
-                                <input
-                                    type="text"
-                                    required
-                                    className="w-full p-2 border rounded-md"
-                                    placeholder="Örn: Konut Kredisi, Garanti Borç"
-                                    value={formData.name}
-                                    onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                                />
-                            </div>
+              {form.kurgusal && (
+                <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/8 px-4 py-3">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                  <p className="text-sm text-muted-foreground">
+                    Kurgu kredi olarak eklenen kayıt, planlama amaçlıdır ve nakit bakiyenizi etkiler.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-                            {/* Kurgu Kredisi Checkbox */}
-                            <div className="md:col-span-2">
-                                <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                    <input
-                                        type="checkbox"
-                                        id="isFictional"
-                                        checked={formData.isFictional}
-                                        onChange={e => setFormData(prev => ({ ...prev, isFictional: e.target.checked }))}
-                                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                    />
-                                    <label htmlFor="isFictional" className="flex-1 text-sm font-medium text-gray-900 cursor-pointer">
-                                        Bu bir kurgu/planlama kredisidir
-                                    </label>
-                                </div>
-                                {formData.isFictional && (
-                                    <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                        <p className="text-sm text-yellow-800">
-                                            ⚠️ <strong>Dikkat:</strong> Kurgu kredisi olarak işaretlendiğinde, aylık ödeme tutarı nakit bakiyenizden otomatik olarak düşülecektir. Bu gerçek bir ödeme değil, planlama amaçlıdır.
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
+          {/* Finansal Detaylar */}
+          <Card>
+            <CardContent className="p-6 space-y-5">
+              <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+                <span className="text-base font-bold text-primary">₺</span>
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Finansal Detaylar
+                </h2>
+              </div>
 
-                            {/* Aylık Ödeme Gösterimi */}
-                            {monthlyPayment > 0 && (
-                                <div className="md:col-span-2">
-                                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm font-medium text-gray-700">Hesaplanan Aylık Ödeme:</span>
-                                            <span className="text-lg font-bold text-green-700">
-                                                {monthlyPayment.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {refData?.currencies.find(c => c.id === formData.currencyId)?.code || ''}
-                                            </span>
-                                        </div>
-                                        {formData.interestRate && Number(formData.interestRate) > 0 && (
-                                            <p className="text-xs text-gray-600 mt-1">
-                                                Faiz oranı: %{formData.interestRate} (yıllık)
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  label="Toplam Borç Tutarı"
+                  required
+                  error={hatalar.toplamTutar}
+                  htmlFor="toplamTutar"
+                >
+                  <Input
+                    id="toplamTutar"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={form.toplamTutar}
+                    onChange={e => guncelle('toplamTutar', e.target.value)}
+                    placeholder="150000"
+                    variant={hatalar.toplamTutar ? 'error' : 'default'}
+                  />
+                </FormField>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Banka *</label>
-                                <select
-                                    required
-                                    className="w-full p-2 border rounded-md"
-                                    value={formData.bankId}
-                                    onChange={e => setFormData(prev => ({ ...prev, bankId: Number(e.target.value) }))}
-                                >
-                                    <option value={0}>Seçiniz</option>
-                                    {refData?.banks.map(bank => (
-                                        <option key={bank.id} value={bank.id}>{bank.name}</option>
-                                    ))}
-                                </select>
-                            </div>
+                <FormField label="Para Birimi" required error={hatalar.paraBirimiId} htmlFor="paraBirimi">
+                  <Select
+                    value={form.paraBirimiId}
+                    onValueChange={v => guncelle('paraBirimiId', v)}
+                    disabled={yukleniyor}
+                  >
+                    <SelectTrigger id="paraBirimi" className={hatalar.paraBirimiId ? 'border-destructive' : ''}>
+                      <SelectValue placeholder={yukleniyor ? 'Yükleniyor...' : 'Para birimi seçin'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {refData?.currencies.map(c => (
+                        <SelectItem key={c.id} value={String(c.id)}>{c.code} — {c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Kredi Türü *</label>
-                                <select
-                                    required
-                                    className="w-full p-2 border rounded-md"
-                                    value={formData.loanType}
-                                    onChange={e => setFormData(prev => ({ ...prev, loanType: e.target.value }))}
-                                >
-                                    <option value="PERSONAL">İhtiyaç Kredisi</option>
-                                    <option value="HOUSING">Konut Kredisi</option>
-                                    <option value="VEHICLE">Taşıt Kredisi</option>
-                                    <option value="CREDIT_CARD">Kredi Kartı Borcu</option>
-                                    <option value="OTHER">Diğer</option>
-                                </select>
-                            </div>
+                <FormField
+                  label="Toplam Taksit Sayısı"
+                  required
+                  error={hatalar.taksitSayisi}
+                  htmlFor="taksitSayisi"
+                >
+                  <Input
+                    id="taksitSayisi"
+                    type="number"
+                    min="1"
+                    value={form.taksitSayisi}
+                    onChange={e => guncelle('taksitSayisi', e.target.value)}
+                    placeholder="36"
+                    variant={hatalar.taksitSayisi ? 'error' : 'default'}
+                  />
+                </FormField>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Toplam Borç Tutar *</label>
-                                <input
-                                    type="number"
-                                    required
-                                    step="0.01"
-                                    className="w-full p-2 border rounded-md"
-                                    value={formData.totalAmount}
-                                    onChange={e => setFormData(prev => ({ ...prev, totalAmount: e.target.value }))}
-                                />
-                            </div>
+                <FormField
+                  label="Kalan Taksit Sayısı"
+                  hint="Boş bırakılırsa toplam taksit alınır"
+                  htmlFor="kalanTaksit"
+                >
+                  <Input
+                    id="kalanTaksit"
+                    type="number"
+                    min="0"
+                    value={form.kalanTaksit}
+                    onChange={e => guncelle('kalanTaksit', e.target.value)}
+                    placeholder="24"
+                  />
+                </FormField>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Para Birimi *</label>
-                                <select
-                                    required
-                                    className="w-full p-2 border rounded-md"
-                                    value={formData.currencyId}
-                                    onChange={e => setFormData(prev => ({ ...prev, currencyId: Number(e.target.value) }))}
-                                >
-                                    <option value={0}>Seçiniz</option>
-                                    {refData?.currencies.map(curr => (
-                                        <option key={curr.id} value={curr.id}>{curr.code}</option>
-                                    ))}
-                                </select>
-                            </div>
+                <FormField
+                  label="Yıllık Faiz Oranı (%)"
+                  hint="İsteğe bağlı — aylık ödeme hesabı için"
+                  htmlFor="faizOrani"
+                >
+                  <Input
+                    id="faizOrani"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={form.faizOrani}
+                    onChange={e => guncelle('faizOrani', e.target.value)}
+                    placeholder="12,50"
+                  />
+                </FormField>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Toplam Taksit Sayısı *</label>
-                                <input
-                                    type="number"
-                                    required
-                                    className="w-full p-2 border rounded-md"
-                                    value={formData.installmentCount}
-                                    onChange={e => setFormData(prev => ({ ...prev, installmentCount: e.target.value }))}
-                                />
-                            </div>
+                <FormField
+                  label="Ödeme Günü (1–31)"
+                  required
+                  error={hatalar.odemeGunu}
+                  htmlFor="odemeGunu"
+                >
+                  <Input
+                    id="odemeGunu"
+                    type="number"
+                    min="1"
+                    max="31"
+                    value={form.odemeGunu}
+                    onChange={e => guncelle('odemeGunu', e.target.value)}
+                    variant={hatalar.odemeGunu ? 'error' : 'default'}
+                  />
+                </FormField>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Kalan Taksit Sayısı</label>
-                                <input
-                                    type="number"
-                                    className="w-full p-2 border rounded-md"
-                                    placeholder="Boş bırakılırsa tamamı"
-                                    value={formData.remainingInstallments}
-                                    onChange={e => setFormData(prev => ({ ...prev, remainingInstallments: e.target.value }))}
-                                />
-                            </div>
+                <FormField
+                  label="Başlangıç Tarihi"
+                  required
+                  htmlFor="baslangicTarihi"
+                >
+                  <Input
+                    id="baslangicTarihi"
+                    type="date"
+                    value={form.baslangicTarihi}
+                    onChange={e => guncelle('baslangicTarihi', e.target.value)}
+                  />
+                </FormField>
+              </div>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Yıllık Faiz Oranı (%)</label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    className="w-full p-2 border rounded-md"
-                                    value={formData.interestRate}
-                                    onChange={e => setFormData(prev => ({ ...prev, interestRate: e.target.value }))}
-                                />
-                            </div>
+              {/* Hesaplanan Aylık Ödeme */}
+              {aylikOdeme > 0 && (
+                <div className="flex items-center justify-between rounded-xl border border-green-500/20 bg-green-500/8 px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <Calculator className="h-4 w-4 text-green-400" />
+                    <span className="text-sm font-medium text-muted-foreground">Hesaplanan Aylık Ödeme</span>
+                  </div>
+                  <span className="text-lg font-bold text-green-400">
+                    {aylikOdeme.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {secilenPara ? ` ${secilenPara.code}` : ''}
+                  </span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Ödeme Günü (1-31) *</label>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    max="31"
-                                    required
-                                    className="w-full p-2 border rounded-md"
-                                    value={formData.paymentDay}
-                                    onChange={e => setFormData(prev => ({ ...prev, paymentDay: Number(e.target.value) }))}
-                                />
-                            </div>
+          {/* Bilgi Notu */}
+          <div className="flex items-start gap-3 rounded-xl border border-blue-500/20 bg-blue-500/8 px-4 py-3">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
+            <p className="text-sm text-muted-foreground">
+              Faiz oranı girilirse aylık ödeme tutarı otomatik hesaplanır. Kalan taksit boş bırakılırsa toplam taksit sayısı esas alınır.
+            </p>
+          </div>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Başlangıç Tarihi *</label>
-                                <input
-                                    type="date"
-                                    required
-                                    className="w-full p-2 border rounded-md"
-                                    value={formData.startDate}
-                                    onChange={e => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="pt-4 flex gap-3">
-                            <Button type="button" variant="outline" className="flex-1" onClick={() => router.back()}>
-                                İptal
-                            </Button>
-                            <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700" disabled={saving}>
-                                <Save className="mr-2 h-4 w-4" /> {saving ? 'Kaydediliyor...' : 'Krediyi Kaydet'}
-                            </Button>
-                        </div>
-                    </form>
-                </CardContent>
-            </Card>
-        </div>
-    )
+          {/* Butonlar */}
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => router.back()}
+              disabled={kaydediliyor}
+            >
+              İptal
+            </Button>
+            <Button
+              type="submit"
+              variant="glow"
+              className="flex-1"
+              loading={kaydediliyor}
+              disabled={kaydediliyor}
+            >
+              Kredi Ekle
+            </Button>
+          </div>
+        </form>
+      </div>
+    </AppPageShell>
+  )
 }

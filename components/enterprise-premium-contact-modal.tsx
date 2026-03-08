@@ -9,11 +9,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
+} from '@/components/mosaic'
+import { Button } from '@/components/mosaic'
+import { Input } from '@/components/mosaic'
+import { Textarea } from '@/components/mosaic'
+import { Label } from '@/components/mosaic'
 import { Loader2, Send, CheckCircle2 } from 'lucide-react'
 import { useUser } from '@/lib/user-context'
 

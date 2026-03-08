@@ -1,24 +1,33 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Button,
+  Input,
+  Switch,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+  ConfirmDialog,
+  PageHeader,
+} from '@/components/mosaic'
 import { useToast } from '@/lib/use-toast'
 import { useUser } from '@/lib/user-context'
 import { getDisplayName } from '@/lib/utils'
 import {
-  Settings,
+  DEFAULT_APP_SETTINGS,
+  DEFAULT_NOTIFICATION_PREFERENCES,
+  normalizeAppSettings,
+  normalizeNotificationPreferences,
+} from '@/lib/user-preferences'
+import {
   User,
   Bell,
   Shield,
@@ -46,6 +55,7 @@ import {
   Loader2,
   Crown,
   Sparkles,
+  Target,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -66,6 +76,9 @@ export default function SettingsPage() {
     weeklyReports: true,
     monthlyReports: true,
     paymentReminders: true,
+    budgetAlerts: true,
+    goalMilestones: true,
+    creditCardDueAlerts: true,
 
     // Görünüm Ayarları
     theme: 'light',
@@ -120,17 +133,37 @@ export default function SettingsPage() {
   // Kullanıcı verilerini yükle
   useEffect(() => {
     if (user) {
+      const notificationPreferences = normalizeNotificationPreferences(user.notifications)
+      const appSettings = normalizeAppSettings(user.settings)
+
       setSettings(prev => ({
         ...prev,
         name: user.name || '',
         username: user.username || '',
         email: user.email || '',
         phone: user.phone || '',
-        theme: 'light', // Varsayılan değerler
-        language: 'tr',
-        currency: 'TRY',
-        dateFormat: 'DD/MM/YYYY',
-        numberFormat: '1.234,56',
+        emailNotifications: notificationPreferences.emailNotifications,
+        pushNotifications: notificationPreferences.pushNotifications,
+        smsNotifications: notificationPreferences.smsNotifications,
+        weeklyReports: notificationPreferences.weeklyReports,
+        monthlyReports: notificationPreferences.monthlyReports,
+        paymentReminders: notificationPreferences.paymentReminders,
+        budgetAlerts: notificationPreferences.budgetAlerts,
+        goalMilestones: notificationPreferences.goalMilestones,
+        creditCardDueAlerts: notificationPreferences.creditCardDueAlerts,
+        theme: user.theme || 'light',
+        language: user.language || 'tr',
+        currency: user.currency || 'TRY',
+        dateFormat: user.dateFormat || 'DD/MM/YYYY',
+        numberFormat: user.numberFormat || '1.234,56',
+        twoFactorAuth: appSettings.twoFactorAuth,
+        biometricAuth: appSettings.biometricAuth,
+        autoLogout: appSettings.autoLogout,
+        sessionTimeout: appSettings.sessionTimeout,
+        autoBackup: appSettings.autoBackup,
+        backupFrequency: appSettings.backupFrequency,
+        dataRetention: appSettings.dataRetention,
+        exportFormat: appSettings.exportFormat,
       }))
     }
   }, [user])
@@ -157,17 +190,42 @@ export default function SettingsPage() {
         name: settings.name,
         username: settings.username,
         phone: settings.phone,
-        // theme: settings.theme, // TODO: Prisma User modelinde yok, settings JSON içinde tutulabilir
-        // language: settings.language, // TODO: Prisma User modelinde yok
-        // currency: settings.currency, // TODO: Prisma User modelinde yok
-        // dateFormat: settings.dateFormat, // TODO: Prisma User modelinde yok
-        // numberFormat: settings.numberFormat, // TODO: Prisma User modelinde yok
+        theme: settings.theme,
+        language: settings.language,
+        currency: settings.currency,
+        dateFormat: settings.dateFormat,
+        numberFormat: settings.numberFormat,
+        notifications: {
+          ...DEFAULT_NOTIFICATION_PREFERENCES,
+          emailNotifications: settings.emailNotifications,
+          pushNotifications: settings.pushNotifications,
+          smsNotifications: settings.smsNotifications,
+          weeklyReports: settings.weeklyReports,
+          monthlyReports: settings.monthlyReports,
+          paymentReminders: settings.paymentReminders,
+          budgetAlerts: settings.budgetAlerts,
+          goalMilestones: settings.goalMilestones,
+          creditCardDueAlerts: settings.creditCardDueAlerts,
+        },
+        settings: {
+          ...DEFAULT_APP_SETTINGS,
+          twoFactorAuth: settings.twoFactorAuth,
+          biometricAuth: settings.biometricAuth,
+          autoLogout: settings.autoLogout,
+          sessionTimeout: settings.sessionTimeout,
+          autoBackup: settings.autoBackup,
+          backupFrequency: settings.backupFrequency,
+          dataRetention: settings.dataRetention,
+          exportFormat: settings.exportFormat,
+        },
       })
 
       if (success) {
         toastSuccess('Başarılı', 'Ayarlar başarıyla kaydedildi!')
+        setSaveMessage('Ayarlar başarıyla kaydedildi')
       } else {
         toastError('Hata', 'Ayarlar kaydedilemedi. Lütfen tekrar deneyin.')
+        setSaveMessage('Ayarlar kaydedilemedi')
       }
     } catch (error) {
       setSaveMessage('Bir hata oluştu. Lütfen tekrar deneyin.')
@@ -177,20 +235,14 @@ export default function SettingsPage() {
   }
 
   const handleExport = () => {
-    // Veri dışa aktarma işlemi
-    // eslint-disable-next-line no-console
     console.log('Veri dışa aktarılıyor...')
   }
 
   const handleImport = () => {
-    // Veri içe aktarma işlemi
-    // eslint-disable-next-line no-console
     console.log('Veri içe aktarılıyor...')
   }
 
   const handleDeleteAccount = () => {
-    // Hesap silme işlemi
-    // eslint-disable-next-line no-console
     console.log('Hesap siliniyor...')
   }
 
@@ -201,7 +253,6 @@ export default function SettingsPage() {
 
     try {
       setIsSaving(true)
-
       const response = await fetch('/api/user/reset-all-data', {
         method: 'POST',
         credentials: 'include',
@@ -209,7 +260,6 @@ export default function SettingsPage() {
 
       if (response.ok) {
         toastSuccess('Tüm verileriniz başarıyla silindi!')
-        // Sayfayı yenile
         setTimeout(() => {
           window.location.reload()
         }, 1500)
@@ -225,817 +275,559 @@ export default function SettingsPage() {
     }
   }
 
-  const handleGoBack = () => {
-    router.back()
-  }
-
-  const handleGoHome = () => {
-    router.push('/dashboard')
-  }
-
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-10 mb-6">
-        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
-                Ayarlar
-              </h1>
-              <p className="text-sm sm:text-base text-slate-600 mt-1">Uygulama ve hesap ayarlarınızı yönetin</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <Button
-                onClick={handleGoBack}
-                variant="outline"
-                className="border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Geri
-              </Button>
-              <Button
-                onClick={handleGoHome}
-                variant="outline"
-                className="border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-              >
-                <Home className="h-4 w-4 mr-2" />
-                Anasayfa
-              </Button>
-              <Button
-                onClick={() => {
-                  void handleSave()
-                }}
-                disabled={isSaving || loading}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Kaydediliyor...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Kaydet
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
 
-      {/* Save Message */}
+      <PageHeader
+        title="Ayarlar"
+        description="Uygulama ve hesap ayarlarınızı yönetin"
+        actions={
+          <>
+            <Button onClick={() => router.back()} variant="outline">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Geri
+            </Button>
+            <Button onClick={() => router.push('/dashboard')} variant="outline">
+              <Home className="h-4 w-4 mr-2" />
+              Anasayfa
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving || loading} variant="default">
+              {isSaving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+              {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
+            </Button>
+          </>
+        }
+      />
+
       {saveMessage && (
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div
-            className={`p-4 rounded-lg ${saveMessage.includes('başarıyla')
-              ? 'bg-green-100 border border-green-200 text-green-800'
-              : 'bg-red-100 border border-red-200 text-red-800'
-              }`}
-          >
-            <div className="flex items-center space-x-2">
-              {saveMessage.includes('başarıyla') ? (
-                <CheckCircle className="h-4 w-4" />
-              ) : (
-                <AlertTriangle className="h-4 w-4" />
-              )}
-              <span className="text-sm font-medium">{saveMessage}</span>
-            </div>
-          </div>
+        <div
+          className={`p-4 flex items-center gap-3 rounded-xl border ${saveMessage.includes('başarıyla')
+            ? 'bg-green-500/10 border-green-500/30 text-green-600'
+            : 'bg-destructive/10 border-destructive/30 text-destructive'
+            }`}
+        >
+          {saveMessage.includes('başarıyla') ? <CheckCircle className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+          <span className="text-sm font-medium">{saveMessage}</span>
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row">
-        {/* Sidebar - Mobilde üstte, desktop'ta solda */}
-        <div className="w-full lg:w-80 bg-white/60 backdrop-blur-sm border-b lg:border-b-0 lg:border-r border-slate-200/60">
-          <div className="p-4 sm:p-6">
-            {/* User Info */}
-            {user && (
-              <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200/50">
-                <div className="flex items-center space-x-3">
-                  <div
-                    className={`p-2 rounded-lg ${user.plan === 'premium'
-                      ? 'bg-gradient-to-br from-purple-500 to-pink-600'
-                      : 'bg-gradient-to-br from-blue-500 to-indigo-600'
-                      }`}
-                  >
-                    <User className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-slate-800">{getDisplayName(user)}</p>
-                    <div className="flex items-center space-x-1">
-                      {user.plan === 'premium' ? (
-                        <>
-                          <Crown className="h-3 w-3 text-purple-600" />
-                          <span className="text-xs text-purple-600 font-medium">Premium</span>
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-3 w-3 text-blue-600" />
-                          <span className="text-xs text-blue-600 font-medium">Ücretsiz</span>
-                        </>
-                      )}
-                    </div>
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Sidebar */}
+        <div className="w-full lg:w-64 space-y-6">
+          {user && (
+            <Card className="bg-muted/30 border-border/50">
+              <CardContent className="p-4 flex items-center space-x-3">
+                <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                  <User className="h-5 w-5" />
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <p className="font-semibold text-foreground truncate">{getDisplayName(user)}</p>
+                  <div className="flex items-center space-x-1.5 mt-0.5">
+                    {user.plan === 'premium' ? (
+                      <>
+                        <Crown className="h-3 w-3 text-purple-500" />
+                        <span className="text-xs text-purple-500 font-medium tracking-wide">Premium</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-3 w-3 text-primary" />
+                        <span className="text-xs text-primary font-medium tracking-wide">Ücretsiz</span>
+                      </>
+                    )}
                   </div>
                 </div>
-              </div>
-            )}
+              </CardContent>
+            </Card>
+          )}
 
-            <nav className="grid grid-cols-2 lg:grid-cols-1 gap-2 lg:space-y-2">
-              {tabs.map(tab => {
-                const Icon = tab.icon
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2.5 lg:py-3 rounded-xl text-left transition-all duration-200 ${activeTab === tab.id
-                      ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-blue-700 border border-blue-500/30 shadow-md'
-                      : 'text-slate-600 hover:bg-slate-100/50 hover:text-slate-800'
-                      }`}
-                  >
-                    <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-lg ${activeTab === tab.id
-                        ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md'
-                        : 'bg-slate-200/50 text-slate-600'
-                        }`}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <span className="font-medium">{tab.name}</span>
-                  </button>
-                )
-              })}
-            </nav>
-          </div>
+          <nav className="flex flex-row lg:flex-col gap-1 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
+            {tabs.map(tab => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${isActive
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                    }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{tab.name}</span>
+                </button>
+              )
+            })}
+          </nav>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 p-4 sm:p-6 lg:p-8">
+        {/* Main Content Area */}
+        <div className="flex-1">
           {activeTab === 'profile' && (
-            <div className="space-y-6">
-              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
-                  <CardTitle className="flex items-center gap-3 text-slate-800">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md">
-                      <User className="h-5 w-5 text-white" />
-                    </div>
-                    Profil Bilgileri
-                  </CardTitle>
-                  <CardDescription className="text-slate-600">
-                    Kişisel bilgilerinizi güncelleyin
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Ad Soyad</label>
-                      <Input
-                        value={settings.name}
-                        onChange={e => setSettings({ ...settings, name: e.target.value })}
-                        placeholder="Adınızı girin"
-                        className="border-slate-200 focus:border-blue-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Kullanıcı Adı</label>
-                      <div className="space-y-1">
-                        <Input
-                          value={settings.username}
-                          onChange={e => setSettings({ ...settings, username: e.target.value })}
-                          placeholder="Kullanıcı adınızı girin"
-                          disabled={!!(user && user.usernameChangeCount >= 1)}
-                          className={`border-slate-200 focus:border-blue-500 ${user && user.usernameChangeCount >= 1 ? 'bg-slate-50 cursor-not-allowed' : ''
-                            }`}
-                        />
-                        {user && (
-                          <p className={`text-xs ${user.usernameChangeCount >= 1 ? 'text-slate-500' : 'text-blue-600'}`}>
-                            {user.usernameChangeCount >= 1
-                              ? 'Kullanıcı adınızı daha önce değiştirdiğiniz için tekrar değiştiremezsiniz.'
-                              : 'Kullanıcı adınızı sadece 1 kez değiştirebilirsiniz.'}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">E-posta</label>
-                      <div className="space-y-2">
-                        <Input
-                          type="email"
-                          value={settings.email}
-                          onChange={e => setSettings({ ...settings, email: e.target.value })}
-                          placeholder="E-posta adresinizi girin"
-                          className="border-slate-200 focus:border-blue-500"
-                          disabled
-                        />
-                        {/* {user && (
-                          <div className="flex items-center gap-2">
-                            {user.emailVerified ? (
-                              <div className="flex items-center gap-1 text-sm text-green-600">
-                                <CheckCircle className="h-4 w-4" />
-                                <span>E-posta doğrulanmış</span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-1 text-sm text-yellow-600">
-                                  <AlertTriangle className="h-4 w-4" />
-                                  <span>E-posta doğrulanmamış</span>
-                                </div>
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => {
-                                    void (async () => {
-                                      if (!user.email) {
-                                        return
-                                      }
-                                      const response = await fetch(
-                                        '/api/auth/resend-verification',
-                                        {
-                                          method: 'POST',
-                                          headers: { 'Content-Type': 'application/json' },
-                                          body: JSON.stringify({ email: user.email }),
-                                        }
-                                      )
-                                      const data = (await response.json()) as {
-                                        success?: boolean
-                                        message?: string
-                                      }
-                                      if (response.ok && data.success) {
-                                        alert(
-                                          'Doğrulama e-postası gönderildi. Lütfen e-posta kutunuzu kontrol edin.'
-                                        )
-                                      } else {
-                                        alert(data.message || 'E-posta gönderilemedi')
-                                      }
-                                    })()
-                                  }}
-                                  className="text-xs"
-                                >
-                                  Doğrulama E-postası Gönder
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                        )} */}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Telefon</label>
-                      <Input
-                        value={settings.phone}
-                        onChange={e => setSettings({ ...settings, phone: e.target.value })}
-                        placeholder="Telefon numaranızı girin"
-                        className="border-slate-200 focus:border-blue-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Şifre</label>
-                      <div className="relative">
-                        <Input
-                          type={showPassword ? 'text' : 'password'}
-                          placeholder="Yeni şifre girin"
-                          className="border-slate-200 focus:border-blue-500 pr-10"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <User className="h-5 w-5 text-muted-foreground" />
+                  Profil Bilgileri
+                </CardTitle>
+                <CardDescription>
+                  Kişisel bilgilerinizi güncelleyin ve hesabınızı yönetin
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Ad Soyad</label>
+                    <Input
+                      value={settings.name}
+                      onChange={e => setSettings({ ...settings, name: e.target.value })}
+                      placeholder="Adınızı girin"
+                    />
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === 'notifications' && (
-            <div className="space-y-6">
-              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-                <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-t-lg">
-                  <CardTitle className="flex items-center gap-3 text-slate-800">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 shadow-md">
-                      <Bell className="h-5 w-5 text-white" />
-                    </div>
-                    Bildirim Ayarları
-                  </CardTitle>
-                  <CardDescription className="text-slate-600">
-                    Hangi bildirimleri almak istediğinizi seçin
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100/50">
-                      <div className="flex items-center space-x-3">
-                        <Mail className="h-5 w-5 text-blue-500" />
-                        <div>
-                          <p className="font-medium text-slate-800">E-posta Bildirimleri</p>
-                          <p className="text-sm text-slate-600">Önemli güncellemeler ve raporlar</p>
-                        </div>
-                      </div>
-                      <Switch
-                        checked={settings.emailNotifications}
-                        onCheckedChange={checked =>
-                          setSettings({ ...settings, emailNotifications: checked })
-                        }
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Kullanıcı Adı</label>
+                    <div className="space-y-1">
+                      <Input
+                        value={settings.username}
+                        onChange={e => setSettings({ ...settings, username: e.target.value })}
+                        placeholder="Kullanıcı adınızı girin"
+                        disabled={!!(user && user.usernameChangeCount >= 1)}
                       />
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100/50">
-                      <div className="flex items-center space-x-3">
-                        <Smartphone className="h-5 w-5 text-green-500" />
-                        <div>
-                          <p className="font-medium text-slate-800">Push Bildirimleri</p>
-                          <p className="text-sm text-slate-600">Anlık uygulama bildirimleri</p>
-                        </div>
-                      </div>
-                      <Switch
-                        checked={settings.pushNotifications}
-                        onCheckedChange={checked =>
-                          setSettings({ ...settings, pushNotifications: checked })
-                        }
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100/50">
-                      <div className="flex items-center space-x-3">
-                        <CreditCard className="h-5 w-5 text-orange-500" />
-                        <div>
-                          <p className="font-medium text-slate-800">Ödeme Hatırlatıcıları</p>
-                          <p className="text-sm text-slate-600">Kredi kartı vade tarihleri</p>
-                        </div>
-                      </div>
-                      <Switch
-                        checked={settings.paymentReminders}
-                        onCheckedChange={checked =>
-                          setSettings({ ...settings, paymentReminders: checked })
-                        }
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100/50">
-                      <div className="flex items-center space-x-3">
-                        <Monitor className="h-5 w-5 text-purple-500" />
-                        <div>
-                          <p className="font-medium text-slate-800">Haftalık Raporlar</p>
-                          <p className="text-sm text-slate-600">Haftalık finansal özet</p>
-                        </div>
-                      </div>
-                      <Switch
-                        checked={settings.weeklyReports}
-                        onCheckedChange={checked =>
-                          setSettings({ ...settings, weeklyReports: checked })
-                        }
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100/50">
-                      <div className="flex items-center space-x-3">
-                        <Settings className="h-5 w-5 text-indigo-500" />
-                        <div>
-                          <p className="font-medium text-slate-800">Aylık Raporlar</p>
-                          <p className="text-sm text-slate-600">Detaylı aylık analiz</p>
-                        </div>
-                      </div>
-                      <Switch
-                        checked={settings.monthlyReports}
-                        onCheckedChange={checked =>
-                          setSettings({ ...settings, monthlyReports: checked })
-                        }
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === 'appearance' && (
-            <div className="space-y-6">
-              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-                <CardHeader className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-t-lg">
-                  <CardTitle className="flex items-center gap-3 text-slate-800">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 shadow-md">
-                      <Palette className="h-5 w-5 text-white" />
-                    </div>
-                    Görünüm Ayarları
-                  </CardTitle>
-                  <CardDescription className="text-slate-600">
-                    Uygulamanın görünümünü kişiselleştirin
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Tema</label>
-                      <Select
-                        value={settings.theme}
-                        onValueChange={value => setSettings({ ...settings, theme: value })}
-                      >
-                        <SelectTrigger className="border-slate-200 focus:border-purple-500">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="light">
-                            <div className="flex items-center space-x-2">
-                              <Sun className="h-4 w-4" />
-                              <span>Açık Tema</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="dark">
-                            <div className="flex items-center space-x-2">
-                              <Moon className="h-4 w-4" />
-                              <span>Koyu Tema</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="auto">
-                            <div className="flex items-center space-x-2">
-                              <Monitor className="h-4 w-4" />
-                              <span>Sistem</span>
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Dil</label>
-                      <Select
-                        value={settings.language}
-                        onValueChange={value => setSettings({ ...settings, language: value })}
-                      >
-                        <SelectTrigger className="border-slate-200 focus:border-purple-500">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tr">Türkçe</SelectItem>
-                          <SelectItem value="en">English</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Para Birimi</label>
-                      <Select
-                        value={settings.currency}
-                        onValueChange={value => setSettings({ ...settings, currency: value })}
-                        disabled={currencies.length === 0}
-                      >
-                        <SelectTrigger className="border-slate-200 focus:border-purple-500">
-                          <SelectValue
-                            placeholder={
-                              currencies.length === 0 ? 'Yükleniyor...' : 'Para birimi seçin'
-                            }
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {currencies.length > 0 ? (
-                            currencies.map(currency => (
-                              <SelectItem key={currency.id} value={currency.code}>
-                                {currency.symbol} {currency.name} ({currency.code})
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <SelectItem value="TRY" disabled>
-                              Para birimleri yükleniyor...
-                            </SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
-                      {currencies.length === 0 && (
-                        <p className="text-xs text-red-600 mt-1">
-                          Para birimleri yüklenemedi. Lütfen sayfayı yenileyin.
+                      {user && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {user.usernameChangeCount >= 1
+                            ? 'Kullanıcı adınızı daha önce değiştirdiğiniz için tekrar değiştiremezsiniz.'
+                            : 'Kullanıcı adınızı sadece 1 kez değiştirebilirsiniz.'}
                         </p>
                       )}
                     </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Tarih Formatı</label>
-                      <Select
-                        value={settings.dateFormat}
-                        onValueChange={value => setSettings({ ...settings, dateFormat: value })}
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">E-posta</label>
+                    <Input
+                      type="email"
+                      value={settings.email}
+                      onChange={e => setSettings({ ...settings, email: e.target.value })}
+                      placeholder="E-posta adresiniz"
+                      disabled
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Telefon</label>
+                    <Input
+                      value={settings.phone}
+                      onChange={e => setSettings({ ...settings, phone: e.target.value })}
+                      placeholder="Telefon numaranızı girin"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Şifre</label>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Yeni şifre girin"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        <SelectTrigger className="border-slate-200 focus:border-purple-500">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-                          <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                          <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === 'notifications' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Bell className="h-5 w-5 text-muted-foreground" />
+                  Bildirim Ayarları
+                </CardTitle>
+                <CardDescription>
+                  Almak istediğiniz bildirim tiplerini belirleyin
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-xl bg-muted/20">
+                  <div className="flex items-center gap-4">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">E-posta Bildirimleri</p>
+                      <p className="text-sm text-muted-foreground">Önemli güncellemeler ve raporlar</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.emailNotifications}
+                    onCheckedChange={checked => setSettings({ ...settings, emailNotifications: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-xl bg-muted/20">
+                  <div className="flex items-center gap-4">
+                    <Smartphone className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Push Bildirimleri</p>
+                      <p className="text-sm text-muted-foreground">Anlık uygulama içi bildirimler</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.pushNotifications}
+                    onCheckedChange={checked => setSettings({ ...settings, pushNotifications: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-xl bg-muted/20">
+                  <div className="flex items-center gap-4">
+                    <CreditCard className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Ödeme Hatırlatıcıları</p>
+                      <p className="text-sm text-muted-foreground">Kredi kartı ve faturta vadeleri</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.paymentReminders}
+                    onCheckedChange={checked => setSettings({ ...settings, paymentReminders: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-xl bg-muted/20">
+                  <div className="flex items-center gap-4">
+                    <AlertTriangle className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Bütçe Aşımı Uyarıları</p>
+                      <p className="text-sm text-muted-foreground">Kategori bazlı eşik ve aşım bildirimleri</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.budgetAlerts}
+                    onCheckedChange={checked => setSettings({ ...settings, budgetAlerts: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-xl bg-muted/20">
+                  <div className="flex items-center gap-4">
+                    <Target className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Hedef İlerleme Bildirimleri</p>
+                      <p className="text-sm text-muted-foreground">Milestone ve tamamlama anlarını kaçırmayın</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.goalMilestones}
+                    onCheckedChange={checked => setSettings({ ...settings, goalMilestones: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-xl bg-muted/20">
+                  <div className="flex items-center gap-4">
+                    <CreditCard className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Kart Son Ödeme Uyarıları</p>
+                      <p className="text-sm text-muted-foreground">Yaklaşan son ödeme günlerini erkenden görün</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.creditCardDueAlerts}
+                    onCheckedChange={checked => setSettings({ ...settings, creditCardDueAlerts: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-xl bg-muted/20">
+                  <div className="flex items-center gap-4">
+                    <Monitor className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Haftalık Raporlar</p>
+                      <p className="text-sm text-muted-foreground">Düzenli finansal özetiniz</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.weeklyReports}
+                    onCheckedChange={checked => setSettings({ ...settings, weeklyReports: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-xl bg-muted/20">
+                  <div className="flex items-center gap-4">
+                    <Info className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Aylık Özetler</p>
+                      <p className="text-sm text-muted-foreground">Ay sonu finans özeti ve net varlık snapshot raporu</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.monthlyReports}
+                    onCheckedChange={checked => setSettings({ ...settings, monthlyReports: checked })}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === 'appearance' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Palette className="h-5 w-5 text-muted-foreground" />
+                  Görünüm Ayarları
+                </CardTitle>
+                <CardDescription>
+                  Dil, tema ve format seçeneklerini dilediğiniz gibi değiştirin
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Tema</label>
+                    <Select value={settings.theme} onValueChange={val => setSettings({ ...settings, theme: val })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="light"><div className="flex items-center gap-2"><Sun className="w-4 h-4" /> Açık Tema</div></SelectItem>
+                        <SelectItem value="dark"><div className="flex items-center gap-2"><Moon className="w-4 h-4" /> Koyu Tema</div></SelectItem>
+                        <SelectItem value="auto"><div className="flex items-center gap-2"><Monitor className="w-4 h-4" /> Sistem</div></SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Dil</label>
+                    <Select value={settings.language} onValueChange={val => setSettings({ ...settings, language: val })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tr">Türkçe</SelectItem>
+                        <SelectItem value="en">English</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Para Birimi</label>
+                    <Select
+                      value={settings.currency}
+                      onValueChange={val => setSettings({ ...settings, currency: val })}
+                      disabled={currencies.length === 0}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={currencies.length === 0 ? 'Yükleniyor...' : 'Seçiniz'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {currencies.map(c => (
+                          <SelectItem key={c.id} value={c.code}>{c.symbol} {c.name} ({c.code})</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Tarih Formatı</label>
+                    <Select value={settings.dateFormat} onValueChange={val => setSettings({ ...settings, dateFormat: val })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="DD/MM/YYYY">G/A/Y</SelectItem>
+                        <SelectItem value="MM/DD/YYYY">A/G/Y</SelectItem>
+                        <SelectItem value="YYYY-MM-DD">Y-A-G</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {activeTab === 'security' && (
-            <div className="space-y-6">
-              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-                <CardHeader className="bg-gradient-to-r from-red-50 to-rose-50 rounded-t-lg">
-                  <CardTitle className="flex items-center gap-3 text-slate-800">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-red-500 to-rose-600 shadow-md">
-                      <Shield className="h-5 w-5 text-white" />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Shield className="h-5 w-5 text-muted-foreground" />
+                  Güvenlik Ayarları
+                </CardTitle>
+                <CardDescription>
+                  Hesabınızı ve cihaz oturumunuzu ekstra katmanlarla koruyun
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-xl bg-muted/20">
+                  <div className="flex items-center gap-4">
+                    <Key className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">İki Faktörlü Doğrulama</p>
+                      <p className="text-sm text-muted-foreground">Ek güvenlik katmanı zorunluluğu</p>
                     </div>
-                    Güvenlik Ayarları
-                  </CardTitle>
-                  <CardDescription className="text-slate-600">
-                    Hesabınızın güvenliğini artırın
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100/50">
-                      <div className="flex items-center space-x-3">
-                        <Key className="h-5 w-5 text-blue-500" />
-                        <div>
-                          <p className="font-medium text-slate-800">İki Faktörlü Doğrulama</p>
-                          <p className="text-sm text-slate-600">Ek güvenlik katmanı</p>
-                        </div>
-                      </div>
-                      <Switch
-                        checked={settings.twoFactorAuth}
-                        onCheckedChange={checked =>
-                          setSettings({ ...settings, twoFactorAuth: checked })
-                        }
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100/50">
-                      <div className="flex items-center space-x-3">
-                        <Smartphone className="h-5 w-5 text-green-500" />
-                        <div>
-                          <p className="font-medium text-slate-800">Biyometrik Doğrulama</p>
-                          <p className="text-sm text-slate-600">Parmak izi veya yüz tanıma</p>
-                        </div>
-                      </div>
-                      <Switch
-                        checked={settings.biometricAuth}
-                        onCheckedChange={checked =>
-                          setSettings({ ...settings, biometricAuth: checked })
-                        }
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100/50">
-                      <div className="flex items-center space-x-3">
-                        <Lock className="h-5 w-5 text-orange-500" />
-                        <div>
-                          <p className="font-medium text-slate-800">Otomatik Çıkış</p>
-                          <p className="text-sm text-slate-600">
-                            Belirli süre sonra otomatik çıkış
-                          </p>
-                        </div>
-                      </div>
-                      <Switch
-                        checked={settings.autoLogout}
-                        onCheckedChange={checked =>
-                          setSettings({ ...settings, autoLogout: checked })
-                        }
-                      />
-                    </div>
-
-                    {settings.autoLogout && (
-                      <div className="ml-6 space-y-2">
-                        <label className="text-sm font-medium text-slate-700">
-                          Oturum Zaman Aşımı (dakika)
-                        </label>
-                        <Input
-                          type="number"
-                          value={settings.sessionTimeout}
-                          onChange={e =>
-                            setSettings({ ...settings, sessionTimeout: parseInt(e.target.value) })
-                          }
-                          className="border-slate-200 focus:border-red-500 w-32"
-                        />
-                      </div>
-                    )}
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <Switch
+                    checked={settings.twoFactorAuth}
+                    onCheckedChange={checked => setSettings({ ...settings, twoFactorAuth: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-xl bg-muted/20">
+                  <div className="flex items-center gap-4">
+                    <Smartphone className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Biyometrik Doğrulama</p>
+                      <p className="text-sm text-muted-foreground">Mobil cihazda FaceID / Parmak İzi ile giriş</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.biometricAuth}
+                    onCheckedChange={checked => setSettings({ ...settings, biometricAuth: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-xl bg-muted/20">
+                  <div className="flex items-center gap-4">
+                    <Lock className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Otomatik Çıkış</p>
+                      <p className="text-sm text-muted-foreground">Hareketsizlik sonrası oturumu kapat</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.autoLogout}
+                    onCheckedChange={checked => setSettings({ ...settings, autoLogout: checked })}
+                  />
+                </div>
+                {settings.autoLogout && (
+                  <div className="pl-14 pt-2">
+                    <label className="text-sm font-medium mb-2 block">Oturum Zaman Aşımı (dk)</label>
+                    <Input
+                      type="number"
+                      value={settings.sessionTimeout}
+                      onChange={e => setSettings({ ...settings, sessionTimeout: parseInt(e.target.value) || 30 })}
+                      className="w-32"
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           )}
 
           {activeTab === 'data' && (
-            <div className="space-y-6">
-              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-                <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-t-lg">
-                  <CardTitle className="flex items-center gap-3 text-slate-800">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 shadow-md">
-                      <Database className="h-5 w-5 text-white" />
-                    </div>
-                    Veri Yönetimi
-                  </CardTitle>
-                  <CardDescription className="text-slate-600">
-                    Verilerinizi yedekleyin ve yönetin
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100/50">
-                      <div className="flex items-center space-x-3">
-                        <Database className="h-5 w-5 text-green-500" />
-                        <div>
-                          <p className="font-medium text-slate-800">Otomatik Yedekleme</p>
-                          <p className="text-sm text-slate-600">
-                            Verilerinizi otomatik olarak yedekleyin
-                          </p>
-                        </div>
-                      </div>
-                      <Switch
-                        checked={settings.autoBackup}
-                        onCheckedChange={checked =>
-                          setSettings({ ...settings, autoBackup: checked })
-                        }
-                      />
-                    </div>
-
-                    {settings.autoBackup && (
-                      <div className="ml-6 space-y-2">
-                        <label className="text-sm font-medium text-slate-700">
-                          Yedekleme Sıklığı
-                        </label>
-                        <Select
-                          value={settings.backupFrequency}
-                          onValueChange={value =>
-                            setSettings({ ...settings, backupFrequency: value })
-                          }
-                        >
-                          <SelectTrigger className="border-slate-200 focus:border-indigo-500 w-48">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="daily">Günlük</SelectItem>
-                            <SelectItem value="weekly">Haftalık</SelectItem>
-                            <SelectItem value="monthly">Aylık</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-
-                    <Separator className="my-6" />
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Button
-                        onClick={handleExport}
-                        variant="outline"
-                        className="flex items-center space-x-2 border-slate-200 hover:border-indigo-500 hover:text-indigo-600"
-                      >
-                        <Download className="h-4 w-4" />
-                        <span>Veri Dışa Aktar</span>
-                      </Button>
-                      <Button
-                        onClick={handleImport}
-                        variant="outline"
-                        className="flex items-center space-x-2 border-slate-200 hover:border-indigo-500 hover:text-indigo-600"
-                      >
-                        <Upload className="h-4 w-4" />
-                        <span>Veri İçe Aktar</span>
-                      </Button>
-                    </div>
-
-                    <Separator className="my-6" />
-
-                    {/* Tüm Verileri Sıfırla Butonu */}
-                    <div className="p-6 border border-red-200 rounded-xl bg-gradient-to-r from-red-50 to-rose-50">
-                      <div className="flex items-start space-x-3">
-                        <AlertTriangle className="h-6 w-6 text-red-500 mt-0.5" />
-                        <div className="flex-1">
-                          <p className="font-semibold text-red-800 text-lg">
-                            Tüm Verilerimi Sıfırla
-                          </p>
-                          <p className="text-sm text-red-700 mt-2 mb-4">
-                            ⚠️ <strong>UYARI:</strong> Bu işlem tüm işlemlerinizi, hesaplarınızı,
-                            kredi kartlarınızı ve diğer tüm verilerinizi kalıcı olarak silecektir.
-                            Bu işlem geri alınamaz!
-                          </p>
-                          <div className="space-y-2 text-sm text-red-600">
-                            <p>• Tüm işlem geçmişi silinecek</p>
-                            <p>• Tüm hesaplar silinecek</p>
-                            <p>• Tüm kredi kartları silinecek</p>
-                            <p>• Otomatik ödemeler silinecek</p>
-                            <p>• Altın ve yatırım verileri silinecek</p>
-                          </div>
-                          <Button
-                            onClick={() => {
-                              setIsResetDialogOpen(true)
-                            }}
-                            variant="destructive"
-                            className="mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Tüm Verilerimi Sıfırla
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <ConfirmationDialog
-                      isOpen={isResetDialogOpen}
-                      onClose={() => setIsResetDialogOpen(false)}
-                      onConfirm={handleResetAllData}
-                      title="Verileri Sıfırla"
-                      message="Tüm verilerinizi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!"
-                      warningMessage="Tüm işlem geçmişi, hesaplar, kartlar ve yatırımlar silinecektir."
-                      confirmText="Evet, Her Şeyi Sil"
-                      cancelText="İptal"
-                    />
-
-                    <div className="p-4 border border-amber-200 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50">
-                      <div className="flex items-start space-x-3">
-                        <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
-                        <div>
-                          <p className="font-medium text-amber-800">Veri Saklama</p>
-                          <p className="text-sm text-amber-700 mt-1">
-                            Verileriniz {settings.dataRetention} gün boyunca saklanır. Bu süre
-                            sonunda otomatik olarak silinir.
-                          </p>
-                        </div>
-                      </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Database className="h-5 w-5 text-muted-foreground" />
+                  Veri Yönetimi
+                </CardTitle>
+                <CardDescription>
+                  Yedekleme, içe aktar/dışa aktar ve geçmişi sıfırlama işlemleri
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between p-4 border rounded-xl bg-muted/20">
+                  <div className="flex items-center gap-4">
+                    <Database className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Otomatik Yedekleme</p>
+                      <p className="text-sm text-muted-foreground">Bulut yedeklemesini etkinleştirin</p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <Switch
+                    checked={settings.autoBackup}
+                    onCheckedChange={checked => setSettings({ ...settings, autoBackup: checked })}
+                  />
+                </div>
+                {settings.autoBackup && (
+                  <div className="pl-14">
+                    <label className="text-sm font-medium mb-2 block">Yedekleme Sıklığı</label>
+                    <Select value={settings.backupFrequency} onValueChange={val => setSettings({ ...settings, backupFrequency: val })}>
+                      <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Her Gün</SelectItem>
+                        <SelectItem value="weekly">Haftada Bir</SelectItem>
+                        <SelectItem value="monthly">Ayda Bir</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                <div className="h-px bg-border my-2" />
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button variant="outline" onClick={handleExport} className="flex-1">
+                    <Download className="w-4 h-4 mr-2" /> Cihaza Yedek İndir (.csv)
+                  </Button>
+                  <Button variant="outline" onClick={handleImport} className="flex-1">
+                    <Upload className="w-4 h-4 mr-2" /> Dosyadan İçe Aktar
+                  </Button>
+                </div>
+
+                <div className="h-px bg-border my-2" />
+
+                <div className="p-5 border border-destructive/30 rounded-xl bg-destructive/10">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                    <div className="flex-1 space-y-2">
+                      <p className="font-semibold text-destructive">Tüm Verileri Sıfırla</p>
+                      <p className="text-sm text-destructive/80">
+                        Hesabınız açık kalır ancak işlem geçmişiniz, kredi kartları ve cüzdanlarınız içerisindeki tüm harici verileriniz kalıcı olarak silinir. Bu işlem geri döndürülemez.
+                      </p>
+                      <Button variant="destructive" onClick={() => setIsResetDialogOpen(true)} className="mt-2">
+                        <Trash2 className="w-4 h-4 mr-2" /> Verileri Sıfırla
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <ConfirmDialog
+                  isOpen={isResetDialogOpen}
+                  onClose={() => setIsResetDialogOpen(false)}
+                  onConfirm={handleResetAllData}
+                  title="Verileri Sıfırla"
+                  message="Tüm işlemlerinizi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!"
+                  warningMessage="Uyarı: Sistem sıfırlanınca eski verilere kesinlikle tekrar ulaşılamaz."
+                  confirmText="Evet, Her Şeyi Sil"
+                  cancelText="İptal"
+                  variant="danger"
+                />
+              </CardContent>
+            </Card>
           )}
 
           {activeTab === 'privacy' && (
-            <div className="space-y-6">
-              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-                <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-t-lg">
-                  <CardTitle className="flex items-center gap-3 text-slate-800">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-slate-500 to-gray-600 shadow-md">
-                      <Lock className="h-5 w-5 text-white" />
-                    </div>
-                    Gizlilik ve Güvenlik
-                  </CardTitle>
-                  <CardDescription className="text-slate-600">
-                    Gizlilik ayarlarınızı yönetin
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div className="space-y-4">
-                    <div className="p-4 border border-green-200 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50">
-                      <div className="flex items-start space-x-3">
-                        <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-                        <div>
-                          <p className="font-medium text-green-800">Veri Şifreleme</p>
-                          <p className="text-sm text-green-700 mt-1">
-                            Tüm verileriniz end-to-end şifreleme ile korunmaktadır.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-4 border border-blue-200 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50">
-                      <div className="flex items-start space-x-3">
-                        <Info className="h-5 w-5 text-blue-500 mt-0.5" />
-                        <div>
-                          <p className="font-medium text-blue-800">Veri Paylaşımı</p>
-                          <p className="text-sm text-blue-700 mt-1">
-                            Verileriniz üçüncü taraflarla paylaşılmaz ve sadece size aittir.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <Separator className="my-6" />
-
-                    <div className="p-6 border border-red-200 rounded-xl bg-gradient-to-r from-red-50 to-rose-50">
-                      <div className="flex items-start space-x-3">
-                        <Trash2 className="h-5 w-5 text-red-500 mt-0.5" />
-                        <div className="flex-1">
-                          <p className="font-medium text-red-800">Hesabı Sil</p>
-                          <p className="text-sm text-red-700 mt-1 mb-4">
-                            Hesabınızı kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem
-                            geri alınamaz.
-                          </p>
-                          <Button
-                            onClick={handleDeleteAccount}
-                            variant="destructive"
-                            className="bg-red-600 hover:bg-red-700"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Hesabı Sil
-                          </Button>
-                        </div>
-                      </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Lock className="h-5 w-5 text-muted-foreground" />
+                  Gizlilik Anlaşmaları ve Hesap Ayarları
+                </CardTitle>
+                <CardDescription>Hesabınızı silme veya gizlilik koşulları</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="p-4 border border-green-500/20 rounded-xl bg-green-500/5">
+                  <div className="flex items-start gap-4">
+                    <CheckCircle className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-foreground">Şifrelenmiş Trafik</p>
+                      <p className="text-sm text-muted-foreground mt-1">Sistemimiz giden/gelen verilerinizi uçtan uca yüksek standartlarda şifreler.</p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+
+                <div className="p-4 border rounded-xl bg-muted/20">
+                  <div className="flex items-start gap-4">
+                    <Info className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium">3. Parti Paylaşımı Kapalı</p>
+                      <p className="text-sm text-muted-foreground mt-1">Sistem istatistik toplar ama verileriniz kesinlikle üçüncü parti reklam verenlerle paylaşılamaz.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="h-px bg-border my-2" />
+
+                <div className="p-5 border border-destructive/30 rounded-xl bg-destructive/10">
+                  <div className="flex items-start gap-3">
+                    <Trash2 className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                    <div className="space-y-2 flex-1">
+                      <p className="font-semibold text-destructive">Hesabı Tamamen Sil</p>
+                      <p className="text-sm text-destructive/80">
+                        Abonelik iptali ve hesabın tamamen buluttan silinmesi. Tüm bilgileriniz saniyeler içinde yok edilecektir.
+                      </p>
+                      <Button variant="destructive" onClick={handleDeleteAccount} className="mt-2">
+                        <Trash2 className="w-4 h-4 mr-2" /> Hesabı Sil
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>

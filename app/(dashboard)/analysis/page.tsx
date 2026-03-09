@@ -2,40 +2,45 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, PageHeader } from '@/components/mosaic'
+import {
+  AppPageShell,
+  Button,
+  Card,
+  CardContent,
+  DashboardCard,
+  QuickActionTile,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  StatCard,
+  StatsGrid,
+} from '@/components/mosaic'
 import { useToast } from '@/lib/use-toast'
 import { formatCurrency } from '@/lib/validators'
 import {
-  ArrowLeft,
-  Home,
-  TrendingUp,
-  TrendingDown,
-  Wallet,
-  PiggyBank,
-  Target,
   AlertCircle,
-  Lightbulb,
-  CheckCircle2,
-  Trophy,
-  Calendar,
-  ArrowUpRight,
-  ArrowDownRight,
-  ChevronRight,
-  Sparkles,
-  Brain,
-  RefreshCw,
   BarChart3,
-  PieChart,
-  FileText,
-  Download,
-  Zap,
-  Shield,
+  Brain,
+  CheckCircle2,
+  ChevronRight,
   Clock,
-  DollarSign,
+  FileText,
+  Lightbulb,
+  PieChart,
+  PiggyBank,
+  RefreshCw,
+  Shield,
+  Sparkles,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  Trophy,
+  Wallet,
 } from 'lucide-react'
 
 interface AnalysisData {
-  // KPI'lar
   totalIncome: number
   totalExpense: number
   netWorth: number
@@ -43,21 +48,15 @@ interface AnalysisData {
   monthlyIncome: number
   monthlyExpense: number
   monthlyNet: number
-
-  // Trend verileri
   incomeGrowth: number
   expenseGrowth: number
   savingsRate: number
-
-  // Kategori analizi
   topCategories: Array<{
     name: string
     amount: number
     percentage: number
     trend: 'up' | 'down' | 'stable'
   }>
-
-  // Son işlemler
   recentTransactions: Array<{
     id: number
     description: string
@@ -66,16 +65,12 @@ interface AnalysisData {
     category: string
     date: string
   }>
-
-  // AI önerileri
   aiInsights: Array<{
     type: 'warning' | 'suggestion' | 'achievement'
     title: string
     description: string
     priority: 'high' | 'medium' | 'low'
   }>
-
-  // Nakit akışı
   cashFlowData: Array<{
     month: string
     income: number
@@ -95,9 +90,7 @@ export default function AnalysisPage() {
   const fetchedRef = useRef(false)
 
   useEffect(() => {
-    if (fetchedRef.current) {
-      return
-    }
+    if (fetchedRef.current) return
     fetchedRef.current = true
     void fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,68 +127,34 @@ export default function AnalysisPage() {
     void fetchData()
   }
 
-  // Finansal sağlık skoru hesaplama
   const calculateHealthScore = () => {
-    if (!analysisData) {
-      return 0
-    }
-    let score = 50 // Başlangıç
-
-    // Tasarruf oranına göre puan
-    if (analysisData.savingsRate >= 20) {
-      score += 25
-    } else if (analysisData.savingsRate >= 10) {
-      score += 15
-    } else if (analysisData.savingsRate >= 5) {
-      score += 10
-    } else if (analysisData.savingsRate < 0) {
-      score -= 15
-    }
-
-    // Gelir büyümesine göre puan
-    if (analysisData.incomeGrowth > 0) {
-      score += 10
-    } else if (analysisData.incomeGrowth < -10) {
-      score -= 10
-    }
-
-    // Gider büyümesine göre puan
-    if (analysisData.expenseGrowth < 0) {
-      score += 10
-    } else if (analysisData.expenseGrowth > 20) {
-      score -= 15
-    }
-
-    // Net değere göre puan
-    if (analysisData.netWorth > 0) {
-      score += 5
-    }
-
+    if (!analysisData) return 0
+    let score = 50
+    if (analysisData.savingsRate >= 20) score += 25
+    else if (analysisData.savingsRate >= 10) score += 15
+    else if (analysisData.savingsRate >= 5) score += 10
+    else if (analysisData.savingsRate < 0) score -= 15
+    if (analysisData.incomeGrowth > 0) score += 10
+    else if (analysisData.incomeGrowth < -10) score -= 10
+    if (analysisData.expenseGrowth < 0) score += 10
+    else if (analysisData.expenseGrowth > 20) score -= 15
+    if (analysisData.netWorth > 0) score += 5
     return Math.min(100, Math.max(0, score))
   }
 
   const healthScore = calculateHealthScore()
 
-  const getHealthColor = (score: number) => {
-    if (score >= 80) {
-      return { bg: 'from-green-500 to-emerald-600', text: 'text-green-400', label: 'Mükemmel' }
-    }
-    if (score >= 60) {
-      return { bg: 'from-blue-500 to-cyan-600', text: 'text-blue-400', label: 'İyi' }
-    }
-    if (score >= 40) {
-      return { bg: 'from-yellow-500 to-orange-600', text: 'text-yellow-600', label: 'Orta' }
-    }
-    return { bg: 'from-red-500 to-rose-600', text: 'text-red-400', label: 'Dikkat' }
+  const getHealthStyle = (score: number) => {
+    if (score >= 80) return { bar: 'from-emerald-500 to-green-600', badge: 'bg-emerald-500/15 text-emerald-300', label: 'Mükemmel' }
+    if (score >= 60) return { bar: 'from-cyan-500 to-blue-600', badge: 'bg-cyan-500/15 text-cyan-300', label: 'İyi' }
+    if (score >= 40) return { bar: 'from-amber-500 to-orange-500', badge: 'bg-amber-500/15 text-amber-300', label: 'Orta' }
+    return { bar: 'from-rose-500 to-red-600', badge: 'bg-rose-500/15 text-rose-300', label: 'Dikkat' }
   }
 
-  const healthInfo = getHealthColor(healthScore)
+  const healthStyle = getHealthStyle(healthScore)
 
-  // Akıllı öneriler oluşturma
   const generateSmartInsights = () => {
-    if (!analysisData) {
-      return []
-    }
+    if (!analysisData) return []
 
     const insights: Array<{
       type: 'success' | 'warning' | 'tip' | 'goal'
@@ -204,93 +163,108 @@ export default function AnalysisPage() {
       description: string
       action?: string
       actionLink?: string
+      borderColor: string
+      iconBg: string
     }> = []
 
-    // Tasarruf analizi
     if (analysisData.savingsRate >= 20) {
       insights.push({
         type: 'success',
-        icon: <Trophy className="h-5 w-5 text-yellow-500" />,
+        icon: <Trophy className="h-5 w-5 text-amber-400" />,
         title: 'Harika Tasarruf Oranı!',
         description: `%${analysisData.savingsRate.toFixed(1)} tasarruf oranı ile finansal hedeflerinize hızla ilerliyorsunuz.`,
+        borderColor: 'border-emerald-500/20',
+        iconBg: 'bg-emerald-500/10',
       })
     } else if (analysisData.savingsRate < 10 && analysisData.savingsRate >= 0) {
       insights.push({
         type: 'tip',
-        icon: <PiggyBank className="h-5 w-5 text-blue-500" />,
+        icon: <PiggyBank className="h-5 w-5 text-cyan-400" />,
         title: 'Tasarruf Oranını Artırın',
         description: `Mevcut %${analysisData.savingsRate.toFixed(1)} tasarruf oranınızı artırmak için gereksiz harcamaları azaltmayı düşünün.`,
         action: 'Harcamaları İncele',
         actionLink: '/transactions',
+        borderColor: 'border-cyan-500/20',
+        iconBg: 'bg-cyan-500/10',
       })
     } else if (analysisData.savingsRate < 0) {
       insights.push({
         type: 'warning',
-        icon: <AlertCircle className="h-5 w-5 text-red-500" />,
+        icon: <AlertCircle className="h-5 w-5 text-rose-400" />,
         title: 'Bütçe Aşımı Uyarısı',
         description: 'Bu dönem harcamalarınız gelirinizi aştı. Acil önlem almanız önerilir.',
         action: 'Bütçe Oluştur',
         actionLink: '/budgets',
+        borderColor: 'border-rose-500/20',
+        iconBg: 'bg-rose-500/10',
       })
     }
 
-    // Gelir trend analizi
     if (analysisData.incomeGrowth > 10) {
       insights.push({
         type: 'success',
-        icon: <TrendingUp className="h-5 w-5 text-green-500" />,
+        icon: <TrendingUp className="h-5 w-5 text-emerald-400" />,
         title: 'Gelir Artışı Trendi',
         description: `Geliriniz geçen döneme göre %${analysisData.incomeGrowth.toFixed(1)} arttı. Bu trendi korumaya devam edin!`,
+        borderColor: 'border-emerald-500/20',
+        iconBg: 'bg-emerald-500/10',
       })
     } else if (analysisData.incomeGrowth < -10) {
       insights.push({
         type: 'warning',
-        icon: <TrendingDown className="h-5 w-5 text-orange-500" />,
+        icon: <TrendingDown className="h-5 w-5 text-amber-400" />,
         title: 'Gelir Düşüşü Tespit Edildi',
         description: `Gelirinizde %${Math.abs(analysisData.incomeGrowth).toFixed(1)} düşüş var. Ek gelir kaynakları değerlendirilebilir.`,
+        borderColor: 'border-amber-500/20',
+        iconBg: 'bg-amber-500/10',
       })
     }
 
-    // Gider trend analizi
     if (analysisData.expenseGrowth > 20) {
       insights.push({
         type: 'warning',
-        icon: <AlertCircle className="h-5 w-5 text-red-500" />,
+        icon: <AlertCircle className="h-5 w-5 text-rose-400" />,
         title: 'Harcama Artışı',
         description: `Harcamalarınız %${analysisData.expenseGrowth.toFixed(1)} arttı. Harcama kategorilerinizi gözden geçirin.`,
         action: 'Kategorileri İncele',
         actionLink: '/analysis/categories',
+        borderColor: 'border-rose-500/20',
+        iconBg: 'bg-rose-500/10',
       })
     } else if (analysisData.expenseGrowth < 0) {
       insights.push({
         type: 'success',
-        icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
+        icon: <CheckCircle2 className="h-5 w-5 text-emerald-400" />,
         title: 'Harcama Kontrolü Başarılı',
         description: `Harcamalarınızı %${Math.abs(analysisData.expenseGrowth).toFixed(1)} azalttınız. Harika bir ilerleme!`,
+        borderColor: 'border-emerald-500/20',
+        iconBg: 'bg-emerald-500/10',
       })
     }
 
-    // En yüksek harcama kategorisi analizi
-    if (analysisData.topCategories && analysisData.topCategories.length > 0) {
+    if (analysisData.topCategories?.length > 0) {
       const topCategory = analysisData.topCategories[0]
       if (topCategory.percentage > 40) {
         insights.push({
           type: 'tip',
-          icon: <Lightbulb className="h-5 w-5 text-yellow-500" />,
+          icon: <Lightbulb className="h-5 w-5 text-amber-400" />,
           title: 'Harcama Yoğunlaşması',
-          description: `"${topCategory.name}" kategorisi toplam harcamalarınızın %${topCategory.percentage.toFixed(1)}'ini oluşturuyor. Çeşitlendirme düşünebilirsiniz.`,
+          description: `"${topCategory.name}" kategorisi toplam harcamalarınızın %${topCategory.percentage.toFixed(1)}'ini oluşturuyor.`,
+          borderColor: 'border-amber-500/20',
+          iconBg: 'bg-amber-500/10',
         })
       }
     }
 
-    // Hedef önerisi
     insights.push({
       type: 'goal',
-      icon: <Target className="h-5 w-5 text-purple-500" />,
+      icon: <Target className="h-5 w-5 text-purple-400" />,
       title: 'Finansal Hedef Belirleyin',
       description: 'Belirli bir tasarruf hedefi belirleyerek motivasyonunuzu artırın.',
       action: 'Hedef Oluştur',
       actionLink: '/goals',
+      borderColor: 'border-purple-500/20',
+      iconBg: 'bg-purple-500/10',
     })
 
     return insights
@@ -298,579 +272,445 @@ export default function AnalysisPage() {
 
   const smartInsights = generateSmartInsights()
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-800 via-blue-50/30 to-indigo-50/50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-300">Finansal analiz hazırlanıyor...</p>
-        </div>
-      </div>
-    )
-  }
+  const categoryColors = [
+    'from-indigo-500 to-violet-600',
+    'from-emerald-500 to-green-600',
+    'from-purple-500 to-fuchsia-600',
+    'from-amber-500 to-orange-500',
+    'from-cyan-500 to-sky-600',
+  ]
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Finansal Analiz Merkezi"
-        description="AI destekli akıllı finansal öneriler ve dönemsel içgörüler."
-        breadcrumbs={[{ label: 'Analiz' }]}
-        leadingActions={[
-          {
-            href: '/dashboard',
-            ariaLabel: 'Dashboard',
-            icon: <Home className="h-5 w-5" />,
-          },
-        ]}
-        onBack={() => window.history.back()}
-        backIcon={<ArrowLeft className="h-5 w-5" />}
-        actions={(
-          <div className="flex items-center gap-3">
-            <select
-              value={selectedPeriod}
-              onChange={e => setSelectedPeriod(e.target.value)}
-              className="px-3 py-2 border border-slate-700 rounded-lg bg-slate-800/80 backdrop-blur-xl text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent"
-            >
-              <option value="7d">Son 7 Gün</option>
-              <option value="30d">Son 30 Gün</option>
-              <option value="90d">Son 3 Ay</option>
-              <option value="1y">Son 1 Yıl</option>
-            </select>
-            <button
-              onClick={handleRefresh}
-              className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
-            >
-              <RefreshCw className="h-5 w-5 text-slate-300" />
-            </button>
-          </div>
-        )}
-      />
-
-      <div>
-        {/* Finansal Sağlık Skoru */}
-        <div className="bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 rounded-2xl p-6 sm:p-8 shadow-mosaic-lg mb-6 overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 via-transparent to-blue-600/10" />
-          <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+    <AppPageShell
+      header={{
+        title: 'Finansal Analiz Merkezi',
+        description: 'AI destekli akıllı finansal öneriler ve dönemsel içgörüler.',
+        breadcrumbs: [{ label: 'Analiz' }],
+        actions: (
+          <>
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger className="w-36 bg-black/20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7d">Son 7 Gün</SelectItem>
+                <SelectItem value="30d">Son 30 Gün</SelectItem>
+                <SelectItem value="90d">Son 3 Ay</SelectItem>
+                <SelectItem value="1y">Son 1 Yıl</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={handleRefresh} disabled={loading}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Yenile
+            </Button>
+          </>
+        ),
+      }}
+    >
+      {/* Finansal Sağlık Skoru */}
+      <Card variant="premium" className="overflow-hidden border-white/10 bg-white/5">
+        <CardContent className="p-6 sm:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <div className={`p-2 rounded-xl bg-gradient-to-br ${healthInfo.bg}`}>
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-white/10 p-2.5">
                   <Shield className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">Finansal Sağlık Skoru</h2>
-                  <p className="text-slate-400 text-sm">Genel finansal durumunuzun değerlendirmesi</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Finansal Sağlık Skoru</p>
+                  <p className="text-sm text-slate-300">Genel finansal durumunuzun değerlendirmesi</p>
                 </div>
               </div>
-              <div className="mt-4">
+              <div className="mt-5">
                 <div className="flex items-end gap-3">
-                  <span className="text-5xl font-bold text-white">{healthScore}</span>
-                  <span className="text-2xl text-slate-400 mb-1">/100</span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${healthInfo.text} bg-white/10`}>
-                    {healthInfo.label}
+                  <span className="text-5xl font-black text-white">{healthScore}</span>
+                  <span className="mb-1 text-2xl text-slate-500">/100</span>
+                  <span className={`mb-1 rounded-full px-3 py-1 text-sm font-medium ${healthStyle.badge}`}>
+                    {healthStyle.label}
                   </span>
                 </div>
-                <div className="mt-3 w-full bg-slate-700 rounded-full h-3">
+                <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-white/10">
                   <div
-                    className={`h-3 rounded-full bg-gradient-to-r ${healthInfo.bg} transition-all duration-1000`}
+                    className={`h-full rounded-full bg-gradient-to-r transition-all duration-1000 ${healthStyle.bar}`}
                     style={{ width: `${healthScore}%` }}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Özet İstatistikler */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 text-center">
-                <DollarSign className="h-5 w-5 text-green-400 mx-auto mb-1" />
-                <p className="text-xs text-slate-400">Gelir</p>
-                <p className="text-lg font-bold text-white">{formatCurrency(analysisData?.totalIncome || 0, 'TRY')}</p>
-              </div>
-              <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 text-center">
-                <TrendingDown className="h-5 w-5 text-red-400 mx-auto mb-1" />
-                <p className="text-xs text-slate-400">Gider</p>
-                <p className="text-lg font-bold text-white">{formatCurrency(analysisData?.totalExpense || 0, 'TRY')}</p>
-              </div>
-              <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 text-center">
-                <PiggyBank className="h-5 w-5 text-blue-400 mx-auto mb-1" />
-                <p className="text-xs text-slate-400">Tasarruf</p>
-                <p className="text-lg font-bold text-white">%{(analysisData?.savingsRate || 0).toFixed(1)}</p>
-              </div>
-              <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 text-center">
-                <Wallet className="h-5 w-5 text-purple-400 mx-auto mb-1" />
-                <p className="text-xs text-slate-400">Net Varlık</p>
-                <p className="text-lg font-bold text-white">{formatCurrency(analysisData?.netWorth || 0, 'TRY')}</p>
-              </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:w-auto">
+              {[
+                { label: 'Toplam Gelir', value: formatCurrency(analysisData?.totalIncome || 0, 'TRY'), color: 'text-emerald-300' },
+                { label: 'Toplam Gider', value: formatCurrency(analysisData?.totalExpense || 0, 'TRY'), color: 'text-rose-300' },
+                { label: 'Tasarruf', value: `%${(analysisData?.savingsRate || 0).toFixed(1)}`, color: 'text-cyan-300' },
+                { label: 'Net Varlık', value: formatCurrency(analysisData?.netWorth || 0, 'TRY'), color: 'text-purple-300' },
+              ].map(item => (
+                <div key={item.label} className="rounded-xl border border-white/10 bg-black/20 p-3 text-center">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">{item.label}</p>
+                  <p className={`mt-1 text-base font-bold ${item.color}`}>{item.value}</p>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Tab Navigation */}
-        <div className="flex flex-wrap gap-2 mb-6 bg-slate-800/60 backdrop-blur-xl p-2 rounded-xl shadow-sm">
-          {[
-            { id: 'overview', label: 'Genel Bakış', icon: BarChart3 },
-            { id: 'insights', label: 'Akıllı Öneriler', icon: Sparkles },
-            { id: 'categories', label: 'Kategoriler', icon: PieChart },
-            { id: 'trends', label: 'Trendler', icon: TrendingUp },
-          ].map(tab => {
-            const Icon = tab.icon
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as TabType)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${activeTab === tab.id
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                  : 'text-slate-300 hover:bg-slate-800 hover:shadow-sm'
-                  }`}
+      {/* KPI Stats */}
+      <StatsGrid>
+        <StatCard
+          title="Toplam Gelir"
+          value={formatCurrency(analysisData?.totalIncome || 0, 'TRY')}
+          icon={TrendingUp}
+          color="green"
+          subtitle="Seçili dönem toplam gelir"
+          trend={analysisData?.incomeGrowth !== undefined ? {
+            value: Math.abs(analysisData.incomeGrowth),
+            label: 'değişim',
+            isPositive: analysisData.incomeGrowth >= 0,
+          } : undefined}
+          variant="premium"
+        />
+        <StatCard
+          title="Toplam Gider"
+          value={formatCurrency(analysisData?.totalExpense || 0, 'TRY')}
+          icon={TrendingDown}
+          color="red"
+          subtitle="Seçili dönem toplam gider"
+          trend={analysisData?.expenseGrowth !== undefined ? {
+            value: Math.abs(analysisData.expenseGrowth),
+            label: 'değişim',
+            isPositive: analysisData.expenseGrowth <= 0,
+          } : undefined}
+          variant="premium"
+        />
+        <StatCard
+          title="Tasarruf Oranı"
+          value={`%${(analysisData?.savingsRate || 0).toFixed(1)}`}
+          icon={PiggyBank}
+          color={(analysisData?.savingsRate || 0) >= 10 ? 'cyan' : (analysisData?.savingsRate || 0) >= 0 ? 'amber' : 'red'}
+          subtitle="Gelirin tasarrufa giden payı"
+          variant="premium"
+        />
+        <StatCard
+          title="Toplam Varlık"
+          value={formatCurrency(analysisData?.totalAssets || 0, 'TRY')}
+          icon={Wallet}
+          color="purple"
+          subtitle="Tüm hesap bakiyeleri toplamı"
+          variant="premium"
+        />
+      </StatsGrid>
+
+      {/* Tab Navigation */}
+      <div className="flex flex-wrap gap-2 rounded-2xl border border-white/10 bg-white/5 p-2">
+        {[
+          { id: 'overview' as TabType, label: 'Genel Bakış', icon: BarChart3 },
+          { id: 'insights' as TabType, label: 'Akıllı Öneriler', icon: Sparkles },
+          { id: 'categories' as TabType, label: 'Kategoriler', icon: PieChart },
+          { id: 'trends' as TabType, label: 'Trendler', icon: TrendingUp },
+        ].map(tab => {
+          const Icon = tab.icon
+          const isActive = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+                isActive
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'text-slate-400 hover:bg-white/10 hover:text-slate-200'
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              {tab.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'overview' && (
+        <div className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Son İşlemler */}
+            <DashboardCard
+              title="Son İşlemler"
+              description="En güncel finansal hareketleriniz"
+              icon={Clock}
+              iconColor="text-cyan-300"
+            >
+              <div className="space-y-2">
+                {loading ? (
+                  <div className="py-8 text-center text-sm text-muted-foreground">Yükleniyor...</div>
+                ) : analysisData?.recentTransactions?.length ? (
+                  analysisData.recentTransactions.slice(0, 5).map(tx => (
+                    <div
+                      key={tx.id}
+                      className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 px-4 py-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`h-2.5 w-2.5 rounded-full ${tx.type === 'income' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{tx.description}</p>
+                          <p className="text-xs text-muted-foreground">{tx.category}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-sm font-bold ${tx.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount, 'TRY')}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(tx.date).toLocaleDateString('tr-TR')}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-8 text-center text-sm text-muted-foreground">
+                    <Clock className="mx-auto mb-2 h-8 w-8 opacity-40" />
+                    Henüz işlem bulunmuyor
+                  </div>
+                )}
+              </div>
+              <Link
+                href="/transactions"
+                className="mt-4 flex w-full items-center justify-center gap-1 rounded-xl border border-border/60 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-indigo-500/40 hover:text-indigo-300"
               >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-              </button>
-            )
-          })}
-        </div>
+                Tüm İşlemleri Gör <ChevronRight className="h-4 w-4" />
+              </Link>
+            </DashboardCard>
 
-        {/* Tab Content */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* KPI Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="group hover:shadow-mosaic transition-all duration-300 border-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 hover:from-green-500/20 hover:to-emerald-500/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 shadow-md group-hover:scale-110 transition-transform">
-                      <ArrowUpRight className="h-4 w-4 text-white" />
-                    </div>
-                    <span className={`text-xs flex items-center gap-1 ${(analysisData?.incomeGrowth || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {(analysisData?.incomeGrowth || 0) >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                      {(analysisData?.incomeGrowth || 0).toFixed(1)}%
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300 mb-1">Toplam Gelir</p>
-                  <p className="text-xl font-bold text-green-400">{formatCurrency(analysisData?.totalIncome || 0, 'TRY')}</p>
-                </CardContent>
-              </Card>
-
-              <Card className="group hover:shadow-mosaic transition-all duration-300 border-0 bg-gradient-to-br from-red-500/10 to-rose-500/10 hover:from-red-500/20 hover:to-rose-500/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-red-500 to-rose-600 shadow-md group-hover:scale-110 transition-transform">
-                      <ArrowDownRight className="h-4 w-4 text-white" />
-                    </div>
-                    <span className={`text-xs flex items-center gap-1 ${(analysisData?.expenseGrowth || 0) <= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {(analysisData?.expenseGrowth || 0) >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                      {(analysisData?.expenseGrowth || 0).toFixed(1)}%
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300 mb-1">Toplam Gider</p>
-                  <p className="text-xl font-bold text-red-400">{formatCurrency(analysisData?.totalExpense || 0, 'TRY')}</p>
-                </CardContent>
-              </Card>
-
-              <Card className="group hover:shadow-mosaic transition-all duration-300 border-0 bg-gradient-to-br from-blue-500/10 to-cyan-50 hover:from-blue-500/20 hover:to-cyan-100">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 shadow-md group-hover:scale-110 transition-transform">
-                      <PiggyBank className="h-4 w-4 text-white" />
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-300 mb-1">Tasarruf Oranı</p>
-                  <p className="text-xl font-bold text-blue-400">%{(analysisData?.savingsRate || 0).toFixed(1)}</p>
-                </CardContent>
-              </Card>
-
-              <Card className="group hover:shadow-mosaic transition-all duration-300 border-0 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 hover:from-purple-500/20 hover:to-indigo-500/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 shadow-md group-hover:scale-110 transition-transform">
-                      <Wallet className="h-4 w-4 text-white" />
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-300 mb-1">Toplam Varlık</p>
-                  <p className="text-xl font-bold text-purple-400">{formatCurrency(analysisData?.totalAssets || 0, 'TRY')}</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Son İşlemler ve Hızlı Öneriler */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Son İşlemler */}
-              <Card className="border-0 shadow-mosaic bg-slate-800/80 backdrop-blur-xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Calendar className="h-5 w-5 text-blue-400" />
-                    Son İşlemler
-                  </CardTitle>
-                  <CardDescription>En güncel finansal hareketleriniz</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {analysisData?.recentTransactions?.slice(0, 5).map(transaction => (
-                      <div
-                        key={transaction.id}
-                        className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-3 h-3 rounded-full ${transaction.type === 'income' ? 'bg-green-500' : 'bg-red-500'
-                              }`}
-                          />
-                          <div>
-                            <p className="text-sm font-medium text-slate-100">{transaction.description}</p>
-                            <p className="text-xs text-slate-500">{transaction.category}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p
-                            className={`text-sm font-bold ${transaction.type === 'income' ? 'text-green-400' : 'text-red-400'
-                              }`}
-                          >
-                            {transaction.type === 'income' ? '+' : '-'}
-                            {formatCurrency(transaction.amount, 'TRY')}
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            {new Date(transaction.date).toLocaleDateString('tr-TR')}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                    {(!analysisData?.recentTransactions || analysisData.recentTransactions.length === 0) && (
-                      <div className="text-center py-8 text-slate-500">
-                        <Clock className="h-8 w-8 mx-auto mb-2 text-slate-300" />
-                        <p>Henüz işlem bulunmuyor</p>
-                      </div>
-                    )}
-                  </div>
-                  <Link
-                    href="/transactions"
-                    className="flex items-center justify-center gap-2 mt-4 w-full py-2 text-blue-400 hover:bg-blue-50 rounded-lg text-sm font-medium transition-colors"
+            {/* Akıllı Öneriler Özet */}
+            <DashboardCard
+              title="Akıllı Öneriler"
+              description="Size özel AI destekli öneriler"
+              icon={Sparkles}
+              iconColor="text-purple-300"
+            >
+              <div className="space-y-3">
+                {smartInsights.slice(0, 3).map((insight, index) => (
+                  <div
+                    key={index}
+                    className={`rounded-xl border bg-muted/20 p-4 ${insight.borderColor}`}
                   >
-                    Tüm İşlemleri Gör
-                    <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </CardContent>
-              </Card>
-
-              {/* Hızlı Öneriler */}
-              <Card className="border-0 shadow-mosaic bg-slate-800/80 backdrop-blur-xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Sparkles className="h-5 w-5 text-purple-400" />
-                    Akıllı Öneriler
-                  </CardTitle>
-                  <CardDescription>Size özel AI destekli öneriler</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {smartInsights.slice(0, 3).map((insight, index) => (
-                      <div
-                        key={index}
-                        className={`p-4 rounded-lg border ${insight.type === 'success' ? 'bg-green-50 border-green-200' :
-                          insight.type === 'warning' ? 'bg-red-50 border-red-200' :
-                            insight.type === 'tip' ? 'bg-blue-50 border-blue-200' :
-                              'bg-purple-50 border-purple-200'
-                          }`}
-                      >
-                        <div className="flex items-start gap-3">
-                          {insight.icon}
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-sm text-slate-100">{insight.title}</h4>
-                            <p className="text-xs text-slate-300 mt-1">{insight.description}</p>
-                            {insight.action && insight.actionLink && (
-                              <Link
-                                href={insight.actionLink}
-                                className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-blue-400 hover:text-blue-400"
-                              >
-                                {insight.action}
-                                <ChevronRight className="h-3 w-3" />
-                              </Link>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => setActiveTab('insights')}
-                    className="flex items-center justify-center gap-2 mt-4 w-full py-2 text-purple-400 hover:bg-purple-50 rounded-lg text-sm font-medium transition-colors"
-                  >
-                    Tüm Önerileri Gör
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Hızlı Erişim */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <Link
-                href="/transactions/new"
-                className="p-4 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 text-white text-center hover:shadow-mosaic hover:scale-105 transition-all"
-              >
-                <Zap className="h-6 w-6 mx-auto mb-2" />
-                <span className="text-sm font-medium">Gelir Ekle</span>
-              </Link>
-              <Link
-                href="/transactions/new"
-                className="p-4 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white text-center hover:shadow-mosaic hover:scale-105 transition-all"
-              >
-                <TrendingDown className="h-6 w-6 mx-auto mb-2" />
-                <span className="text-sm font-medium">Gider Ekle</span>
-              </Link>
-              <Link
-                href="/analysis/export"
-                className="p-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-center hover:shadow-mosaic hover:scale-105 transition-all"
-              >
-                <Download className="h-6 w-6 mx-auto mb-2" />
-                <span className="text-sm font-medium">Rapor İndir</span>
-              </Link>
-              <Link
-                href="/accounts"
-                className="p-4 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 text-white text-center hover:shadow-mosaic hover:scale-105 transition-all"
-              >
-                <Wallet className="h-6 w-6 mx-auto mb-2" />
-                <span className="text-sm font-medium">Hesaplarım</span>
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'insights' && (
-          <div className="space-y-4">
-            <Card className="border-0 shadow-mosaic bg-gradient-to-r from-purple-500/10 to-blue-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-6 w-6 text-purple-400" />
-                  AI Finansal Asistan
-                </CardTitle>
-                <CardDescription>Finansal verileriniz analiz edilerek size özel öneriler oluşturuldu</CardDescription>
-              </CardHeader>
-            </Card>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {smartInsights.map((insight, index) => (
-                <Card
-                  key={index}
-                  className={`border-0 shadow-md hover:shadow-mosaic transition-all ${insight.type === 'success' ? 'bg-gradient-to-br from-green-500/10 to-emerald-500/10' :
-                    insight.type === 'warning' ? 'bg-gradient-to-br from-red-500/10 to-rose-500/10' :
-                      insight.type === 'tip' ? 'bg-gradient-to-br from-blue-500/10 to-cyan-50' :
-                        'bg-gradient-to-br from-purple-500/10 to-pink-500/10'
-                    }`}
-                >
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-xl ${insight.type === 'success' ? 'bg-green-500/15' :
-                        insight.type === 'warning' ? 'bg-red-500/15' :
-                          insight.type === 'tip' ? 'bg-blue-500/15' :
-                            'bg-purple-500/15'
-                        }`}>
+                    <div className="flex items-start gap-3">
+                      <div className={`rounded-lg p-2 ${insight.iconBg}`}>
                         {insight.icon}
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-slate-100 mb-1">{insight.title}</h3>
-                        <p className="text-sm text-slate-300">{insight.description}</p>
+                        <p className="text-sm font-semibold text-foreground">{insight.title}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{insight.description}</p>
                         {insight.action && insight.actionLink && (
                           <Link
                             href={insight.actionLink}
-                            className={`inline-flex items-center gap-1 mt-3 px-3 py-1.5 rounded-lg text-sm font-medium ${insight.type === 'success' ? 'bg-green-600 text-white' :
-                              insight.type === 'warning' ? 'bg-red-600 text-white' :
-                                insight.type === 'tip' ? 'bg-blue-600 text-white' :
-                                  'bg-purple-600 text-white'
-                              }`}
+                            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-indigo-300 hover:text-indigo-200"
                           >
-                            {insight.action}
-                            <ChevronRight className="h-4 w-4" />
+                            {insight.action} <ChevronRight className="h-3 w-3" />
                           </Link>
                         )}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'categories' && (
-          <div className="space-y-6">
-            <Card className="border-0 shadow-mosaic bg-slate-800/80 backdrop-blur-xl">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <PieChart className="h-6 w-6 text-green-400" />
-                  Harcama Kategorileri
-                </CardTitle>
-                <CardDescription>En çok harcama yaptığınız kategorilerin analizi</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {analysisData?.topCategories?.map((category, index) => {
-                    const colors = [
-                      'from-blue-500 to-indigo-600',
-                      'from-green-500 to-emerald-600',
-                      'from-purple-500 to-pink-600',
-                      'from-orange-500 to-red-600',
-                      'from-cyan-500 to-blue-600',
-                    ]
-                    return (
-                      <div key={index} className="p-4 bg-slate-800/50 rounded-xl">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${colors[index % colors.length]}`} />
-                            <span className="font-medium text-slate-100">{category.name}</span>
-                          </div>
-                          <div className="text-right">
-                            <span className="font-bold text-slate-100">{formatCurrency(category.amount, 'TRY')}</span>
-                            <span className="text-slate-500 text-sm ml-2">(%{category.percentage.toFixed(1)})</span>
-                          </div>
-                        </div>
-                        <div className="w-full bg-slate-700 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full bg-gradient-to-r ${colors[index % colors.length]} transition-all duration-500`}
-                            style={{ width: `${category.percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                    )
-                  })}
-                  {(!analysisData?.topCategories || analysisData.topCategories.length === 0) && (
-                    <div className="text-center py-8 text-slate-500">
-                      <PieChart className="h-8 w-8 mx-auto mb-2 text-slate-300" />
-                      <p>Henüz kategori verisi bulunmuyor</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {activeTab === 'trends' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="border-0 shadow-mosaic bg-gradient-to-br from-green-500/10 to-emerald-500/10">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-green-400">
-                    <TrendingUp className="h-5 w-5" />
-                    Gelir Trendi
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-4">
-                    <p className="text-4xl font-bold text-green-400">
-                      {(analysisData?.incomeGrowth || 0) >= 0 ? '+' : ''}
-                      {(analysisData?.incomeGrowth || 0).toFixed(1)}%
-                    </p>
-                    <p className="text-slate-300 mt-2">Geçen döneme göre değişim</p>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-mosaic bg-gradient-to-br from-red-500/10 to-rose-500/10">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-red-400">
-                    <TrendingDown className="h-5 w-5" />
-                    Gider Trendi
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-4">
-                    <p className="text-4xl font-bold text-red-400">
-                      {(analysisData?.expenseGrowth || 0) >= 0 ? '+' : ''}
-                      {(analysisData?.expenseGrowth || 0).toFixed(1)}%
-                    </p>
-                    <p className="text-slate-300 mt-2">Geçen döneme göre değişim</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card className="border-0 shadow-mosaic bg-slate-800/80 backdrop-blur-xl">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-6 w-6 text-blue-400" />
-                  Aylık Nakit Akışı
-                </CardTitle>
-                <CardDescription>Son dönem gelir-gider dengesi</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {analysisData?.cashFlowData?.slice(0, 6).map((data, index) => (
-                    <div key={index} className="p-4 bg-slate-800/50 rounded-xl">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-slate-200">{data.month}</span>
-                        <span className={`font-bold ${data.net >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {data.net >= 0 ? '+' : ''}{formatCurrency(data.net, 'TRY')}
-                        </span>
-                      </div>
-                      <div className="flex gap-2 text-xs text-slate-500">
-                        <span className="text-green-400">Gelir: {formatCurrency(data.income, 'TRY')}</span>
-                        <span>•</span>
-                        <span className="text-red-400">Gider: {formatCurrency(data.expense, 'TRY')}</span>
-                      </div>
-                    </div>
-                  ))}
-                  {(!analysisData?.cashFlowData || analysisData.cashFlowData.length === 0) && (
-                    <div className="text-center py-8 text-slate-500">
-                      <BarChart3 className="h-8 w-8 mx-auto mb-2 text-slate-300" />
-                      <p>Henüz nakit akışı verisi bulunmuyor</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Detaylı Analiz Linkleri */}
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold text-slate-100 mb-4">Detaylı Analizler</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <Link href="/analysis/cashflow" className="group">
-              <Card className="border-0 bg-slate-800/80 hover:shadow-mosaic transition-all hover:scale-105">
-                <CardContent className="p-4 text-center">
-                  <div className="mx-auto w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                    <BarChart3 className="h-6 w-6 text-white" />
-                  </div>
-                  <p className="font-medium text-slate-100">Nakit Akışı</p>
-                  <p className="text-xs text-slate-500">Detaylı analiz</p>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link href="/analysis/categories" className="group">
-              <Card className="border-0 bg-slate-800/80 hover:shadow-mosaic transition-all hover:scale-105">
-                <CardContent className="p-4 text-center">
-                  <div className="mx-auto w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                    <PieChart className="h-6 w-6 text-white" />
-                  </div>
-                  <p className="font-medium text-slate-100">Kategoriler</p>
-                  <p className="text-xs text-slate-500">Harcama dağılımı</p>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link href="/analysis/trends" className="group">
-              <Card className="border-0 bg-slate-800/80 hover:shadow-mosaic transition-all hover:scale-105">
-                <CardContent className="p-4 text-center">
-                  <div className="mx-auto w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                    <TrendingUp className="h-6 w-6 text-white" />
-                  </div>
-                  <p className="font-medium text-slate-100">Trendler</p>
-                  <p className="text-xs text-slate-500">Gelir/Gider trendleri</p>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link href="/analysis/export" className="group">
-              <Card className="border-0 bg-slate-800/80 hover:shadow-mosaic transition-all hover:scale-105">
-                <CardContent className="p-4 text-center">
-                  <div className="mx-auto w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                    <FileText className="h-6 w-6 text-white" />
-                  </div>
-                  <p className="font-medium text-slate-100">Raporlar</p>
-                  <p className="text-xs text-slate-500">PDF/Excel export</p>
-                </CardContent>
-              </Card>
-            </Link>
+                ))}
+              </div>
+              <button
+                onClick={() => setActiveTab('insights')}
+                className="mt-4 flex w-full items-center justify-center gap-1 rounded-xl border border-border/60 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-purple-500/40 hover:text-purple-300"
+              >
+                Tüm Önerileri Gör <ChevronRight className="h-4 w-4" />
+              </button>
+            </DashboardCard>
           </div>
         </div>
+      )}
+
+      {activeTab === 'insights' && (
+        <div className="space-y-4">
+          <Card variant="premium" className="border-purple-500/20 bg-purple-500/5">
+            <CardContent className="flex items-center gap-3 p-5">
+              <div className="rounded-xl bg-purple-500/15 p-3">
+                <Brain className="h-6 w-6 text-purple-300" />
+              </div>
+              <div>
+                <p className="font-semibold text-white">AI Finansal Asistan</p>
+                <p className="text-sm text-slate-400">Finansal verileriniz analiz edilerek size özel öneriler oluşturuldu</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {smartInsights.map((insight, index) => (
+              <div
+                key={index}
+                className={`rounded-2xl border bg-muted/20 p-5 transition-all hover:bg-muted/30 ${insight.borderColor}`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className={`rounded-xl p-3 ${insight.iconBg}`}>
+                    {insight.icon}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-foreground">{insight.title}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{insight.description}</p>
+                    {insight.action && insight.actionLink && (
+                      <Link
+                        href={insight.actionLink}
+                        className="mt-3 inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-1.5 text-sm font-medium text-slate-200 transition-colors hover:bg-white/15"
+                      >
+                        {insight.action} <ChevronRight className="h-4 w-4" />
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'categories' && (
+        <DashboardCard
+          title="Harcama Kategorileri"
+          description="En çok harcama yaptığınız kategorilerin analizi"
+          icon={PieChart}
+          iconColor="text-emerald-300"
+        >
+          <div className="space-y-4">
+            {loading ? (
+              <div className="py-8 text-center text-sm text-muted-foreground">Yükleniyor...</div>
+            ) : analysisData?.topCategories?.length ? (
+              analysisData.topCategories.map((category, index) => (
+                <div key={index} className="rounded-xl border border-border/60 bg-muted/20 p-4">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-3 w-3 rounded-full bg-gradient-to-r ${categoryColors[index % categoryColors.length]}`} />
+                      <span className="font-medium text-foreground">{category.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-bold text-foreground">{formatCurrency(category.amount, 'TRY')}</span>
+                      <span className="ml-2 text-sm text-muted-foreground">%{category.percentage.toFixed(1)}</span>
+                    </div>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className={`h-full rounded-full bg-gradient-to-r transition-all duration-500 ${categoryColors[index % categoryColors.length]}`}
+                      style={{ width: `${category.percentage}%` }}
+                    />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="py-8 text-center text-sm text-muted-foreground">
+                <PieChart className="mx-auto mb-2 h-8 w-8 opacity-40" />
+                Henüz kategori verisi bulunmuyor
+              </div>
+            )}
+          </div>
+        </DashboardCard>
+      )}
+
+      {activeTab === 'trends' && (
+        <div className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card variant="premium" className="border-emerald-500/20 bg-emerald-500/5">
+              <CardContent className="p-6 text-center">
+                <div className="mb-2 flex items-center justify-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-emerald-400" />
+                  <p className="font-semibold text-emerald-300">Gelir Trendi</p>
+                </div>
+                <p className="text-4xl font-black text-white">
+                  {(analysisData?.incomeGrowth || 0) >= 0 ? '+' : ''}
+                  {(analysisData?.incomeGrowth || 0).toFixed(1)}%
+                </p>
+                <p className="mt-2 text-sm text-slate-400">Geçen döneme göre değişim</p>
+              </CardContent>
+            </Card>
+
+            <Card variant="premium" className="border-rose-500/20 bg-rose-500/5">
+              <CardContent className="p-6 text-center">
+                <div className="mb-2 flex items-center justify-center gap-2">
+                  <TrendingDown className="h-5 w-5 text-rose-400" />
+                  <p className="font-semibold text-rose-300">Gider Trendi</p>
+                </div>
+                <p className="text-4xl font-black text-white">
+                  {(analysisData?.expenseGrowth || 0) >= 0 ? '+' : ''}
+                  {(analysisData?.expenseGrowth || 0).toFixed(1)}%
+                </p>
+                <p className="mt-2 text-sm text-slate-400">Geçen döneme göre değişim</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <DashboardCard
+            title="Aylık Nakit Akışı"
+            description="Son dönem gelir-gider dengesi"
+            icon={BarChart3}
+            iconColor="text-indigo-300"
+          >
+            <div className="space-y-3">
+              {loading ? (
+                <div className="py-8 text-center text-sm text-muted-foreground">Yükleniyor...</div>
+              ) : analysisData?.cashFlowData?.length ? (
+                analysisData.cashFlowData.slice(0, 6).map((data, index) => (
+                  <div key={index} className="rounded-xl border border-border/60 bg-muted/20 p-4">
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="font-medium text-foreground">{data.month}</span>
+                      <span className={`font-bold ${data.net >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {data.net >= 0 ? '+' : ''}{formatCurrency(data.net, 'TRY')}
+                      </span>
+                    </div>
+                    <div className="flex gap-3 text-xs text-muted-foreground">
+                      <span className="text-emerald-400">Gelir: {formatCurrency(data.income, 'TRY')}</span>
+                      <span>·</span>
+                      <span className="text-rose-400">Gider: {formatCurrency(data.expense, 'TRY')}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-8 text-center text-sm text-muted-foreground">
+                  <BarChart3 className="mx-auto mb-2 h-8 w-8 opacity-40" />
+                  Henüz nakit akışı verisi bulunmuyor
+                </div>
+              )}
+            </div>
+          </DashboardCard>
+        </div>
+      )}
+
+      {/* Detaylı Analizler */}
+      <div>
+        <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">Detaylı Analizler</p>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <QuickActionTile
+            href="/analysis/cashflow"
+            title="Nakit Akışı"
+            description="Aylık gelir-gider dengesi ve nakit akış analizi"
+            icon={BarChart3}
+            tone="indigo"
+          />
+          <QuickActionTile
+            href="/analysis/categories"
+            title="Kategoriler"
+            description="Harcama dağılımı ve kategori bazlı analiz"
+            icon={PieChart}
+            tone="green"
+          />
+          <QuickActionTile
+            href="/analysis/trends"
+            title="Trendler"
+            description="Gelir ve gider trendleri, dönemsel karşılaştırma"
+            icon={TrendingUp}
+            tone="purple"
+          />
+          <QuickActionTile
+            href="/analysis/export"
+            title="Raporlar"
+            description="PDF ve Excel formatında finansal raporlar"
+            icon={FileText}
+            tone="amber"
+            meta="PDF · Excel · CSV"
+          />
+        </div>
       </div>
-    </div>
+    </AppPageShell>
   )
 }

@@ -78,7 +78,7 @@ export default function BudgetsPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Butce verileri yuklenemedi')
+        throw new Error('Bütçe verileri yüklenemedi')
       }
 
       const data = (await response.json()) as BudgetSummaryResponse
@@ -89,7 +89,7 @@ export default function BudgetsPage() {
       )
     } catch (error) {
       console.error('Budget summary error:', error)
-      toastError('Hata', 'Butce verileri yuklenemedi')
+      toastError('Hata', 'Bütçe verileri yüklenemedi')
     } finally {
       setLoading(false)
     }
@@ -135,7 +135,7 @@ export default function BudgetsPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Butce kaydedilemedi')
+        throw new Error('Bütçe kaydedilemedi')
       }
 
       const data = (await response.json()) as BudgetSummaryResponse
@@ -143,10 +143,10 @@ export default function BudgetsPage() {
       setDraftBudgets(
         Object.fromEntries(data.items.map(item => [item.categoryId, item.budgeted.toFixed(2)]))
       )
-      toastSuccess('Basarili', 'Butce planiniz kaydedildi')
+      toastSuccess('Başarılı', 'Bütçe planınız kaydedildi')
     } catch (error) {
       console.error('Budget save error:', error)
-      toastError('Hata', 'Butce kaydedilemedi')
+      toastError('Hata', 'Bütçe kaydedilemedi')
     } finally {
       setSaving(false)
     }
@@ -155,9 +155,9 @@ export default function BudgetsPage() {
   return (
     <AppPageShell
       header={{
-        title: 'Butceler',
-        description: 'Kategori bazli limitleri, zero-based tahsisi ve gerceklesen harcamalari yonetin.',
-        breadcrumbs: [{ label: 'Butceler' }],
+        title: 'Bütçeler',
+        description: 'Kategori bazlı limitleri, sıfır bazlı tahsisi ve gerçekleşen harcamaları yönetin.',
+        breadcrumbs: [{ label: 'Bütçeler' }],
         actions: (
           <>
             <Button variant="outline" onClick={() => void fetchSummary()}>
@@ -166,7 +166,7 @@ export default function BudgetsPage() {
             </Button>
             <Button variant="glow" onClick={() => void handleSave()} disabled={saving || loading}>
               <Save className="mr-2 h-4 w-4" />
-              {saving ? 'Kaydediliyor...' : 'Butceyi Kaydet'}
+              {saving ? 'Kaydediliyor...' : 'Bütçeyi Kaydet'}
             </Button>
           </>
         ),
@@ -184,17 +184,17 @@ export default function BudgetsPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="monthly">Aylik Butce</SelectItem>
-                <SelectItem value="weekly">Haftalik Butce</SelectItem>
+                <SelectItem value="monthly">Aylık Bütçe</SelectItem>
+                <SelectItem value="weekly">Haftalık Bütçe</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold text-white">Zero-based butceleme</p>
+                <p className="text-sm font-semibold text-white">Sıfır bazlı bütçeleme</p>
                 <p className="text-xs text-slate-400">
-                  Gelirinizin her birimini bir kategoriye veya amaca atayin.
+                  Gelirinizin her birimini bir kategoriye veya amaca atayın.
                 </p>
               </div>
               <Switch checked={zeroBased} onCheckedChange={setZeroBased} />
@@ -209,7 +209,7 @@ export default function BudgetsPage() {
                 </p>
               </>
             ) : (
-              <p>Butce yukleniyor...</p>
+              <p>Bütçe yükleniyor...</p>
             )}
           </div>
         </CardContent>
@@ -217,11 +217,11 @@ export default function BudgetsPage() {
 
       <StatsGrid>
         <StatCard
-          title="Toplam Butce"
+          title="Toplam Bütçe"
           value={formatCurrency(summary?.totalBudgeted || 0, summary?.currency || 'TRY')}
           icon={Target}
           color="indigo"
-          subtitle="Kategori tahsislerinin toplami"
+          subtitle="Kategori tahsislerinin toplamı"
           variant="premium"
         />
         <StatCard
@@ -229,15 +229,15 @@ export default function BudgetsPage() {
           value={formatCurrency(summary?.totalSpent || 0, summary?.currency || 'TRY')}
           icon={TrendingDown}
           color="red"
-          subtitle="Secili periyottaki giderler"
+          subtitle="Seçili periyottaki giderler"
           variant="premium"
         />
         <StatCard
-          title="Kalan Butce"
+          title="Kalan Bütçe"
           value={formatCurrency(summary?.remainingBudget || 0, summary?.currency || 'TRY')}
           icon={PiggyBank}
           color={(summary?.remainingBudget || 0) >= 0 ? 'green' : 'red'}
-          subtitle="Butce eksi gerceklesen"
+          subtitle="Bütçe eksi gerçekleşen"
           variant="premium"
         />
         <StatCard
@@ -245,20 +245,20 @@ export default function BudgetsPage() {
           value={`${summary?.overBudgetCount || 0}`}
           icon={AlertTriangle}
           color={(summary?.overBudgetCount || 0) > 0 ? 'amber' : 'green'}
-          subtitle="Esik veya asim tespit edilenler"
+          subtitle="Eşik veya aşım tespit edilenler"
           variant="premium"
         />
       </StatsGrid>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(340px,0.9fr)]">
         <DashboardCard
-          title="Kategori Butceleri"
-          description="Hedef, gerceklesen ve kalan durumunu ayni tabloda yonetin."
+          title="Kategori Bütçeleri"
+          description="Hedef, gerçekleşen ve kalan durumunu aynı tabloda yönetin."
           icon={Target}
           iconColor="text-indigo-300"
         >
           {loading || !summary ? (
-            <div className="py-12 text-center text-sm text-muted-foreground">Butce ozetiniz yukleniyor...</div>
+            <div className="py-12 text-center text-sm text-muted-foreground">Bütçe özetiniz yükleniyor...</div>
           ) : (
             <div className="space-y-4">
               {summary.items.map(item => {
@@ -273,10 +273,10 @@ export default function BudgetsPage() {
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-semibold text-foreground">{item.categoryName}</p>
-                          {isOver ? <span className="rounded-full bg-red-500/10 px-2 py-0.5 text-[11px] font-medium text-red-400">Asim</span> : null}
+                          {isOver ? <span className="rounded-full bg-red-500/10 px-2 py-0.5 text-[11px] font-medium text-red-400">Aşım</span> : null}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          {item.transactionCount} islem · esik %{item.alertThreshold.toFixed(0)}
+                          {item.transactionCount} işlem · eşik %{item.alertThreshold.toFixed(0)}
                         </p>
                       </div>
                       <div className="grid gap-3 sm:grid-cols-[150px_160px_160px]">
@@ -293,7 +293,7 @@ export default function BudgetsPage() {
                           }
                         />
                         <div className="rounded-xl border border-border/70 bg-muted/20 px-3 py-2">
-                          <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Gerceklesen</p>
+                          <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Gerçekleşen</p>
                           <p className="mt-1 text-sm font-semibold text-foreground">
                             {formatCurrency(item.spent, summary.currency)}
                           </p>
@@ -320,7 +320,7 @@ export default function BudgetsPage() {
                         />
                       </div>
                       <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                        <span>%{liveProgress.toFixed(0)} kullanildi</span>
+                        <span>%{liveProgress.toFixed(0)} kullanıldı</span>
                         <span>
                           Hedef {formatCurrency(liveBudget, summary.currency)}
                         </span>
@@ -335,13 +335,13 @@ export default function BudgetsPage() {
 
         <div className="space-y-6">
           <DashboardCard
-            title="Butce vs Gerceklesen"
-            description="En yogun kategorilerde planlanan ve harcanan tutari karsilastirin."
+            title="Bütçe vs Gerçekleşen"
+            description="En yoğun kategorilerde planlanan ve harcanan tutarı karşılaştırın."
             icon={TrendingDown}
             iconColor="text-amber-300"
           >
             {loading || chartData.length === 0 ? (
-              <div className="py-12 text-center text-sm text-muted-foreground">Grafik hazirlaniyor...</div>
+              <div className="py-12 text-center text-sm text-muted-foreground">Grafik hazırlanıyor...</div>
             ) : (
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
@@ -368,7 +368,7 @@ export default function BudgetsPage() {
 
           <Card variant="premium" className="border-white/10 bg-white/5">
             <CardContent className="space-y-3 p-5">
-              <p className="text-sm font-semibold text-white">Zero-based gorunum</p>
+              <p className="text-sm font-semibold text-white">Sıfır bazlı görünüm</p>
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Toplam gelir</p>
                 <p className="mt-2 text-2xl font-black text-white">
@@ -376,13 +376,13 @@ export default function BudgetsPage() {
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Atanan butce</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Atanan bütçe</p>
                 <p className="mt-2 text-2xl font-black text-indigo-300">
                   {formatCurrency(summary?.totalBudgeted || 0, summary?.currency || 'TRY')}
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Gorev bekleyen tutar</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Görev bekleyen tutar</p>
                 <p className={`mt-2 text-2xl font-black ${(summary?.remainingToAssign || 0) >= 0 ? 'text-emerald-300' : 'text-red-300'}`}>
                   {formatCurrency(summary?.remainingToAssign || 0, summary?.currency || 'TRY')}
                 </p>

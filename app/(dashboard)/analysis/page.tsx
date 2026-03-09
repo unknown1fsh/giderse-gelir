@@ -90,7 +90,7 @@ export default function AnalysisPage() {
   const fetchedRef = useRef(false)
 
   useEffect(() => {
-    if (fetchedRef.current) return
+    if (fetchedRef.current) { return }
     fetchedRef.current = true
     void fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -128,33 +128,33 @@ export default function AnalysisPage() {
   }
 
   const calculateHealthScore = () => {
-    if (!analysisData) return 0
+    if (!analysisData) { return 0 }
     let score = 50
-    if (analysisData.savingsRate >= 20) score += 25
-    else if (analysisData.savingsRate >= 10) score += 15
-    else if (analysisData.savingsRate >= 5) score += 10
-    else if (analysisData.savingsRate < 0) score -= 15
-    if (analysisData.incomeGrowth > 0) score += 10
-    else if (analysisData.incomeGrowth < -10) score -= 10
-    if (analysisData.expenseGrowth < 0) score += 10
-    else if (analysisData.expenseGrowth > 20) score -= 15
-    if (analysisData.netWorth > 0) score += 5
+    if (analysisData.savingsRate >= 20) { score += 25 }
+    else if (analysisData.savingsRate >= 10) { score += 15 }
+    else if (analysisData.savingsRate >= 5) { score += 10 }
+    else if (analysisData.savingsRate < 0) { score -= 15 }
+    if (analysisData.incomeGrowth > 0) { score += 10 }
+    else if (analysisData.incomeGrowth < -10) { score -= 10 }
+    if (analysisData.expenseGrowth < 0) { score += 10 }
+    else if (analysisData.expenseGrowth > 20) { score -= 15 }
+    if (analysisData.netWorth > 0) { score += 5 }
     return Math.min(100, Math.max(0, score))
   }
 
   const healthScore = calculateHealthScore()
 
   const getHealthStyle = (score: number) => {
-    if (score >= 80) return { bar: 'from-emerald-500 to-green-600', badge: 'bg-emerald-500/15 text-emerald-300', label: 'Mükemmel' }
-    if (score >= 60) return { bar: 'from-cyan-500 to-blue-600', badge: 'bg-cyan-500/15 text-cyan-300', label: 'İyi' }
-    if (score >= 40) return { bar: 'from-amber-500 to-orange-500', badge: 'bg-amber-500/15 text-amber-300', label: 'Orta' }
+    if (score >= 80) { return { bar: 'from-emerald-500 to-green-600', badge: 'bg-emerald-500/15 text-emerald-300', label: 'Mükemmel' } }
+    if (score >= 60) { return { bar: 'from-cyan-500 to-blue-600', badge: 'bg-cyan-500/15 text-cyan-300', label: 'İyi' } }
+    if (score >= 40) { return { bar: 'from-amber-500 to-orange-500', badge: 'bg-amber-500/15 text-amber-300', label: 'Orta' } }
     return { bar: 'from-rose-500 to-red-600', badge: 'bg-rose-500/15 text-rose-300', label: 'Dikkat' }
   }
 
   const healthStyle = getHealthStyle(healthScore)
 
   const generateSmartInsights = () => {
-    if (!analysisData) return []
+    if (!analysisData) { return [] }
 
     const insights: Array<{
       type: 'success' | 'warning' | 'tip' | 'goal'

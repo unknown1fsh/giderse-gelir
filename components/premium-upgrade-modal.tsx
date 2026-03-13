@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/mosaic'
 import { Button } from '@/components/mosaic'
 import {
@@ -16,6 +15,7 @@ import {
   Brain,
   Target,
   Gift,
+  AlertTriangle,
 } from 'lucide-react'
 
 interface PremiumUpgradeModalProps {
@@ -35,12 +35,15 @@ export default function PremiumUpgradeModal({
   featureName = 'Premium Özellik',
   limitInfo,
 }: PremiumUpgradeModalProps) {
-  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+
+  const SHOPIER_PREMIUM = 'https://www.shopier.com/cinarinovasyon/45196765'
+  const SHOPIER_FAMILY = 'https://www.shopier.com/cinarinovasyon/45196957'
 
   const handleUpgrade = () => {
     setIsLoading(true)
-    router.push('/premium')
+    window.open(SHOPIER_PREMIUM, '_blank', 'noopener,noreferrer')
+    setTimeout(() => setIsLoading(false), 1000)
   }
 
   const getFeatureIcon = () => {
@@ -115,16 +118,24 @@ export default function PremiumUpgradeModal({
           </ul>
 
           {/* Price */}
-          <div className="mb-5 rounded-2xl border border-purple-400/20 bg-gradient-to-br from-purple-900/40 to-pink-900/30 p-4 text-center">
+          <div className="mb-4 rounded-2xl border border-purple-400/20 bg-gradient-to-br from-purple-900/40 to-pink-900/30 p-4 text-center">
             <p className="text-xs uppercase tracking-widest text-slate-500">Premium Plan</p>
             <div className="mt-1 flex items-end justify-center gap-1">
               <span className="text-3xl font-extrabold text-white">₺149</span>
               <span className="mb-1 text-sm text-slate-400">/ay</span>
             </div>
-            <p className="mt-1 text-xs text-purple-300">İlk 30 gün ücretsiz — sonra aylık ₺149</p>
             <p className="mt-2 text-xs text-slate-500">
-              Veya <span className="text-cyan-300 font-medium">Aile Paketi ₺249/ay</span> — 5 kişiye kadar paylaşım
+              Veya <a href={SHOPIER_FAMILY} target="_blank" rel="noopener noreferrer" className="text-cyan-300 font-medium hover:underline">Aile Paketi ₺249/ay</a> — 5 kişiye kadar paylaşım
             </p>
+          </div>
+
+          {/* E-posta uyarısı */}
+          <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-amber-400/20 bg-amber-400/10 px-3.5 py-2.5 text-xs text-amber-300">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+            <span>
+              Ödeme yaparken <strong className="text-amber-200">GiderSE-Gelir hesabınızdaki e-posta adresini</strong> kullanın.
+              Aboneliğiniz e-posta eşleştirmesiyle otomatik aktifleşir.
+            </span>
           </div>
 
           {/* Actions */}
@@ -139,7 +150,7 @@ export default function PremiumUpgradeModal({
               ) : (
                 <>
                   <Crown className="mr-2 h-4 w-4" />
-                  Planları Gör & Ücretsiz Dene
+                  Shopier ile Satın Al
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </>
               )}

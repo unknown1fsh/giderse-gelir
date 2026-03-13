@@ -1,9 +1,14 @@
 'use client'
 
-import { Check, X, ArrowRight, ShieldCheck, Gift } from 'lucide-react'
+import { Check, X, ArrowRight, ShieldCheck, Gift, AlertTriangle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import BrandLogo from '@/components/brand-logo'
+
+const SHOPIER_LINKS: Record<string, string> = {
+  premium: 'https://www.shopier.com/cinarinovasyon/45196765',
+  family: 'https://www.shopier.com/cinarinovasyon/45196957',
+}
 
 const PLANS = [
   {
@@ -13,6 +18,7 @@ const PLANS = [
     highlight: false,
     desc: 'Kişisel finans takibine başlamak için.',
     cta: 'Ücretsiz başla',
+    shopierKey: null as string | null,
     features: [
       'Aylık 100 işlem',
       '3 hesap & 2 kart',
@@ -28,7 +34,8 @@ const PLANS = [
     badge: 'En Popüler',
     highlight: true,
     desc: 'Finansal gücünü tam anlamıyla kullan.',
-    cta: '30 gün ücretsiz dene',
+    cta: 'Satın Al',
+    shopierKey: 'premium',
     features: [
       'Sınırsız işlem & hesap',
       'AI finansal asistan',
@@ -45,7 +52,8 @@ const PLANS = [
     badge: null,
     highlight: false,
     desc: 'Ailenizin finansını birlikte yönetin.',
-    cta: '30 gün ücretsiz dene',
+    cta: 'Satın Al',
+    shopierKey: 'family',
     features: [
       "Premium'ın tamamı",
       '5 kişilik paylaşım',
@@ -118,6 +126,21 @@ export default function PricingPage() {
         </p>
       </div>
 
+      {/* Email uyarı banner'ı */}
+      <div className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8 mb-8">
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-400/20 bg-amber-400/[0.06] px-5 py-4">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
+          <div>
+            <p className="text-sm font-semibold text-amber-300">Ödeme Yaparken Dikkat!</p>
+            <p className="mt-1 text-xs leading-relaxed text-slate-400">
+              Shopier üzerinden ödeme yaparken, <strong className="text-amber-200">GiderSE-Gelir hesabınızda kayıtlı olan e-posta adresini</strong> kullanmanız gerekmektedir.
+              Aboneliğiniz bu e-posta adresi üzerinden otomatik olarak aktifleştirilecektir.
+              Farklı bir e-posta ile ödeme yaparsanız paketiniz aktifleştirilemez.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Plan cards */}
       <div className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8">
         <div className="grid gap-5 sm:grid-cols-3">
@@ -146,13 +169,23 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <button
-                onClick={() => router.push('/auth/register')}
-                className={`w-full rounded-xl py-2.5 text-xs font-semibold transition ${p.highlight
-                  ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:opacity-90'
-                  : 'border border-white/10 text-slate-300 hover:bg-white/5'}`}>
-                {p.cta}
-              </button>
+              {p.shopierKey ? (
+                <a
+                  href={SHOPIER_LINKS[p.shopierKey]}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`block w-full text-center rounded-xl py-2.5 text-xs font-semibold transition ${p.highlight
+                    ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:opacity-90'
+                    : 'border border-white/10 text-slate-300 hover:bg-white/5'}`}>
+                  {p.cta}
+                </a>
+              ) : (
+                <button
+                  onClick={() => router.push('/auth/register')}
+                  className="w-full rounded-xl py-2.5 text-xs font-semibold transition border border-white/10 text-slate-300 hover:bg-white/5">
+                  {p.cta}
+                </button>
+              )}
             </div>
           ))}
         </div>

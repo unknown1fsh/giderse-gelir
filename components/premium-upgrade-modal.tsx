@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/mosaic'
 import { Button } from '@/components/mosaic'
+import { SHOPIER_LINKS } from '@/lib/shopier-links'
 import {
   Crown,
   CheckCircle,
@@ -37,12 +38,9 @@ export default function PremiumUpgradeModal({
 }: PremiumUpgradeModalProps) {
   const [isLoading, setIsLoading] = useState(false)
 
-  const SHOPIER_PREMIUM = 'https://www.shopier.com/cinarinovasyon/45196765'
-  const SHOPIER_FAMILY = 'https://www.shopier.com/cinarinovasyon/45196957'
-
   const handleUpgrade = () => {
     setIsLoading(true)
-    window.open(SHOPIER_PREMIUM, '_blank', 'noopener,noreferrer')
+    window.open(SHOPIER_LINKS.premium, '_blank', 'noopener,noreferrer')
     setTimeout(() => setIsLoading(false), 1000)
   }
 
@@ -125,7 +123,7 @@ export default function PremiumUpgradeModal({
               <span className="mb-1 text-sm text-slate-400">/ay</span>
             </div>
             <p className="mt-2 text-xs text-slate-500">
-              Veya <a href={SHOPIER_FAMILY} target="_blank" rel="noopener noreferrer" className="text-cyan-300 font-medium hover:underline">Aile Paketi ₺249/ay</a> — 5 kişiye kadar paylaşım
+              Veya <a href={SHOPIER_LINKS.family} target="_blank" rel="noopener noreferrer" className="text-cyan-300 font-medium hover:underline">Aile Paketi ₺249/ay</a> — 5 kişiye kadar paylaşım
             </p>
           </div>
 

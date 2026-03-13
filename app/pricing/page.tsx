@@ -4,11 +4,8 @@ import { Check, X, ArrowRight, ShieldCheck, Gift, AlertTriangle } from 'lucide-r
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import BrandLogo from '@/components/brand-logo'
+import { SHOPIER_LINKS, ShopierPlanKey } from '@/lib/shopier-links'
 
-const SHOPIER_LINKS: Record<string, string> = {
-  premium: 'https://www.shopier.com/cinarinovasyon/45196765',
-  family: 'https://www.shopier.com/cinarinovasyon/45196957',
-}
 
 const PLANS = [
   {
@@ -18,7 +15,7 @@ const PLANS = [
     highlight: false,
     desc: 'Kişisel finans takibine başlamak için.',
     cta: 'Ücretsiz başla',
-    shopierKey: null as string | null,
+    shopierKey: null as ShopierPlanKey | null,
     features: [
       'Aylık 100 işlem',
       '3 hesap & 2 kart',
@@ -35,7 +32,7 @@ const PLANS = [
     highlight: true,
     desc: 'Finansal gücünü tam anlamıyla kullan.',
     cta: 'Satın Al',
-    shopierKey: 'premium',
+    shopierKey: 'premium' as const,
     features: [
       'Sınırsız işlem & hesap',
       'AI finansal asistan',
@@ -53,7 +50,7 @@ const PLANS = [
     highlight: false,
     desc: 'Ailenizin finansını birlikte yönetin.',
     cta: 'Satın Al',
-    shopierKey: 'family',
+    shopierKey: 'family' as const,
     features: [
       "Premium'ın tamamı",
       '5 kişilik paylaşım',

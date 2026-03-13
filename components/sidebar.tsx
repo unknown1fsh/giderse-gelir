@@ -210,8 +210,10 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         {/* Premium Upgrade Banner - Free users only */}
         {user && (user.plan === 'free' || !user.plan) && (
           <div className="mx-4 mt-4 shrink-0">
-            <Link
-              href="/help/tickets/new?intent=membership&planId=premium&source=sidebar"
+            <a
+              href="https://www.shopier.com/cinarinovasyon/45196765"
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={handleLinkClick}
               className="block p-3 bg-gradient-to-r from-indigo-600/20 to-violet-600/20 rounded-lg border border-indigo-500/20 hover:from-indigo-600/30 hover:to-violet-600/30 transition-all duration-300 group"
             >
@@ -221,10 +223,10 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-white">Premium&apos;a Geç</p>
-                  <p className="text-xs text-indigo-300/70 truncate">Tüm özellikleri aç</p>
+                  <p className="text-xs text-indigo-300/70 truncate">₺149/ay — Tüm özellikleri aç</p>
                 </div>
               </div>
-            </Link>
+            </a>
           </div>
         )}
 

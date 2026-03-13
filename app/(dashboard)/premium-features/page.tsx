@@ -253,13 +253,15 @@ export default function PremiumFeaturesPage() {
               <p className="mb-6 text-slate-300 text-lg">
                 Finansal yönetiminizi bir üst seviyeye taşıyın
               </p>
-              <Link
-                href="/premium"
+              <a
+                href="https://www.shopier.com/cinarinovasyon/45196765"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center space-x-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 text-lg font-bold text-white shadow-mosaic hover:from-purple-700 hover:to-pink-700 transition-all hover:scale-105"
               >
                 <span>Premium Satın Al</span>
                 <ArrowRight className="h-5 w-5" />
-              </Link>
+              </a>
             </div>
           </div>
         )}

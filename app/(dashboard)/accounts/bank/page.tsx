@@ -92,7 +92,7 @@ export default function BankAccountsPage() {
         description="Banka hesaplarınızı görüntüleyin, bakiyeleri izleyin ve detayları yönetin."
         breadcrumbs={[{ label: 'Hesaplar', href: '/accounts' }, { label: 'Banka Hesapları' }]}
         actions={(
-          <Link href="/accounts/new">
+          <Link href="/accounts?openNew=1&type=bank">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
               Yeni Hesap
@@ -161,7 +161,7 @@ export default function BankAccountsPage() {
             <div className="text-center py-8 text-muted-foreground">
               <Wallet className="h-8 w-8 mx-auto mb-2" />
               <p>Henüz banka hesabı eklenmemiş</p>
-              <Link href="/accounts/new" className="text-blue-400 hover:underline">
+              <Link href="/accounts?openNew=1&type=bank" className="text-blue-400 hover:underline">
                 İlk hesabınızı ekleyin
               </Link>
             </div>

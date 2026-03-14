@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import {
   AppPageShell,
   Badge,
@@ -9,9 +10,23 @@ import {
   Card,
   CardContent,
   ConfirmationDialog,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
   DistributionBar,
   EditNameModal,
   EmptyState,
+  FormField,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Spinner,
   StatCard,
   StatsGrid,
@@ -83,6 +98,49 @@ interface GoldItem {
 
 type TabType = 'all' | 'cash' | 'bank' | 'cards' | 'ewallet' | 'gold'
 type ItemType = 'account' | 'ewallet' | 'card'
+type AccountCreateType = 'bank' | 'credit_card' | 'gold'
+
+interface ReferenceData {
+  banks: Array<{ id: number; name: string; asciiName: string }>
+  accountTypes: Array<{ id: number; code: string; name: string; description?: string | null }>
+  goldTypes: Array<{ id: number; code: string; name: string; description?: string | null }>
+  goldPurities: Array<{ id: number; code: string; name: string; purity: string }>
+  currencies: Array<{ id: number; code: string; name: string; symbol: string }>
+}
+
+const ACCOUNT_TYPE_OPTIONS: Array<{
+  id: AccountCreateType
+  title: string
+  description: string
+  icon: React.ElementType
+  color: string
+  selectedColor: string
+}> = [
+  {
+    id: 'bank',
+    title: 'Banka Hesabı',
+    description: 'Nakit veya banka hesap bakiyesi',
+    icon: Building2,
+    color: 'border-border/60 hover:border-blue-500/40 hover:bg-blue-500/5',
+    selectedColor: 'border-blue-500 bg-blue-500/10',
+  },
+  {
+    id: 'credit_card',
+    title: 'Kredi Kartı',
+    description: 'Limit ve borç takibi',
+    icon: CreditCard,
+    color: 'border-border/60 hover:border-purple-500/40 hover:bg-purple-500/5',
+    selectedColor: 'border-purple-500 bg-purple-500/10',
+  },
+  {
+    id: 'gold',
+    title: 'Altın',
+    description: 'Altın ve ziynet varlıkları',
+    icon: Coins,
+    color: 'border-border/60 hover:border-amber-500/40 hover:bg-amber-500/5',
+    selectedColor: 'border-amber-500 bg-amber-500/10',
+  },
+]
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -195,6 +253,7 @@ function ActionButtons({
 export default function AccountsPage() {
   const { isPremium, handlePremiumFeature } = usePremium()
   const { success: toastSuccess, error: toastError } = useToast()
+  const searchParams = useSearchParams()
 
   const [cashAccounts, setCashAccounts] = useState<BankAccount[]>([])
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
@@ -212,6 +271,27 @@ export default function AccountsPage() {
 
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [createDrawerOpen, setCreateDrawerOpen] = useState(false)
+  const [createSubmitting, setCreateSubmitting] = useState(false)
+  const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
+  const [referenceLoading, setReferenceLoading] = useState(false)
+  const [createType, setCreateType] = useState<AccountCreateType>('bank')
+  const [createErrors, setCreateErrors] = useState<Record<string, string>>({})
+  const [createForm, setCreateForm] = useState({
+    name: '',
+    bankId: '',
+    accountTypeId: '',
+    currencyId: '',
+    balance: '',
+    accountNumber: '',
+    iban: '',
+    limitAmount: '',
+    dueDay: '',
+    goldTypeId: '',
+    goldPurityId: '',
+    weight: '',
+    purchasePrice: '',
+  })
   const [selectedItem, setSelectedItem] = useState<{
     id: number
     name: string
@@ -220,6 +300,7 @@ export default function AccountsPage() {
   const [transactionCount, setTransactionCount] = useState(0)
 
   const fetchedRef = useRef(false)
+  const handledOpenNewQueryRef = useRef(false)
 
   useEffect(() => {
     if (fetchedRef.current) {return}
@@ -253,6 +334,195 @@ export default function AccountsPage() {
       console.error('Veriler yüklenirken hata:', err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const resetCreateForm = (nextCurrencyId = '') => {
+    setCreateErrors({})
+    setCreateForm({
+      name: '',
+      bankId: '',
+      accountTypeId: '',
+      currencyId: nextCurrencyId,
+      balance: '',
+      accountNumber: '',
+      iban: '',
+      limitAmount: '',
+      dueDay: '',
+      goldTypeId: '',
+      goldPurityId: '',
+      weight: '',
+      purchasePrice: '',
+    })
+  }
+
+  const ensureReferenceData = async () => {
+    if (referenceData) {
+      return referenceData
+    }
+
+    setReferenceLoading(true)
+    try {
+      const response = await fetch(`/api/reference-data?_t=${Date.now()}`, {
+        cache: 'no-store',
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        throw new Error('Referans veriler alınamadı')
+      }
+
+      const data = (await response.json()) as ReferenceData
+      setReferenceData(data)
+
+      const tryCurrency = data.currencies.find(currency => currency.code === 'TRY')
+      resetCreateForm(tryCurrency ? String(tryCurrency.id) : '')
+      return data
+    } finally {
+      setReferenceLoading(false)
+    }
+  }
+
+  const openCreateDrawer = async (nextType: AccountCreateType = 'bank') => {
+    try {
+      setCreateType(nextType)
+      await ensureReferenceData()
+      setCreateDrawerOpen(true)
+    } catch {
+      toastError('Hata', 'Yeni hesap formu hazırlanamadı')
+    }
+  }
+
+  const closeCreateDrawer = () => {
+    setCreateDrawerOpen(false)
+    setCreateErrors({})
+  }
+
+  useEffect(() => {
+    if (handledOpenNewQueryRef.current || loading) {
+      return
+    }
+
+    if (searchParams.get('openNew') !== '1') {
+      return
+    }
+
+    handledOpenNewQueryRef.current = true
+    const queryType = searchParams.get('type')
+    const normalizedType: AccountCreateType =
+      queryType === 'credit_card' ? 'credit_card' : queryType === 'gold' ? 'gold' : 'bank'
+
+    void openCreateDrawer(normalizedType)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, searchParams])
+
+  const updateCreateField = (field: keyof typeof createForm, value: string) => {
+    setCreateForm(prev => ({ ...prev, [field]: value }))
+    if (createErrors[field]) {
+      setCreateErrors(prev => {
+        const next = { ...prev }
+        delete next[field]
+        return next
+      })
+    }
+  }
+
+  const validateCreateForm = () => {
+    const errors: Record<string, string> = {}
+
+    if (!createForm.name.trim()) {
+      errors.name = 'Ad alanı zorunludur'
+    }
+
+    if (createType === 'bank') {
+      if (!createForm.bankId) {errors.bankId = 'Banka seçimi zorunludur'}
+      if (!createForm.accountTypeId) {errors.accountTypeId = 'Hesap türü seçimi zorunludur'}
+      if (!createForm.currencyId) {errors.currencyId = 'Para birimi seçimi zorunludur'}
+    }
+
+    if (createType === 'credit_card') {
+      if (!createForm.bankId) {errors.bankId = 'Banka seçimi zorunludur'}
+      if (!createForm.currencyId) {errors.currencyId = 'Para birimi seçimi zorunludur'}
+      if (!createForm.limitAmount || parseFloat(createForm.limitAmount) <= 0) {
+        errors.limitAmount = 'Geçerli bir limit tutarı giriniz'
+      }
+      if (!createForm.dueDay) {
+        errors.dueDay = 'Son ödeme günü zorunludur'
+      }
+    }
+
+    if (createType === 'gold') {
+      if (!createForm.goldTypeId) {errors.goldTypeId = 'Altın türü seçimi zorunludur'}
+      if (!createForm.goldPurityId) {errors.goldPurityId = 'Ayar seçimi zorunludur'}
+      if (!createForm.weight || parseFloat(createForm.weight) <= 0) {
+        errors.weight = 'Geçerli bir ağırlık giriniz'
+      }
+      if (!createForm.purchasePrice || parseFloat(createForm.purchasePrice) <= 0) {
+        errors.purchasePrice = 'Geçerli bir alış fiyatı giriniz'
+      }
+    }
+
+    setCreateErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const handleCreateSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (!validateCreateForm()) {
+      return
+    }
+
+    setCreateSubmitting(true)
+    try {
+      const payload = {
+        accountType: createType,
+        name: createForm.name.trim(),
+        bankId: createForm.bankId ? parseInt(createForm.bankId) : 0,
+        accountTypeId: createForm.accountTypeId ? parseInt(createForm.accountTypeId) : 0,
+        currencyId: createForm.currencyId ? parseInt(createForm.currencyId) : 0,
+        balance: parseFloat(createForm.balance) || 0,
+        accountNumber: createForm.accountNumber || null,
+        iban: createForm.iban ? `TR${createForm.iban.replace(/\s/g, '')}` : null,
+        limitAmount: parseFloat(createForm.limitAmount) || 0,
+        dueDay: createForm.dueDay ? parseInt(createForm.dueDay) : 1,
+        goldTypeId: createForm.goldTypeId ? parseInt(createForm.goldTypeId) : 0,
+        goldPurityId: createForm.goldPurityId ? parseInt(createForm.goldPurityId) : 0,
+        weight: parseFloat(createForm.weight) || 0,
+        purchasePrice: parseFloat(createForm.purchasePrice) || 0,
+      }
+
+      const response = await fetch('/api/accounts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        const errorData = (await response.json()) as { error?: string }
+        throw new Error(errorData.error || 'Hesap kaydedilemedi')
+      }
+
+      toastSuccess('Başarılı', 'Hesap başarıyla eklendi')
+      if (createType === 'credit_card') {
+        setActiveTab('cards')
+      }
+      if (createType === 'gold') {
+        setActiveTab('gold')
+      }
+      if (createType === 'bank') {
+        setActiveTab('bank')
+      }
+
+      closeCreateDrawer()
+      fetchedRef.current = false
+      await fetchData()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Hesap kaydedilemedi'
+      toastError('Hata', message)
+    } finally {
+      setCreateSubmitting(false)
     }
   }
 
@@ -393,11 +663,9 @@ export default function AccountsPage() {
         title: 'Hesaplarım',
         description: 'Tüm finansal varlıklarınız tek ekranda',
         actions: (
-          <Button asChild variant="glow">
-            <Link href="/accounts/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Yeni Hesap
-            </Link>
+          <Button variant="glow" onClick={() => void openCreateDrawer('bank')}>
+            <Plus className="mr-2 h-4 w-4" />
+            Yeni Hesap
           </Button>
         ),
       }}
@@ -557,10 +825,8 @@ export default function AccountsPage() {
                 description="Nakit varlıklarınızı takip etmek için hesap ekleyin."
                 icon={<Banknote className="h-10 w-10" />}
                 action={
-                  <Button asChild variant="outline" size="sm">
-                    <Link href="/accounts/new?type=cash">
-                      <Plus className="mr-2 h-4 w-4" /> Nakit Ekle
-                    </Link>
+                  <Button variant="outline" size="sm" onClick={() => void openCreateDrawer('bank')}>
+                    <Plus className="mr-2 h-4 w-4" /> Nakit Ekle
                   </Button>
                 }
               />
@@ -618,10 +884,8 @@ export default function AccountsPage() {
                 description="Banka hesaplarınızı ekleyerek bakiyelerinizi takip edin."
                 icon={<Building2 className="h-10 w-10" />}
                 action={
-                  <Button asChild variant="outline" size="sm">
-                    <Link href="/accounts/new?type=bank">
-                      <Plus className="mr-2 h-4 w-4" /> Hesap Ekle
-                    </Link>
+                  <Button variant="outline" size="sm" onClick={() => void openCreateDrawer('bank')}>
+                    <Plus className="mr-2 h-4 w-4" /> Hesap Ekle
                   </Button>
                 }
               />
@@ -931,6 +1195,272 @@ export default function AccountsPage() {
         confirmText="Evet, Sil"
         cancelText="İptal"
       />
+
+      <Drawer open={createDrawerOpen} onOpenChange={setCreateDrawerOpen}>
+        <DrawerContent className="border-border/60 bg-card">
+          <form onSubmit={e => void handleCreateSubmit(e)} className="flex h-full flex-col">
+            <DrawerHeader>
+              <DrawerTitle>Yeni Hesap Ekle</DrawerTitle>
+              <DrawerDescription>
+                Varlık türünü seçip temel alanları doldurarak hesabınızı hızlıca oluşturun.
+              </DrawerDescription>
+            </DrawerHeader>
+
+            <DrawerBody className="space-y-5">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                {ACCOUNT_TYPE_OPTIONS.map(option => {
+                  const selected = option.id === createType
+                  const Icon = option.icon
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => {
+                        setCreateType(option.id)
+                        setCreateErrors({})
+                      }}
+                      className={cn(
+                        'rounded-xl border-2 p-3 text-left transition-all',
+                        selected ? option.selectedColor : option.color
+                      )}
+                    >
+                      <div className="mb-2 flex items-center gap-2">
+                        <Icon className="h-4 w-4" />
+                        <p className="text-sm font-semibold text-foreground">{option.title}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{option.description}</p>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <FormField label="Ad" htmlFor="create-name" required error={createErrors.name}>
+                <Input
+                  id="create-name"
+                  placeholder="Örn: İş Bankası Vadesiz"
+                  value={createForm.name}
+                  onChange={event => updateCreateField('name', event.target.value)}
+                  required
+                />
+              </FormField>
+
+              {createType === 'bank' && (
+                <>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <FormField label="Banka" required error={createErrors.bankId}>
+                      <Select value={createForm.bankId} onValueChange={value => updateCreateField('bankId', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Banka seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {referenceData?.banks.map(bank => (
+                            <SelectItem key={bank.id} value={String(bank.id)}>{bank.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormField>
+
+                    <FormField label="Hesap Türü" required error={createErrors.accountTypeId}>
+                      <Select value={createForm.accountTypeId} onValueChange={value => updateCreateField('accountTypeId', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Tür seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {referenceData?.accountTypes.map(type => (
+                            <SelectItem key={type.id} value={String(type.id)}>{type.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormField>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <FormField label="Para Birimi" required error={createErrors.currencyId}>
+                      <Select value={createForm.currencyId} onValueChange={value => updateCreateField('currencyId', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Para birimi seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {referenceData?.currencies.map(currency => (
+                            <SelectItem key={currency.id} value={String(currency.id)}>
+                              {currency.code} ({currency.symbol})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormField>
+
+                    <FormField label="Bakiye" htmlFor="create-balance">
+                      <Input
+                        id="create-balance"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={createForm.balance}
+                        onChange={event => updateCreateField('balance', event.target.value)}
+                        placeholder="0.00"
+                      />
+                    </FormField>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <FormField label="Hesap Numarası" htmlFor="create-account-number">
+                      <Input
+                        id="create-account-number"
+                        value={createForm.accountNumber}
+                        onChange={event => updateCreateField('accountNumber', event.target.value)}
+                        placeholder="İsteğe bağlı"
+                      />
+                    </FormField>
+
+                    <FormField label="IBAN (TR olmadan)" htmlFor="create-iban">
+                      <Input
+                        id="create-iban"
+                        value={createForm.iban}
+                        onChange={event => updateCreateField('iban', event.target.value)}
+                        placeholder="İsteğe bağlı"
+                      />
+                    </FormField>
+                  </div>
+                </>
+              )}
+
+              {createType === 'credit_card' && (
+                <>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <FormField label="Banka" required error={createErrors.bankId}>
+                      <Select value={createForm.bankId} onValueChange={value => updateCreateField('bankId', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Banka seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {referenceData?.banks.map(bank => (
+                            <SelectItem key={bank.id} value={String(bank.id)}>{bank.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormField>
+
+                    <FormField label="Para Birimi" required error={createErrors.currencyId}>
+                      <Select value={createForm.currencyId} onValueChange={value => updateCreateField('currencyId', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Para birimi seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {referenceData?.currencies.map(currency => (
+                            <SelectItem key={currency.id} value={String(currency.id)}>
+                              {currency.code} ({currency.symbol})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormField>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <FormField label="Limit Tutarı" htmlFor="create-limit" required error={createErrors.limitAmount}>
+                      <Input
+                        id="create-limit"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={createForm.limitAmount}
+                        onChange={event => updateCreateField('limitAmount', event.target.value)}
+                        placeholder="0.00"
+                      />
+                    </FormField>
+
+                    <FormField label="Son Ödeme Günü" htmlFor="create-due-day" required error={createErrors.dueDay}>
+                      <Input
+                        id="create-due-day"
+                        type="number"
+                        min="1"
+                        max="31"
+                        value={createForm.dueDay}
+                        onChange={event => updateCreateField('dueDay', event.target.value)}
+                        placeholder="1-31"
+                      />
+                    </FormField>
+                  </div>
+                </>
+              )}
+
+              {createType === 'gold' && (
+                <>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <FormField label="Altın Türü" required error={createErrors.goldTypeId}>
+                      <Select value={createForm.goldTypeId} onValueChange={value => updateCreateField('goldTypeId', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Altın türü seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {referenceData?.goldTypes.map(type => (
+                            <SelectItem key={type.id} value={String(type.id)}>{type.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormField>
+
+                    <FormField label="Ayar" required error={createErrors.goldPurityId}>
+                      <Select value={createForm.goldPurityId} onValueChange={value => updateCreateField('goldPurityId', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Ayar seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {referenceData?.goldPurities.map(purity => (
+                            <SelectItem key={purity.id} value={String(purity.id)}>{purity.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormField>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <FormField label="Ağırlık (gram)" htmlFor="create-weight" required error={createErrors.weight}>
+                      <Input
+                        id="create-weight"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={createForm.weight}
+                        onChange={event => updateCreateField('weight', event.target.value)}
+                        placeholder="0.00"
+                      />
+                    </FormField>
+
+                    <FormField label="Alış Fiyatı (TRY)" htmlFor="create-purchase-price" required error={createErrors.purchasePrice}>
+                      <Input
+                        id="create-purchase-price"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={createForm.purchasePrice}
+                        onChange={event => updateCreateField('purchasePrice', event.target.value)}
+                        placeholder="0.00"
+                      />
+                    </FormField>
+                  </div>
+                </>
+              )}
+
+              {referenceLoading && (
+                <div className="rounded-xl border border-border/60 bg-muted/30 p-3 text-sm text-muted-foreground">
+                  Referans veriler yükleniyor...
+                </div>
+              )}
+            </DrawerBody>
+
+            <DrawerFooter className="gap-2">
+              <Button type="button" variant="outline" onClick={closeCreateDrawer}>
+                İptal
+              </Button>
+              <Button type="submit" variant="glow" loading={createSubmitting} disabled={referenceLoading}>
+                Hesabı Kaydet
+              </Button>
+            </DrawerFooter>
+          </form>
+        </DrawerContent>
+      </Drawer>
     </AppPageShell>
   )
 }

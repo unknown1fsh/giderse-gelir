@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import {
@@ -251,6 +251,14 @@ function ActionButtons({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AccountsPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-[60vh] items-center justify-center"><Spinner /></div>}>
+      <AccountsContent />
+    </Suspense>
+  )
+}
+
+function AccountsContent() {
   const { isPremium, handlePremiumFeature } = usePremium()
   const { success: toastSuccess, error: toastError } = useToast()
   const searchParams = useSearchParams()

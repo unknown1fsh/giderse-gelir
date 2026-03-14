@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   AppPageShell,
@@ -77,6 +76,14 @@ function getDaysUntilDue(dueDay: number): number {
 }
 
 export default function CardsPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center py-20"><Spinner /></div>}>
+      <CardsContent />
+    </Suspense>
+  )
+}
+
+function CardsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { success: toastSuccess, error: toastError } = useToast()

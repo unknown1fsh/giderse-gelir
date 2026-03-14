@@ -687,7 +687,7 @@ export default function AccountsPage() {
                 icon={<CreditCard className="h-10 w-10" />}
                 action={
                   <Button asChild variant="outline" size="sm">
-                    <Link href="/accounts/new?type=credit_card">
+                    <Link href="/cards?openNew=1">
                       <Plus className="mr-2 h-4 w-4" /> Kart Ekle
                     </Link>
                   </Button>

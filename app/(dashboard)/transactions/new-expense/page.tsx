@@ -2,7 +2,20 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/mosaic'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/mosaic'
 import { EditNameModal } from '@/components/mosaic'
 import { ConfirmationDialog } from '@/components/mosaic'
 import { usePremium } from '@/lib/use-premium'
@@ -1089,14 +1102,13 @@ export default function NewExpensePage() {
       </Card>
 
       {/* Yeni Alıcı Modal */}
-      {showBeneficiaryModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md bg-slate-800 shadow-mosaic-lg">
-            <CardHeader>
-              <CardTitle>Yeni Alıcı Ekle</CardTitle>
-              <CardDescription>Havale/EFT yapacağınız kişi bilgilerini girin</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+      <Drawer open={showBeneficiaryModal} onOpenChange={setShowBeneficiaryModal}>
+        <DrawerContent className="border-white/10 bg-slate-950 sm:max-w-md">
+          <DrawerHeader>
+            <DrawerTitle>Yeni Alıcı Ekle</DrawerTitle>
+            <DrawerDescription>Havale/EFT yapacağınız kişi bilgilerini girin</DrawerDescription>
+          </DrawerHeader>
+          <DrawerBody className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Alıcı Adı *</label>
                 <input
@@ -1162,39 +1174,36 @@ export default function NewExpensePage() {
                   placeholder="05XX XXX XX XX"
                 />
               </div>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowBeneficiaryModal(false)}
-                  className="flex-1 min-h-[48px] px-4 py-3 border border-border rounded-md hover:bg-accent hover:text-accent-foreground"
-                >
-                  İptal
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    void handleAddBeneficiary()
-                  }}
-                  className="flex-1 min-h-[48px] px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Ekle
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+          </DrawerBody>
+          <DrawerFooter className="gap-2">
+            <button
+              type="button"
+              onClick={() => setShowBeneficiaryModal(false)}
+              className="flex-1 min-h-[48px] px-4 py-3 border border-border rounded-md hover:bg-accent hover:text-accent-foreground"
+            >
+              İptal
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                void handleAddBeneficiary()
+              }}
+              className="flex-1 min-h-[48px] px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Ekle
+            </button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       {/* Yeni E-Cüzdan Modal */}
-      {showEWalletModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md bg-slate-800 shadow-mosaic-lg">
-            <CardHeader>
-              <CardTitle>Yeni E-Cüzdan Ekle</CardTitle>
-              <CardDescription>PayPal, Papara, Ininal vb. e-cüzdan bilgileri</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+      <Drawer open={showEWalletModal} onOpenChange={setShowEWalletModal}>
+        <DrawerContent className="border-white/10 bg-slate-950 sm:max-w-md">
+          <DrawerHeader>
+            <DrawerTitle>Yeni E-Cüzdan Ekle</DrawerTitle>
+            <DrawerDescription>PayPal, Papara, Ininal vb. e-cüzdan bilgileri</DrawerDescription>
+          </DrawerHeader>
+          <DrawerBody className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">E-Cüzdan Adı *</label>
                 <input
@@ -1258,29 +1267,27 @@ export default function NewExpensePage() {
                   placeholder="0,00"
                 />
               </div>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowEWalletModal(false)}
-                  className="flex-1 min-h-[48px] px-4 py-3 border border-border rounded-md hover:bg-accent hover:text-accent-foreground"
-                >
-                  İptal
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    void handleAddEWallet()
-                  }}
-                  className="flex-1 min-h-[48px] px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Ekle
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+          </DrawerBody>
+          <DrawerFooter className="gap-2">
+            <button
+              type="button"
+              onClick={() => setShowEWalletModal(false)}
+              className="flex-1 min-h-[48px] px-4 py-3 border border-border rounded-md hover:bg-accent hover:text-accent-foreground"
+            >
+              İptal
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                void handleAddEWallet()
+              }}
+              className="flex-1 min-h-[48px] px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Ekle
+            </button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       {/* Edit Beneficiary Modal */}
       {editingBeneficiary && (

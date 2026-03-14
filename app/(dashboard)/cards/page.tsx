@@ -2,13 +2,27 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   AppPageShell,
   Button,
   Card,
   CardContent,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
   EmptyState,
+  FormField,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   StatCard,
   StatsGrid,
   Spinner,
@@ -41,6 +55,11 @@ interface CreditCardData {
   createdAt: string
 }
 
+interface ReferenceData {
+  banks: Array<{ id: number; name: string }>
+  currencies: Array<{ id: number; code: string; name: string }>
+}
+
 function getNextDueDate(dueDay: number): Date {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -59,6 +78,7 @@ function getDaysUntilDue(dueDay: number): number {
 
 export default function CardsPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { success: toastSuccess, error: toastError } = useToast()
   const [creditCards, setCreditCards] = useState<CreditCardData[]>([])
   const [loading, setLoading] = useState(true)
@@ -66,14 +86,140 @@ export default function CardsPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [selectedCard, setSelectedCard] = useState<CreditCardData | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
+  const [creating, setCreating] = useState(false)
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+  const [createForm, setCreateForm] = useState({
+    name: '',
+    bankId: '',
+    currencyId: '',
+    limitAmount: '',
+    dueDay: '1',
+  })
 
   useEffect(() => {
-    fetch('/api/cards', { credentials: 'include' })
-      .then(r => (r.ok ? r.json() : Promise.reject('Yüklenemedi')))
-      .then(data => setCreditCards(data))
-      .catch(() => setError('Kredi kartları yüklenirken hata oluştu'))
-      .finally(() => setLoading(false))
+    void fetchCards()
+    void fetchReferenceData()
   }, [])
+
+  useEffect(() => {
+    if (searchParams.get('openNew') === '1') {
+      openCreateDrawer()
+    }
+  }, [searchParams])
+
+  const fetchCards = async () => {
+    try {
+      const response = await fetch('/api/cards', { credentials: 'include' })
+      if (!response.ok) {
+        throw new Error('Yüklenemedi')
+      }
+
+      const data = (await response.json()) as CreditCardData[]
+      setCreditCards(data)
+      setError(null)
+    } catch {
+      setError('Kredi kartları yüklenirken hata oluştu')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchReferenceData = async () => {
+    try {
+      const response = await fetch('/api/reference-data', { credentials: 'include' })
+      if (!response.ok) {
+        return
+      }
+
+      const data = (await response.json()) as ReferenceData
+      setReferenceData(data)
+
+      const tryCurrency = data.currencies.find(currency => currency.code === 'TRY')
+      if (tryCurrency) {
+        setCreateForm(prev => ({ ...prev, currencyId: String(tryCurrency.id) }))
+      }
+    } catch {
+      // Referans veri alınamazsa form yine de manuel seçimle çalışır
+    }
+  }
+
+  const openCreateDrawer = () => {
+    setFormErrors({})
+    setCreateForm(prev => ({
+      ...prev,
+      name: '',
+      bankId: '',
+      limitAmount: '',
+      dueDay: '1',
+    }))
+    setDrawerOpen(true)
+  }
+
+  const validateCreateForm = () => {
+    const nextErrors: Record<string, string> = {}
+
+    if (!createForm.name.trim()) {
+      nextErrors.name = 'Kart adı zorunludur'
+    }
+    if (!createForm.bankId) {
+      nextErrors.bankId = 'Banka seçimi zorunludur'
+    }
+    if (!createForm.currencyId) {
+      nextErrors.currencyId = 'Para birimi seçimi zorunludur'
+    }
+
+    const limitAmount = Number(createForm.limitAmount)
+    if (!createForm.limitAmount || Number.isNaN(limitAmount) || limitAmount <= 0) {
+      nextErrors.limitAmount = 'Geçerli bir limit tutarı girin'
+    }
+
+    const dueDay = Number(createForm.dueDay)
+    if (!createForm.dueDay || Number.isNaN(dueDay) || dueDay < 1 || dueDay > 31) {
+      nextErrors.dueDay = 'Son ödeme günü 1-31 arasında olmalıdır'
+    }
+
+    setFormErrors(nextErrors)
+    return Object.keys(nextErrors).length === 0
+  }
+
+  const handleCreateCard = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!validateCreateForm()) {
+      return
+    }
+
+    setCreating(true)
+    try {
+      const response = await fetch('/api/accounts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          accountType: 'credit_card',
+          name: createForm.name.trim(),
+          bankId: Number(createForm.bankId),
+          currencyId: Number(createForm.currencyId),
+          limitAmount: Number(createForm.limitAmount),
+          dueDay: Number(createForm.dueDay),
+        }),
+      })
+
+      if (!response.ok) {
+        const err = (await response.json()) as { error?: string }
+        throw new Error(err.error || 'Kart eklenemedi')
+      }
+
+      toastSuccess('Başarılı', 'Kredi kartı eklendi')
+      setDrawerOpen(false)
+      await fetchCards()
+    } catch (err) {
+      toastError('Hata', err instanceof Error ? err.message : 'Kart eklenemedi')
+    } finally {
+      setCreating(false)
+    }
+  }
 
   const handleEditName = async (newName: string) => {
     if (!selectedCard) {return}
@@ -130,11 +276,9 @@ export default function CardsPage() {
         description: 'Limit kullanımını ve ödeme tarihlerini takip edin',
         onBack: () => router.back(),
         actions: (
-          <Button asChild variant="glow">
-            <Link href="/accounts/new?type=credit_card">
+          <Button variant="glow" onClick={openCreateDrawer}>
               <Plus className="mr-2 h-4 w-4" />
               Yeni Kart
-            </Link>
           </Button>
         ),
       }}
@@ -183,11 +327,9 @@ export default function CardsPage() {
           description="Kredi kartı limitlerini ve ödeme tarihlerini takip etmek için kart ekleyin."
           icon={<CreditCard className="h-10 w-10" />}
           action={
-            <Button asChild variant="glow">
-              <Link href="/accounts/new?type=credit_card">
+            <Button variant="glow" onClick={openCreateDrawer}>
                 <Plus className="mr-2 h-4 w-4" />
                 İlk Kartı Ekle
-              </Link>
             </Button>
           }
         />
@@ -356,6 +498,127 @@ export default function CardsPage() {
           cancelText="İptal"
         />
       )}
+
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <DrawerContent className="border-white/10 bg-slate-950 sm:max-w-xl">
+          <form onSubmit={e => void handleCreateCard(e)} className="flex h-full flex-col">
+            <DrawerHeader>
+              <DrawerTitle>Yeni Kart Ekle</DrawerTitle>
+              <DrawerDescription>
+                Kredi kartınızı ekleyin, limit kullanımını ve ödeme tarihlerini bu sayfadan yönetin.
+              </DrawerDescription>
+            </DrawerHeader>
+
+            <DrawerBody className="space-y-5">
+              <FormField label="Kart Adı" required error={formErrors.name}>
+                <Input
+                  value={createForm.name}
+                  onChange={event => {
+                    setCreateForm(prev => ({ ...prev, name: event.target.value }))
+                    if (formErrors.name) {
+                      setFormErrors(prev => ({ ...prev, name: '' }))
+                    }
+                  }}
+                  placeholder="Örn: Akbank Axess"
+                  variant={formErrors.name ? 'error' : 'default'}
+                />
+              </FormField>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <FormField label="Banka" required error={formErrors.bankId}>
+                  <Select
+                    value={createForm.bankId}
+                    onValueChange={value => {
+                      setCreateForm(prev => ({ ...prev, bankId: value }))
+                      if (formErrors.bankId) {
+                        setFormErrors(prev => ({ ...prev, bankId: '' }))
+                      }
+                    }}
+                  >
+                    <SelectTrigger className={formErrors.bankId ? 'border-destructive' : ''}>
+                      <SelectValue placeholder="Banka seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {referenceData?.banks.map(bank => (
+                        <SelectItem key={bank.id} value={String(bank.id)}>
+                          {bank.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
+
+                <FormField label="Para Birimi" required error={formErrors.currencyId}>
+                  <Select
+                    value={createForm.currencyId}
+                    onValueChange={value => {
+                      setCreateForm(prev => ({ ...prev, currencyId: value }))
+                      if (formErrors.currencyId) {
+                        setFormErrors(prev => ({ ...prev, currencyId: '' }))
+                      }
+                    }}
+                  >
+                    <SelectTrigger className={formErrors.currencyId ? 'border-destructive' : ''}>
+                      <SelectValue placeholder="Para birimi seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {referenceData?.currencies.map(currency => (
+                        <SelectItem key={currency.id} value={String(currency.id)}>
+                          {currency.code} - {currency.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <FormField label="Kart Limiti" required error={formErrors.limitAmount}>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={createForm.limitAmount}
+                    onChange={event => {
+                      setCreateForm(prev => ({ ...prev, limitAmount: event.target.value }))
+                      if (formErrors.limitAmount) {
+                        setFormErrors(prev => ({ ...prev, limitAmount: '' }))
+                      }
+                    }}
+                    placeholder="50000"
+                    variant={formErrors.limitAmount ? 'error' : 'default'}
+                  />
+                </FormField>
+
+                <FormField label="Son Ödeme Günü" required error={formErrors.dueDay}>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="31"
+                    value={createForm.dueDay}
+                    onChange={event => {
+                      setCreateForm(prev => ({ ...prev, dueDay: event.target.value }))
+                      if (formErrors.dueDay) {
+                        setFormErrors(prev => ({ ...prev, dueDay: '' }))
+                      }
+                    }}
+                    variant={formErrors.dueDay ? 'error' : 'default'}
+                  />
+                </FormField>
+              </div>
+            </DrawerBody>
+
+            <DrawerFooter className="gap-2">
+              <Button type="button" variant="outline" onClick={() => setDrawerOpen(false)}>
+                Vazgeç
+              </Button>
+              <Button type="submit" variant="glow" loading={creating} disabled={creating}>
+                Kartı Kaydet
+              </Button>
+            </DrawerFooter>
+          </form>
+        </DrawerContent>
+      </Drawer>
     </AppPageShell>
   )
 }

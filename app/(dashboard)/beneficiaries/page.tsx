@@ -1,8 +1,30 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, PageHeader } from '@/components/mosaic'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  FormField,
+  Input,
+  PageHeader,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
+} from '@/components/mosaic'
 import { Users, Edit, Trash2, Plus, Mail, Phone } from 'lucide-react'
 import { EditNameModal } from '@/components/mosaic'
 import { ConfirmationDialog } from '@/components/mosaic'
@@ -22,6 +44,10 @@ interface Beneficiary {
   createdAt: string
 }
 
+interface ReferenceData {
+  banks: Array<{ id: number; name: string }>
+}
+
 export default function BeneficiariesPage() {
   const { success: toastSuccess, error: toastError } = useToast()
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([])
@@ -30,10 +56,113 @@ export default function BeneficiariesPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
+  const [creating, setCreating] = useState(false)
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+  const [createForm, setCreateForm] = useState({
+    name: '',
+    bankId: '',
+    iban: '',
+    accountNo: '',
+    phoneNumber: '',
+    email: '',
+    description: '',
+  })
 
   useEffect(() => {
-    fetchBeneficiaries()
+    void fetchBeneficiaries()
+    void fetchReferenceData()
   }, [])
+
+  const fetchReferenceData = async () => {
+    try {
+      const response = await fetch('/api/reference-data', {
+        credentials: 'include',
+      })
+      if (!response.ok) {
+        return
+      }
+
+      const data = (await response.json()) as ReferenceData
+      setReferenceData(data)
+    } catch {
+      // Referans veri alınamazsa bankasız kayıt da yapılabilir
+    }
+  }
+
+  const openCreateDrawer = () => {
+    setFormErrors({})
+    setCreateForm({
+      name: '',
+      bankId: '',
+      iban: '',
+      accountNo: '',
+      phoneNumber: '',
+      email: '',
+      description: '',
+    })
+    setDrawerOpen(true)
+  }
+
+  const validateCreateForm = () => {
+    const nextErrors: Record<string, string> = {}
+
+    if (!createForm.name.trim()) {
+      nextErrors.name = 'Alıcı adı zorunludur'
+    }
+
+    if (
+      !createForm.iban.trim() &&
+      !createForm.accountNo.trim() &&
+      !createForm.phoneNumber.trim() &&
+      !createForm.email.trim()
+    ) {
+      nextErrors.contact =
+        'En az bir iletişim bilgisi girin (IBAN, hesap no, telefon veya e-posta)'
+    }
+
+    setFormErrors(nextErrors)
+    return Object.keys(nextErrors).length === 0
+  }
+
+  const handleCreateBeneficiary = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!validateCreateForm()) {
+      return
+    }
+
+    setCreating(true)
+    try {
+      const response = await fetch('/api/beneficiaries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          name: createForm.name.trim(),
+          iban: createForm.iban.trim() || null,
+          accountNo: createForm.accountNo.trim() || null,
+          bankId: createForm.bankId ? Number(createForm.bankId) : null,
+          phoneNumber: createForm.phoneNumber.trim() || null,
+          email: createForm.email.trim() || null,
+          description: createForm.description.trim() || null,
+        }),
+      })
+
+      if (!response.ok) {
+        const payload = (await response.json()) as { error?: string }
+        throw new Error(payload.error || 'Alıcı eklenemedi')
+      }
+
+      toastSuccess('Başarılı', 'Alıcı başarıyla eklendi')
+      setDrawerOpen(false)
+      await fetchBeneficiaries()
+    } catch (err) {
+      toastError('Hata', err instanceof Error ? err.message : 'Alıcı eklenemedi')
+    } finally {
+      setCreating(false)
+    }
+  }
 
   const fetchBeneficiaries = async () => {
     try {
@@ -118,13 +247,10 @@ export default function BeneficiariesPage() {
         description="Havale ve EFT işlemleriniz için kayıtlı kişileri yönetin."
         breadcrumbs={[{ label: 'Alıcılar' }]}
         actions={(
-          <Link
-            href="/beneficiaries/new"
-            className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
+          <Button onClick={openCreateDrawer}>
             <Plus className="h-4 w-4" />
             Yeni Alıcı
-          </Link>
+          </Button>
         )}
       />
 
@@ -259,6 +385,130 @@ export default function BeneficiariesPage() {
           cancelText="İptal"
         />
       )}
+
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <DrawerContent className="border-white/10 bg-slate-950 sm:max-w-xl">
+          <form onSubmit={e => void handleCreateBeneficiary(e)} className="flex h-full flex-col">
+            <DrawerHeader>
+              <DrawerTitle>Yeni Alıcı Ekle</DrawerTitle>
+              <DrawerDescription>
+                Havale ve EFT işlemleri için alıcı kaydını bu sayfadan ayrılmadan oluşturun.
+              </DrawerDescription>
+            </DrawerHeader>
+
+            <DrawerBody className="space-y-5">
+              <FormField label="Alıcı Adı" required error={formErrors.name}>
+                <Input
+                  value={createForm.name}
+                  onChange={event => {
+                    setCreateForm(prev => ({ ...prev, name: event.target.value }))
+                    if (formErrors.name) {
+                      setFormErrors(prev => ({ ...prev, name: '' }))
+                    }
+                  }}
+                  placeholder="Örn: Ahmet Yılmaz"
+                  variant={formErrors.name ? 'error' : 'default'}
+                />
+              </FormField>
+
+              <FormField label="Banka (opsiyonel)">
+                <Select
+                  value={createForm.bankId}
+                  onValueChange={value => setCreateForm(prev => ({ ...prev, bankId: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Banka seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {referenceData?.banks.map(bank => (
+                      <SelectItem key={bank.id} value={String(bank.id)}>
+                        {bank.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormField>
+
+              {formErrors.contact && (
+                <p className="text-sm font-medium text-destructive">{formErrors.contact}</p>
+              )}
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <FormField label="IBAN">
+                  <Input
+                    value={createForm.iban}
+                    onChange={event => {
+                      setCreateForm(prev => ({ ...prev, iban: event.target.value }))
+                      if (formErrors.contact) {
+                        setFormErrors(prev => ({ ...prev, contact: '' }))
+                      }
+                    }}
+                    placeholder="TR00..."
+                  />
+                </FormField>
+
+                <FormField label="Hesap Numarası">
+                  <Input
+                    value={createForm.accountNo}
+                    onChange={event => {
+                      setCreateForm(prev => ({ ...prev, accountNo: event.target.value }))
+                      if (formErrors.contact) {
+                        setFormErrors(prev => ({ ...prev, contact: '' }))
+                      }
+                    }}
+                    placeholder="1234567890"
+                  />
+                </FormField>
+
+                <FormField label="Telefon">
+                  <Input
+                    value={createForm.phoneNumber}
+                    onChange={event => {
+                      setCreateForm(prev => ({ ...prev, phoneNumber: event.target.value }))
+                      if (formErrors.contact) {
+                        setFormErrors(prev => ({ ...prev, contact: '' }))
+                      }
+                    }}
+                    placeholder="05XX XXX XX XX"
+                  />
+                </FormField>
+
+                <FormField label="E-posta">
+                  <Input
+                    type="email"
+                    value={createForm.email}
+                    onChange={event => {
+                      setCreateForm(prev => ({ ...prev, email: event.target.value }))
+                      if (formErrors.contact) {
+                        setFormErrors(prev => ({ ...prev, contact: '' }))
+                      }
+                    }}
+                    placeholder="ornek@eposta.com"
+                  />
+                </FormField>
+              </div>
+
+              <FormField label="Not (opsiyonel)">
+                <Textarea
+                  value={createForm.description}
+                  onChange={event => setCreateForm(prev => ({ ...prev, description: event.target.value }))}
+                  rows={3}
+                  placeholder="Alıcı hakkında ek bilgi"
+                />
+              </FormField>
+            </DrawerBody>
+
+            <DrawerFooter className="gap-2">
+              <Button type="button" variant="outline" onClick={() => setDrawerOpen(false)}>
+                Vazgeç
+              </Button>
+              <Button type="submit" variant="glow" loading={creating} disabled={creating}>
+                Alıcıyı Kaydet
+              </Button>
+            </DrawerFooter>
+          </form>
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }

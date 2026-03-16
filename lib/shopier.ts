@@ -94,19 +94,19 @@ export async function verifyOrderViaApi(orderId: string): Promise<boolean> {
 
 /**
  * Shopier ödeme tutarından plan ID'sini belirler.
- * Premium: ₺149, Aile: ₺249
+ * Pro (premium): ₺99, Premium (family): ₺199
  */
 export function determinePlanFromAmount(amount: number): 'premium' | 'family' | null {
-  if (Math.abs(amount - 149) < 5) { return 'premium' }
-  if (Math.abs(amount - 249) < 5) { return 'family' }
+  if (Math.abs(amount - 99) < 5) { return 'premium' }
+  if (Math.abs(amount - 199) < 5) { return 'family' }
   return null
 }
 
 /**
  * Shopier ürün ID'sinden plan ID'sini belirler.
  * Shopier ürün linkleri:
- *   Premium: 45196765
- *   Aile:    45196957
+ *   Pro:      45196765
+ *   Premium: 45196957
  */
 export function determinePlanFromProductId(productId: string): 'premium' | 'family' | null {
   if (productId === '45196765') { return 'premium' }

@@ -34,8 +34,8 @@ export interface PlanConfig extends PlanPricing {
 // Plan fiyatları (TRY, aylık)
 export const PLAN_PRICES: Record<PlanId, number> = {
   [PLAN_IDS.FREE]: 0,
-  [PLAN_IDS.PREMIUM]: 149,
-  [PLAN_IDS.FAMILY]: 249,
+  [PLAN_IDS.PREMIUM]: 99,
+  [PLAN_IDS.FAMILY]: 199,
 }
 
 // Plan limitleri
@@ -52,7 +52,7 @@ export const PLAN_LIMITS: Record<
   }
 > = {
   [PLAN_IDS.FREE]: {
-    transactions: 100,
+    transactions: 30,
     accounts: 3,
     creditCards: 2,
     ewallets: 2,
@@ -94,7 +94,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       {
         name: 'Temel Özellikler',
         features: [
-          'Aylık 100 işlem kaydı',
+          'Aylık 30 işlem kaydı',
           '3 banka hesabı',
           '2 kredi kartı, 2 e-cüzdan',
           '3 tasarruf hedefi',
@@ -105,7 +105,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       },
     ],
     limitations: [
-      'Sınırlı işlem sayısı (aylık 100)',
+      'Sınırlı işlem sayısı (aylık 30)',
       'AI analiz yok',
       'PDF/Excel export yok',
       'Yatırım takibi yok',
@@ -116,11 +116,11 @@ export const PLANS: Record<PlanId, PlanConfig> = {
 
   [PLAN_IDS.PREMIUM]: {
     id: PLAN_IDS.PREMIUM,
-    name: 'Premium',
+    name: 'Pro',
     price: PLAN_PRICES.premium,
     currency: 'TRY',
     period: 'month',
-    description: 'Paranı tam kontrol altına almak isteyenler için',
+    description: 'Sınırsız takip ve AI finans koçu ile büyümek isteyenler için',
     trialDays: 30,
     badge: 'En Popüler',
     categories: [
@@ -181,16 +181,16 @@ export const PLANS: Record<PlanId, PlanConfig> = {
 
   [PLAN_IDS.FAMILY]: {
     id: PLAN_IDS.FAMILY,
-    name: 'Aile',
+    name: 'Premium',
     price: PLAN_PRICES.family,
     currency: 'TRY',
     period: 'month',
-    description: 'Aile bütçesini birlikte yönetenler için',
+    description: 'Gelişmiş analiz ve yatırım odağı isteyen ileri seviye kullanıcılar için',
     trialDays: 30,
-    badge: 'Aile Paketi',
+    badge: 'İleri Seviye',
     categories: [
       {
-        name: 'Premium\'ın Tamamı',
+        name: 'Pro\'nun Tamamı',
         features: [
           'Sınırsız işlem, hesap, kart',
           'AI analiz & tahminler',
@@ -200,13 +200,13 @@ export const PLANS: Record<PlanId, PlanConfig> = {
         ],
       },
       {
-        name: 'Aile Özellikleri',
+        name: 'Premium Plus Analizler',
         features: [
-          '5 kişiye kadar paylaşım',
-          'Ortak aile bütçesi',
-          'Üye bazlı harcama takibi',
-          'Aile bazlı hedefler',
-          'Ortak dönem yönetimi',
+          'Kredi kartı ekstre analizi',
+          'Gelişmiş AI finansal içgörüler',
+          'Borç azaltma stratejisi önerileri',
+          'Yatırım odaklı öneri setleri',
+          'Öncelikli yeni özellik erişimi',
         ],
       },
       {

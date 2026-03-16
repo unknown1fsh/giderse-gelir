@@ -17,7 +17,7 @@ const PLANS = [
     cta: 'Ücretsiz başla',
     shopierKey: null as ShopierPlanKey | null,
     features: [
-      'Aylık 100 işlem',
+      'Aylık 30 işlem',
       '3 hesap & 2 kart',
       'Temel bütçe takibi',
       'Dönem yönetimi',
@@ -26,11 +26,11 @@ const PLANS = [
     ],
   },
   {
-    name: 'Premium',
-    price: 149,
+    name: 'Pro',
+    price: 99,
     badge: 'En Popüler',
     highlight: true,
-    desc: 'Finansal gücünü tam anlamıyla kullan.',
+    desc: 'Sınırsız işlem ve AI finans koçu ile bütçeni optimize et.',
     cta: 'Satın Al',
     shopierKey: 'premium' as const,
     features: [
@@ -44,33 +44,33 @@ const PLANS = [
     ],
   },
   {
-    name: 'Aile',
-    price: 249,
+    name: 'Premium',
+    price: 199,
     badge: null,
     highlight: false,
-    desc: 'Ailenizin finansını birlikte yönetin.',
+    desc: 'Gelişmiş analizler, borç planı ve yatırım içgörüleri.',
     cta: 'Satın Al',
     shopierKey: 'family' as const,
     features: [
-      "Premium'ın tamamı",
-      '5 kişilik paylaşım',
-      'Ortak aile bütçesi',
-      'Her üye için ayrı profil',
-      'Öncelikli telefon destek',
+      "Pro planın tüm özellikleri",
+      'Kredi kartı ekstre analizi',
+      'AI borç kapatma planı (Snowball)',
+      'AI yatırım öneri senaryoları',
+      'Öncelikli premium destek',
     ],
   },
 ]
 
 const COMPARE: { label: string; free: string | boolean; premium: string | boolean; family: string | boolean }[] = [
-  { label: 'Aylık işlem limiti',   free: '100',              premium: 'Sınırsız',          family: 'Sınırsız'           },
+  { label: 'Aylık işlem limiti',   free: '30',              premium: 'Sınırsız',          family: 'Sınırsız'           },
   { label: 'Hesap & kart',         free: '3 hesap / 2 kart', premium: 'Sınırsız',          family: 'Sınırsız'           },
   { label: 'Veri geçmişi',         free: '3 ay',             premium: 'Tümü',              family: 'Tümü'               },
   { label: 'AI finansal asistan',  free: false,              premium: true,                family: true                 },
-  { label: 'AI analiz raporu',     free: false,              premium: 'Ayda 4',            family: 'Ayda 4 / kişi'      },
+  { label: 'AI analiz raporu',     free: false,              premium: 'Ayda 4',            family: 'Ayda 8'             },
   { label: 'Yatırım takibi',       free: false,              premium: true,                family: true                 },
   { label: 'PDF & Excel export',   free: false,              premium: true,                family: true                 },
-  { label: 'Aile paylaşımı',       free: false,              premium: false,               family: '5 kişi'             },
-  { label: 'Destek',               free: 'E-posta',          premium: '7/24 öncelikli',    family: 'Telefon + 7/24'     },
+  { label: 'Kredi kartı analiz',   free: false,              premium: false,               family: true                 },
+  { label: 'Destek',               free: 'E-posta',          premium: '7/24 öncelikli',    family: 'Öncelikli + canlı destek' },
 ]
 
 export default function PricingPage() {
@@ -188,6 +188,12 @@ export default function PricingPage() {
         </div>
       </div>
 
+      <div className="relative z-10 mx-auto mt-6 max-w-5xl px-5 sm:px-8">
+        <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.06] px-5 py-4 text-xs text-cyan-100">
+          <strong>Lifetime (₺999) erken kullanıcı paketi</strong> için destek ekibine ulaşabilirsin. Sınırlı kontenjanla manuel aktivasyon yapıyoruz.
+        </div>
+      </div>
+
       {/* Comparison table */}
       <div className="relative z-10 mx-auto max-w-5xl px-5 py-20 sm:px-8">
         <h2 className="mb-8 text-center text-base font-bold text-white">Plan karşılaştırması</h2>
@@ -197,8 +203,8 @@ export default function PricingPage() {
               <tr className="border-b border-white/[0.06]">
                 <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-slate-600">Özellik</th>
                 <th className="px-2 sm:px-4 py-3 sm:py-4 text-center text-xs font-medium text-slate-500">Başlangıç</th>
-                <th className="px-2 sm:px-4 py-3 sm:py-4 text-center text-xs font-bold text-violet-400">Premium</th>
-                <th className="px-2 sm:px-4 py-3 sm:py-4 text-center text-xs font-medium text-slate-500">Aile</th>
+                <th className="px-2 sm:px-4 py-3 sm:py-4 text-center text-xs font-bold text-violet-400">Pro</th>
+                <th className="px-2 sm:px-4 py-3 sm:py-4 text-center text-xs font-medium text-slate-500">Premium</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.03]">
@@ -245,7 +251,7 @@ export default function PricingPage() {
             <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">mükemmel zaman.</span>
           </h2>
           <p className="mb-8 text-sm text-slate-500">
-            İlk 30 gün Premium tüm özellikleriyle ücretsiz. Taahhüt yok.
+            İlk 30 gün Pro/Premium özelliklerini ücretsiz dene. Taahhüt yok.
           </p>
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <button onClick={() => router.push('/auth/register')}

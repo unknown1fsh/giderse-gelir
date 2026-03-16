@@ -17,31 +17,31 @@ const PLANS_UI = [
     borderClass: 'border-white/10',
     buttonClass: 'bg-white/10 text-white hover:bg-white/20',
     description: 'Kişisel finans takibine başlamak için',
-    features: ['Aylık 100 işlem', '3 banka hesabı', '2 kredi kartı & 2 e-cüzdan', '3 tasarruf hedefi', 'Temel bütçe takibi', 'Dönem yönetimi'],
+    features: ['Aylık 30 işlem', '3 banka hesabı', '2 kredi kartı & 2 e-cüzdan', '3 tasarruf hedefi', 'Temel bütçe takibi', 'Dönem yönetimi'],
     missing: ['AI analiz & tahminler', 'Yatırım takibi', 'PDF/Excel export', 'Otomatik ödeme takibi'],
   },
   {
-    id: 'premium', name: 'Premium', price: 149, badge: 'En Popüler',
+    id: 'premium', name: 'Pro', price: 99, badge: 'En Popüler',
     iconGradient: 'from-purple-500 to-pink-500',
     borderClass: 'border-purple-400/50',
     buttonClass: 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white',
-    description: 'Paranı tam kontrol altına almak isteyenler için',
+    description: 'Sınırsız takip ve AI finans koçu ile büyümek isteyenler için',
     features: ['Sınırsız işlem, hesap, kart', 'AI finansal asistan', 'Harcama & gelir tahminleri', 'Yatırım & portföy takibi', 'Otomatik ödeme takibi', 'PDF & Excel export', 'Nakit akış & trend analizleri', '7/24 öncelikli destek'],
     missing: [],
   },
   {
-    id: 'family', name: 'Aile', price: 249, badge: 'Aile Paketi',
+    id: 'family', name: 'Premium', price: 199, badge: 'İleri Seviye',
     iconGradient: 'from-cyan-500 to-blue-500',
     borderClass: 'border-cyan-400/40',
     buttonClass: 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white',
-    description: 'Aile bütçesini birlikte yönetenler için',
-    features: ["Premium'ın tüm özellikleri", '5 kişiye kadar paylaşım', 'Ortak aile bütçesi', 'Üye bazlı harcama takibi', 'Aile hedefleri', 'Telefon destek (hafta içi)', 'Hesap yöneticisi ataması'],
+    description: 'Kredi kartı analizi, borç planı ve yatırım içgörüsü isteyenler için',
+    features: ["Pro planın tüm özellikleri", 'Kredi kartı ekstre analizi', 'AI borç kapatma planı', 'Abonelik tespit önerileri', 'Yatırım öneri senaryoları', 'Öncelikli canlı destek', 'Yeni özelliklere erken erişim'],
     missing: [],
   },
 ]
 
 const COMPARE = [
-  { label: 'Aylık işlem',           free: '100',       premium: 'Sınırsız', family: 'Sınırsız' },
+  { label: 'Aylık işlem',           free: '30',       premium: 'Sınırsız', family: 'Sınırsız' },
   { label: 'Hesap / Kart sayısı',   free: '3 / 2',     premium: 'Sınırsız', family: 'Sınırsız' },
   { label: 'Tasarruf hedefi',       free: '3 hedef',   premium: 'Sınırsız', family: 'Sınırsız' },
   { label: 'AI analiz',             free: false,        premium: true,        family: true },
@@ -49,9 +49,9 @@ const COMPARE = [
   { label: 'Yatırım takibi',        free: false,        premium: true,        family: true },
   { label: 'Otomatik ödeme takibi', free: false,        premium: true,        family: true },
   { label: 'PDF / Excel export',    free: false,        premium: true,        family: true },
-  { label: 'Aile paylaşımı',        free: false,        premium: false,       family: '5 kişi' },
-  { label: 'Ortak aile bütçesi',    free: false,        premium: false,       family: true },
-  { label: 'Telefon destek',        free: false,        premium: false,       family: true },
+  { label: 'Kredi kartı analiz',    free: false,        premium: false,       family: true },
+  { label: 'AI borç kapatma planı',    free: false,        premium: false,       family: true },
+  { label: 'Yatırım önerileri',     free: false,        premium: false,       family: true },
 ]
 
 const SPOTLIGHTS = [
@@ -60,7 +60,7 @@ const SPOTLIGHTS = [
   { icon: Target,     title: 'Akıllı Hedef Takibi',    desc: 'Tasarruf hedeflerini belirle, ilerlemeyi izle. AI hangi kategoriden kısarsan daha hızlı ulaşırsın hesaplar.', gradient: 'from-orange-500 to-red-500' },
   { icon: TrendingUp, title: 'Yatırım & Portföy',      desc: 'Hisse, kripto, altın ve yatırım fonu portföyünü tek ekranda gör. Canlı fiyat güncellemesi.', gradient: 'from-green-500 to-emerald-500' },
   { icon: Zap,        title: 'Otomatik Ödeme Takibi',  desc: 'Kira, fatura, Netflix, abonelik — tüm tekrarlayan ödemelerini kaçırmadan takip et.', gradient: 'from-indigo-500 to-purple-500' },
-  { icon: Users,      title: 'Aile Bütçesi',           desc: 'Aile üyeleriyle ortak bütçe ve hedef yönetimi. Kim ne harcıyor, aile genelinde tablo anlık güncellenir.', gradient: 'from-pink-500 to-rose-500' },
+  { icon: Users,      title: 'Borç & Yatırım Motoru',           desc: 'Borçları snowball yaklaşımıyla sıralar, tasarruf alanlarını çıkarır ve yatırım potansiyelini görünür kılar.', gradient: 'from-pink-500 to-rose-500' },
 ]
 
 function CellValue({ value }: { value: string | boolean }) {
@@ -99,7 +99,7 @@ export default function PremiumPage() {
     if (planId === currentPlan) {return 'Mevcut Planın'}
     if (planId === 'free') {return 'Ücretsize Geç'}
     if (planId === 'premium') {return '30 Gün Ücretsiz Dene'}
-    if (planId === 'family') {return 'Aile Paketine Geç'}
+    if (planId === 'family') {return "Premium'a Geç"}
     return 'Seç'
   }
 
@@ -109,14 +109,18 @@ export default function PremiumPage() {
       <div className="mx-auto max-w-5xl px-4 pb-12 pt-16 text-center">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-1.5 text-sm font-medium text-amber-300">
           <Gift className="h-4 w-4" />
+<<<<<<< HEAD
           Nisan ayı sonuna kadar: İlk 1 Ay Premium ücretsiz!
+=======
+          Yeni üyelere 30 gün Pro/Premium ücretsiz
+>>>>>>> 228e1dc0a76619c6cdcdc060750ae48114bdf29c
         </div>
         <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
           Finansal özgürlüğün<br />
           <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">doğru planı</span> seç
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-base text-slate-400">
-          Taahhüt yok. İstediğin zaman iptal et. Premium planını ilk 30 gün ücretsiz dene.
+          Taahhüt yok. İstediğin zaman iptal et. Pro veya Premium planını ilk 30 gün ücretsiz dene.
         </p>
       </div>
 
@@ -192,7 +196,7 @@ export default function PremiumPage() {
 
       {/* Spotlights */}
       <div className="mx-auto max-w-5xl px-4 pb-20">
-        <h2 className="mb-8 text-center text-2xl font-bold text-white">Premium ile neler kazanırsın?</h2>
+        <h2 className="mb-8 text-center text-2xl font-bold text-white">Pro/Premium ile neler kazanırsın?</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {SPOTLIGHTS.map(item => {
             const Icon = item.icon
@@ -218,8 +222,8 @@ export default function PremiumPage() {
               <tr className="border-b border-white/10 bg-white/5">
                 <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-widest text-slate-500">Özellik</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-400">Başlangıç</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-purple-300">Premium</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-cyan-300">Aile</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-purple-300">Pro</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-cyan-300">Premium</th>
               </tr>
             </thead>
             <tbody>
@@ -245,7 +249,11 @@ export default function PremiumPage() {
           </div>
           <h2 className="mt-2 text-2xl font-extrabold text-white">Bugün başla, ilk 1 ay bedava</h2>
           <p className="mx-auto mt-3 max-w-sm text-sm text-slate-400">
+<<<<<<< HEAD
             Kredi kartı gerekmez. İlk 1 ay tam Premium erişim. Beğenmezsen tek tıkla iptal.
+=======
+            Kredi kartı gerekmez. İlk 30 gün tam Pro erişim. Beğenmezsen tek tıkla iptal.
+>>>>>>> 228e1dc0a76619c6cdcdc060750ae48114bdf29c
           </p>
           <button
             onClick={() => handleUpgrade('premium')}
@@ -253,13 +261,13 @@ export default function PremiumPage() {
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 text-sm font-semibold text-white transition hover:from-purple-700 hover:to-pink-700 disabled:opacity-60"
           >
             {isCurrentPremium ? (
-              <><BadgeCheck className="h-4 w-4" /> Premium aktif</>
+              <><BadgeCheck className="h-4 w-4" /> Pro aktif</>
             ) : (
-              <>Premium ücretsiz dene <ArrowRight className="h-4 w-4" /></>
+              <>Pro ücretsiz dene <ArrowRight className="h-4 w-4" /></>
             )}
           </button>
           {isCurrentFamily && (
-            <p className="mt-3 text-xs text-cyan-300">Aile paketi aktif — tüm Premium özellikler dahil.</p>
+            <p className="mt-3 text-xs text-cyan-300">Premium plan aktif — tüm Pro özellikler dahil.</p>
           )}
         </div>
       </div>

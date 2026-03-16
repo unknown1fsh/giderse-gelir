@@ -53,15 +53,15 @@ export default function PremiumUpgradeModal({
 
   const getFeatureDescription = () => {
     if (limitInfo?.type === 'transaction') {
-      return `Aylık ${limitInfo.limit} işlem limitine ulaştınız. Premium ile sınırsız işlem yapabilirsiniz.`
+      return `Aylık ${limitInfo.limit} işlem limitine ulaştınız. Pro ile sınırsız işlem yapabilirsiniz.`
     }
     if (limitInfo?.type === 'analysis') {
-      return `${featureName} Premium üyelik gerektirir. Gelişmiş analizlere erişim kazanın.`
+      return `${featureName} Pro üyelik gerektirir. Gelişmiş analizlere erişim kazanın.`
     }
     if (limitInfo?.type === 'export') {
-      return `Veri dışa aktarma özelliği Premium üyelik gerektirir. Raporlarınızı Excel ve PDF formatında indirin.`
+      return `Veri dışa aktarma özelliği Pro üyelik gerektirir. Raporlarınızı Excel ve PDF formatında indirin.`
     }
-    return `${featureName} Premium üyelik gerektirir.`
+    return `${featureName} Pro üyelik gerektirir.`
   }
 
   const FeatureIcon = getFeatureIcon()
@@ -92,7 +92,7 @@ export default function PremiumUpgradeModal({
               <FeatureIcon className="h-7 w-7 text-white" />
             </div>
             <DialogTitle className="text-xl font-bold text-white">
-              Premium&apos;a Geç
+              Pro&apos;ya Geç
             </DialogTitle>
             <DialogDescription className="mt-2 text-sm text-slate-400">
               {getFeatureDescription()}
@@ -117,13 +117,13 @@ export default function PremiumUpgradeModal({
 
           {/* Price */}
           <div className="mb-4 rounded-2xl border border-purple-400/20 bg-gradient-to-br from-purple-900/40 to-pink-900/30 p-4 text-center">
-            <p className="text-xs uppercase tracking-widest text-slate-500">Premium Plan</p>
+            <p className="text-xs uppercase tracking-widest text-slate-500">Pro Plan</p>
             <div className="mt-1 flex items-end justify-center gap-1">
-              <span className="text-3xl font-extrabold text-white">₺149</span>
+              <span className="text-3xl font-extrabold text-white">₺99</span>
               <span className="mb-1 text-sm text-slate-400">/ay</span>
             </div>
             <p className="mt-2 text-xs text-slate-500">
-              Veya <a href={SHOPIER_LINKS.family} target="_blank" rel="noopener noreferrer" className="text-cyan-300 font-medium hover:underline">Aile Paketi ₺249/ay</a> — 5 kişiye kadar paylaşım
+              Veya <a href={SHOPIER_LINKS.family} target="_blank" rel="noopener noreferrer" className="text-cyan-300 font-medium hover:underline">Premium Paketi ₺199/ay</a> — gelişmiş analizler ve yatırım içgörüleri
             </p>
           </div>
 

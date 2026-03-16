@@ -110,7 +110,7 @@ export default function PricingPage() {
       {/* Hero */}
       <div className="relative z-10 mx-auto max-w-7xl px-5 pb-16 pt-20 text-center sm:px-8 sm:pt-28">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-400/15 bg-amber-400/8 px-3.5 py-1.5 text-xs font-medium text-amber-300">
-          <Gift className="h-3.5 w-3.5" /> İlk 30 gün her plan ücretsiz
+          <Gift className="h-3.5 w-3.5" /> Nisan ayı sonuna kadar 1 Ay ücretsiz Premium!
         </div>
         <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
           Şeffaf,<br />

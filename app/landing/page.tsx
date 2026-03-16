@@ -156,7 +156,7 @@ export default function LandingPage() {
       {!promoDismissed && (
         <div className="relative z-50 flex items-center justify-center gap-3 bg-gradient-to-r from-amber-500 via-orange-400 to-amber-500 px-4 py-2 text-xs font-medium text-black sm:text-sm">
           <Gift className="h-3.5 w-3.5 shrink-0" />
-          <span><strong>Yeni üyelere özel:</strong> İlk 30 gün Premium tamamen ücretsiz.</span>
+          <span><strong>Nisan ayı sonuna kadar:</strong> Yeni üyelere ilk 1 Ay Premium tamamen ücretsiz!</span>
           <button onClick={() => router.push('/auth/register')} className="inline-flex items-center gap-1 rounded-full bg-black/15 px-2.5 py-0.5 text-xs font-bold hover:bg-black/25 transition">
             Başla <ArrowRight className="h-3 w-3" />
           </button>
@@ -225,7 +225,7 @@ export default function LandingPage() {
             <div className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-1.5 text-xs text-slate-600 lg:justify-start">
               <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500/80" />Anonim kayıt</span>
               <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500/80" />Kredi kartı gerekmez</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500/80" />30 gün ücretsiz Premium</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500/80" />1 Ay ücretsiz Premium (Nisan sonuna kadar)</span>
             </div>
           </div>
 

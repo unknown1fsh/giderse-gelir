@@ -128,7 +128,7 @@ export default function RegisterPage() {
           {/* Promo badge */}
           <div className="flex items-center gap-2 rounded-xl border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm text-amber-300">
             <Gift className="h-4 w-4 shrink-0" />
-            <span><strong>Yeni üyelere özel:</strong> İlk 30 gün Premium ücretsiz.</span>
+            <span><strong>Nisan ayı sonuna kadar:</strong> Yeni üyelere özel 1 Ay Premium ücretsiz!</span>
           </div>
 
           {/* Heading */}

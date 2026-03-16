@@ -102,7 +102,7 @@ export default function PremiumUpgradeModal({
           {/* Trial badge */}
           <div className="mb-5 flex items-center gap-2 rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-300">
             <Gift className="h-4 w-4 shrink-0" />
-            <span><strong>İlk 30 gün ücretsiz.</strong> Taahhüt yok, istediğin zaman iptal.</span>
+            <span><strong>Nisan ayı sonuna kadar ilk 1 ay ücretsiz!</strong> Taahhüt yok, istediğin zaman iptal.</span>
           </div>
 
           {/* Highlights */}

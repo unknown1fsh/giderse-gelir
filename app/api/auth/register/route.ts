@@ -111,16 +111,14 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     }
   }
 
-  const successMessage = 'İlginize teşekkür ederiz. Kaydınız admin onayından sonra aktif olacaktır. Genelde en fazla 1 saat sürmektedir.'
+  const successMessage = 'Kayıt işleminiz başarılı! Lütfen e-posta adresinize gönderilen bağlantıya tıklayarak hesabınızı aktifleştirin.'
 
   return NextResponse.json(
     {
       success: true,
-      // user: loginResult.user, // Otomatik giriş yok
-      // session: loginResult.session, // Otomatik giriş yok
       message: successMessage,
-      emailVerificationSent: false, // Email onayı şu an öncelikli değil, admin onayı gerekli
-      requiresApproval: true,
+      emailVerificationSent: true,
+      requiresApproval: false,
     },
     { status: 201 }
   )

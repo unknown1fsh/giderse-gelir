@@ -39,11 +39,12 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     )
   }
 
-  // Email'i doğrula
+  // Email'i doğrula ve hesabı aktifleştir
   await prisma.user.update({
     where: { id: user.id },
     data: {
       emailVerified: true,
+      isActive: true,
       emailVerificationToken: null,
       emailVerificationExpiry: null,
     },
@@ -86,11 +87,12 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
     return NextResponse.redirect(new URL('/auth/verify-email?error=already-verified', request.url))
   }
 
-  // Email'i doğrula
+  // Email'i doğrula ve hesabı aktifleştir
   await prisma.user.update({
     where: { id: user.id },
     data: {
       emailVerified: true,
+      isActive: true,
       emailVerificationToken: null,
       emailVerificationExpiry: null,
     },

@@ -109,11 +109,7 @@ export default function PremiumPage() {
       <div className="mx-auto max-w-5xl px-4 pb-12 pt-16 text-center">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-1.5 text-sm font-medium text-amber-300">
           <Gift className="h-4 w-4" />
-<<<<<<< HEAD
-          Nisan ayı sonuna kadar: İlk 1 Ay Premium ücretsiz!
-=======
-          Yeni üyelere 30 gün Pro/Premium ücretsiz
->>>>>>> 228e1dc0a76619c6cdcdc060750ae48114bdf29c
+          Nisan ayı sonuna kadar: İlk 1 Ay Pro/Premium ücretsiz!
         </div>
         <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
           Finansal özgürlüğün<br />
@@ -249,11 +245,7 @@ export default function PremiumPage() {
           </div>
           <h2 className="mt-2 text-2xl font-extrabold text-white">Bugün başla, ilk 1 ay bedava</h2>
           <p className="mx-auto mt-3 max-w-sm text-sm text-slate-400">
-<<<<<<< HEAD
-            Kredi kartı gerekmez. İlk 1 ay tam Premium erişim. Beğenmezsen tek tıkla iptal.
-=======
-            Kredi kartı gerekmez. İlk 30 gün tam Pro erişim. Beğenmezsen tek tıkla iptal.
->>>>>>> 228e1dc0a76619c6cdcdc060750ae48114bdf29c
+            Kredi kartı gerekmez. İlk 1 ay tam Pro erişim. Beğenmezsen tek tıkla iptal.
           </p>
           <button
             onClick={() => handleUpgrade('premium')}

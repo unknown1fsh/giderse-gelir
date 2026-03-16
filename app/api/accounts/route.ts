@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth'
+import { checkCreationLimit } from '@/lib/premium-middleware'
 
 export async function GET(request: NextRequest) {
   try {
@@ -163,6 +164,15 @@ export async function POST(request: NextRequest) {
     // eslint-disable-next-line no-console
     console.log('[DEBUG] Account creation request body:', JSON.stringify(body, null, 2))
     if (body.accountType === 'bank') {
+      // Limit kontrolü
+      const limitCheck = await checkCreationLimit(user.id, 'accounts')
+      if (!limitCheck.allowed) {
+        return NextResponse.json({ 
+          error: limitCheck.message,
+          requiresPremium: true
+        }, { status: 403 })
+      }
+
       // Validasyon: Zorunlu alanları kontrol et
       if (!body.bankId || body.bankId === 0) {
         return NextResponse.json({ error: 'Lütfen bir banka seçin' }, { status: 400 })
@@ -232,6 +242,15 @@ export async function POST(request: NextRequest) {
     }
 
     if (body.accountType === 'credit_card') {
+      // Limit kontrolü
+      const limitCheck = await checkCreationLimit(user.id, 'creditCards')
+      if (!limitCheck.allowed) {
+        return NextResponse.json({ 
+          error: limitCheck.message,
+          requiresPremium: true
+        }, { status: 403 })
+      }
+
       // Validasyon: Zorunlu alanları kontrol et
       if (!body.bankId || body.bankId === 0) {
         return NextResponse.json({ error: 'Lütfen bir banka seçin' }, { status: 400 })

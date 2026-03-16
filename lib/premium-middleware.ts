@@ -176,3 +176,98 @@ export async function checkFeatureLimit(
     current: currentCount,
   }
 }
+
+/**
+ * Entity oluşturma limit kontrolü
+ */
+export async function checkCreationLimit(
+  userId: number,
+  entityType: 'accounts' | 'creditCards' | 'ewallets' | 'goals' | 'budgets'
+): Promise<{ allowed: boolean; limit: number; currentCount: number; message?: string }> {
+  // 1. Kullanıcının mevcut planını bul
+  const subscription = await prisma.userSubscription.findFirst({
+    where: {
+      userId,
+      status: 'active',
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+  
+  const currentPlan = subscription?.planId || PLAN_IDS.FREE
+  const planLimits = getPlanLimits(currentPlan)
+  const limit = planLimits[entityType]
+
+  // Sınırsız ise baştan izin ver
+  if (limit === -1) {
+    return { allowed: true, limit, currentCount: 0 }
+  }
+
+  // 2. Mevcut entity sayısını bul
+  let currentCount = 0
+  switch (entityType) {
+    case 'accounts':
+      // Altın hesapları 'account' sayısına dahil mi? Projede ayrı tablo.
+      // Şimdilik sadece banka hesaplarını sayalım.
+      currentCount = await prisma.account.count({ where: { userId, active: true } })
+      break
+    case 'creditCards':
+      currentCount = await prisma.creditCard.count({ where: { userId, active: true } })
+      break
+    case 'ewallets':
+      currentCount = await prisma.eWallet.count({ where: { userId, active: true } })
+      break
+    case 'goals':
+      currentCount = await prisma.goal.count({ where: { userId, status: 'active' } })
+      break
+    case 'budgets':
+      currentCount = await prisma.budgetPlan.count({ where: { userId, active: true } })
+      break
+  }
+
+  // 3. Karşılaştır
+  const allowed = currentCount < limit
+  let message = ''
+  
+  if (!allowed) {
+    const entityNames = {
+      accounts: 'banka hesabı',
+      creditCards: 'kredi kartı',
+      ewallets: 'e-cüzdan',
+      goals: 'hedef',
+      budgets: 'bütçe'
+    }
+    message = `Ücretsiz (Başlangıç) plan limitinize (${limit} ${entityNames[entityType]}) ulaştınız. Daha fazla oluşturmak için Premium'a geçmelisiniz.`
+  }
+
+  return {
+    allowed,
+    limit,
+    currentCount,
+    message
+  }
+}
+
+/**
+ * Kullanıcı planına göre işlem geçmişi için izin verilen en eski tarihi döndürür
+ * Sınırsız geçmiş erişimi varsa `null` döner.
+ */
+export async function getHistoryLimitDate(userId: number): Promise<Date | null> {
+  const subscription = await prisma.userSubscription.findFirst({
+    where: {
+      userId,
+      status: 'active',
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+  
+  const currentPlan = subscription?.planId || PLAN_IDS.FREE
+  const planLimits = getPlanLimits(currentPlan)
+  
+  if (planLimits.transactionHistoryMonths === -1) {
+    return null
+  }
+  
+  const limitDate = new Date()
+  limitDate.setMonth(limitDate.getMonth() - planLimits.transactionHistoryMonths)
+  return limitDate
+}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getActivePeriod, getCurrentUser } from '@/lib/auth'
 import { getNetWorthSummary } from '@/lib/finance/net-worth'
+import { getHistoryLimitDate } from '@/lib/premium-middleware'
 
 export async function GET(request: NextRequest) {
   try {
@@ -35,11 +36,19 @@ export async function GET(request: NextRequest) {
         startDate.setDate(now.getDate() - 30)
     }
 
+    const historyLimitDate = await getHistoryLimitDate(user.id)
+    if (historyLimitDate && startDate < historyLimitDate) {
+      startDate.setTime(historyLimitDate.getTime())
+    }
+
     const activePeriod = await getActivePeriod(request)
     const txBaseWhere: { userId: number; periodId?: number } = { userId: user.id }
     if (activePeriod) {
       txBaseWhere.periodId = activePeriod.id
     }
+
+    const pastMonthDate = new Date(startDate.getTime() - (now.getTime() - startDate.getTime()))
+    const pastMonthQueryStart = historyLimitDate && pastMonthDate < historyLimitDate ? historyLimitDate : pastMonthDate
 
     // Paralel veri çekme
     const [transactions, netWorthSummary, lastMonthTransactions] =
@@ -71,7 +80,7 @@ export async function GET(request: NextRequest) {
           where: {
             ...txBaseWhere,
             transactionDate: {
-              gte: new Date(startDate.getTime() - (now.getTime() - startDate.getTime())),
+              gte: pastMonthQueryStart,
               lt: startDate,
             },
           },
@@ -191,12 +200,28 @@ export async function GET(request: NextRequest) {
       const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1)
       const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0)
 
+      let gteDate = monthStart
+      if (historyLimitDate && gteDate < historyLimitDate) {
+        gteDate = historyLimitDate
+      }
+
+      if (gteDate > monthEnd) {
+        // Bu ay geçmiş limitinin tamamen dışında kalıyorsa atla
+        cashFlowData.push({
+          month: monthDate.toLocaleDateString('tr-TR', { month: 'short', year: 'numeric' }),
+          income: 0,
+          expense: 0,
+          net: 0,
+        })
+        continue;
+      }
+
       // Her ay için ayrı veri çek
       const monthTransactions = await prisma.transaction.findMany({
         where: {
           ...txBaseWhere,
           transactionDate: {
-            gte: monthStart,
+            gte: gteDate,
             lte: monthEnd,
           },
         },
@@ -223,11 +248,16 @@ export async function GET(request: NextRequest) {
 
     // Bu ay verileri
     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    let thisMonthGte = thisMonthStart
+    if (historyLimitDate && thisMonthGte < historyLimitDate) {
+      thisMonthGte = historyLimitDate
+    }
+
     const thisMonthTransactions = await prisma.transaction.findMany({
       where: {
         ...txBaseWhere,
         transactionDate: {
-          gte: thisMonthStart,
+          gte: thisMonthGte,
         },
       },
       include: {

@@ -6,6 +6,7 @@ import { TransactionService } from '@/server/services/impl/TransactionService'
 import { ExceptionMapper } from '@/server/errors'
 import { buildTransactionWhere, parseTransactionFilters } from '@/lib/search'
 import { syncNotificationEvents } from '@/lib/notifications/service'
+import { getHistoryLimitDate } from '@/lib/premium-middleware'
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +19,11 @@ export async function GET(request: NextRequest) {
     const activePeriod = await getActivePeriod(request)
     const { searchParams } = new URL(request.url)
     const filters = parseTransactionFilters(searchParams)
-    const whereClause = buildTransactionWhere(user.id, activePeriod?.id, filters)
+    
+    // Geçmiş limitini uygula
+    const historyLimitDate = await getHistoryLimitDate(user.id)
+    const whereClause = buildTransactionWhere(user.id, activePeriod?.id, filters, historyLimitDate)
+    
     const orderBy: Record<string, 'asc' | 'desc'> = {
       [filters.sortBy]: filters.sortDirection,
     }

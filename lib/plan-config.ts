@@ -43,6 +43,7 @@ export const PLAN_LIMITS: Record<
   PlanId,
   {
     transactions: number   // -1 = sınırsız
+    transactionHistoryMonths: number // -1 = sınırsız
     accounts: number
     creditCards: number
     ewallets: number
@@ -53,6 +54,7 @@ export const PLAN_LIMITS: Record<
 > = {
   [PLAN_IDS.FREE]: {
     transactions: 30,
+    transactionHistoryMonths: 3,
     accounts: 3,
     creditCards: 2,
     ewallets: 2,
@@ -62,6 +64,7 @@ export const PLAN_LIMITS: Record<
   },
   [PLAN_IDS.PREMIUM]: {
     transactions: -1,
+    transactionHistoryMonths: -1,
     accounts: -1,
     creditCards: -1,
     ewallets: -1,
@@ -71,6 +74,7 @@ export const PLAN_LIMITS: Record<
   },
   [PLAN_IDS.FAMILY]: {
     transactions: -1,
+    transactionHistoryMonths: -1,
     accounts: -1,
     creditCards: -1,
     ewallets: -1,

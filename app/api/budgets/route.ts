@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getActivePeriod, getCurrentUser } from '@/lib/auth'
 import { getBudgetSummary, getBudgetWindow, saveBudgetPlan, type BudgetPeriodType } from '@/lib/finance/budgets'
 import { syncNotificationEvents } from '@/lib/notifications/service'
+import { checkCreationLimit } from '@/lib/premium-middleware'
 
 function resolvePeriodType(value: string | null): BudgetPeriodType {
   return value === 'weekly' ? 'weekly' : 'monthly'
@@ -80,6 +81,15 @@ export async function POST(request: NextRequest) {
 
     if (!currency) {
       return NextResponse.json({ error: 'Varsayılan para birimi bulunamadı' }, { status: 400 })
+    }
+
+    // Limit kontrolü
+    const limitCheck = await checkCreationLimit(user.id, 'budgets')
+    if (!limitCheck.allowed) {
+      return NextResponse.json({ 
+        error: limitCheck.message,
+        requiresPremium: true
+      }, { status: 403 })
     }
 
     await saveBudgetPlan(prisma, {

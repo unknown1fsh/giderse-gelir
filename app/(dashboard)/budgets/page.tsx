@@ -17,6 +17,7 @@ import {
   StatsGrid,
   Switch,
 } from '@/components/mosaic'
+import { usePremium } from '@/lib/use-premium'
 import { useToast } from '@/lib/use-toast'
 import { formatCurrency } from '@/lib/validators'
 import { AlertTriangle, PiggyBank, RefreshCw, Save, Target, TrendingDown } from 'lucide-react'
@@ -63,6 +64,7 @@ interface BudgetSummaryResponse {
 
 export default function BudgetsPage() {
   const { success: toastSuccess, error: toastError } = useToast()
+  const { handlePremiumFeature } = usePremium()
   const [summary, setSummary] = useState<BudgetSummaryResponse | null>(null)
   const [periodType, setPeriodType] = useState<'weekly' | 'monthly'>('monthly')
   const [zeroBased, setZeroBased] = useState(true)
@@ -135,7 +137,13 @@ export default function BudgetsPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Bütçe kaydedilemedi')
+        const errorData = (await response.json()) as { error?: string, requiresPremium?: boolean, feature?: string }
+        if (errorData.requiresPremium) {
+          handlePremiumFeature(errorData.feature || 'Yeni Bütçe')
+          setSaving(false)
+          return
+        }
+        throw new Error(errorData.error || 'Bütçe kaydedilemedi')
       }
 
       const data = (await response.json()) as BudgetSummaryResponse

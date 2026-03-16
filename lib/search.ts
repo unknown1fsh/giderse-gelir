@@ -96,7 +96,8 @@ export function parseTransactionFilters(searchParams: URLSearchParams): Transact
 export function buildTransactionWhere(
   userId: number,
   activePeriodId: number | null | undefined,
-  filters: TransactionQueryFilters
+  filters: TransactionQueryFilters,
+  historyLimitDate?: Date | null
 ): Prisma.TransactionWhereInput {
   const where: Prisma.TransactionWhereInput = {
     userId,
@@ -136,9 +137,18 @@ export function buildTransactionWhere(
     }
   }
 
-  if (filters.startDate || filters.endDate) {
+  if (filters.startDate || filters.endDate || historyLimitDate) {
+    let gteDate = filters.startDate
+
+    // Eğer bir geçmiş limiti varsa, başlangıç tarihi limit tarihinden geri olamaz
+    if (historyLimitDate) {
+      if (!gteDate || gteDate < historyLimitDate) {
+        gteDate = historyLimitDate
+      }
+    }
+
     where.transactionDate = {
-      ...(filters.startDate ? { gte: filters.startDate } : {}),
+      ...(gteDate ? { gte: gteDate } : {}),
       ...(filters.endDate ? { lte: filters.endDate } : {}),
     }
   }
@@ -181,11 +191,13 @@ export async function runGlobalSearch(
     query,
     activePeriodId,
     limit = 5,
+    historyLimitDate = null,
   }: {
     userId: number
     query: string
     activePeriodId?: number | null
     limit?: number
+    historyLimitDate?: Date | null
   }
 ) {
   const trimmedQuery = query.trim()
@@ -204,6 +216,7 @@ export async function runGlobalSearch(
       where: {
         userId,
         ...(activePeriodId ? { periodId: activePeriodId } : {}),
+        ...(historyLimitDate ? { transactionDate: { gte: historyLimitDate } } : {}),
         OR: [
           { description: { contains: trimmedQuery, mode: 'insensitive' } },
           { notes: { contains: trimmedQuery, mode: 'insensitive' } },

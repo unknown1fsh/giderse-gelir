@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth'
 import { syncNotificationEvents } from '@/lib/notifications/service'
+import { checkCreationLimit } from '@/lib/premium-middleware'
 
 export async function GET(request: NextRequest) {
     try {
@@ -35,6 +36,15 @@ export async function POST(request: NextRequest) {
 
         if (!name || !targetAmount || !currencyId) {
             return NextResponse.json({ error: 'Eksik bilgi' }, { status: 400 })
+        }
+
+        // Limit kontrolü
+        const limitCheck = await checkCreationLimit(user.id, 'goals')
+        if (!limitCheck.allowed) {
+            return NextResponse.json({ 
+                error: limitCheck.message,
+                requiresPremium: true
+            }, { status: 403 })
         }
 
         const goal = await prisma.goal.create({

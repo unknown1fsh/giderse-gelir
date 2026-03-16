@@ -33,6 +33,7 @@ import {
     StatsGrid,
     Textarea,
 } from '@/components/mosaic'
+import { usePremium } from '@/lib/use-premium'
 import { useToast } from '@/lib/use-toast'
 import { formatCurrency } from '@/lib/validators'
 import {
@@ -213,6 +214,7 @@ export default function GoalsPage() {
     const { success: toastSuccess, error: toastError } = useToast()
 
     const [goals, setGoals] = useState<Goal[]>([])
+    const { handlePremiumFeature } = usePremium()
     const [currencies, setCurrencies] = useState<CurrencyOption[]>([])
     const [loading, setLoading] = useState(true)
     const [refreshing, setRefreshing] = useState(false)
@@ -479,7 +481,13 @@ export default function GoalsPage() {
             )
 
             if (!response.ok) {
-                throw new Error(drawerMode === 'create' ? 'Hedef oluşturulamadı' : 'Hedef güncellenemedi')
+                const errorData = (await response.json()) as { error?: string, requiresPremium?: boolean, feature?: string }
+                if (errorData.requiresPremium) {
+                    handlePremiumFeature(errorData.feature || 'Yeni Hedef')
+                    setSubmitting(false)
+                    return
+                }
+                throw new Error(errorData.error || (drawerMode === 'create' ? 'Hedef oluşturulamadı' : 'Hedef güncellenemedi'))
             }
 
             toastSuccess(

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth'
+import { checkCreationLimit } from '@/lib/premium-middleware'
 
 // E-Cüzdan listesi getir
 export async function GET(request: NextRequest) {
@@ -47,6 +48,15 @@ export async function POST(request: NextRequest) {
         { error: 'Zorunlu alanlar: name, provider, currencyId' },
         { status: 400 }
       )
+    }
+
+    // Limit kontrolü
+    const limitCheck = await checkCreationLimit(user.id, 'ewallets')
+    if (!limitCheck.allowed) {
+      return NextResponse.json({ 
+        error: limitCheck.message,
+        requiresPremium: true
+      }, { status: 403 })
     }
 
     const eWallet = await prisma.eWallet.create({

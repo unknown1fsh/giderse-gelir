@@ -508,7 +508,12 @@ function AccountsContent() {
       })
 
       if (!response.ok) {
-        const errorData = (await response.json()) as { error?: string }
+        const errorData = (await response.json()) as { error?: string, requiresPremium?: boolean, feature?: string }
+        if (errorData.requiresPremium) {
+          handlePremiumFeature(errorData.feature || 'Yeni Hesap')
+          setCreateSubmitting(false)
+          return
+        }
         throw new Error(errorData.error || 'Hesap kaydedilemedi')
       }
 

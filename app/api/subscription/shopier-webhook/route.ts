@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
         )
       }
     } else {
+      console.warn('[Shopier Webhook] İmza header\'ı eksik, doğrulama atlandı')
     }
 
     // Body'yi parse et

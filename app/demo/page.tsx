@@ -18,6 +18,10 @@ export default function DemoPage() {
         })
 
         if (res.ok) {
+          const data = await res.json()
+          if (data.prefetchedData) {
+            sessionStorage.setItem('demo-prefetch', JSON.stringify(data.prefetchedData))
+          }
           router.replace('/dashboard')
         } else {
           const data = await res.json()

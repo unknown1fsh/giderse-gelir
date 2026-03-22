@@ -166,6 +166,12 @@ export default function DashboardPage() {
     useEffect(() => {
         if (fetchedRef.current || loading) {return}
         fetchedRef.current = true
+        // Demo prefetch varsa anında göster, arka planda refresh et
+        const cached = sessionStorage.getItem('demo-prefetch')
+        if (cached) {
+            sessionStorage.removeItem('demo-prefetch')
+            try { setData(JSON.parse(cached) as DashboardData) } catch { /* ignore */ }
+        }
         void fetchDashboardData()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, loading])

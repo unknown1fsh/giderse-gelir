@@ -44,20 +44,14 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const isProduction = process.env.NODE_ENV === 'production'
-  const googleTagId = process.env.NEXT_PUBLIC_GOOGLE_TAG_ID || 'AW-17814901017'
+  const googleTagId = process.env.NEXT_PUBLIC_GOOGLE_TAG_ID
 
   return (
     <html lang="tr" className={`${inter.variable} ${jakarta.variable} ${caveat.variable} scroll-smooth`} data-scroll-behavior="smooth">
       <body className={`${inter.className} antialiased`}>
-        {/* Analytics & Ads — yalnızca production'da yüklenir */}
+        {/* Analytics — yalnızca production'da yüklenir */}
         {isProduction && (
           <>
-            <Script
-              async
-              src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9291172027532317"
-              crossOrigin="anonymous"
-              strategy="afterInteractive"
-            />
             <Script
               src={`https://www.googletagmanager.com/gtag/js?id=${googleTagId}`}
               strategy="afterInteractive"
@@ -71,11 +65,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   window.dataLayer = window.dataLayer || [];
                   function gtag(){dataLayer.push(arguments);}
                   gtag('js', new Date());
-                  gtag('config', '${googleTagId}', {
-                    'send_page_view': true,
-                    'allow_enhanced_conversions': true,
-                    'transport_type': 'beacon'
-                  });
                 `,
               }}
             />

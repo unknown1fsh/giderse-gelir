@@ -143,7 +143,7 @@ export default function LandingPage() {
   const [demoLoading, setDemoLoading] = useState(false)
 
   async function handleDemoClick() {
-    if (demoLoading) return
+    if (demoLoading) { return }
     setDemoLoading(true)
     try {
       const res = await fetch('/api/auth/demo', { method: 'POST', credentials: 'include' })

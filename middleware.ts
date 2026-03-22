@@ -49,7 +49,12 @@ const authRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password', '/
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Production'da HTTPS kontrolü
+  // API rotaları için hiçbir middleware kontrolü yapma (health check dahil)
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next()
+  }
+
+  // Production'da HTTPS kontrolü (sadece sayfa rotaları için)
   if (process.env.NODE_ENV === 'production') {
     const protocol = request.headers.get('x-forwarded-proto') || request.nextUrl.protocol
     if (protocol !== 'https' && !request.nextUrl.hostname.includes('localhost')) {
@@ -60,7 +65,7 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Demo hesabı: yazma işlemlerini engelle (API rotaları dahil)
+  // Demo hesabı: yazma işlemlerini engelle (sayfa rotaları için)
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
     const isAuthRoute = DEMO_WRITE_ALLOWLIST.some(p => pathname.startsWith(p))
     if (!isAuthRoute) {
@@ -72,11 +77,6 @@ export function middleware(request: NextRequest) {
         )
       }
     }
-  }
-
-  // API rotaları için sayfa düzeyinde koruma gerekmez
-  if (pathname.startsWith('/api/')) {
-    return NextResponse.next()
   }
 
   // Cookie'den token kontrolü (basit)

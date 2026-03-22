@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { isPremiumPlan, isFamilyPlan, PLAN_IDS, getPlanLimits } from './plan-config'
-
-const prisma = new PrismaClient()
 
 // Premium özellik gereksinimleri
 export type PremiumRequirement = 'premium' | 'family'

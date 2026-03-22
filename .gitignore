@@ -53,6 +53,7 @@ Thumbs.db
 log.txt
 test-output.txt
 *.test-output.*
+tsc_*.txt
 .cache
 .temp
 .tmp

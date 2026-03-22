@@ -207,6 +207,7 @@ model User {
   supportTickets          SupportTicket[]
   supportTicketReplies    SupportTicketReply[]
 
+  @@index([role, isActive])
   @@map("user")
 }
 
@@ -224,6 +225,7 @@ model UserSession {
   activePeriod   Period?  @relation(fields: [activePeriodId], references: [id])
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, isActive])
   @@map("user_session")
 }
 

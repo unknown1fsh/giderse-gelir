@@ -140,6 +140,26 @@ export default function LandingPage() {
   const router = useRouter()
   const mouse = useMouseParallax()
   const [promoDismissed, setPromoDismissed] = useState(false)
+  const [demoLoading, setDemoLoading] = useState(false)
+
+  async function handleDemoClick() {
+    if (demoLoading) return
+    setDemoLoading(true)
+    try {
+      const res = await fetch('/api/auth/demo', { method: 'POST', credentials: 'include' })
+      if (res.ok) {
+        const data = await res.json() as { prefetchedData?: object }
+        if (data.prefetchedData) {
+          sessionStorage.setItem('demo-prefetch', JSON.stringify(data.prefetchedData))
+        }
+        router.push('/dashboard')
+      } else {
+        router.push('/demo')
+      }
+    } catch {
+      router.push('/demo')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#050816] text-white overflow-x-hidden">
@@ -216,9 +236,12 @@ export default function LandingPage() {
                 Ücretsiz başla
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
               </button>
-              <button onClick={() => router.push('/demo')}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 px-7 py-3.5 font-medium text-slate-300 transition hover:border-white/20 hover:text-white sm:w-auto">
-                <Play className="h-4 w-4 text-violet-400" /> Canlı Demo
+              <button onClick={handleDemoClick} disabled={demoLoading}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 px-7 py-3.5 font-medium text-slate-300 transition hover:border-white/20 hover:text-white sm:w-auto disabled:opacity-70 disabled:cursor-not-allowed">
+                {demoLoading
+                  ? <span className="h-4 w-4 rounded-full border-2 border-violet-400 border-t-transparent animate-spin" />
+                  : <Play className="h-4 w-4 text-violet-400" />}
+                Canlı Demo
               </button>
             </div>
 

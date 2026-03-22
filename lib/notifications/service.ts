@@ -48,32 +48,28 @@ async function createNotificationRecord(
   status: 'pending' | 'sent' | 'failed' = 'pending'
 ) {
   const dedupeKey = `${event.dedupeBaseKey}:${channel}`
-  const existing = await prisma.notification.findFirst({
-    where: { dedupeKey },
-  })
-
-  if (existing) {
-    return existing
+  const data = {
+    userId,
+    type: event.type,
+    channel,
+    title: event.title,
+    body: event.body,
+    status,
+    priority: event.priority || 'normal',
+    dedupeKey,
+    payload: {
+      ...(event.payload || {}),
+      href: event.href || null,
+    },
+    sourceEntityType: event.sourceEntityType,
+    sourceEntityId: event.sourceEntityId,
+    deliveredAt: status === 'sent' ? new Date() : null,
   }
 
-  return prisma.notification.create({
-    data: {
-      userId,
-      type: event.type,
-      channel,
-      title: event.title,
-      body: event.body,
-      status,
-      priority: event.priority || 'normal',
-      dedupeKey,
-      payload: {
-        ...(event.payload || {}),
-        href: event.href || null,
-      },
-      sourceEntityType: event.sourceEntityType,
-      sourceEntityId: event.sourceEntityId,
-      deliveredAt: status === 'sent' ? new Date() : null,
-    },
+  return prisma.notification.upsert({
+    where: { dedupeKey },
+    create: data,
+    update: {},
   })
 }
 

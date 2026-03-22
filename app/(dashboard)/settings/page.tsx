@@ -235,15 +235,15 @@ export default function SettingsPage() {
   }
 
   const handleExport = () => {
-    console.log('Veri dışa aktarılıyor...')
+    // TODO: Dışa aktarma özelliği eklenecek
   }
 
   const handleImport = () => {
-    console.log('Veri içe aktarılıyor...')
+    // TODO: İçe aktarma özelliği eklenecek
   }
 
   const handleDeleteAccount = () => {
-    console.log('Hesap siliniyor...')
+    // TODO: Hesap silme özelliği eklenecek
   }
 
   const handleResetAllData = async () => {

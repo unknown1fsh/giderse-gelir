@@ -27,7 +27,6 @@ export default function UserWelcomeSection() {
   const isPremium = user.plan === 'premium'
   const isEnterprise = user.plan === 'enterprise'
   const isEnterprisePremium = user.plan === 'enterprise_premium'
-  // const isFree = user.plan === 'free' // TODO: Kullanılacak
 
   const getPlanInfo = () => {
     if (isEnterprisePremium) {

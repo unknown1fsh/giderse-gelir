@@ -218,7 +218,7 @@ export default function LandingPage() {
               </button>
               <button onClick={() => router.push('/demo')}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 px-7 py-3.5 font-medium text-slate-300 transition hover:border-white/20 hover:text-white sm:w-auto">
-                <Play className="h-4 w-4 text-violet-400" /> Demo
+                <Play className="h-4 w-4 text-violet-400" /> Canlı Demo
               </button>
             </div>
 

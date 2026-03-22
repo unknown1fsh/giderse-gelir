@@ -12,9 +12,6 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
   // Kullanıcı kontrolü (opsiyonel - bazı referans veriler public olabilir)
   const user = await getCurrentUser(request)
 
-  // eslint-disable-next-line no-console
-  console.log('🔍 Reference data çekiliyor...')
-
   const parameterService = new SystemParameterService(prisma)
 
   // TRANSACTION parametreleri için REF TABLOLARINDAN çek (Foreign Key uyumu için)
@@ -49,15 +46,6 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
     prisma.refGoldType.findMany({ where: { active: true }, orderBy: { name: 'asc' } }),
     prisma.refGoldPurity.findMany({ where: { active: true }, orderBy: { code: 'asc' } }),
   ])
-
-  // eslint-disable-next-line no-console
-  console.log('📊 Reference veriler:', {
-    txTypes: refTxTypes.length,
-    categories: refTxCategories.length,
-    paymentMethods: paymentMethodParams.length,
-    currencies: currencyParams.length > 0 ? currencyParams.length : refCurrencies.length,
-    currenciesSource: currencyParams.length > 0 ? 'SystemParameter' : 'RefCurrency',
-  })
 
   // Kullanıcıya özel veriler (sadece login olmuşsa)
   const [accounts, creditCards, eWallets, beneficiaries, loans] = await Promise.all([
@@ -222,15 +210,6 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
     },
   }
 
-  // eslint-disable-next-line no-console
-  console.log('✅ Reference data hazırlandı:', {
-    txTypes: response.txTypes.length,
-    categories: response.categories.length,
-    paymentMethods: response.paymentMethods.length,
-    refPaymentMethods: response.refPaymentMethods.length,
-    currencies: response.currencies.length,
-    accounts: response.accounts.length,
-  })
 
   return NextResponse.json(response, {
     headers: {

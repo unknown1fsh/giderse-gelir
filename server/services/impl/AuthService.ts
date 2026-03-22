@@ -161,7 +161,7 @@ export class AuthService {
         data: { isActive: false },
       })
 
-      const token = this.generateToken(user.id, user.email, plan)
+      const token = this.generateToken(user.id, user.email, plan, user.role)
       const expiresAt = new Date(Date.now() + this.sessionDurationDays * 24 * 60 * 60 * 1000)
 
       const session = await this.prisma.userSession.create({
@@ -217,13 +217,14 @@ export class AuthService {
   // Girdi: userId, email, plan
   // Çıktı: JWT token
   // Hata: -
-  private generateToken(userId: number, email: string, plan: string): string {
+  private generateToken(userId: number, email: string, plan: string, role: string): string {
     // Her token'ın unique olması için iat (issued at) ekle
     return jwt.sign(
       {
         userId,
         email,
         plan,
+        role,
         iat: Math.floor(Date.now() / 1000), // Unix timestamp (seconds)
         nonce: Math.random().toString(36).substring(7), // Ekstra uniqueness
       },
@@ -238,12 +239,13 @@ export class AuthService {
   // Girdi: token
   // Çıktı: Decoded token veya null
   // Hata: -
-  private verifyToken(token: string): { userId: number; email: string; plan: string } | null {
+  private verifyToken(token: string): { userId: number; email: string; plan: string; role: string } | null {
     try {
       return jwt.verify(token, this.jwtSecret) as {
         userId: number
         email: string
         plan: string
+        role: string
       }
     } catch {
       return null
@@ -318,6 +320,44 @@ export class AuthService {
       console.error('[AUTH] validateSession error:', error)
       return null
     }
+  }
+
+  // Bu metot demo kullanıcısı için kısa ömürlü session oluşturur (2 saat).
+  // Girdi: userId, email, plan, role, ipAddress
+  // Çıktı: SessionData
+  async createDemoSession(
+    userId: number,
+    email: string,
+    plan: string,
+    role: string,
+    ipAddress?: string
+  ): Promise<SessionData> {
+    // Önceki aktif sessionları kapat
+    await this.prisma.userSession.updateMany({
+      where: { userId, isActive: true },
+      data: { isActive: false },
+    })
+
+    const token = this.generateToken(userId, email, plan, role)
+    const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000) // 2 saat
+
+    const session = await this.prisma.userSession.create({
+      data: { userId, token, expiresAt, ipAddress },
+    })
+
+    // Aktif dönemi session'a bağla
+    const activePeriod = await this.prisma.period.findFirst({
+      where: { userId, isActive: true, isClosed: false },
+      orderBy: { startDate: 'desc' },
+    })
+    if (activePeriod) {
+      await this.prisma.userSession.update({
+        where: { id: session.id },
+        data: { activePeriodId: activePeriod.id },
+      })
+    }
+
+    return { id: session.id, token: session.token, expiresAt: session.expiresAt }
   }
 
   // Bu metot çıkış yapar.

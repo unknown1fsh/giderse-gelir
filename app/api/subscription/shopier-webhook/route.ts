@@ -26,9 +26,7 @@ export async function POST(request: NextRequest) {
           { status: 401 }
         )
       }
-      console.log('[Shopier Webhook] İmza doğrulandı ✓')
     } else {
-      console.warn('[Shopier Webhook] İmza header\'ı bulunamadı, API doğrulaması kullanılacak')
     }
 
     // Body'yi parse et
@@ -43,15 +41,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('[Shopier Webhook] Olay alındı:', {
-      event: webhookData.event,
-      orderId: webhookData.payload?.id,
-      email: webhookData.payload?.customer?.email,
-    })
-
     // Sadece sipariş olaylarını işle
     if (webhookData.event !== 'order.created' && webhookData.event !== 'order.fulfilled') {
-      console.log('[Shopier Webhook] Olay atlanıyor:', webhookData.event)
       return NextResponse.json({ success: true, message: 'Olay atlandı' }, { status: 200 })
     }
 
@@ -60,10 +51,7 @@ export async function POST(request: NextRequest) {
 
     // API üzerinden sipariş doğrulaması (ek güvenlik)
     if (parsed.orderId) {
-      const apiVerified = await verifyOrderViaApi(parsed.orderId)
-      if (apiVerified) {
-        console.log('[Shopier Webhook] Sipariş API üzerinden doğrulandı ✓')
-      }
+      await verifyOrderViaApi(parsed.orderId)
     }
 
     // Plan belirlenebilir mi?
@@ -96,12 +84,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('[Shopier Webhook] Kullanıcı eşleştirildi:', {
-      userId: user.id,
-      email: user.email,
-      plan: parsed.planId,
-    })
-
     // Aynı sipariş için daha önce abonelik oluşturulmuş mu kontrol et (duplicate koruma)
     const existingTransaction = await prisma.userSubscription.findFirst({
       where: {
@@ -110,7 +92,6 @@ export async function POST(request: NextRequest) {
     })
 
     if (existingTransaction) {
-      console.log('[Shopier Webhook] Bu sipariş zaten işlenmiş:', parsed.orderId)
       return NextResponse.json({ success: true, message: 'Sipariş zaten işlenmiş' }, { status: 200 })
     }
 
@@ -152,13 +133,6 @@ export async function POST(request: NextRequest) {
         },
       })
     }
-
-    console.log('[Shopier Webhook] Abonelik aktifleştirildi:', {
-      userId: user.id,
-      plan: parsed.planId,
-      endDate: endDate.toISOString(),
-      orderId: parsed.orderId,
-    })
 
     return NextResponse.json({ success: true }, { status: 200 })
   } catch (error) {

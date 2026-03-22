@@ -10,8 +10,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Oturum bulunamadı' }, { status: 401 })
     }
 
-    console.log(`Kullanıcı ${user.email} tüm verilerini sıfırlıyor...`)
-
     // Tüm kullanıcı verilerini sil
     await prisma.transaction.deleteMany({
       where: { userId: user.id },

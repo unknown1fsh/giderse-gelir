@@ -57,7 +57,6 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
 
   // Premium seçilirse, kullanıcı free olarak kaydedilecek ve destek talebi oluşturulacak
   const requestedPlan = plan || 'free'
-  // const actualPlan = requestedPlan === 'premium' ? 'free' : requestedPlan // TODO: Kullanılacak
   const isPremiumRequest = requestedPlan === 'premium'
 
   // AuthService ile kullanıcı kaydı (her zaman free olarak)
@@ -69,7 +68,6 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     name,
     phone,
     password,
-    // plan: actualPlan, // TODO: User modelinde yok, UserSubscription'da tutuluyor
   })
 
   const user = await authService.register(registerDTO)

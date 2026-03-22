@@ -134,15 +134,12 @@ export default function NewIncomePage() {
           )
 
           if (gelirType) {
-            console.log('✅ GELIR tipi bulundu:', gelirType)
             setGelirTxTypeId(gelirType.id)
             setFormData(prev => ({ ...prev, txTypeId: gelirType.id }))
           } else {
-            console.warn('⚠️ GELIR tipi bulunamadı. Mevcut txTypes:', data.txTypes)
             // İlk txType'ı varsayılan olarak kullan (fallback)
             if (data.txTypes.length > 0) {
               const firstType = data.txTypes[0]
-              console.warn('⚠️ İlk txType kullanılıyor:', firstType)
               setGelirTxTypeId(firstType.id)
               setFormData(prev => ({ ...prev, txTypeId: firstType.id }))
             }

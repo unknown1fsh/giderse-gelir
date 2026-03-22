@@ -53,16 +53,5 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     { status: 200 }
   )
 
-  // Cookie'nin response header'ında olduğunu doğrula
-  const cookieHeader = response.headers.get('set-cookie')
-  // eslint-disable-next-line no-console
-  if (cookieHeader) {
-    // eslint-disable-next-line no-console
-    console.log("[AUTH] Cookie response header'da ayarlandı")
-  } else {
-    // eslint-disable-next-line no-console
-    console.warn("[AUTH] UYARI: Cookie response header'da yok!")
-  }
-
   return response
 })

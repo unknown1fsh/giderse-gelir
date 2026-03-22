@@ -34,9 +34,6 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // const { searchParams } = new URL(request.url)
-    // const period = searchParams.get('period') || '12m' // TODO: Kullanılacak
-
     const activePeriod = await getActivePeriod(request)
 
     // Kullanıcı bazlı veri çekme

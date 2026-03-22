@@ -146,15 +146,12 @@ export default function NewExpensePage() {
           )
 
           if (giderType) {
-            console.log('✅ GIDER tipi bulundu:', giderType)
             setGiderTxTypeId(giderType.id)
             setFormData(prev => ({ ...prev, txTypeId: giderType.id }))
           } else {
-            console.warn('⚠️ GIDER tipi bulunamadı. Mevcut txTypes:', data.txTypes)
             // İkinci txType'ı varsayılan olarak kullan (fallback - genelde GIDER ikinci sırada)
             if (data.txTypes.length > 1) {
               const secondType = data.txTypes[1]
-              console.warn('⚠️ İkinci txType kullanılıyor:', secondType)
               setGiderTxTypeId(secondType.id)
               setFormData(prev => ({ ...prev, txTypeId: secondType.id }))
             }

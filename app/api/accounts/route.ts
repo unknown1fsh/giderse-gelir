@@ -161,8 +161,6 @@ export async function POST(request: NextRequest) {
     const activePeriod = await getActivePeriod(request)
 
     // Hesap türüne göre farklı işlemler
-    // eslint-disable-next-line no-console
-    console.log('[DEBUG] Account creation request body:', JSON.stringify(body, null, 2))
     if (body.accountType === 'bank') {
       // Limit kontrolü
       const limitCheck = await checkCreationLimit(user.id, 'accounts')

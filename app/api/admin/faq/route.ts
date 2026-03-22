@@ -16,8 +16,10 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
   }
 
   const { searchParams } = new URL(request.url)
-  const page = parseInt(searchParams.get('page') || '1')
-  const limit = parseInt(searchParams.get('limit') || '50')
+  const pageRaw = parseInt(searchParams.get('page') || '1')
+  const page = isNaN(pageRaw) || pageRaw < 1 ? 1 : pageRaw
+  const limitRaw = parseInt(searchParams.get('limit') || '50')
+  const limit = isNaN(limitRaw) || limitRaw < 1 ? 50 : Math.min(limitRaw, 500)
   const search = searchParams.get('search') || ''
   const category = searchParams.get('category') || ''
   const isActive = searchParams.get('isActive')

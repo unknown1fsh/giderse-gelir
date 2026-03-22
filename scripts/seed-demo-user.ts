@@ -28,12 +28,12 @@ async function main() {
 
   // ── Referans verileri ────────────────────────────────────────────────────
   const tryC   = await prisma.refCurrency.findUniqueOrThrow({ where: { code: 'TRY' } })
-  const usdC   = await prisma.refCurrency.findUniqueOrThrow({ where: { code: 'USD' } })
+  await prisma.refCurrency.findUniqueOrThrow({ where: { code: 'USD' } })
   await prisma.refCurrency.findUniqueOrThrow({ where: { code: 'EUR' } })
 
   const vadesiz = await prisma.refAccountType.findUniqueOrThrow({ where: { code: 'VADESIZ' } })
   const vadeli  = await prisma.refAccountType.findUniqueOrThrow({ where: { code: 'VADELI' } })
-  const doviz   = await prisma.refAccountType.findUniqueOrThrow({ where: { code: 'DOVIZ' } })
+  await prisma.refAccountType.findUniqueOrThrow({ where: { code: 'DOVIZ' } })
 
   const gelirType  = await prisma.refTxType.findUniqueOrThrow({ where: { code: 'GELIR' } })
   const giderType  = await prisma.refTxType.findUniqueOrThrow({ where: { code: 'GIDER' } })
@@ -68,7 +68,7 @@ async function main() {
   const bkZiraat   = await prisma.refBank.findUniqueOrThrow({ where: { asciiName: 'Ziraat Bankasi' } })
   const bkYapiK    = await prisma.refBank.findUniqueOrThrow({ where: { asciiName: 'Yapi Kredi' } })
   const bkIs       = await prisma.refBank.findUniqueOrThrow({ where: { asciiName: 'Is Bankasi' } })
-  const bkAkbank   = await prisma.refBank.findUniqueOrThrow({ where: { asciiName: 'Akbank' } })
+  await prisma.refBank.findUniqueOrThrow({ where: { asciiName: 'Akbank' } })
 
   // Altın türleri
   const gtCumhuriyet = await prisma.refGoldType.findUniqueOrThrow({ where: { code: 'CUMHURIYET_ALTINI' } })
@@ -107,7 +107,7 @@ async function main() {
       dateFormat: 'DD/MM/YYYY',
       numberFormat: '1.234,56',
       theme: 'dark',
-      role: 'USER',
+      role: 'DEMO',
       isActive: true,
       lastLoginAt: new Date(),
       notifications: {
@@ -126,22 +126,20 @@ async function main() {
 
   console.log(`✅ Demo kullanıcı oluşturuldu: ${user.email} (id: ${user.id})`)
 
-  // ── Premium abonelik ───────────────────────────────────────────────────────
+  // ── Ücretsiz abonelik (demo free plan) ────────────────────────────────────
   await prisma.userSubscription.create({
     data: {
       userId: user.id,
-      planId: 'premium',
+      planId: 'free',
       status: 'active',
-      startDate: d(2025, 9, 1),
-      endDate: d(2026, 9, 1),
-      amount: 149,
+      startDate: d(2026, 1, 1),
+      endDate: d(2027, 1, 1),
+      amount: 0,
       currency: 'TRY',
-      paymentMethod: 'credit_card',
-      autoRenew: true,
     },
   })
 
-  console.log('✅ Premium abonelik oluşturuldu')
+  console.log('✅ Ücretsiz abonelik oluşturuldu')
 
   // ── Dönem (Period) ─────────────────────────────────────────────────────────
   const period = await prisma.period.create({
@@ -201,21 +199,7 @@ async function main() {
     },
   })
 
-  await prisma.account.create({
-    data: {
-      userId: user.id,
-      periodId: period.id,
-      name: 'İş Bankası USD Hesabı',
-      accountTypeId: doviz.id,
-      bankId: bkIs.id,
-      accountNumber: '4412-0072183',
-      iban: 'TR640006400441200721830',
-      balance: 3200.00,
-      currencyId: usdC.id,
-    },
-  })
-
-  console.log('✅ 4 hesap oluşturuldu')
+  console.log('✅ 3 hesap oluşturuldu (free plan limiti)')
 
   // ── Kredi Kartları ─────────────────────────────────────────────────────────
   const ccGaranti = await prisma.creditCard.create({
@@ -248,22 +232,7 @@ async function main() {
     },
   })
 
-  const ccAkbank = await prisma.creditCard.create({
-    data: {
-      userId: user.id,
-      periodId: period.id,
-      name: 'Akbank Axess Platinum',
-      bankId: bkAkbank.id,
-      limitAmount: 20000,
-      availableLimit: 14750,
-      currencyId: tryC.id,
-      statementDay: 25,
-      dueDay: 15,
-      minPaymentPercent: 3.0,
-    },
-  })
-
-  console.log('✅ 3 kredi kartı oluşturuldu')
+  console.log('✅ 2 kredi kartı oluşturuldu (free plan limiti)')
 
   // ── E-Cüzdanlar ────────────────────────────────────────────────────────────
   const ewPapara = await prisma.eWallet.create({
@@ -708,7 +677,7 @@ async function main() {
         currencyId: tryC.id,
         paymentMethodId: pmKredi.id,
         categoryId: catSaglik.id,
-        creditCardId: ccAkbank.id,
+        creditCardId: ccGaranti.id,
         cronSchedule: '0 9 1 * *',
         nextPaymentDate: d(2026, 4, 1),
         description: 'Basic Fit aylık üyelik',
@@ -983,7 +952,7 @@ async function main() {
       amount: 450, currencyId: tryC.id,
       paymentMethodId: pmKredi.id,
       transactionDate: d(year, month, 1),
-      creditCardId: ccAkbank.id,
+      creditCardId: ccGaranti.id,
       description: 'Basic Fit spor salonu aylık üyelik',
       isRecurring: true, recurringType: 'monthly',
       tags: ['sağlık', 'spor'],
@@ -1194,7 +1163,7 @@ async function main() {
       amount: o.amount, currencyId: tryC.id,
       paymentMethodId: pmKredi.id,
       transactionDate: d(o.year, o.month, o.day),
-      creditCardId: ccAkbank.id,
+      creditCardId: ccGaranti.id,
       description: o.desc,
       tags: ['diğer'],
     })

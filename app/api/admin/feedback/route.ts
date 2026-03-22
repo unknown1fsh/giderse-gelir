@@ -12,8 +12,10 @@ export const GET = ExceptionMapper.asyncHandler(async (request: NextRequest) => 
   const searchParams = request.nextUrl.searchParams
   const status = searchParams.get('status')
   const type = searchParams.get('type')
-  const page = parseInt(searchParams.get('page') || '1')
-  const limit = parseInt(searchParams.get('limit') || '20')
+  const pageRaw = parseInt(searchParams.get('page') || '1')
+  const limitRaw = parseInt(searchParams.get('limit') || '20')
+  const page = isNaN(pageRaw) || pageRaw < 1 ? 1 : pageRaw
+  const limit = isNaN(limitRaw) || limitRaw < 1 ? 20 : Math.min(limitRaw, 500)
   const skip = (page - 1) * limit
 
   const where: any = {}

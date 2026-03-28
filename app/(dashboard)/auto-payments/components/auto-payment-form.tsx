@@ -95,26 +95,6 @@ function getSourceOptions(
   }
 }
 
-function getSourceDescription(option: AutoPaymentReferenceOption | undefined, sourceType: AutoPaymentSourceType) {
-  if (!option) {
-    return 'Ödeme kaynağı seçilmediğinde bu kayıt takip ve hatırlatma amaçlı kullanılır.'
-  }
-
-  if (sourceType === 'account' || sourceType === 'creditCard') {
-    return [option.bank?.name, option.currency?.code].filter(Boolean).join(' • ')
-  }
-
-  if (sourceType === 'eWallet') {
-    return [option.provider, option.currency?.code].filter(Boolean).join(' • ')
-  }
-
-  if (sourceType === 'beneficiary') {
-    return [option.bank?.name, option.iban].filter(Boolean).join(' • ')
-  }
-
-  return ''
-}
-
 export function createAutoPaymentFormState({
   fallbackCurrencyId,
   fallbackPaymentMethodId,
@@ -168,7 +148,7 @@ export function createAutoPaymentFormState({
 }
 
 export function AutoPaymentForm({
-  mode,
+  mode: _mode,
   formData,
   referenceData,
   onChange,
@@ -189,8 +169,7 @@ export function AutoPaymentForm({
   allowActiveToggle?: boolean
 }) {
   const sourceOptions = getSourceOptions(formData.sourceType, referenceData)
-  const selectedSource = sourceOptions.find(option => String(option.id) === formData.sourceId)
-  const selectedCurrency = referenceData.currencies.find(
+const selectedCurrency = referenceData.currencies.find(
     currency => String(currency.id) === formData.currencyId
   )
 

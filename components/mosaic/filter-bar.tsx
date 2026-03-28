@@ -17,7 +17,7 @@ export function FilterBar({ children, className, ...props }: FilterBarProps) {
             )}
             {...props}
         >
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 flex-1">
                 {children}
             </div>
         </div>

@@ -35,6 +35,8 @@ import {
 } from '@/components/mosaic'
 import { formatCurrency, parseCurrencyInput } from '@/lib/validators'
 import { useToast } from '@/lib/use-toast'
+import { useUser } from '@/lib/user-context'
+import { isPremiumPlan } from '@/lib/plan-config'
 import {
   Calendar,
   Coins,
@@ -149,8 +151,16 @@ function getCurrentValue(item: GoldItem) {
 }
 
 export default function GoldPage() {
+  const { user, loading: userLoading } = useUser()
   const router = useRouter()
   const { success: toastSuccess, error: toastError } = useToast()
+
+  useEffect(() => {
+    if (userLoading) return
+    if (!isPremiumPlan(user?.plan || 'free')) {
+      void router.push('/premium')
+    }
+  }, [userLoading, user, router])
 
   const [goldItems, setGoldItems] = useState<GoldItem[]>([])
   const [goldTypes, setGoldTypes] = useState<GoldTypeOption[]>([])
@@ -522,6 +532,8 @@ export default function GoldPage() {
     )
   }
 
+  if (!userLoading && !isPremiumPlan(user?.plan || 'free')) return null
+
   return (
     <>
       <AppPageShell
@@ -555,7 +567,7 @@ export default function GoldPage() {
               <div className="space-y-5">
                 <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">
                   <Coins className="h-3.5 w-3.5" />
-                  Mosaic altın merkezi
+                  Altın Takip Merkezi
                 </div>
                 <div>
                   <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">

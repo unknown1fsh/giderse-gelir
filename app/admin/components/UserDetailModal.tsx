@@ -162,9 +162,8 @@ export default function UserDetailModal({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="free">Free</SelectItem>
-                      <SelectItem value="premium">Premium</SelectItem>
-                      <SelectItem value="enterprise">Enterprise</SelectItem>
-                      <SelectItem value="enterprise_premium">Enterprise Premium</SelectItem>
+                      <SelectItem value="premium">Pro</SelectItem>
+                      <SelectItem value="family">Premium</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

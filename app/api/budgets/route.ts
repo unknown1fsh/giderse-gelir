@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(summary)
   } catch (error) {
     console.error('Budget GET error:', error)
-    return NextResponse.json({ error: 'Butce verileri alinamadi' }, { status: 500 })
+    return NextResponse.json({ error: 'Bütçe verileri alınamadı' }, { status: 500 })
   }
 }
 
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       currencyId: currency,
       zeroBased: body.zeroBased ?? true,
       name:
-        body.name || (periodType === 'weekly' ? 'Haftalik Butce' : 'Aylik Butce'),
+        body.name || (periodType === 'weekly' ? 'Haftalık Bütçe' : 'Aylık Bütçe'),
       notes: body.notes,
       allocations:
         body.allocations?.map(allocation => ({
@@ -126,6 +126,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(summary)
   } catch (error) {
     console.error('Budget POST error:', error)
-    return NextResponse.json({ error: 'Butce kaydedilemedi' }, { status: 500 })
+    return NextResponse.json({ error: 'Bütçe kaydedilemedi' }, { status: 500 })
   }
 }

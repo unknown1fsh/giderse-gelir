@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   ArrowUpRight,
   BarChart3,
@@ -97,6 +98,7 @@ const TYPE_ICONS = {
 
 export default function InvestmentsPage() {
   const { user, loading: userLoading } = useUser()
+  const router = useRouter()
   const { success: toastSuccess, error: toastError } = useToast()
 
   const [loading, setLoading] = useState(true)
@@ -134,6 +136,13 @@ export default function InvestmentsPage() {
 
   const isPremium = isPremiumPlan(user?.plan || 'free')
   const pageSize = 8
+
+  useEffect(() => {
+    if (userLoading) return
+    if (!isPremium) {
+      void router.push('/premium')
+    }
+  }, [userLoading, isPremium, router])
 
   useEffect(() => {
     if (userLoading) {
@@ -177,13 +186,13 @@ export default function InvestmentsPage() {
           return
         }
 
-        throw new Error((payload as { error?: string }).error || 'Yatirimlar yuklenemedi')
+        throw new Error((payload as { error?: string }).error || 'Yatırımlar yüklenemedi')
       }
 
       setInvestments((payload as Array<Record<string, unknown>>).map(item => normalizeInvestment(item as never)))
     } catch (fetchError) {
       console.error('Investments fetch error:', fetchError)
-      setError(fetchError instanceof Error ? fetchError.message : 'Yatirimlar yuklenemedi')
+      setError(fetchError instanceof Error ? fetchError.message : 'Yatırımlar yüklenemedi')
     } finally {
       setLoading(false)
     }
@@ -346,12 +355,12 @@ export default function InvestmentsPage() {
     const definition = INVESTMENT_TYPE_DEFINITIONS[formData.investmentType]
 
     if (!formData.name.trim() || !formData.quantity.trim() || !formData.purchasePrice.trim()) {
-      toastError('Hata', 'Ad, miktar ve alis fiyati zorunludur')
+      toastError('Hata', 'Ad, miktar ve alış fiyatı zorunludur')
       return
     }
 
     if (!formData.currencyId) {
-      toastError('Hata', 'Para birimi seciniz')
+      toastError('Hata', 'Para birimi seçiniz')
       return
     }
 
@@ -392,7 +401,7 @@ export default function InvestmentsPage() {
           return
         }
 
-        toastError('Hata', String(payload.error || 'Kayit guncellenemedi'))
+        toastError('Hata', String(payload.error || 'Kayıt güncellenemedi'))
         return
       }
 
@@ -404,12 +413,12 @@ export default function InvestmentsPage() {
       )
       setEditorState({ open: false, mode: 'create', investment: null })
       toastSuccess(
-        'Basarili',
-        editorState.mode === 'edit' ? 'Yatirim guncellendi' : 'Yatirim eklendi'
+        'Başarılı',
+        editorState.mode === 'edit' ? 'Yatırım güncellendi' : 'Yatırım eklendi'
       )
     } catch (submitError) {
       console.error('Investment editor submit error:', submitError)
-      toastError('Hata', 'Kayit islemi tamamlanamadi')
+      toastError('Hata', 'Kayıt işlemi tamamlanamadı')
     } finally {
       setSaving(false)
     }
@@ -428,15 +437,15 @@ export default function InvestmentsPage() {
 
       if (!response.ok) {
         const payload = (await response.json()) as { error?: string }
-        toastError('Hata', payload.error || 'Yatirim silinemedi')
+        toastError('Hata', payload.error || 'Yatırım silinemedi')
         return
       }
 
       setInvestments(prev => prev.filter(item => item.id !== deleteTarget.id))
-      toastSuccess('Basarili', 'Yatirim silindi')
+      toastSuccess('Başarılı', 'Yatırım silindi')
     } catch (deleteError) {
       console.error('Investment delete error:', deleteError)
-      toastError('Hata', 'Yatirim silinemedi')
+      toastError('Hata', 'Yatırım silinemedi')
     } finally {
       setDeleteTarget(null)
     }
@@ -447,7 +456,7 @@ export default function InvestmentsPage() {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="space-y-3 text-center">
           <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-primary" />
-          <p className="text-sm text-muted-foreground">Yatirim merkezi hazirlaniyor...</p>
+          <p className="text-sm text-muted-foreground">Yatırım merkezi hazırlanıyor...</p>
         </div>
       </div>
     )
@@ -457,9 +466,9 @@ export default function InvestmentsPage() {
     <>
       <AppPageShell
         header={{
-          title: 'Yatirim Merkezi',
+          title: 'Yatırım Merkezi',
           description:
-            'Tablo odakli portfolio gorunumu, filtrelenebilir pozisyon listesi ve hizli yonetim aksiyonlari.',
+            'Tablo odaklı portföy görünümü, filtrelenebilir pozisyon listesi ve hızlı yönetim aksiyonları.',
           actions: (
             <>
               <Button variant="outline" onClick={() => void fetchData()}>
@@ -469,7 +478,7 @@ export default function InvestmentsPage() {
               <Button variant="outline" asChild>
                 <Link href="/investments/new">
                   <Search className="mr-2 h-4 w-4" />
-                  Tur bazli akis
+                  Tür bazlı akış
                 </Link>
               </Button>
               <Button onClick={openCreateDrawer}>
@@ -482,34 +491,34 @@ export default function InvestmentsPage() {
       >
         {!isPremium ? (
           <DashboardCard
-            title="Premium yatirim merkezi"
-            description="Hisse, fon, kripto ve diger varliklar icin tam portfoy kontrolu Premium plana dahildir."
+            title="Premium Yatırım Merkezi"
+            description="Hisse, fon, kripto ve diğer varlıklar için tam portföy kontrolü Premium plana dahildir."
             icon={Crown}
             headerAction={<Badge variant="premium">Premium</Badge>}
           >
             <div className="grid gap-6 lg:grid-cols-[1.5fr_minmax(0,1fr)]">
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Mosaic dark yatirim deneyimi; filtrelenebilir tablo, hizli edit drawer&apos;i,
-                  performans panelleri ve type-specific create akislarini tek merkezde toplar.
+                  Filtrelenebilir tablo, hızlı düzenleme paneli,
+                  performans panelleri ve tür bazlı oluşturma akışlarını tek merkezde toplar.
                 </p>
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div className="rounded-xl border border-border bg-muted/20 p-4">
-                    <div className="text-sm font-medium text-foreground">Table-first ekran</div>
+                    <div className="text-sm font-medium text-foreground">Tablo görünümü</div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      Tur, para birimi, risk ve performans bazli filtreleme.
+                      Tür, para birimi, risk ve performans bazlı filtreleme.
                     </div>
                   </div>
                   <div className="rounded-xl border border-border bg-muted/20 p-4">
-                    <div className="text-sm font-medium text-foreground">CRUD aksiyonlari</div>
+                    <div className="text-sm font-medium text-foreground">CRUD aksiyonları</div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      Olustur, duzenle ve sil akislarina ayni merkezden erisin.
+                      Oluştur, düzenle ve sil akışlarına aynı merkezden eriş.
                     </div>
                   </div>
                   <div className="rounded-xl border border-border bg-muted/20 p-4">
-                    <div className="text-sm font-medium text-foreground">Analitik sag panel</div>
+                    <div className="text-sm font-medium text-foreground">Analitik sağ panel</div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      Dagilim, kazananlar ve son eklenenler tek bakista.
+                      Dağılım, kazananlar ve son eklenenler tek bakışta.
                     </div>
                   </div>
                 </div>
@@ -520,9 +529,9 @@ export default function InvestmentsPage() {
                     <Crown className="h-6 w-6" />
                   </div>
                   <div>
-                    <div className="text-lg font-semibold text-foreground">Premium&apos;a gecin</div>
+                    <div className="text-lg font-semibold text-foreground">Premium&apos;a Geçin</div>
                     <div className="text-sm text-muted-foreground">
-                      Tum yatirim araclarini tek panelden yonetin.
+                      Tüm yatırım araçlarını tek panelden yönetin.
                     </div>
                   </div>
                 </div>
@@ -534,15 +543,15 @@ export default function InvestmentsPage() {
           </DashboardCard>
         ) : error ? (
           <ErrorState
-            title="Yatirimlar yuklenemedi"
+            title="Yatırımlar yüklenemedi"
             description={error}
             onRetry={() => void fetchData()}
           />
         ) : (
           <>
             <DashboardCard
-              title="Portfoy ozeti"
-              description="Ana KPI seti ve performans ozetleri"
+              title="Portföy Özeti"
+              description="Ana KPI seti ve performans özetleri"
               icon={BarChart3}
               headerAction={
                 <Badge variant={currencyBreakdown.length > 1 ? 'warning' : 'success'}>
@@ -557,7 +566,7 @@ export default function InvestmentsPage() {
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div>
                       <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                        Toplam portfoy degeri
+                        Toplam portföy değeri
                       </div>
                       <div className="mt-3 text-4xl font-bold tracking-tight text-foreground">
                         {formatCurrency(summary.totalCurrentValue, dominantCurrency)}
@@ -574,40 +583,40 @@ export default function InvestmentsPage() {
                       </div>
                     </div>
                     <div className="max-w-sm text-sm text-muted-foreground">
-                      Agirlikli gosterim para birimi: <span className="font-medium text-foreground">{dominantCurrency}</span>.
-                      Karisik para birimlerinde panel dagilimlari kayit bazli normalize edilir.
+                      Ağırlıklı gösterim para birimi: <span className="font-medium text-foreground">{dominantCurrency}</span>.
+                      Karışık para birimlerinde panel dağılımları kayıt bazlı normalize edilir.
                     </div>
                   </div>
                 </div>
 
                 <StatsGrid>
                   <StatCard
-                    title="Aktif kayit"
+                    title="Aktif kayıt"
                     value={summary.activeCount}
                     icon={BarChart3}
                     color="blue"
                     description="Takip edilen toplam pozisyon"
                   />
                   <StatCard
-                    title="Yatirilan"
+                    title="Yatırılan"
                     value={formatCurrency(summary.totalInvested, dominantCurrency)}
                     icon={Coins}
                     color="amber"
-                    description="Toplam maliyet baziniz"
+                    description="Toplam maliyet bazınız"
                   />
                   <StatCard
                     title="Kar / zarar"
                     value={`${summary.totalProfitLoss >= 0 ? '+' : ''}${formatCurrency(summary.totalProfitLoss, dominantCurrency)}`}
                     icon={summary.totalProfitLoss >= 0 ? TrendingUp : TrendingDown}
                     color={summary.totalProfitLoss >= 0 ? 'emerald' : 'rose'}
-                    description="Acilis maliyetine gore"
+                    description="Açılış maliyetine göre"
                   />
                   <StatCard
-                    title="Kazanc oranı"
+                    title="Kazanç oranı"
                     value={`${summary.winRate.toFixed(0)}%`}
                     icon={Sparkles}
                     color="purple"
-                    description="Karda olan kayit orani"
+                    description="Karda olan kayıt oranı"
                   />
                 </StatsGrid>
               </div>
@@ -617,15 +626,15 @@ export default function InvestmentsPage() {
               <SearchBox
                 value={query}
                 onSearch={value => setQuery(value)}
-                placeholder="Varlik, sembol, kategori ara..."
+                placeholder="Varlık, sembol, kategori ara..."
               />
 
               <Select value={typeFilter} onValueChange={value => setTypeFilter(value as typeof typeFilter)}>
                 <SelectTrigger className="sm:w-[180px]">
-                  <SelectValue placeholder="Tur" />
+                  <SelectValue placeholder="Tür" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tum turler</SelectItem>
+                  <SelectItem value="all">Tüm türler</SelectItem>
                   {INVESTMENT_TYPE_OPTIONS.map(option => (
                     <SelectItem key={option.id} value={option.id}>
                       {option.label}
@@ -639,7 +648,7 @@ export default function InvestmentsPage() {
                   <SelectValue placeholder="Para birimi" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tum para birimleri</SelectItem>
+                  <SelectItem value="all">Tüm para birimleri</SelectItem>
                   {currencyBreakdown.map(item => (
                     <SelectItem key={item.code} value={item.code}>
                       {item.code}
@@ -653,7 +662,7 @@ export default function InvestmentsPage() {
                   <SelectValue placeholder="Risk" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tum riskler</SelectItem>
+                  <SelectItem value="all">Tüm riskler</SelectItem>
                   {RISK_LEVEL_OPTIONS.map(option => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -670,7 +679,7 @@ export default function InvestmentsPage() {
                   <SelectValue placeholder="Performans" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tum durumlar</SelectItem>
+                  <SelectItem value="all">Tüm durumlar</SelectItem>
                   <SelectItem value="gainers">Karda</SelectItem>
                   <SelectItem value="losers">Zararda</SelectItem>
                 </SelectContent>
@@ -678,24 +687,24 @@ export default function InvestmentsPage() {
 
               <Select value={sortMode} onValueChange={value => setSortMode(value as SortMode)}>
                 <SelectTrigger className="sm:w-[170px]">
-                  <SelectValue placeholder="Siralama" />
+                  <SelectValue placeholder="Sıralama" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="value-desc">Deger: yuksekten</SelectItem>
-                  <SelectItem value="invested-desc">Maliyet: yuksekten</SelectItem>
-                  <SelectItem value="profit-desc">Kar: yuksekten</SelectItem>
-                  <SelectItem value="profit-asc">Kar: dusukten</SelectItem>
+                  <SelectItem value="value-desc">Değer: yüksekten</SelectItem>
+                  <SelectItem value="invested-desc">Maliyet: yüksekten</SelectItem>
+                  <SelectItem value="profit-desc">Kâr: yüksekten</SelectItem>
+                  <SelectItem value="profit-asc">Kâr: düşükten</SelectItem>
                   <SelectItem value="newest">En yeni</SelectItem>
                   <SelectItem value="oldest">En eski</SelectItem>
-                  <SelectItem value="name-asc">Ada gore</SelectItem>
+                  <SelectItem value="name-asc">Ada göre</SelectItem>
                 </SelectContent>
               </Select>
             </FilterBar>
 
             <div className="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_360px]">
               <DashboardCard
-                title="Pozisyon tablosu"
-                description={`${filteredInvestments.length} kayit listeleniyor`}
+                title="Pozisyon Tablosu"
+                description={`${filteredInvestments.length} kayıt listeleniyor`}
                 icon={BarChart3}
                 headerAction={
                   <Badge variant="outline">
@@ -708,8 +717,8 @@ export default function InvestmentsPage() {
                 {filteredInvestments.length === 0 ? (
                   <div className="p-6">
                     <EmptyState
-                      title="Filtrelerle eslesen yatirim yok"
-                      description="Arama ve filtreleri temizleyin ya da yeni bir yatirim ekleyin."
+                      title="Filtrelerle eşleşen yatırım yok"
+                      description="Arama ve filtreleri temizleyin ya da yeni bir yatırım ekleyin."
                       action={
                         <div className="flex flex-wrap justify-center gap-2">
                           <Button variant="outline" onClick={() => {
@@ -724,7 +733,7 @@ export default function InvestmentsPage() {
                           </Button>
                           <Button onClick={openCreateDrawer}>
                             <Plus className="mr-2 h-4 w-4" />
-                            Yeni yatirim
+                            Yeni yatırım
                           </Button>
                         </div>
                       }
@@ -735,11 +744,11 @@ export default function InvestmentsPage() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Varlik</TableHead>
-                          <TableHead>Miktar / Alis</TableHead>
-                          <TableHead>Yatirilan</TableHead>
-                          <TableHead>Guncel</TableHead>
-                          <TableHead>Kar / zarar</TableHead>
+                          <TableHead>Varlık</TableHead>
+                          <TableHead>Miktar / Alış</TableHead>
+                          <TableHead>Yatırılan</TableHead>
+                          <TableHead>Güncel</TableHead>
+                          <TableHead>Kâr / zarar</TableHead>
                           <TableHead>Risk</TableHead>
                           <TableHead>Tarih</TableHead>
                           <TableHead className="text-right">Aksiyon</TableHead>
@@ -803,10 +812,10 @@ export default function InvestmentsPage() {
                                   }
                                 >
                                   {investment.riskLevel === 'low'
-                                    ? 'Dusuk'
+                                    ? 'Düşük'
                                     : investment.riskLevel === 'medium'
                                       ? 'Orta'
-                                      : 'Yuksek'}
+                                      : 'Yüksek'}
                                 </Badge>
                               </TableCell>
                               <TableCell>
@@ -861,9 +870,9 @@ export default function InvestmentsPage() {
               </DashboardCard>
 
               <div className="space-y-6">
-                <ChartCard title="Varlik dagilimi" description="Portfoy icindeki tur paylari" icon={PieChart}>
+                <ChartCard title="Varlık dağılımı" description="Portföy içindeki tür payları" icon={PieChart}>
                   {typeBreakdown.length === 0 ? (
-                    <div className="text-sm text-muted-foreground">Dagilim icin yatirim bulunmuyor.</div>
+                    <div className="text-sm text-muted-foreground">Dağılım için yatırım bulunmuyor.</div>
                   ) : (
                     <div className="space-y-3">
                       {typeBreakdown.slice(0, 6).map(item => (
@@ -871,7 +880,7 @@ export default function InvestmentsPage() {
                           <div className="flex items-center justify-between text-sm">
                             <div className="font-medium text-foreground">{item.label}</div>
                             <div className="text-muted-foreground">
-                              {item.share.toFixed(1)}% • {item.count} kayit
+                              {item.share.toFixed(1)}% • {item.count} kayıt
                             </div>
                           </div>
                           <div className="h-2 overflow-hidden rounded-full bg-muted">
@@ -886,11 +895,11 @@ export default function InvestmentsPage() {
                   )}
                 </ChartCard>
 
-                <ChartCard title="One cikanlar" description="Performansa gore hizli okuma" icon={TrendingUp}>
+                <ChartCard title="Öne çıkanlar" description="Performansa göre hızlı okuma" icon={TrendingUp}>
                   <div className="space-y-4">
                     {bestPerformer ? (
                       <div className="rounded-xl border border-green-500/20 bg-green-500/10 p-4">
-                        <div className="text-xs uppercase tracking-wide text-green-300">En guclu pozisyon</div>
+                        <div className="text-xs uppercase tracking-wide text-green-300">En güçlü pozisyon</div>
                         <div className="mt-2 font-semibold text-foreground">{bestPerformer.name}</div>
                         <div className="mt-1 text-sm text-green-300">
                           +{bestPerformer.profitLossPercent.toFixed(2)}% •{' '}
@@ -900,7 +909,7 @@ export default function InvestmentsPage() {
                     ) : null}
                     {weakestPerformer ? (
                       <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4">
-                        <div className="text-xs uppercase tracking-wide text-rose-300">En zayif pozisyon</div>
+                        <div className="text-xs uppercase tracking-wide text-rose-300">En zayıf pozisyon</div>
                         <div className="mt-2 font-semibold text-foreground">{weakestPerformer.name}</div>
                         <div className="mt-1 text-sm text-rose-300">
                           {weakestPerformer.profitLossPercent.toFixed(2)}% •{' '}
@@ -911,16 +920,16 @@ export default function InvestmentsPage() {
                   </div>
                 </ChartCard>
 
-                <ChartCard title="Para birimi maruziyeti" description="Kayit sayisi ve hacim" icon={Coins}>
+                <ChartCard title="Para birimi maruziyeti" description="Kayıt sayısı ve hacim" icon={Coins}>
                   {currencyBreakdown.length === 0 ? (
-                    <div className="text-sm text-muted-foreground">Para birimi maruziyeti olusmadi.</div>
+                    <div className="text-sm text-muted-foreground">Para birimi maruziyeti oluşmadı.</div>
                   ) : (
                     <div className="space-y-3">
                       {currencyBreakdown.map(item => (
                         <div key={item.code} className="flex items-center justify-between rounded-xl border border-border bg-muted/20 p-3">
                           <div>
                             <div className="font-medium text-foreground">{item.code}</div>
-                            <div className="text-xs text-muted-foreground">{item.count} kayit</div>
+                            <div className="text-xs text-muted-foreground">{item.count} kayıt</div>
                           </div>
                           <div className="text-sm font-medium text-foreground">
                             {formatCurrency(item.value, item.code)}
@@ -931,9 +940,9 @@ export default function InvestmentsPage() {
                   )}
                 </ChartCard>
 
-                <ChartCard title="Son hareketler" description="En son eklenen kayitlar" icon={RefreshCcw}>
+                <ChartCard title="Son hareketler" description="En son eklenen kayıtlar" icon={RefreshCcw}>
                   {recentInvestments.length === 0 ? (
-                    <div className="text-sm text-muted-foreground">Henuz kayit eklenmedi.</div>
+                    <div className="text-sm text-muted-foreground">Henüz kayıt eklenmedi.</div>
                   ) : (
                     <div className="space-y-3">
                       {recentInvestments.map(item => (
@@ -968,15 +977,15 @@ export default function InvestmentsPage() {
         <DrawerContent className="sm:max-w-xl">
           <DrawerHeader>
             <DrawerTitle>
-              {editorState.mode === 'edit' ? 'Yatirimi duzenle' : 'Hizli yatirim ekle'}
+              {editorState.mode === 'edit' ? 'Yatırımı düzenle' : 'Hızlı yatırım ekle'}
             </DrawerTitle>
             <DrawerDescription>
-              Ortak veri kontrati kullanilir. Gerekirse detayli tur akislarina gecis yapabilirsiniz.
+              Ortak veri kontratı kullanılır. Gerekirse detaylı tür akışlarına geçiş yapabilirsiniz.
             </DrawerDescription>
           </DrawerHeader>
           <DrawerBody>
             <div className="space-y-4">
-              <FormField label="Yatirim turu">
+              <FormField label="Yatırım türü">
                 <Select
                   value={formData.investmentType}
                   onValueChange={value =>
@@ -993,7 +1002,7 @@ export default function InvestmentsPage() {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Tur seciniz" />
+                    <SelectValue placeholder="Tür seçiniz" />
                   </SelectTrigger>
                   <SelectContent>
                     {INVESTMENT_TYPE_OPTIONS.map(option => (
@@ -1006,11 +1015,11 @@ export default function InvestmentsPage() {
               </FormField>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <FormField label="Yatirim adi" required>
+                <FormField label="Yatırım adı" required>
                   <Input
                     value={formData.name}
                     onChange={event => setFormData(prev => ({ ...prev, name: event.target.value }))}
-                    placeholder="Varlik adi"
+                    placeholder="Varlık adı"
                   />
                 </FormField>
                 <FormField label="Sembol">
@@ -1035,7 +1044,7 @@ export default function InvestmentsPage() {
                     onValueChange={value => setFormData(prev => ({ ...prev, currencyId: value }))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Para birimi seciniz" />
+                      <SelectValue placeholder="Para birimi seçiniz" />
                     </SelectTrigger>
                     <SelectContent>
                       {currencies.map(currency => (
@@ -1121,12 +1130,12 @@ export default function InvestmentsPage() {
             </Button>
             <Button variant="outline" asChild>
               <Link href={`/investments/${formData.investmentType}/new`}>
-                Tur bazli akisa git
+                Tür bazlı akışa git
               </Link>
             </Button>
             <Button onClick={() => void submitEditor()} loading={saving}>
               <Save className="mr-2 h-4 w-4" />
-              {editorState.mode === 'edit' ? 'Degisiklikleri kaydet' : 'Yatirimi olustur'}
+              {editorState.mode === 'edit' ? 'Değişiklikleri kaydet' : 'Yatırımı oluştur'}
             </Button>
           </DrawerFooter>
         </DrawerContent>
@@ -1136,17 +1145,17 @@ export default function InvestmentsPage() {
         isOpen={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
         onConfirm={confirmDelete}
-        title="Yatirimi sil"
-        message={`${deleteTarget?.name || 'Secili kaydi'} silmek istediginize emin misiniz?`}
-        warningMessage="Kayit pasife alinacak ve portfoy ozetleri aninda guncellenecek."
+        title="Yatırımı sil"
+        message={`${deleteTarget?.name || 'Seçili kaydı'} silmek istediğinize emin misiniz?`}
+        warningMessage="Kayıt pasife alınacak ve portföy özetleri anında güncellenecek."
         confirmText="Evet, sil"
-        cancelText="Iptal"
+        cancelText="İptal"
       />
 
       <PremiumUpgradeModal
         isOpen={showPremiumModal}
         onClose={() => setShowPremiumModal(false)}
-        featureName="Yatirim Yonetimi"
+        featureName="Yatırım Yönetimi"
       />
     </>
   )

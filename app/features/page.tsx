@@ -3,11 +3,12 @@
 import {
   BrainCircuit, BarChart3, Target, TrendingUp, Shield,
   Bell, CreditCard, Wallet, PiggyBank, FileText,
-  ArrowRight, ShieldCheck, Sparkles, Zap,
+  ArrowRight, ShieldCheck, Sparkles, Zap, Menu, X,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import BrandLogo from '@/components/brand-logo'
+import { useState } from 'react'
 
 const SECTIONS = [
   {
@@ -119,6 +120,7 @@ const SECTIONS = [
 
 export default function FeaturesPage() {
   const router = useRouter()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-[#050816] text-white">
@@ -140,16 +142,46 @@ export default function FeaturesPage() {
           <div className="hidden items-center gap-7 text-sm text-slate-400 sm:flex">
             <Link href="/landing"  className="transition hover:text-white">Ana Sayfa</Link>
             <Link href="/pricing"  className="transition hover:text-white">Fiyatlar</Link>
-            <Link href="/demo"     className="transition hover:text-white">Demo</Link>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <button onClick={() => router.push('/auth/login')} className="px-3 py-1.5 text-slate-400 hover:text-white transition">Giriş</button>
-            <button onClick={() => router.push('/auth/register')} className="rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 px-4 py-1.5 font-semibold text-white hover:opacity-90 transition shadow-[0_0_18px_rgba(139,92,246,0.3)]">
+            <button onClick={() => router.push('/auth/login')} className="hidden px-3 py-1.5 text-slate-400 hover:text-white transition sm:block">Giriş</button>
+            <button onClick={() => router.push('/auth/register')} className="hidden rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 px-4 py-1.5 font-semibold text-white hover:opacity-90 transition shadow-[0_0_18px_rgba(139,92,246,0.3)] sm:block">
               Ücretsiz Başla
+            </button>
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="sm:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.05] transition"
+              aria-label="Menüyü aç"
+            >
+              <Menu className="h-5 w-5" />
             </button>
           </div>
         </div>
       </nav>
+
+      {/* Mobile Drawer */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 sm:hidden">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
+          <div className="absolute right-0 top-0 h-full w-72 max-w-[85vw] bg-slate-950 border-l border-white/[0.07] flex flex-col p-6">
+            <div className="flex items-center justify-between mb-8">
+              <BrandLogo size={20} priority variant="dark" textClassName="text-white font-bold text-sm" />
+              <button onClick={() => setMobileOpen(false)} className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.05] transition">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <nav className="flex flex-col gap-1 text-sm">
+              <Link href="/landing" onClick={() => setMobileOpen(false)} className="px-3 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/[0.05] transition">Ana Sayfa</Link>
+              <Link href="/features" onClick={() => setMobileOpen(false)} className="px-3 py-2.5 rounded-lg text-white bg-white/[0.05] font-medium">Özellikler</Link>
+              <Link href="/pricing" onClick={() => setMobileOpen(false)} className="px-3 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/[0.05] transition">Fiyatlar</Link>
+            </nav>
+            <div className="mt-auto flex flex-col gap-2">
+              <button onClick={() => { setMobileOpen(false); router.push('/auth/login') }} className="w-full px-4 py-2.5 rounded-lg border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.05] transition text-sm">Giriş Yap</button>
+              <button onClick={() => { setMobileOpen(false); router.push('/auth/register') }} className="w-full rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 px-4 py-2.5 font-semibold text-white hover:opacity-90 transition text-sm">Ücretsiz Başla</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero */}
       <div className="relative z-10 mx-auto max-w-7xl px-5 pb-16 pt-20 text-center sm:px-8 sm:pt-28">
@@ -242,7 +274,6 @@ export default function FeaturesPage() {
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-600">
             <Link href="/landing"  className="hover:text-slate-300 transition">Ana Sayfa</Link>
             <Link href="/pricing"  className="hover:text-slate-300 transition">Fiyatlar</Link>
-            <Link href="/demo"     className="hover:text-slate-300 transition">Demo</Link>
             <Link href="/privacy"  className="hover:text-slate-300 transition">Gizlilik</Link>
             <Link href="/terms"    className="hover:text-slate-300 transition">Kullanım Şartları</Link>
             <Link href="/kvkk"     className="hover:text-slate-300 transition">KVKK</Link>

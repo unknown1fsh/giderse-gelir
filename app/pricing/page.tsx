@@ -96,7 +96,6 @@ export default function PricingPage() {
           <div className="hidden items-center gap-7 text-sm text-slate-400 sm:flex">
             <Link href="/landing"  className="transition hover:text-white">Ana Sayfa</Link>
             <Link href="/features" className="transition hover:text-white">Özellikler</Link>
-            <Link href="/demo"     className="transition hover:text-white">Demo</Link>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <button onClick={() => router.push('/auth/login')} className="px-3 py-1.5 text-slate-400 hover:text-white transition">Giriş</button>
@@ -140,7 +139,7 @@ export default function PricingPage() {
 
       {/* Plan cards */}
       <div className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8">
-        <div className="grid gap-5 sm:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-3">
           {PLANS.map((p) => (
             <div key={p.name}
               className={`relative rounded-2xl p-6 ${p.highlight
@@ -272,7 +271,6 @@ export default function PricingPage() {
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-600">
             <Link href="/landing"  className="hover:text-slate-300 transition">Ana Sayfa</Link>
             <Link href="/features" className="hover:text-slate-300 transition">Özellikler</Link>
-            <Link href="/demo"     className="hover:text-slate-300 transition">Demo</Link>
             <Link href="/privacy"  className="hover:text-slate-300 transition">Gizlilik</Link>
             <Link href="/terms"    className="hover:text-slate-300 transition">Kullanım Şartları</Link>
             <Link href="/kvkk"     className="hover:text-slate-300 transition">KVKK</Link>

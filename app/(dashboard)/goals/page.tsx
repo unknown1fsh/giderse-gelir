@@ -631,7 +631,7 @@ export default function GoalsPage() {
                             <div className="space-y-5">
                                 <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-200">
                                     <Target className="h-3.5 w-3.5" />
-                                    Mosaic hedef merkezi
+                                    Hedef Takip Merkezi
                                 </div>
                                 <div>
                                     <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">

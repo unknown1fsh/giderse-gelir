@@ -80,10 +80,10 @@ type StatusFilter = 'all' | 'active' | 'inactive' | 'upcoming'
 type SortOption = 'next-up' | 'next-down' | 'amount-high' | 'amount-low' | 'newest'
 
 const SOURCE_LABELS: Record<AutoPaymentSourceType, string> = {
-  none: 'Kaynak secilmedi',
-  account: 'Banka hesabi',
-  creditCard: 'Kredi karti',
-  eWallet: 'E-cuzdan',
+  none: 'Kaynak seçilmedi',
+  account: 'Banka hesabı',
+  creditCard: 'Kredi kartı',
+  eWallet: 'E-cüzdan',
   beneficiary: 'Lehtar',
 }
 
@@ -133,7 +133,7 @@ function getStatusBadge(payment: NormalizedAutoPayment) {
     return { label: 'Pasif', variant: 'outline' as const }
   }
   if (isUpcoming(payment.nextPaymentDate)) {
-    return { label: 'Yaklasan', variant: 'warning' as const }
+    return { label: 'Yaklaşan', variant: 'warning' as const }
   }
 
   return { label: 'Aktif', variant: 'success' as const }
@@ -146,9 +146,16 @@ function sourceFilterLabel(sourceType: AutoPaymentSourceType) {
 export default function AutoPaymentsPage() {
   const router = useRouter()
   const { success: toastSuccess, error: toastError, warning: toastWarning } = useToast()
-  const { user } = useUser()
+  const { user, loading: userLoading } = useUser()
   const isPremium = isPremiumPlan(user?.plan || 'free')
   const fetchedRef = useRef(false)
+
+  useEffect(() => {
+    if (userLoading) return
+    if (!isPremium) {
+      void router.push('/premium')
+    }
+  }, [userLoading, isPremium, router])
 
   const [autoPayments, setAutoPayments] = useState<NormalizedAutoPayment[]>([])
   const [referenceData, setReferenceData] = useState<AutoPaymentReferenceData>({
@@ -214,12 +221,12 @@ export default function AutoPaymentsPage() {
         throw new Error(
           !Array.isArray(paymentsPayload) && paymentsPayload.error
             ? paymentsPayload.error
-            : 'Otomatik odemeler alinamadi'
+            : 'Otomatik ödemeler alınamadı'
         )
       }
 
       if (!referenceResponse.ok) {
-        throw new Error(referencePayload.error || 'Referans verileri alinamadi')
+        throw new Error(referencePayload.error || 'Referans verileri alınamadı')
       }
 
       const nextReferenceData = buildAutoPaymentReferenceData(referencePayload)
@@ -248,9 +255,9 @@ export default function AutoPaymentsPage() {
       setError(
         fetchError instanceof Error
           ? fetchError.message
-          : 'Otomatik odemeler yuklenirken bir hata olustu.'
+          : 'Otomatik ödemeler yüklenirken bir hata oluştu.'
       )
-      toastError('Hata', 'Otomatik odeme merkezi yuklenemedi')
+      toastError('Hata', 'Otomatik ödeme merkezi yüklenemedi')
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -342,12 +349,12 @@ export default function AutoPaymentsPage() {
   const totalAmountHeadline =
     currencySummaries.length === 1
       ? formatCurrency(currencySummaries[0].total, currencySummaries[0].code)
-      : `${currencySummaries.length} para biriminde dagilim`
+      : `${currencySummaries.length} para biriminde dağılım`
 
   const totalAmountSubtitle =
     currencySummaries.length === 1
-      ? `Aktif ${currencySummaries[0].count} talimatin toplami`
-      : 'Kur cevrimi yapmadan para birimi bazli ozetlenir'
+      ? `Aktif ${currencySummaries[0].count} talimatın toplamı`
+      : 'Kur çevrimi yapmadan para birimi bazlı özetlenir'
 
   const filteredPayments = useMemo(() => {
     const query = searchTerm.trim().toLocaleLowerCase('tr')
@@ -485,8 +492,8 @@ export default function AutoPaymentsPage() {
       }
 
       toastSuccess(
-        'Basarili',
-        drawerMode === 'create' ? 'Yeni talimat olusturuldu' : 'Talimat guncellendi'
+        'Başarılı',
+        drawerMode === 'create' ? 'Yeni talimat oluşturuldu' : 'Talimat güncellendi'
       )
       closeDrawer()
       await fetchData({ silent: true })
@@ -539,7 +546,7 @@ export default function AutoPaymentsPage() {
           setShowPremiumModal(true)
           return
         }
-        throw new Error(payload.error || 'Durum guncellenemedi')
+        throw new Error(payload.error || 'Durum güncellenemedi')
       }
 
       setAutoPayments(current =>
@@ -548,14 +555,14 @@ export default function AutoPaymentsPage() {
         )
       )
       toastSuccess(
-        'Basarili',
-        payment.active ? 'Talimat pasife alindi' : 'Talimat yeniden aktiflesti'
+        'Başarılı',
+        payment.active ? 'Talimat pasife alındı' : 'Talimat yeniden etkinleşti'
       )
     } catch (toggleError) {
       console.error('Auto payment toggle error:', toggleError)
       toastError(
         'Hata',
-        toggleError instanceof Error ? toggleError.message : 'Durum guncellenemedi'
+        toggleError instanceof Error ? toggleError.message : 'Durum güncellenemedi'
       )
     }
   }
@@ -584,7 +591,7 @@ export default function AutoPaymentsPage() {
       }
 
       setAutoPayments(current => current.filter(item => item.id !== deleteCandidate.id))
-      toastWarning('Silindi', 'Talimat kaldirildi ve hatirlatma akisindan cikarildi')
+      toastWarning('Silindi', 'Talimat kaldırıldı ve hatırlatma akışından çıkarıldı')
     } catch (deleteError) {
       console.error('Auto payment delete error:', deleteError)
       toastError(
@@ -601,9 +608,9 @@ export default function AutoPaymentsPage() {
     return (
       <AppPageShell
         header={{
-          title: 'Otomatik Odemeler',
-          description: 'Talimat merkezi hazirlaniyor.',
-          breadcrumbs: [{ label: 'Dashboard', href: '/dashboard' }, { label: 'Otomatik Odemeler' }],
+          title: 'Otomatik Ödemeler',
+          description: 'Talimat merkezi hazırlanıyor.',
+          breadcrumbs: [{ label: 'Dashboard', href: '/dashboard' }, { label: 'Otomatik Ödemeler' }],
           onBack: () => router.back(),
           leadingActions: [
             {
@@ -619,9 +626,9 @@ export default function AutoPaymentsPage() {
             <div className="flex min-h-[260px] flex-col items-center justify-center gap-4 text-center">
               <div className="h-10 w-10 animate-spin rounded-full border-2 border-cyan-400/20 border-t-cyan-400" />
               <div>
-                <p className="text-lg font-semibold text-white">Otomatik odeme merkezi yukleniyor</p>
+                <p className="text-lg font-semibold text-white">Otomatik ödeme merkezi yükleniyor</p>
                 <p className="mt-1 text-sm text-slate-400">
-                  Talimat listesi, filtreler ve odak panelleri hazirlaniyor.
+                  Talimat listesi, filtreler ve odak panelleri hazırlanıyor.
                 </p>
               </div>
             </div>
@@ -635,9 +642,9 @@ export default function AutoPaymentsPage() {
     return (
       <AppPageShell
         header={{
-          title: 'Otomatik Odemeler',
-          description: 'Duzenli talimatlarinizi tek merkezde yonetin.',
-          breadcrumbs: [{ label: 'Dashboard', href: '/dashboard' }, { label: 'Otomatik Odemeler' }],
+          title: 'Otomatik Ödemeler',
+          description: 'Düzenli talimatlarınızı tek merkezde yönetin.',
+          breadcrumbs: [{ label: 'Dashboard', href: '/dashboard' }, { label: 'Otomatik Ödemeler' }],
           onBack: () => router.back(),
           leadingActions: [
             {
@@ -649,7 +656,7 @@ export default function AutoPaymentsPage() {
         }}
       >
         <ErrorState
-          title="Otomatik odemeler yuklenemedi"
+          title="Otomatik ödemeler yüklenemedi"
           description={error}
           onRetry={() => void fetchData()}
           className="min-h-[320px]"
@@ -662,10 +669,10 @@ export default function AutoPaymentsPage() {
     <>
       <AppPageShell
         header={{
-          title: 'Otomatik Odemeler',
+          title: 'Otomatik Ödemeler',
           description:
-            'Duzenli fatura, abonelik ve planli transferlerinizi filtreleyin, guncelleyin ve ayni ekrandan yonetin.',
-          breadcrumbs: [{ label: 'Dashboard', href: '/dashboard' }, { label: 'Otomatik Odemeler' }],
+            'Düzenli fatura, abonelik ve planlı transferlerinizi filtreleyin, güncelleyin ve aynı ekrandan yönetin.',
+          breadcrumbs: [{ label: 'Dashboard', href: '/dashboard' }, { label: 'Otomatik Ödemeler' }],
           onBack: () => router.back(),
           leadingActions: [
             {
@@ -689,7 +696,7 @@ export default function AutoPaymentsPage() {
               </Button>
               <Button variant="glow" onClick={openCreateDrawer}>
                 <Plus className="mr-2 h-4 w-4" />
-                Yeni otomatik odeme
+                Yeni otomatik ödeme
               </Button>
             </>
           ),
@@ -702,7 +709,7 @@ export default function AutoPaymentsPage() {
               <div>
                 <p className="text-sm font-semibold text-amber-200">Premium gerekli</p>
                 <p className="mt-1 text-sm text-slate-300">
-                  Yeni talimat ekleme, duzenleme ve silme aksiyonlari premium planla acilir.
+                  Yeni talimat ekleme, düzenleme ve silme aksiyonları premium planla açılır.
                 </p>
               </div>
               <Button variant="premium" onClick={() => setShowPremiumModal(true)}>
@@ -718,27 +725,27 @@ export default function AutoPaymentsPage() {
             value={summary.active}
             icon={BellRing}
             color="blue"
-            subtitle="Hatirlatma akisinda kalan kayitlar"
+            subtitle="Hatırlatma akışında kalan kayıtlar"
             variant="premium"
           />
           <StatCard
-            title="Yaklasan odeme"
+            title="Yaklaşan ödeme"
             value={summary.upcoming}
             icon={AlertCircle}
             color="amber"
-            subtitle="Onumuzdeki 7 gun icindeki aktif kayitlar"
+            subtitle="Önümüzdeki 7 gün içindeki aktif kayıtlar"
             variant="premium"
           />
           <StatCard
-            title="Kaynak dagilimi"
+            title="Kaynak dağılımı"
             value={summary.sourceTypeCount}
             icon={Wallet}
             color="purple"
-            subtitle="Bagli kaynak tipi cesitliligi"
+            subtitle="Bağlı kaynak tipi çeşitliliği"
             variant="premium"
           />
           <StatCard
-            title="Toplam tutar ozeti"
+            title="Toplam tutar özeti"
             value={totalAmountHeadline}
             icon={Calendar}
             color="green"
@@ -751,7 +758,7 @@ export default function AutoPaymentsPage() {
           <SearchBox
             value={searchTerm}
             onSearch={setSearchTerm}
-            placeholder="Talimat, kategori, odeme yontemi veya kaynak ara"
+            placeholder="Talimat, kategori, ödeme yöntemi veya kaynak ara"
             className="sm:w-full lg:w-[360px]"
           />
 
@@ -763,7 +770,7 @@ export default function AutoPaymentsPage() {
               <SelectValue placeholder="Kaynak tipi" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tum kaynaklar</SelectItem>
+              <SelectItem value="all">Tüm kaynaklar</SelectItem>
               {sourceOptions.map(sourceType => (
                 <SelectItem key={sourceType} value={sourceType}>
                   {sourceFilterLabel(sourceType)}
@@ -777,7 +784,7 @@ export default function AutoPaymentsPage() {
               <SelectValue placeholder="Para birimi" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tum para birimleri</SelectItem>
+              <SelectItem value="all">Tüm para birimleri</SelectItem>
               {referenceData.currencies.map(currency => (
                 <SelectItem key={currency.id} value={currency.code || String(currency.id)}>
                   {currency.code || currency.name}
@@ -794,10 +801,10 @@ export default function AutoPaymentsPage() {
               <SelectValue placeholder="Durum" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tum durumlar</SelectItem>
+              <SelectItem value="all">Tüm durumlar</SelectItem>
               <SelectItem value="active">Aktif</SelectItem>
               <SelectItem value="inactive">Pasif</SelectItem>
-              <SelectItem value="upcoming">Yaklasan</SelectItem>
+              <SelectItem value="upcoming">Yaklaşan</SelectItem>
             </SelectContent>
           </Select>
 
@@ -806,10 +813,10 @@ export default function AutoPaymentsPage() {
               <SelectValue placeholder="Siralama" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="next-up">Odeme tarihi yakindan</SelectItem>
-              <SelectItem value="next-down">Odeme tarihi uzaktan</SelectItem>
-              <SelectItem value="amount-high">Tutar yuksekten</SelectItem>
-              <SelectItem value="amount-low">Tutar dusukten</SelectItem>
+              <SelectItem value="next-up">Ödeme tarihi yakından</SelectItem>
+              <SelectItem value="next-down">Ödeme tarihi uzaktan</SelectItem>
+              <SelectItem value="amount-high">Tutar yüksekten</SelectItem>
+              <SelectItem value="amount-low">Tutar düşükten</SelectItem>
               <SelectItem value="newest">Son eklenen</SelectItem>
             </SelectContent>
           </Select>
@@ -818,7 +825,7 @@ export default function AutoPaymentsPage() {
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_340px]">
           <DashboardCard
             title="Talimat listesi"
-            description="Duzenle, aktifligi degistir veya kaldir. Her satir talimatin canli durumunu ozetler."
+            description="Düzenle, aktifliği değiştir veya kaldır. Her satır talimatın canlı durumunu özetler."
             icon={Calendar}
             iconColor="text-cyan-300"
             className="bg-slate-950/70"
@@ -828,7 +835,7 @@ export default function AutoPaymentsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Talimat</TableHead>
-                    <TableHead>Kategori / yontem</TableHead>
+                    <TableHead>Kategori / yöntem</TableHead>
                     <TableHead>Kaynak</TableHead>
                     <TableHead>Tekrarlama</TableHead>
                     <TableHead>Sonraki tarih</TableHead>
@@ -852,14 +859,14 @@ export default function AutoPaymentsPage() {
                               <Badge variant="outline">{payment.category?.name || 'Kategori yok'}</Badge>
                             </div>
                             <p className="max-w-[320px] text-xs text-slate-400">
-                              {payment.description?.trim() || 'Aciklama eklenmedi.'}
+                              {payment.description?.trim() || 'Açıklama eklenmedi.'}
                             </p>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="space-y-1 text-sm">
                             <div className="font-medium text-slate-100">
-                              {payment.paymentMethod?.name || 'Odeme yontemi yok'}
+                              {payment.paymentMethod?.name || 'Ödeme yöntemi yok'}
                             </div>
                             <div className="text-xs text-slate-400">{payment.currency.code}</div>
                           </div>
@@ -896,8 +903,8 @@ export default function AutoPaymentsPage() {
                               {daysUntil === null
                                 ? 'Tarih yok'
                                 : daysUntil < 0
-                                  ? `${Math.abs(daysUntil)} gun gecikti`
-                                  : `${daysUntil} gun sonra`}
+                                  ? `${Math.abs(daysUntil)} gün gecikti`
+                                  : `${daysUntil} gün sonra`}
                             </div>
                           </div>
                         </TableCell>
@@ -913,7 +920,7 @@ export default function AutoPaymentsPage() {
                               variant="ghost"
                               size="icon"
                               onClick={() => openEditDrawer(payment)}
-                              aria-label="Duzenle"
+                              aria-label="Düzenle"
                             >
                               <Edit3 className="h-4 w-4" />
                             </Button>
@@ -944,13 +951,13 @@ export default function AutoPaymentsPage() {
               <EmptyState
                 title={
                   autoPayments.length === 0
-                    ? 'Henuz talimat eklenmedi'
-                    : 'Filtreye uyan talimat bulunamadi'
+                    ? 'Henüz talimat eklenmedi'
+                    : 'Filtreye uyan talimat bulunamadı'
                 }
                 description={
                   autoPayments.length === 0
-                    ? 'Ilk kaydi ekleyerek fatura ve duzenli transferlerinizi tek merkezde toplayin.'
-                    : 'Arama veya filtreleri degistirerek daha fazla kayit gosterin.'
+                    ? 'İlk kaydı ekleyerek fatura ve düzenli transferlerinizi tek merkezde toplayın.'
+                    : 'Arama veya filtreleri değiştirerek daha fazla kayıt gösterin.'
                 }
                 icon={<Calendar className="h-10 w-10 text-cyan-300" />}
                 action={
@@ -972,16 +979,16 @@ export default function AutoPaymentsPage() {
           <div className="space-y-6">
             <DashboardCard
               title="Odak paneli"
-              description="Bugun en yakin hatirlatma ve son eklenen kayitlar."
+              description="Bugün en yakın hatırlatma ve son eklenen kayıtlar."
               icon={AlertCircle}
               iconColor="text-amber-300"
               className="bg-slate-950/70"
             >
               <div className="space-y-4">
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">En yakin odeme</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">En yakın ödeme</p>
                   <p className="mt-2 text-lg font-semibold text-white">
-                    {summary.nearestPayment?.name || 'Takvimlenmis kayit yok'}
+                    {summary.nearestPayment?.name || 'Takvimlenmiş kayıt yok'}
                   </p>
                   <p className="mt-1 text-sm text-slate-400">
                     {summary.nearestPayment
@@ -989,14 +996,14 @@ export default function AutoPaymentsPage() {
                           summary.nearestPayment.amount,
                           summary.nearestPayment.currency.code
                         )}`
-                      : 'Tarihi olan aktif talimat eklendiginde burada gorunur.'}
+                      : 'Tarihi olan aktif talimat eklendiğinde burada görünür.'}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Bu ay yaklasanlar</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Bu ay yaklaşanlar</p>
                   <p className="mt-2 text-2xl font-black text-cyan-300">{summary.thisMonth}</p>
                   <p className="mt-1 text-sm text-slate-400">
-                    Ayni ay icinde tekrar edecek aktif kayitlarin sayisi.
+                    Aynı ay içinde tekrar edecek aktif kayıtların sayısı.
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -1007,15 +1014,15 @@ export default function AutoPaymentsPage() {
                   <p className="mt-1 text-sm text-slate-400">
                     {summary.newestPayment?.createdAt
                       ? new Date(summary.newestPayment.createdAt).toLocaleDateString('tr-TR')
-                      : 'Yeni kayit geldiginde burada gorunur.'}
+                      : 'Yeni kayıt geldiğinde burada görünür.'}
                   </p>
                 </div>
               </div>
             </DashboardCard>
 
             <DashboardCard
-              title="Kaynak dagilimi"
-              description="Talimatlar hangi odeme kaynaginda yogunlasiyor?"
+              title="Kaynak dağılımı"
+              description="Talimatlar hangi ödeme kaynağında yoğunlaşıyor?"
               icon={Wallet}
               iconColor="text-emerald-300"
               className="bg-slate-950/70"
@@ -1026,21 +1033,21 @@ export default function AutoPaymentsPage() {
                     <DistributionBar
                       key={item.sourceType}
                       label={sourceFilterLabel(item.sourceType)}
-                      value={`${item.count} kayit`}
+                      value={`${item.count} kayıt`}
                       percentage={summary.total ? (item.count / summary.total) * 100 : 0}
                       tone={item.sourceType === 'beneficiary' ? 'amber' : 'blue'}
-                      hint="Tek kaynak kuralina gore dagitim"
+                      hint="Tek kaynak kuralına göre dağıtım"
                     />
                   ))
                 ) : (
-                  <p className="text-sm text-slate-400">Dagilim gostermek icin kayit ekleyin.</p>
+                  <p className="text-sm text-slate-400">Dağılım göstermek için kayıt ekleyin.</p>
                 )}
               </div>
             </DashboardCard>
 
             <DashboardCard
-              title="Para birimi gorunumu"
-              description="Kur cevrimi yapmadan aktif portfoyu izleyin."
+              title="Para birimi görünümü"
+              description="Kur çevrimi yapmadan aktif portföyü izleyin."
               icon={Landmark}
               iconColor="text-violet-300"
               className="bg-slate-950/70"
@@ -1064,7 +1071,7 @@ export default function AutoPaymentsPage() {
                     />
                   ))
                 ) : (
-                  <p className="text-sm text-slate-400">Aktif talimat olmadiginda burada ozet goremezsiniz.</p>
+                  <p className="text-sm text-slate-400">Aktif talimat olmadığında burada özet göremezsiniz.</p>
                 )}
               </div>
             </DashboardCard>
@@ -1086,12 +1093,12 @@ export default function AutoPaymentsPage() {
         <DrawerContent className="border-white/10 bg-slate-950">
           <DrawerHeader>
             <DrawerTitle>
-              {drawerMode === 'create' ? 'Yeni otomatik odeme' : 'Talimati duzenle'}
+              {drawerMode === 'create' ? 'Yeni otomatik ödeme' : 'Talimatı düzenle'}
             </DrawerTitle>
             <DrawerDescription>
               {drawerMode === 'create'
-                ? 'Ayni panelde kaynak, takvim ve odeme yontemini baglayarak yeni kayit olusturun.'
-                : 'Talimatin kaynak, tarih ve aktiflik bilgisini guncelleyin.'}
+                ? 'Aynı panelde kaynak, takvim ve ödeme yöntemini bağlayarak yeni kayıt oluşturun.'
+                : 'Talimatın kaynak, tarih ve aktiflik bilgisini güncelleyin.'}
             </DrawerDescription>
           </DrawerHeader>
           <DrawerBody>
@@ -1102,7 +1109,7 @@ export default function AutoPaymentsPage() {
               onChange={setFormData}
               onSubmit={submitForm}
               onCancel={closeDrawer}
-              submitLabel={drawerMode === 'create' ? 'Talimati olustur' : 'Degisiklikleri kaydet'}
+              submitLabel={drawerMode === 'create' ? 'Talimatı oluştur' : 'Değişiklikleri kaydet'}
               submitting={submitting}
             />
           </DrawerBody>
@@ -1116,10 +1123,10 @@ export default function AutoPaymentsPage() {
         title="Talimat silinsin mi?"
         message={
           deleteCandidate
-            ? `"${deleteCandidate.name}" kaydi kaldirilacak ve gelecekteki hatirlatmalar duracak.`
-            : 'Secilen talimat kaldirilacak.'
+            ? `"${deleteCandidate.name}" kaydı kaldırılacak ve gelecekteki hatırlatmalar duracak.`
+            : 'Seçilen talimat kaldırılacak.'
         }
-        warningMessage="Bu islem geri alinamaz. Gecmis islem kayitlari etkilenmez."
+        warningMessage="Bu işlem geri alınamaz. Geçmiş işlem kayıtları etkilenmez."
         confirmText="Talimati sil"
         cancelText="Vazgec"
         loading={deletingId !== null}
@@ -1128,7 +1135,7 @@ export default function AutoPaymentsPage() {
       <PremiumUpgradeModal
         isOpen={showPremiumModal}
         onClose={() => setShowPremiumModal(false)}
-        featureName="Otomatik odemeler"
+        featureName="Otomatik ödemeler"
       />
     </>
   )

@@ -5,7 +5,6 @@ import { Menu } from 'lucide-react'
 import Sidebar from '@/components/sidebar'
 import PeriodOnboarding from '@/components/period-onboarding'
 import BrandLogo from '@/components/brand-logo'
-import DemoBanner from '@/components/demo-banner'
 import { useUser } from '@/lib/user-context'
 import { getDisplayName } from '@/lib/utils'
 import { GlobalOmnibox } from '@/components/dashboard/global-omnibox'
@@ -17,7 +16,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex flex-col h-screen h-[100dvh] bg-[var(--mosaic-bg)]">
-      <DemoBanner />
       {/* Main layout */}
       <div className="flex flex-1 min-h-0">
       {/* Sidebar */}

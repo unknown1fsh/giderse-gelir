@@ -59,7 +59,7 @@ export function NotificationCenter() {
         credentials: 'include',
       })
       if (!response.ok) {
-        throw new Error('Bildirimler yuklenemedi')
+        throw new Error('Bildirimler yüklenemedi')
       }
 
       const data = (await response.json()) as {
@@ -190,18 +190,18 @@ export function NotificationCenter() {
           <DrawerHeader>
             <DrawerTitle>Bildirim Merkezi</DrawerTitle>
             <DrawerDescription>
-              Butce, odeme, kart ve hedef hareketlerini tek panelden yonetin.
+              Bütçe, ödeme, kart ve hedef hareketlerini tek panelden yönetin.
             </DrawerDescription>
           </DrawerHeader>
 
           <DrawerBody className="space-y-4">
             <div className="flex items-center justify-between rounded-2xl border border-border/70 bg-muted/30 p-4">
               <div>
-                <p className="text-sm font-semibold text-foreground">Okunmamis bildirimler</p>
+                <p className="text-sm font-semibold text-foreground">Okunmamış bildirimler</p>
                 <p className="text-xs text-muted-foreground">
                   {unreadItems.length > 0
                     ? `${unreadItems.length} adet yeni bildirim var.`
-                    : 'Tum bildirimleri okudunuz.'}
+                    : 'Tüm bildirimleri okudunuz.'}
                 </p>
               </div>
               <Badge variant={unreadItems.length > 0 ? 'info' : 'outline'}>{unreadCount}</Badge>
@@ -213,7 +213,7 @@ export function NotificationCenter() {
                   <div>
                     <p className="text-sm font-semibold text-foreground">Web push</p>
                     <p className="text-xs text-muted-foreground">
-                      Anlik hatirlatmalar icin tarayici bildirimlerini etkinlestirin.
+                      Anlık hatırlatmalar için tarayıcı bildirimlerini etkinleştirin.
                     </p>
                   </div>
                   <Button
@@ -223,7 +223,7 @@ export function NotificationCenter() {
                     disabled={subscribing || pushPermission === 'granted'}
                   >
                     {subscribing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    {pushPermission === 'granted' ? 'Etkin' : 'Etkinlestir'}
+                    {pushPermission === 'granted' ? 'Etkin' : 'Etkinleştir'}
                   </Button>
                 </div>
               </div>
@@ -232,11 +232,11 @@ export function NotificationCenter() {
             {loading ? (
               <div className="flex min-h-[240px] items-center justify-center text-muted-foreground">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Bildirimler yukleniyor...
+                Bildirimler yükleniyor...
               </div>
             ) : items.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
-                Su an gosterilecek bildirim yok.
+                Şu an gösterilecek bildirim yok.
               </div>
             ) : (
               <div className="space-y-3">
@@ -293,7 +293,7 @@ export function NotificationCenter() {
           <DrawerFooter className="gap-2">
             <Button variant="outline" onClick={() => void handleMarkAllRead()} disabled={unreadCount === 0}>
               <CheckCheck className="mr-2 h-4 w-4" />
-              Tumunu okundu yap
+              Tümünü okundu yap
             </Button>
             <Button variant="ghost" onClick={() => setOpen(false)}>
               Kapat

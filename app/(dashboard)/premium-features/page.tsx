@@ -152,7 +152,7 @@ export default function PremiumFeaturesPage() {
   const isEnterprise = user.plan === 'enterprise'
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 sm:p-6 md:p-8">
       <div className="mx-auto max-w-7xl">
         {/* Başlık */}
         <div className="mb-12 text-center">
@@ -160,7 +160,7 @@ export default function PremiumFeaturesPage() {
             <div className="rounded-full bg-gradient-to-r from-yellow-500/20 to-amber-500/20 p-3 border border-yellow-500/30">
               <Crown className="h-8 w-8 text-yellow-400 animate-pulse" />
             </div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent sm:text-4xl md:text-5xl">
               {isEnterprise ? 'Enterprise' : 'Premium'} Özellikler
             </h1>
             <Sparkles className="h-8 w-8 text-yellow-400" />
@@ -245,16 +245,16 @@ export default function PremiumFeaturesPage() {
         {/* Free Kullanıcı için Yükseltme Çağrısı */}
         {!isPremium && (
           <div className="mt-12 text-center">
-            <div className="rounded-2xl bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-xl border border-purple-500/30 p-8">
+            <div className="rounded-2xl bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-xl border border-purple-500/30 p-4 sm:p-6 md:p-8">
               <Crown className="mx-auto mb-4 h-16 w-16 text-yellow-400 animate-bounce" />
-              <h3 className="mb-4 text-3xl font-bold text-white">
+              <h3 className="mb-4 text-xl font-bold text-white sm:text-2xl md:text-3xl">
                 Premium'a Geçin, Tüm Özelliklerin Kilidini Açın!
               </h3>
               <p className="mb-6 text-slate-300 text-lg">
                 Finansal yönetiminizi bir üst seviyeye taşıyın
               </p>
               <a
-                href="https://www.shopier.com/cinarinovasyon/45196765"
+                href="https://www.shopier.com/ssayinovation/45196765"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center space-x-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 text-lg font-bold text-white shadow-mosaic hover:from-purple-700 hover:to-pink-700 transition-all hover:scale-105"

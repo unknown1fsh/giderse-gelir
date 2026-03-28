@@ -9,7 +9,20 @@ import {
     CardContent,
     DashboardCard,
     DistributionBar,
+    Drawer,
+    DrawerBody,
+    DrawerContent,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
     EmptyState,
+    FormField,
+    Input,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
     Skeleton,
     StatCard,
     StatsGrid,
@@ -22,9 +35,24 @@ import {
     CalendarDays,
     CheckCircle2,
     Landmark,
+    Plus,
+    RefreshCw,
     TrendingDown,
     Wallet,
 } from 'lucide-react'
+
+interface ReferenceData {
+    banks: Array<{ id: number; name: string }>
+    currencies: Array<{ id: number; code: string; name: string }>
+}
+
+const LOAN_TYPES = [
+    { value: 'PERSONAL', label: 'İhtiyaç Kredisi' },
+    { value: 'HOUSING', label: 'Konut Kredisi' },
+    { value: 'VEHICLE', label: 'Taşıt Kredisi' },
+    { value: 'CREDIT_CARD', label: 'Kredi Kartı Borcu' },
+    { value: 'OTHER', label: 'Diğer' },
+]
 
 interface InstallmentItem {
     id: number
@@ -78,6 +106,24 @@ export default function InstallmentsPage() {
     const [processingId, setProcessingId] = useState<number | null>(null)
     const fetchedRef = useRef(false)
 
+    // Create drawer state
+    const [drawerOpen, setDrawerOpen] = useState(false)
+    const [saving, setSaving] = useState(false)
+    const [referenceData, setReferenceData] = useState<ReferenceData | null>(null)
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+    const [createForm, setCreateForm] = useState({
+        name: '',
+        bankId: '',
+        loanType: 'PERSONAL',
+        totalAmount: '',
+        installmentCount: '',
+        remainingInstallments: '',
+        interestRate: '',
+        paymentDay: '15',
+        currencyId: '',
+        startDate: new Date().toISOString().split('T')[0],
+    })
+
     async function fetchData() {
         try {
             setLoading(true)
@@ -96,8 +142,96 @@ export default function InstallmentsPage() {
         if (fetchedRef.current) {return}
         fetchedRef.current = true
         void fetchData()
+        void fetchReferenceData()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    const fetchReferenceData = async () => {
+        try {
+            const response = await fetch('/api/reference-data', { credentials: 'include' })
+            if (!response.ok) {return}
+            const data = (await response.json()) as ReferenceData
+            setReferenceData(data)
+            const tryCurrency = data.currencies.find(c => c.code === 'TRY')
+            if (tryCurrency) {
+                setCreateForm(prev => ({ ...prev, currencyId: String(tryCurrency.id) }))
+            }
+        } catch {
+            // silently ignore
+        }
+    }
+
+    const openCreateDrawer = () => {
+        setFormErrors({})
+        setCreateForm(prev => ({
+            ...prev,
+            name: '',
+            bankId: '',
+            loanType: 'PERSONAL',
+            totalAmount: '',
+            installmentCount: '',
+            remainingInstallments: '',
+            interestRate: '',
+            paymentDay: '15',
+            startDate: new Date().toISOString().split('T')[0],
+        }))
+        setDrawerOpen(true)
+    }
+
+    const validateForm = () => {
+        const errors: Record<string, string> = {}
+        if (!createForm.name.trim()) {errors.name = 'Taksit adı zorunludur'}
+        if (!createForm.bankId) {errors.bankId = 'Banka seçimi zorunludur'}
+        if (!createForm.currencyId) {errors.currencyId = 'Para birimi zorunludur'}
+        const total = Number(createForm.totalAmount)
+        if (!createForm.totalAmount || isNaN(total) || total <= 0) {errors.totalAmount = 'Geçerli bir tutar girin'}
+        const count = Number(createForm.installmentCount)
+        if (!createForm.installmentCount || isNaN(count) || count <= 0) {errors.installmentCount = 'Geçerli taksit sayısı girin'}
+        const day = Number(createForm.paymentDay)
+        if (!createForm.paymentDay || isNaN(day) || day < 1 || day > 31) {errors.paymentDay = 'Ödeme günü 1-31 arası olmalı'}
+        if (!createForm.startDate) {errors.startDate = 'Başlangıç tarihi zorunludur'}
+        setFormErrors(errors)
+        return Object.keys(errors).length === 0
+    }
+
+    const handleCreateInstallment = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!validateForm()) {return}
+        setSaving(true)
+        try {
+            const count = Number(createForm.installmentCount)
+            const response = await fetch('/api/loans', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    name: createForm.name.trim(),
+                    bankId: Number(createForm.bankId),
+                    loanType: createForm.loanType,
+                    totalAmount: Number(createForm.totalAmount),
+                    installmentCount: count,
+                    remainingInstallments: createForm.remainingInstallments
+                        ? Number(createForm.remainingInstallments)
+                        : count,
+                    interestRate: createForm.interestRate ? Number(createForm.interestRate) : null,
+                    paymentDay: Number(createForm.paymentDay),
+                    currencyId: Number(createForm.currencyId),
+                    startDate: createForm.startDate,
+                }),
+            })
+            if (!response.ok) {
+                const payload = (await response.json()) as { error?: string }
+                throw new Error(payload.error || 'Taksit eklenemedi')
+            }
+            toastSuccess('Başarılı', 'Taksit başarıyla eklendi')
+            setDrawerOpen(false)
+            void fetchData()
+        } catch (err) {
+            toastError('Hata', err instanceof Error ? err.message : 'Taksit eklenemedi')
+        } finally {
+            setSaving(false)
+        }
+    }
 
     async function handleProcessPayment(id: number) {
         setProcessingId(id)
@@ -137,6 +271,12 @@ export default function InstallmentsPage() {
                     title: 'Taksit Ödemeleri',
                     description: 'Aylık ödeme takviminizi yönetin',
                     breadcrumbs: [{ label: 'Taksit Ödemeleri' }],
+                    actions: (
+                        <Button onClick={openCreateDrawer} disabled>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Yeni Taksit
+                        </Button>
+                    ),
                 }}
             >
                 <div className="space-y-6">
@@ -152,11 +292,24 @@ export default function InstallmentsPage() {
     }
 
     return (
+        <>
         <AppPageShell
             header={{
                 title: 'Taksit Ödemeleri',
                 description: 'Aktif taksitlerinizi takip edin ve ödemelerinizi kaydedin',
                 breadcrumbs: [{ label: 'Taksit Ödemeleri' }],
+                actions: (
+                    <>
+                        <Button variant="outline" onClick={() => void fetchData()}>
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                            Yenile
+                        </Button>
+                        <Button onClick={openCreateDrawer}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Yeni Taksit
+                        </Button>
+                    </>
+                ),
             }}
         >
             {/* Özet istatistikler */}
@@ -398,5 +551,138 @@ export default function InstallmentsPage() {
                 </DashboardCard>
             )}
         </AppPageShell>
+
+        <Drawer open={drawerOpen} onOpenChange={open => { if (!open) { setDrawerOpen(false) } else { setDrawerOpen(true) } }}>
+            <DrawerContent className="sm:max-w-lg">
+                <DrawerHeader>
+                    <DrawerTitle>Yeni Taksit Ekle</DrawerTitle>
+                </DrawerHeader>
+                <DrawerBody>
+                    <form id="installment-form" onSubmit={e => { void handleCreateInstallment(e) }} className="space-y-4">
+                        <FormField label="Taksit Adı" required error={formErrors.name}>
+                            <Input
+                                value={createForm.name}
+                                onChange={e => setCreateForm(prev => ({ ...prev, name: e.target.value }))}
+                                placeholder="Örn: Konut Kredisi, Araç Kredisi"
+                            />
+                        </FormField>
+
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <FormField label="Banka" required error={formErrors.bankId}>
+                                <Select value={createForm.bankId} onValueChange={v => setCreateForm(prev => ({ ...prev, bankId: v }))}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Banka seçin" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {referenceData?.banks.map(bank => (
+                                            <SelectItem key={bank.id} value={String(bank.id)}>{bank.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </FormField>
+
+                            <FormField label="Kredi Türü">
+                                <Select value={createForm.loanType} onValueChange={v => setCreateForm(prev => ({ ...prev, loanType: v }))}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {LOAN_TYPES.map(t => (
+                                            <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </FormField>
+                        </div>
+
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <FormField label="Toplam Tutar" required error={formErrors.totalAmount}>
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={createForm.totalAmount}
+                                    onChange={e => setCreateForm(prev => ({ ...prev, totalAmount: e.target.value }))}
+                                    placeholder="0.00"
+                                />
+                            </FormField>
+
+                            <FormField label="Para Birimi" required error={formErrors.currencyId}>
+                                <Select value={createForm.currencyId} onValueChange={v => setCreateForm(prev => ({ ...prev, currencyId: v }))}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Para birimi" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {referenceData?.currencies.map(c => (
+                                            <SelectItem key={c.id} value={String(c.id)}>{c.code} — {c.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </FormField>
+                        </div>
+
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <FormField label="Toplam Taksit Sayısı" required error={formErrors.installmentCount}>
+                                <Input
+                                    type="number"
+                                    min="1"
+                                    value={createForm.installmentCount}
+                                    onChange={e => setCreateForm(prev => ({ ...prev, installmentCount: e.target.value }))}
+                                    placeholder="Örn: 36"
+                                />
+                            </FormField>
+
+                            <FormField label="Kalan Taksit" hint="Boş bırakılırsa toplam taksit sayısı kullanılır">
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    value={createForm.remainingInstallments}
+                                    onChange={e => setCreateForm(prev => ({ ...prev, remainingInstallments: e.target.value }))}
+                                    placeholder="Devam eden taksit varsa"
+                                />
+                            </FormField>
+                        </div>
+
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <FormField label="Faiz Oranı (%)" hint="İsteğe bağlı">
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={createForm.interestRate}
+                                    onChange={e => setCreateForm(prev => ({ ...prev, interestRate: e.target.value }))}
+                                    placeholder="Örn: 2.5"
+                                />
+                            </FormField>
+
+                            <FormField label="Ödeme Günü (1-31)" required error={formErrors.paymentDay}>
+                                <Input
+                                    type="number"
+                                    min="1"
+                                    max="31"
+                                    value={createForm.paymentDay}
+                                    onChange={e => setCreateForm(prev => ({ ...prev, paymentDay: e.target.value }))}
+                                />
+                            </FormField>
+                        </div>
+
+                        <FormField label="Başlangıç Tarihi" required error={formErrors.startDate}>
+                            <Input
+                                type="date"
+                                value={createForm.startDate}
+                                onChange={e => setCreateForm(prev => ({ ...prev, startDate: e.target.value }))}
+                            />
+                        </FormField>
+                    </form>
+                </DrawerBody>
+                <DrawerFooter>
+                    <Button variant="outline" onClick={() => setDrawerOpen(false)}>İptal</Button>
+                    <Button type="submit" form="installment-form" loading={saving}>
+                        Taksit Ekle
+                    </Button>
+                </DrawerFooter>
+            </DrawerContent>
+        </Drawer>
+        </>
     )
 }

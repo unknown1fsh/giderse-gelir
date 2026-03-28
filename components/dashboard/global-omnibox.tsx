@@ -9,11 +9,11 @@ import type { GlobalSearchResultItem } from '@/lib/search'
 type SearchResponse = Record<string, GlobalSearchResultItem[]>
 
 const groupLabels: Record<string, string> = {
-  transactions: 'Islemler',
+  transactions: 'İşlemler',
   accounts: 'Hesaplar',
   cards: 'Kartlar',
   goals: 'Hedefler',
-  autoPayments: 'Otomatik Odemeler',
+  autoPayments: 'Otomatik Ödemeler',
 }
 
 export function GlobalOmnibox() {
@@ -61,7 +61,7 @@ export function GlobalOmnibox() {
           credentials: 'include',
         })
         if (!response.ok) {
-          throw new Error('Arama basarisiz')
+          throw new Error('Arama başarısız')
         }
 
         const data = (await response.json()) as SearchResponse
@@ -99,7 +99,7 @@ export function GlobalOmnibox() {
           }
         }}
         onChange={event => setQuery(event.target.value)}
-        placeholder="Islem, hesap, kart, hedef veya odeme ara..."
+        placeholder="İşlem, hesap, kart, hedef veya ödeme ara..."
         className="h-11 rounded-xl border-border/70 bg-muted/40 pl-10 pr-10 sm:pl-10 sm:pr-10 text-sm"
       />
       {loading ? (
@@ -111,7 +111,7 @@ export function GlobalOmnibox() {
           <CardContent className="max-h-[28rem] overflow-y-auto p-3">
             {flatCount === 0 ? (
               <div className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
-                Sonuc bulunamadi.
+                Sonuç bulunamadı.
               </div>
             ) : (
               <div className="space-y-4">

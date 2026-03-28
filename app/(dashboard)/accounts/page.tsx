@@ -212,7 +212,7 @@ function PremiumUpsell({ feature }: { feature: string }) {
           Bu özellik Premium üyelere özeldir. Tüm finansal varlıklarınızı tek yerden yönetin.
         </p>
         <Button asChild variant="premium" size="sm">
-          <a href="https://www.shopier.com/cinarinovasyon/45196765" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.shopier.com/ssayinovation/45196765" target="_blank" rel="noopener noreferrer">
             <Sparkles className="mr-2 h-4 w-4" /> Premium&apos;a Geç
           </a>
         </Button>

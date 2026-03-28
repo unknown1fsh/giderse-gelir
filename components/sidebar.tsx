@@ -31,6 +31,7 @@ import {
   Landmark,
   Banknote,
   BadgeDollarSign,
+  Lock,
 } from 'lucide-react'
 
 interface NavSection {
@@ -52,7 +53,7 @@ const navSections: NavSection[] = [
     items: [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, color: 'text-indigo-400' },
       { name: 'İşlemler', href: '/transactions', icon: Receipt, color: 'text-green-400' },
-      { name: 'Toplam Varlık', href: '/portfolio', icon: PieChart, color: 'text-emerald-400' },
+      { name: 'Toplam Varlık', href: '/portfolio', icon: PieChart, color: 'text-emerald-400', premium: true },
     ],
   },
   {
@@ -63,21 +64,21 @@ const navSections: NavSection[] = [
       { name: 'Krediler', href: '/loans', icon: Landmark, color: 'text-cyan-400' },
       { name: 'Bütçeler', href: '/budgets', icon: Target, color: 'text-amber-400' },
       { name: 'Taksitler', href: '/installments', icon: CalendarClock, color: 'text-orange-400' },
-      { name: 'Otomatik Ödemeler', href: '/auto-payments', icon: BadgeDollarSign, color: 'text-teal-400' },
+      { name: 'Otomatik Ödemeler', href: '/auto-payments', icon: BadgeDollarSign, color: 'text-teal-400', premium: true },
     ],
   },
   {
     label: 'Yatırım',
     items: [
-      { name: 'Yatırım Araçları', href: '/investments', icon: Building2, color: 'text-violet-400' },
-      { name: 'Altın', href: '/gold', icon: Coins, color: 'text-yellow-400' },
+      { name: 'Yatırım Araçları', href: '/investments', icon: Building2, color: 'text-violet-400', premium: true },
+      { name: 'Altın', href: '/gold', icon: Coins, color: 'text-yellow-400', premium: true },
       { name: 'E-Cüzdanlar', href: '/ewallets', icon: Banknote, color: 'text-lime-400' },
     ],
   },
   {
     label: 'Raporlar',
     items: [
-      { name: 'Analiz ve Raporlar', href: '/analysis', icon: BarChart3, color: 'text-indigo-400' },
+      { name: 'Analiz ve Raporlar', href: '/analysis', icon: BarChart3, color: 'text-indigo-400', premium: true },
       {
         name: 'AI Analiz Raporu',
         href: '/ai-analysis',
@@ -179,7 +180,17 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           {/* Plan Badge */}
           {user && (
             <div className="flex items-center px-6 pb-3">
-              {user.plan === 'premium' ||
+              {user.plan === 'family' ? (
+                <Link
+                  href="/premium-features"
+                  onClick={handleLinkClick}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-cyan-500/15 to-blue-500/15 border border-cyan-500/25 hover:from-cyan-500/25 hover:to-blue-500/25 transition-all duration-300 group"
+                >
+                  <Crown className="h-3.5 w-3.5 text-cyan-400" />
+                  <span className="text-xs font-semibold text-cyan-300">Family</span>
+                  <Sparkles className="h-3 w-3 text-cyan-500/50" />
+                </Link>
+              ) : user.plan === 'premium' ||
                 user.plan === 'enterprise' ||
                 user.plan === 'enterprise_premium' ? (
                 <Link
@@ -188,32 +199,24 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-500/25 hover:from-amber-500/25 hover:to-orange-500/25 transition-all duration-300 group"
                 >
                   <Crown className="h-3.5 w-3.5 text-amber-400" />
-                  <span className="text-xs font-semibold text-amber-300">
-                    {user.plan === 'enterprise_premium'
-                      ? 'Kurumsal Premium'
-                      : user.plan === 'enterprise'
-                        ? 'Enterprise'
-                        : 'Premium'}
-                  </span>
+                  <span className="text-xs font-semibold text-amber-300">Pro</span>
                   <Sparkles className="h-3 w-3 text-amber-500/50" />
                 </Link>
               ) : (
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border border-border">
                   <User className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs font-medium text-muted-foreground">Free</span>
+                  <span className="text-xs font-medium text-muted-foreground">Ücretsiz</span>
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* Premium Upgrade Banner - Free users only */}
+        {/* Upgrade Banner */}
         {user && (user.plan === 'free' || !user.plan) && (
           <div className="mx-4 mt-4 shrink-0">
-            <a
-              href="https://www.shopier.com/cinarinovasyon/45196765"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/premium"
               onClick={handleLinkClick}
               className="block p-3 bg-gradient-to-r from-indigo-600/20 to-violet-600/20 rounded-lg border border-indigo-500/20 hover:from-indigo-600/30 hover:to-violet-600/30 transition-all duration-300 group"
             >
@@ -222,11 +225,30 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   <Crown className="h-4 w-4 text-indigo-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white">Premium&apos;a Geç</p>
-                  <p className="text-xs text-indigo-300/70 truncate">₺149/ay — Tüm özellikleri aç</p>
+                  <p className="text-sm font-medium text-white">Pro&apos;ya Geç</p>
+                  <p className="text-xs text-indigo-300/70 truncate">₺99/ay — Tüm özellikleri aç</p>
                 </div>
               </div>
-            </a>
+            </Link>
+          </div>
+        )}
+        {user && (user.plan === 'premium' || user.plan === 'enterprise') && (
+          <div className="mx-4 mt-4 shrink-0">
+            <Link
+              href="/premium"
+              onClick={handleLinkClick}
+              className="block p-3 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-lg border border-cyan-500/20 hover:from-cyan-600/30 hover:to-blue-600/30 transition-all duration-300 group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-1.5 rounded-lg bg-cyan-500/20 group-hover:bg-cyan-500/30 transition-colors">
+                  <Crown className="h-4 w-4 text-cyan-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white">Family&apos;e Yükselt</p>
+                  <p className="text-xs text-cyan-300/70 truncate">₺199/ay — Gelişmiş analizler</p>
+                </div>
+              </div>
+            </Link>
           </div>
         )}
 
@@ -239,48 +261,40 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 px-3 py-3 scrollbar-thin">
-          {navSections.map(section => {
-            // Filter items based on premium status
-            const visibleItems = section.items.filter(item => {
-              if (item.premium && user && !isPremiumPlan(user.plan)) {
-                return false
-              }
-              return true
-            })
-
-            if (visibleItems.length === 0) { return null }
-
-            return (
-              <div key={section.label} className="mb-4">
-                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  {section.label}
-                </p>
-                <div className="space-y-0.5">
-                  {visibleItems.map(item => {
-                    const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-                    return (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        onClick={handleLinkClick}
-                        className={`group flex items-center gap-3 rounded-lg px-3 min-h-[40px] py-2 text-sm font-medium transition-all duration-200 ${isActive
-                          ? 'bg-primary/10 text-primary border-l-2 border-primary ml-0'
-                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                          }`}
-                      >
-                        <item.icon
-                          className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-primary' : item.color + ' group-hover:text-foreground'
-                            }`}
-                        />
-                        <span className="truncate">{item.name}</span>
-                        {item.premium && <Crown className="h-3 w-3 text-amber-400 flex-shrink-0 ml-auto" />}
-                      </Link>
-                    )
-                  })}
-                </div>
+          {navSections.map(section => (
+            <div key={section.label} className="mb-4">
+              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                {section.label}
+              </p>
+              <div className="space-y-0.5">
+                {section.items.map(item => {
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                  const isLocked = item.premium && user && !isPremiumPlan(user.plan)
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={handleLinkClick}
+                      className={`group flex items-center gap-3 rounded-lg px-3 min-h-[40px] py-2 text-sm font-medium transition-all duration-200 ${
+                        isLocked
+                          ? 'opacity-40 hover:opacity-60'
+                          : isActive
+                            ? 'bg-primary/10 text-primary border-l-2 border-primary ml-0'
+                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      }`}
+                    >
+                      <item.icon
+                        className={`h-4 w-4 flex-shrink-0 ${isActive && !isLocked ? 'text-primary' : item.color + ' group-hover:text-foreground'}`}
+                      />
+                      <span className="truncate">{item.name}</span>
+                      {isLocked && <Lock className="h-3 w-3 text-muted-foreground flex-shrink-0 ml-auto" />}
+                      {item.premium && !isLocked && <Crown className="h-3 w-3 text-amber-400 flex-shrink-0 ml-auto" />}
+                    </Link>
+                  )
+                })}
               </div>
-            )
-          })}
+            </div>
+          ))}
         </nav>
 
         {/* Bottom Section */}

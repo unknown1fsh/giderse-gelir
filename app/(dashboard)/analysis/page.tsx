@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useUser } from '@/lib/user-context'
+import { isPremiumPlan } from '@/lib/plan-config'
 import {
   AppPageShell,
   Button,
@@ -82,12 +85,21 @@ interface AnalysisData {
 type TabType = 'overview' | 'insights' | 'categories' | 'trends'
 
 export default function AnalysisPage() {
+  const { user, loading: userLoading } = useUser()
+  const router = useRouter()
   const { error: toastError } = useToast()
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedPeriod, setSelectedPeriod] = useState('30d')
   const [activeTab, setActiveTab] = useState<TabType>('overview')
   const fetchedRef = useRef(false)
+
+  useEffect(() => {
+    if (userLoading) return
+    if (!isPremiumPlan(user?.plan || 'free')) {
+      void router.push('/premium')
+    }
+  }, [userLoading, user, router])
 
   useEffect(() => {
     if (fetchedRef.current) { return }
@@ -280,6 +292,8 @@ export default function AnalysisPage() {
     'from-cyan-500 to-sky-600',
   ]
 
+  if (!userLoading && !isPremiumPlan(user?.plan || 'free')) return null
+
   return (
     <AppPageShell
       header={{
@@ -323,7 +337,7 @@ export default function AnalysisPage() {
               </div>
               <div className="mt-5">
                 <div className="flex items-end gap-3">
-                  <span className="text-5xl font-black text-white">{healthScore}</span>
+                  <span className="text-3xl font-black text-white sm:text-5xl">{healthScore}</span>
                   <span className="mb-1 text-2xl text-slate-500">/100</span>
                   <span className={`mb-1 rounded-full px-3 py-1 text-sm font-medium ${healthStyle.badge}`}>
                     {healthStyle.label}
@@ -617,7 +631,7 @@ export default function AnalysisPage() {
                   <TrendingUp className="h-5 w-5 text-emerald-400" />
                   <p className="font-semibold text-emerald-300">Gelir Trendi</p>
                 </div>
-                <p className="text-4xl font-black text-white">
+                <p className="text-2xl font-black text-white sm:text-4xl">
                   {(analysisData?.incomeGrowth || 0) >= 0 ? '+' : ''}
                   {(analysisData?.incomeGrowth || 0).toFixed(1)}%
                 </p>
@@ -631,7 +645,7 @@ export default function AnalysisPage() {
                   <TrendingDown className="h-5 w-5 text-rose-400" />
                   <p className="font-semibold text-rose-300">Gider Trendi</p>
                 </div>
-                <p className="text-4xl font-black text-white">
+                <p className="text-2xl font-black text-white sm:text-4xl">
                   {(analysisData?.expenseGrowth || 0) >= 0 ? '+' : ''}
                   {(analysisData?.expenseGrowth || 0).toFixed(1)}%
                 </p>

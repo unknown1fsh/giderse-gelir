@@ -108,10 +108,10 @@ const FOREX_OPTIONS = [
 ]
 
 const COMMODITY_OPTIONS = [
-  { symbol: 'GC=F', name: 'Altin (Gold Futures)' },
-  { symbol: 'SI=F', name: 'Gumus (Silver Futures)' },
+  { symbol: 'GC=F', name: 'Altın (Gold Futures)' },
+  { symbol: 'SI=F', name: 'Gümüş (Silver Futures)' },
   { symbol: 'CL=F', name: 'Ham Petrol (WTI)' },
-  { symbol: 'HG=F', name: 'Bakir (Copper Futures)' },
+  { symbol: 'HG=F', name: 'Bakır (Copper Futures)' },
 ]
 
 const REAL_ESTATE_CATEGORIES = ['Konut', 'Ticari', 'Arsa']
@@ -693,7 +693,7 @@ export function InvestmentCreateExperience({
               ? 'Kupon, vade ve ISIN alanlarını doldurarak sabit getirili ürün kaydını zenginleştirebilirsiniz.'
               : selectedType === 'real-estate'
                 ? 'Değerleme ve kira geliri bilgileri meta alanda saklanır; ana ekrandaki analizlerde kullanılır.'
-                : 'Manuel varliklar icin ad, sembol ve fiyat bilgileri yeterlidir. Dilerseniz not alanina stratejinizi ekleyin.'}
+                : 'Manuel varlıklar için ad, sembol ve fiyat bilgileri yeterlidir. Dilerseniz not alanına stratejinizi ekleyin.'}
           </div>
         </CardContent>
       </Card>
@@ -705,7 +705,7 @@ export function InvestmentCreateExperience({
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="space-y-3 text-center">
           <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-primary" />
-          <p className="text-sm text-muted-foreground">Yatirim formu hazirlaniyor...</p>
+          <p className="text-sm text-muted-foreground">Yatırım formu hazırlanıyor...</p>
         </div>
       </div>
     )
@@ -789,10 +789,10 @@ export function InvestmentCreateExperience({
                             }
                           >
                             {option.defaultRiskLevel === 'low'
-                              ? 'Dusuk'
+                              ? 'Düşük'
                               : option.defaultRiskLevel === 'medium'
                                 ? 'Orta'
-                                : 'Yuksek'}
+                                : 'Yüksek'}
                           </Badge>
                         </div>
                       </button>
@@ -814,14 +814,14 @@ export function InvestmentCreateExperience({
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="rounded-xl border border-border bg-muted/20 p-4">
-                  <div className="text-xs uppercase tracking-wide text-muted-foreground">Yatirilan tutar</div>
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground">Yatırılan tutar</div>
                   <div className="mt-2 text-xl font-semibold text-foreground">
                     {formatCurrency(purchaseTotal, selectedType === 'crypto' ? 'TRY' : currencies.find(item => String(item.id) === formData.currencyId)?.code || 'TRY')}
                   </div>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-xl border border-border bg-muted/20 p-4">
-                    <div className="text-xs uppercase tracking-wide text-muted-foreground">Guncel deger</div>
+                    <div className="text-xs uppercase tracking-wide text-muted-foreground">Güncel değer</div>
                     <div className="mt-2 text-lg font-semibold text-foreground">
                       {formatCurrency(currentValue, currencies.find(item => String(item.id) === formData.currencyId)?.code || 'TRY')}
                     </div>
@@ -864,7 +864,7 @@ export function InvestmentCreateExperience({
                           {selectedAsset.exchange ? ` • ${selectedAsset.exchange}` : ''}
                         </div>
                       </div>
-                      <Badge variant="info">Secili varlik</Badge>
+                      <Badge variant="info">Seçili varlık</Badge>
                     </div>
                   </div>
                 ) : null}

@@ -183,9 +183,7 @@ export async function getBudgetSummary(
   const allocationMap = new Map(
     currentPlan?.allocations.map(allocation => [allocation.categoryId, allocation]) ?? []
   )
-  const itemSources = currentPlan?.allocations.length
-    ? currentPlan.allocations.map(allocation => allocation.category)
-    : categories
+  const itemSources = categories
 
   const items: BudgetSummaryItem[] = itemSources.map(category => {
     const allocation = allocationMap.get(category.id)
@@ -219,7 +217,7 @@ export async function getBudgetSummary(
 
   return {
     planId: currentPlan?.id ?? null,
-    planName: currentPlan?.name ?? (periodType === 'weekly' ? 'Haftalik Butce' : 'Aylik Butce'),
+    planName: currentPlan?.name ?? (periodType === 'weekly' ? 'Haftalık Bütçe' : 'Aylık Bütçe'),
     periodType,
     currency: converter.targetCurrencyCode,
     zeroBased: currentPlan?.zeroBased ?? true,

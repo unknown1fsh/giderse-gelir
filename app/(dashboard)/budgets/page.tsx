@@ -102,15 +102,32 @@ export default function BudgetsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [periodType])
 
+  const sortedItems = useMemo(
+    () =>
+      summary?.items
+        .slice()
+        .sort((a, b) => {
+          const aBudget = Number(a.budgeted) || 0
+          const bBudget = Number(b.budgeted) || 0
+          const aSpent = Number(a.spent) || 0
+          const bSpent = Number(b.spent) || 0
+          // Items with budget or spending come first
+          const aScore = aBudget + aSpent
+          const bScore = bBudget + bSpent
+          return bScore - aScore
+        }) ?? [],
+    [summary]
+  )
+
   const chartData = useMemo(
     () =>
-      summary?.items.slice(0, 8).map(item => ({
+      sortedItems.slice(0, 8).map(item => ({
         name: item.categoryName,
         budgeted: item.budgeted,
         spent: item.spent,
         fill: item.isOverBudget ? '#ef4444' : '#6366f1',
-      })) ?? [],
-    [summary]
+      })),
+    [sortedItems]
   )
 
   const handleSave = async () => {
@@ -128,11 +145,13 @@ export default function BudgetsPage() {
           periodType,
           zeroBased,
           name: summary.planName,
-          allocations: summary.items.map(item => ({
-            categoryId: item.categoryId,
-            amount: Number(draftBudgets[item.categoryId] || 0),
-            alertThreshold: item.alertThreshold,
-          })),
+          allocations: summary.items
+            .filter(item => Number(draftBudgets[item.categoryId] || 0) > 0)
+            .map(item => ({
+              categoryId: item.categoryId,
+              amount: Number(draftBudgets[item.categoryId]),
+              alertThreshold: item.alertThreshold,
+            })),
         }),
       })
 
@@ -269,7 +288,10 @@ export default function BudgetsPage() {
             <div className="py-12 text-center text-sm text-muted-foreground">Bütçe özetiniz yükleniyor...</div>
           ) : (
             <div className="space-y-4">
-              {summary.items.map(item => {
+              <p className="text-xs text-muted-foreground">
+                Tüm gider kategorileri listeleniyor. Bütçe hedefi belirlemek istediğiniz kategorilere tutar girin, boş bıraktıklarınız kayda dahil edilmez.
+              </p>
+              {sortedItems.map(item => {
                 const liveBudget = Number(draftBudgets[item.categoryId] || 0)
                 const liveProgress = liveBudget > 0 ? Math.min((item.spent / liveBudget) * 100, 999) : 0
                 const liveRemaining = liveBudget - item.spent

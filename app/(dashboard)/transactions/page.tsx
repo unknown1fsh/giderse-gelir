@@ -202,14 +202,14 @@ function TransactionsPageContent() {
       })
 
       if (!response.ok) {
-        throw new Error('Islemler yuklenemedi')
+        throw new Error('İşlemler yüklenemedi')
       }
 
       const result = (await response.json()) as TransactionResponse
       setData(result)
     } catch (error) {
       console.error('Transactions fetch error:', error)
-      toastError('Hata', 'Islemler yuklenemedi')
+      toastError('Hata', 'İşlemler yüklenemedi')
     } finally {
       setLoading(false)
     }
@@ -239,7 +239,7 @@ function TransactionsPageContent() {
   }
 
   const handleSaveView = async () => {
-    const name = window.prompt('Kayitli filtre adi')
+    const name = window.prompt('Kayıtlı filtre adı')
     if (!name) {
       return
     }
@@ -269,14 +269,14 @@ function TransactionsPageContent() {
       })
 
       if (!response.ok) {
-        throw new Error('Kayitli filtre olusturulamadi')
+        throw new Error('Kayıtlı filtre oluşturulamadı')
       }
 
-      toastSuccess('Basarili', 'Filtre gorunumu kaydedildi')
+      toastSuccess('Başarılı', 'Filtre görünümü kaydedildi')
       void fetchSavedViews()
     } catch (error) {
       console.error('Save view error:', error)
-      toastError('Hata', 'Filtre gorunumu kaydedilemedi')
+      toastError('Hata', 'Filtre görünümü kaydedilemedi')
     }
   }
 
@@ -310,9 +310,9 @@ function TransactionsPageContent() {
   return (
     <AppPageShell
       header={{
-        title: 'Islem Merkezi',
-        description: 'Global arama, coklu filtreleme ve kayitli gorunumlerle tum hareketlerinizi yonetin.',
-        breadcrumbs: [{ label: 'Islemler' }],
+        title: 'İşlem Merkezi',
+        description: 'Global arama, çoklu filtreleme ve kayıtlı görünümlerle tüm hareketlerinizi yönetin.',
+        breadcrumbs: [{ label: 'İşlemler' }],
         actions: (
           <>
             <Button variant="outline" onClick={() => void fetchTransactions(buildQueryString(filters, page))}>
@@ -329,7 +329,7 @@ function TransactionsPageContent() {
     >
       <StatsGrid>
         <StatCard
-          title="Gorunen Kayit"
+          title="Görünen Kayıt"
           value={data?.total || 0}
           icon={Search}
           color="indigo"
@@ -341,7 +341,7 @@ function TransactionsPageContent() {
           value={formatCurrency(stats.totalIncome, 'TRY')}
           icon={TrendingIcon(true)}
           color="green"
-          subtitle="Secili gorunum"
+          subtitle="Seçili görünüm"
           variant="premium"
         />
         <StatCard
@@ -349,7 +349,7 @@ function TransactionsPageContent() {
           value={formatCurrency(stats.totalExpense, 'TRY')}
           icon={TrendingIcon(false)}
           color="red"
-          subtitle="Secili gorunum"
+          subtitle="Seçili görünüm"
           variant="premium"
         />
         <StatCard
@@ -357,7 +357,7 @@ function TransactionsPageContent() {
           value={activeFilterCount}
           icon={SlidersHorizontal}
           color={activeFilterCount > 0 ? 'amber' : 'cyan'}
-          subtitle="Kombine filtre sayisi"
+          subtitle="Kombine filtre sayısı"
           variant="premium"
         />
       </StatsGrid>
@@ -386,7 +386,7 @@ function TransactionsPageContent() {
             setFilters(prev => ({ ...prev, search: value }))
             setPage(1)
           }}
-          placeholder="Aciklama, kategori veya etiket ara..."
+          placeholder="Açıklama, kategori veya etiket ara..."
         />
         <Select
           value={filters.txTypeId}
@@ -396,10 +396,10 @@ function TransactionsPageContent() {
           }}
         >
           <SelectTrigger className="max-w-[180px]">
-            <SelectValue placeholder="Islem tipi" />
+            <SelectValue placeholder="İşlem tipi" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tum tipler</SelectItem>
+            <SelectItem value="all">Tüm tipler</SelectItem>
             {data?.txTypes.map(type => (
               <SelectItem key={type.id} value={String(type.id)}>
                 {type.name}
@@ -418,7 +418,7 @@ function TransactionsPageContent() {
             <SelectValue placeholder="Kategori" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tum kategoriler</SelectItem>
+            <SelectItem value="all">Tüm kategoriler</SelectItem>
             {data?.categories.map(category => (
               <SelectItem key={category.id} value={String(category.id)}>
                 {category.name}
@@ -476,13 +476,13 @@ function TransactionsPageContent() {
           }}
         >
           <SelectTrigger className="max-w-[180px]">
-            <SelectValue placeholder="Sirala" />
+            <SelectValue placeholder="Sırala" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="transactionDate:desc">Tarih (yeni-eski)</SelectItem>
             <SelectItem value="transactionDate:asc">Tarih (eski-yeni)</SelectItem>
-            <SelectItem value="amount:desc">Tutar (buyuk-kucuk)</SelectItem>
-            <SelectItem value="amount:asc">Tutar (kucuk-buyuk)</SelectItem>
+            <SelectItem value="amount:desc">Tutar (büyük-küçük)</SelectItem>
+            <SelectItem value="amount:asc">Tutar (küçük-büyük)</SelectItem>
           </SelectContent>
         </Select>
       </FilterBar>
@@ -492,7 +492,7 @@ function TransactionsPageContent() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Aciklama</TableHead>
+                <TableHead>Açıklama</TableHead>
                 <TableHead>Kategori</TableHead>
                 <TableHead>Tarih</TableHead>
                 <TableHead>Etiketler</TableHead>
@@ -503,7 +503,7 @@ function TransactionsPageContent() {
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
-                    Islemler yukleniyor...
+                    İşlemler yükleniyor...
                   </TableCell>
                 </TableRow>
               ) : data?.items.length ? (
@@ -553,7 +553,7 @@ function TransactionsPageContent() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
-                    Secili filtrelerle eslesen hareket bulunamadi.
+                    Seçili filtrelerle eşleşen hareket bulunamadı.
                   </TableCell>
                 </TableRow>
               )}
@@ -566,7 +566,7 @@ function TransactionsPageContent() {
         <PaginationContent>
           <PaginationItem>
             <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(prev => prev - 1)}>
-              Onceki
+              Önceki
             </Button>
           </PaginationItem>
           <PaginationItem>

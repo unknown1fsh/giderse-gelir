@@ -166,12 +166,6 @@ export default function DashboardPage() {
     useEffect(() => {
         if (fetchedRef.current || loading) {return}
         fetchedRef.current = true
-        // Demo prefetch varsa anında göster, arka planda refresh et
-        const cached = sessionStorage.getItem('demo-prefetch')
-        if (cached) {
-            sessionStorage.removeItem('demo-prefetch')
-            try { setData(JSON.parse(cached) as DashboardData) } catch { /* ignore */ }
-        }
         void fetchDashboardData()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, loading])
@@ -232,10 +226,16 @@ export default function DashboardPage() {
 
     // ── Plan badge ────────────────────────────────────────────────────────────
     const getPlanBadge = () => {
-        if (!user || user.plan === 'free') {return null}
+        if (!user || user.plan === 'free' || !user.plan) {return null}
         if (user.plan === 'enterprise_premium') {return { icon: Award, label: 'Kurumsal Premium', cls: 'border-amber-500/25 bg-amber-500/10 text-amber-200' }}
         if (user.plan === 'enterprise') {return { icon: Star, label: 'Kurumsal', cls: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-200' }}
-        return { icon: Crown, label: 'Premium', cls: 'border-violet-500/25 bg-violet-500/10 text-violet-200' }
+        if (user.plan === 'family') {return { icon: Crown, label: 'Family', cls: 'border-cyan-500/25 bg-cyan-500/10 text-cyan-200' }}
+        return { icon: Crown, label: 'Pro', cls: 'border-violet-500/25 bg-violet-500/10 text-violet-200' }
+    }
+    const getUpgradeCTA = () => {
+        if (!user || user.plan === 'family' || user.plan === 'enterprise_premium') {return null}
+        if (user.plan === 'premium' || user.plan === 'enterprise') {return { label: 'Family\'e Yükselt', href: '/premium', cls: 'text-cyan-400 hover:text-cyan-300' }}
+        return { label: 'Pro\'ya Geç →', href: '/premium', cls: 'text-violet-400 hover:text-violet-300' }
     }
 
     // ── Early returns ─────────────────────────────────────────────────────────
@@ -265,6 +265,7 @@ export default function DashboardPage() {
 
     const health = calculateHealth()
     const planBadge = getPlanBadge()
+    const upgradeCTA = getUpgradeCTA()
     const snapshots = data.assets.snapshots ?? []
 
     // sparkline data
@@ -320,6 +321,11 @@ export default function DashboardPage() {
                                     <planBadge.icon className="h-3 w-3" />
                                     {planBadge.label}
                                 </div>
+                            )}
+                            {upgradeCTA && (
+                                <Link href={upgradeCTA.href} className={cn('hidden sm:inline-flex items-center text-xs font-medium transition-colors', upgradeCTA.cls)}>
+                                    {upgradeCTA.label}
+                                </Link>
                             )}
                         </div>
                         <div className="flex items-center gap-2">

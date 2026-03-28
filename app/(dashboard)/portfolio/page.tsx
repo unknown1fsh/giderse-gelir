@@ -1,6 +1,9 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useUser } from '@/lib/user-context'
+import { isPremiumPlan } from '@/lib/plan-config'
 import {
   AppPageShell,
   Button,
@@ -68,9 +71,18 @@ interface NetWorthResponse {
 }
 
 export default function PortfolioPage() {
+  const { user, loading: userLoading } = useUser()
+  const router = useRouter()
   const { error: toastError } = useToast()
   const [data, setData] = useState<NetWorthResponse | null>(null)
   const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (userLoading) return
+    if (!isPremiumPlan(user?.plan || 'free')) {
+      void router.push('/premium')
+    }
+  }, [userLoading, user, router])
 
   const fetchSummary = async () => {
     try {
@@ -80,14 +92,14 @@ export default function PortfolioPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Net varlik yuklenemedi')
+        throw new Error('Net varlık yüklenemedi')
       }
 
       const summary = (await response.json()) as NetWorthResponse
       setData(summary)
     } catch (error) {
       console.error('Net worth fetch error:', error)
-      toastError('Hata', 'Net varlik yuklenemedi')
+      toastError('Hata', 'Net varlık yüklenemedi')
     } finally {
       setLoading(false)
     }
@@ -107,8 +119,8 @@ export default function PortfolioPage() {
               value: data.breakdown.assets.cash + data.breakdown.assets.eWallets,
               fill: '#38bdf8',
             },
-            { name: 'Yatirim', value: data.breakdown.assets.investments, fill: '#10b981' },
-            { name: 'Altin', value: data.breakdown.assets.gold, fill: '#f59e0b' },
+            { name: 'Yatırım', value: data.breakdown.assets.investments, fill: '#10b981' },
+            { name: 'Altın', value: data.breakdown.assets.gold, fill: '#f59e0b' },
             { name: 'Gayrimenkul', value: data.breakdown.assets.realEstate, fill: '#8b5cf6' },
           ].filter(item => item.value > 0)
         : [],
@@ -120,23 +132,25 @@ export default function PortfolioPage() {
       data
         ? [
             ['Nakit ve banka', data.breakdown.assets.cash, data.breakdown.counts.accounts],
-            ['E-cuzdan', data.breakdown.assets.eWallets, data.breakdown.counts.eWallets],
-            ['Yatirim', data.breakdown.assets.investments, data.breakdown.counts.investments],
-            ['Altin', data.breakdown.assets.gold, data.breakdown.counts.goldItems],
+            ['E-cüzdan', data.breakdown.assets.eWallets, data.breakdown.counts.eWallets],
+            ['Yatırım', data.breakdown.assets.investments, data.breakdown.counts.investments],
+            ['Altın', data.breakdown.assets.gold, data.breakdown.counts.goldItems],
             ['Gayrimenkul', data.breakdown.assets.realEstate, 0],
-            ['Kredi karti borcu', -data.breakdown.liabilities.creditCards, data.breakdown.counts.creditCards],
+            ['Kredi kartı borcu', -data.breakdown.liabilities.creditCards, data.breakdown.counts.creditCards],
             ['Kredi bakiyesi', -data.breakdown.liabilities.loans, data.breakdown.counts.loans],
           ]
         : [],
     [data]
   )
 
+  if (!userLoading && !isPremiumPlan(user?.plan || 'free')) return null
+
   return (
     <AppPageShell
       header={{
-        title: 'Net Varlik',
+        title: 'Net Varlık',
         description:
-          'Varliklariniz, borclariniz ve zaman icindeki net varlik trendi tek hesaplama motoruyla sunulur.',
+          'Varlıklarınız, borçlarınız ve zaman içindeki net varlık trendi tek hesaplama motoruyla sunulur.',
         breadcrumbs: [{ label: 'Portfoy' }],
         actions: (
           <Button variant="outline" onClick={() => void fetchSummary()} disabled={loading}>
@@ -148,7 +162,7 @@ export default function PortfolioPage() {
     >
       <StatsGrid>
         <StatCard
-          title="Toplam Varlik"
+          title="Toplam Varlık"
           value={formatCurrency(data?.totalAssets || 0, data?.currency || 'TRY')}
           icon={Wallet}
           color="cyan"
@@ -164,15 +178,15 @@ export default function PortfolioPage() {
           variant="premium"
         />
         <StatCard
-          title="Net Varlik"
+          title="Net Varlık"
           value={formatCurrency(data?.netWorth || 0, data?.currency || 'TRY')}
           icon={TrendingUp}
           color={(data?.netWorth || 0) >= 0 ? 'green' : 'red'}
-          subtitle="Varliklar eksi toplam borclar"
+          subtitle="Varlıklar eksi toplam borçlar"
           variant="premium"
         />
         <StatCard
-          title="Altin + Yatirim"
+          title="Altın + Yatırım"
           value={formatCurrency(
             (data?.breakdown.assets.gold || 0) +
               (data?.breakdown.assets.investments || 0) +
@@ -188,14 +202,14 @@ export default function PortfolioPage() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(340px,0.9fr)]">
         <DashboardCard
-          title="Net Varlik Trendi"
-          description="Snapshot verileriyle zaman icinde toplam net varlik degisimi."
+          title="Net Varlık Trendi"
+          description="Snapshot verileriyle zaman içinde toplam net varlık değişimi."
           icon={TrendingUp}
           iconColor="text-emerald-300"
         >
           {!data || data.snapshots.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
-              Snapshot verisi olustukca burada net varlik cizgisi gorunecek.
+              Snapshot verisi oluştukça burada net varlık çizgisi görünecek.
             </div>
           ) : (
             <div className="h-80">
@@ -231,14 +245,14 @@ export default function PortfolioPage() {
         </DashboardCard>
 
         <DashboardCard
-          title="Varlik Dagilimi"
-          description="Nakit, yatirim, altin ve gayrimenkul paylarini inceleyin."
+          title="Varlık Dağılımı"
+          description="Nakit, yatırım, altın ve gayrimenkul paylarını inceleyin."
           icon={PieChart}
           iconColor="text-cyan-300"
         >
           {!data || distributionData.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
-              Dagilim verisi bulunamadi.
+              Dağılım verisi bulunamadı.
             </div>
           ) : (
             <div className="space-y-4">

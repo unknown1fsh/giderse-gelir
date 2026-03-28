@@ -96,11 +96,11 @@ async function dispatchNotificationEvent(
 
   if (user.notifications.emailNotifications) {
     const emailRecord = await createNotificationRecord(prisma, user.id, 'email', event)
-    const emailResult = await sendNotificationEmail(user.email, user.name || 'Kullanici', {
+    const emailResult = await sendNotificationEmail(user.email, user.name || 'Kullanıcı', {
       subject: event.title,
       title: event.title,
       body: event.body,
-      ctaLabel: 'Detayi Gor',
+      ctaLabel: 'Detayı Gör',
       ctaUrl: event.href,
     })
 
@@ -262,11 +262,11 @@ export async function syncNotificationEvents(
       await dispatchNotificationEvent(prisma, user, {
         type: alertType,
         title: item.isOverBudget
-          ? `${item.categoryName} butcesi asildi`
-          : `${item.categoryName} butcesi esige yaklasti`,
+          ? `${item.categoryName} bütçesi aşıldı`
+          : `${item.categoryName} bütçesi eşiğe yaklaştı`,
         body: item.isOverBudget
-          ? `${item.categoryName} kategorisinde planlanan butceyi astiniz.`
-          : `${item.categoryName} kategorisinde harcama orani %${item.progress.toFixed(0)} seviyesine geldi.`,
+          ? `${item.categoryName} kategorisinde planlanan bütçeyi aştınız.`
+          : `${item.categoryName} kategorisinde harcama oranı %${item.progress.toFixed(0)} seviyesine geldi.`,
         href: '/budgets',
         dedupeBaseKey,
         sourceEntityType: 'budget',
@@ -294,8 +294,8 @@ export async function syncNotificationEvents(
 
       await dispatchNotificationEvent(prisma, user, {
         type: 'bill_reminder',
-        title: `${autoPayment.name} yaklasiyor`,
-        body: `${autoPayment.category.name} kategorisindeki odeme ${daysLeft} gun sonra gerceklesecek.`,
+        title: `${autoPayment.name} yaklaşıyor`,
+        body: `${autoPayment.category.name} kategorisindeki ödeme ${daysLeft} gün sonra gerçekleşecek.`,
         href: '/auto-payments',
         dedupeBaseKey: `autopayment-${autoPayment.id}-${daysLeft}-${autoPayment.nextPaymentDate.toISOString().slice(0, 10)}`,
         sourceEntityType: 'auto_payment',
@@ -320,8 +320,8 @@ export async function syncNotificationEvents(
 
       await dispatchNotificationEvent(prisma, user, {
         type: 'credit_card_due',
-        title: `${card.name} son odeme tarihi yaklasiyor`,
-        body: `${card.bank.name} kartinizin son odeme tarihi ${daysLeft} gun sonra.`,
+        title: `${card.name} son ödeme tarihi yaklaşıyor`,
+        body: `${card.bank.name} kartınızın son ödeme tarihi ${daysLeft} gün sonra.`,
         href: '/cards',
         dedupeBaseKey: `card-${card.id}-${daysLeft}-${nextDueDate.toISOString().slice(0, 10)}`,
         sourceEntityType: 'credit_card',
@@ -351,8 +351,8 @@ export async function syncNotificationEvents(
         title: `${goal.name} hedefinde %${milestone} seviyesine geldiniz`,
         body:
           milestone === 100
-            ? `${goal.name} hedefine ulastiniz. Tebrikler.`
-            : `${goal.name} hedefi icin bir sonraki esige emin adimlarla yaklasiyorsunuz.`,
+            ? `${goal.name} hedefine ulaştınız. Tebrikler.`
+            : `${goal.name} hedefi için bir sonraki eşiğe emin adımlarla yaklaşıyorsunuz.`,
         href: '/goals',
         dedupeBaseKey: `goal-${goal.id}-milestone-${milestone}`,
         sourceEntityType: 'goal',

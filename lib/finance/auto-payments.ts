@@ -110,10 +110,10 @@ export const AUTO_PAYMENT_FREQUENCY_OPTIONS: Array<{
   label: string
   description: string
 }> = [
-  { id: 'daily', label: 'Gunluk', description: 'Her gun hatirlatma veya talimat' },
-  { id: 'weekly', label: 'Haftalik', description: 'Her hafta ayni gun' },
-  { id: 'monthly', label: 'Aylik', description: 'Aylik abonelik ve fatura akisi' },
-  { id: 'yearly', label: 'Yillik', description: 'Yilda bir yenilenen odemeler' },
+  { id: 'daily', label: 'Günlük', description: 'Her gün hatırlatma veya talimat' },
+  { id: 'weekly', label: 'Haftalık', description: 'Her hafta aynı gün' },
+  { id: 'monthly', label: 'Aylık', description: 'Aylık abonelik ve fatura akışı' },
+  { id: 'yearly', label: 'Yıllık', description: 'Yılda bir yenilenen ödemeler' },
 ]
 
 const CRON_BY_FREQUENCY: Record<AutoPaymentFrequency, string> = {
@@ -141,16 +141,16 @@ export function normalizeFrequency(
   }
 
   const normalized = value.trim().toLowerCase()
-  if (normalized === 'daily' || normalized === 'gunluk') {
+  if (normalized === 'daily' || normalized === 'günlük') {
     return 'daily'
   }
-  if (normalized === 'weekly' || normalized === 'haftalik') {
+  if (normalized === 'weekly' || normalized === 'haftalık') {
     return 'weekly'
   }
-  if (normalized === 'monthly' || normalized === 'aylik') {
+  if (normalized === 'monthly' || normalized === 'aylık') {
     return 'monthly'
   }
-  if (normalized === 'yearly' || normalized === 'annual' || normalized === 'yillik') {
+  if (normalized === 'yearly' || normalized === 'annual' || normalized === 'yıllık') {
     return 'yearly'
   }
 
@@ -185,7 +185,7 @@ export function frequencyFromCronSchedule(cronSchedule: unknown): AutoPaymentFre
 }
 
 export function getFrequencyLabel(frequency: AutoPaymentFrequency) {
-  return AUTO_PAYMENT_FREQUENCY_OPTIONS.find(option => option.id === frequency)?.label ?? 'Aylik'
+  return AUTO_PAYMENT_FREQUENCY_OPTIONS.find(option => option.id === frequency)?.label ?? 'Aylık'
 }
 
 export function getSourceType(input: {
@@ -371,33 +371,33 @@ export function buildAutoPaymentInput(body: unknown): {
   error?: string
 } {
   if (!body || typeof body !== 'object') {
-    return { error: 'Gecerli bir otomatik odeme verisi gonderin.' }
+    return { error: 'Geçerli bir otomatik ödeme verisi gönderin.' }
   }
 
   const payload = body as Record<string, unknown>
   const name = typeof payload.name === 'string' ? payload.name.trim() : ''
   if (!name) {
-    return { error: 'Talimat adi zorunludur.' }
+    return { error: 'Talimat adı zorunludur.' }
   }
 
   const amount = parseNumberLike(payload.amount, NaN)
   if (!Number.isFinite(amount) || amount <= 0) {
-    return { error: 'Tutar sifirdan buyuk olmalidir.' }
+    return { error: 'Tutar sıfırdan büyük olmalıdır.' }
   }
 
   const currencyId = parsePositiveId(payload.currencyId)
   if (!currencyId) {
-    return { error: 'Gecerli bir para birimi secin.' }
+    return { error: 'Geçerli bir para birimi seçin.' }
   }
 
   const paymentMethodId = parsePositiveId(payload.paymentMethodId)
   if (!paymentMethodId) {
-    return { error: 'Gecerli bir odeme yontemi secin.' }
+    return { error: 'Geçerli bir ödeme yöntemi seçin.' }
   }
 
   const categoryId = parsePositiveId(payload.categoryId)
   if (!categoryId) {
-    return { error: 'Gecerli bir kategori secin.' }
+    return { error: 'Geçerli bir kategori seçin.' }
   }
 
   const frequency = payload.frequency
@@ -414,7 +414,7 @@ export function buildAutoPaymentInput(body: unknown): {
       : null
 
   if (nextPaymentDate && Number.isNaN(nextPaymentDate.getTime())) {
-    return { error: 'Sonraki odeme tarihi gecersiz.' }
+    return { error: 'Sonraki ödeme tarihi geçersiz.' }
   }
 
   const accountId = parsePositiveId(payload.accountId)
@@ -424,7 +424,7 @@ export function buildAutoPaymentInput(body: unknown): {
 
   const selectedSourceCount = [accountId, creditCardId, eWalletId, beneficiaryId].filter(Boolean).length
   if (selectedSourceCount > 1) {
-    return { error: 'Ayni anda yalnizca tek odeme kaynagi baglanabilir.' }
+    return { error: 'Aynı anda yalnızca tek ödeme kaynağı bağlanabilir.' }
   }
 
   return {

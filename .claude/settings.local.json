@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"export.*getActivePeriod\" /c/projects/giderse-gelir/lib/*.ts)",
+      "Bash(grep -E \"\\\\.\\(tsx?|jsx?\\)$\")",
+      "Bash(ls -la /c/projects/giderse-gelir/app/\\\\\\(dashboard\\\\\\)/settings/)",
+      "Bash(ls -la /c/projects/giderse-gelir/app/\\\\\\(dashboard\\\\\\)/)",
+      "Read(//c/projects/giderse-gelir/**)",
+      "Bash(for file:*)",
+      "Bash(do echo:*)",
+      "Bash(for path:*)",
+      "Bash(npx tsx:*)"
+    ]
+  }
+}

@@ -2,8 +2,6 @@
 
 import {
   Badge,
-  Card,
-  CardContent,
   FormField,
   Input,
   Select,
@@ -72,11 +70,11 @@ export const EMPTY_AUTO_PAYMENT_FORM: AutoPaymentFormState = {
 }
 
 const SOURCE_TYPE_LABELS: Record<AutoPaymentSourceType, string> = {
-  none: 'Kaynak secmeden takip et',
-  account: 'Banka hesabi',
-  creditCard: 'Kredi karti',
-  eWallet: 'E-cuzdan',
-  beneficiary: 'Lehtar / alici',
+  none: 'Kaynak seçmeden takip et',
+  account: 'Banka hesabı',
+  creditCard: 'Kredi kartı',
+  eWallet: 'E-cüzdan',
+  beneficiary: 'Lehtar / alıcı',
 }
 
 function getSourceOptions(
@@ -99,7 +97,7 @@ function getSourceOptions(
 
 function getSourceDescription(option: AutoPaymentReferenceOption | undefined, sourceType: AutoPaymentSourceType) {
   if (!option) {
-    return 'Odeme kaynagi secilmediginde bu kayit takip ve hatirlatma amacli kullanilir.'
+    return 'Ödeme kaynağı seçilmediğinde bu kayıt takip ve hatırlatma amaçlı kullanılır.'
   }
 
   if (sourceType === 'account' || sourceType === 'creditCard') {
@@ -198,8 +196,7 @@ export function AutoPaymentForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_320px]">
-        <div className="space-y-5">
+      <div className="space-y-5">
           <FormField label="Talimat Adı" htmlFor="auto-payment-name" required>
             <Input
               id="auto-payment-name"
@@ -400,96 +397,51 @@ export function AutoPaymentForm({
               </div>
             </div>
           ) : null}
-        </div>
 
-        <div className="space-y-4">
-          <Card variant="premium" className="border-white/10 bg-white/5">
-            <CardContent className="space-y-4 p-5">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Önizleme</p>
-                <p className="mt-2 text-xl font-semibold text-white">
-                  {formData.name.trim() || 'Yeni otomatik ödeme'}
-                </p>
-                <p className="mt-1 text-sm text-slate-400">
-                  {mode === 'create'
-                    ? 'Talimat eklendiğinde ana listede hemen görünür.'
-                    : 'Değişiklikler kaydedildiğinde odak panelleri otomatik güncellenir.'}
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Badge variant={formData.active ? 'success' : 'outline'}>
-                  {formData.active ? 'Aktif' : 'Pasif'}
-                </Badge>
-                <Badge variant="info">{getFrequencyLabel(formData.frequency)}</Badge>
-                {formData.sourceType !== 'none' ? (
-                  <Badge variant="outline">{SOURCE_TYPE_LABELS[formData.sourceType]}</Badge>
-                ) : (
-                  <Badge variant="warning">Sadece takip kaydı</Badge>
-                )}
-              </div>
-
-              <div className="space-y-3 rounded-2xl border border-white/10 bg-black/20 p-4">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Tutar Özeti</p>
-                  <p className="mt-2 text-lg font-semibold text-cyan-300">
-                    {formData.amount && selectedCurrency?.code
-                      ? formatCurrency(Number(formData.amount), selectedCurrency.code)
-                      : 'Tutar bekleniyor...'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Kaynak Bağlantısı</p>
-                  <p className="mt-2 text-sm font-medium text-white">
-                    {selectedSource?.name || SOURCE_TYPE_LABELS[formData.sourceType]}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-400">
-                    {getSourceDescription(selectedSource, formData.sourceType)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Takvim</p>
-                  <p className="mt-2 text-sm font-medium text-white">
-                    {formData.nextPaymentDate
-                      ? new Date(formData.nextPaymentDate).toLocaleDateString('tr-TR')
-                      : 'Tarih seçilmedi'}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-400">
-                    {AUTO_PAYMENT_FREQUENCY_OPTIONS.find(option => option.id === formData.frequency)
-                      ?.description ?? 'Takvim planı bekleniyor...'}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="flex gap-3">
-            {onCancel ? (
-              <button
-                type="button"
-                onClick={onCancel}
-                className="inline-flex flex-1 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-white/10"
-              >
-                Vazgeç
-              </button>
-            ) : null}
-            <button
-              type="submit"
-              className="inline-flex flex-1 items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={
-                submitting ||
-                !formData.name.trim() ||
-                !formData.amount ||
-                !formData.currencyId ||
-                !formData.paymentMethodId ||
-                !formData.categoryId ||
-                !formData.nextPaymentDate ||
-                (formData.sourceType !== 'none' && !formData.sourceId)
-              }
-            >
-              {submitting ? 'Kaydediliyor...' : submitLabel}
-            </button>
+        {/* Özet satırı */}
+        {(formData.name.trim() || formData.amount) && (
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/50 bg-muted/20 px-4 py-3">
+            <span className="text-sm font-medium text-foreground truncate max-w-[200px]">
+              {formData.name.trim() || 'Talimat'}
+            </span>
+            <Badge variant={formData.active ? 'success' : 'outline'}>
+              {formData.active ? 'Aktif' : 'Pasif'}
+            </Badge>
+            <Badge variant="info">{getFrequencyLabel(formData.frequency)}</Badge>
+            {formData.amount && selectedCurrency?.code && (
+              <span className="ml-auto text-sm font-semibold text-cyan-400">
+                {formatCurrency(Number(formData.amount), selectedCurrency.code)}
+              </span>
+            )}
           </div>
+        )}
+
+        <div className="flex gap-3 pt-2">
+          {onCancel ? (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="inline-flex flex-1 items-center justify-center rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition hover:bg-muted"
+            >
+              Vazgeç
+            </button>
+          ) : null}
+          <button
+            type="submit"
+            className="inline-flex flex-1 items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={
+              submitting ||
+              !formData.name.trim() ||
+              !formData.amount ||
+              !formData.currencyId ||
+              !formData.paymentMethodId ||
+              !formData.categoryId ||
+              !formData.nextPaymentDate ||
+              (formData.sourceType !== 'none' && !formData.sourceId)
+            }
+          >
+            {submitting ? 'Kaydediliyor...' : submitLabel}
+          </button>
         </div>
       </div>
     </form>

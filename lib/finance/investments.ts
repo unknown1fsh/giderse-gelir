@@ -126,26 +126,26 @@ export const INVESTMENT_TYPE_DEFINITIONS: Record<InvestmentTypeId, InvestmentTyp
   },
   forex: {
     id: 'forex',
-    label: 'Doviz',
-    shortLabel: 'Doviz',
-    description: 'Pariteleri ve kur bazli pozisyonlari takip edin.',
-    defaultCategory: 'Doviz',
+    label: 'Döviz',
+    shortLabel: 'Döviz',
+    description: 'Pariteleri ve kur bazlı pozisyonları takip edin.',
+    defaultCategory: 'Döviz',
     defaultRiskLevel: 'high',
   },
   'real-estate': {
     id: 'real-estate',
     label: 'Gayrimenkul',
     shortLabel: 'Gayrimenkul',
-    description: 'Degerleme ve kira geliri odakli fiziksel varlik takibi.',
+    description: 'Değerleme ve kira geliri odaklı fiziksel varlık takibi.',
     defaultCategory: 'Gayrimenkul',
     defaultRiskLevel: 'medium',
   },
   other: {
     id: 'other',
-    label: 'Diger Arac',
-    shortLabel: 'Diger',
-    description: 'Opsiyon, vadeli islem veya ozel enstrumanlar icin esnek giris.',
-    defaultCategory: 'Diger Arac',
+    label: 'Diğer Araç',
+    shortLabel: 'Diğer',
+    description: 'Opsiyon, vadeli işlem veya özel enstrümanlar için esnek giriş.',
+    defaultCategory: 'Diğer Araç',
     defaultRiskLevel: 'high',
   },
 }
@@ -155,9 +155,9 @@ export const INVESTMENT_TYPE_OPTIONS = INVESTMENT_TYPE_IDS.map(
 )
 
 export const RISK_LEVEL_OPTIONS: Array<{ value: RiskLevel; label: string }> = [
-  { value: 'low', label: 'Dusuk Risk' },
+  { value: 'low', label: 'Düşük Risk' },
   { value: 'medium', label: 'Orta Risk' },
-  { value: 'high', label: 'Yuksek Risk' },
+  { value: 'high', label: 'Yüksek Risk' },
 ]
 
 export function parseNumberLike(value: unknown, fallback = 0): number {
@@ -251,7 +251,7 @@ export function normalizeInvestment(raw: InvestmentApiRecord): NormalizedInvestm
     currency: {
       id: Number(raw.currency?.id ?? 0),
       code: normalizeText(raw.currency?.code) || 'TRY',
-      name: normalizeText(raw.currency?.name) || 'Turk Lirasi',
+      name: normalizeText(raw.currency?.name) || 'Türk Lirası',
       symbol: normalizeText(raw.currency?.symbol) || undefined,
     },
     createdAt: normalizeDateString(raw.createdAt),
@@ -304,7 +304,7 @@ export function buildInvestmentUpsertInput(
     normalizeInvestmentType(raw.investmentType ?? raw.type) ?? options?.fallbackType ?? null
 
   if (!investmentType) {
-    return { error: 'Gecerli bir yatirim turu seciniz' }
+    return { error: 'Geçerli bir yatırım türü seçiniz' }
   }
 
   const definition = INVESTMENT_TYPE_DEFINITIONS[investmentType]
@@ -328,27 +328,27 @@ export function buildInvestmentUpsertInput(
   }
 
   if (!name) {
-    return { error: 'Yatirim adi zorunludur' }
+    return { error: 'Yatırım adı zorunludur' }
   }
 
   if (!currencyId || currencyId <= 0) {
-    return { error: 'Gecerli bir para birimi seciniz' }
+    return { error: 'Geçerli bir para birimi seçiniz' }
   }
 
   if (!Number.isFinite(quantity) || quantity <= 0) {
-    return { error: 'Miktar sifirdan buyuk olmali' }
+    return { error: 'Miktar sıfırdan büyük olmalı' }
   }
 
   if (!Number.isFinite(purchasePrice) || purchasePrice <= 0) {
-    return { error: 'Alis fiyati sifirdan buyuk olmali' }
+    return { error: 'Alış fiyatı sıfırdan büyük olmalı' }
   }
 
   if (!Number.isFinite(currentPrice) || currentPrice < 0) {
-    return { error: 'Guncel fiyat negatif olamaz' }
+    return { error: 'Güncel fiyat negatif olamaz' }
   }
 
   if (Number.isNaN(parsedDate.getTime())) {
-    return { error: 'Gecerli bir alis tarihi seciniz' }
+    return { error: 'Geçerli bir alış tarihi seçiniz' }
   }
 
   return {

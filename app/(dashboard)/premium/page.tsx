@@ -9,6 +9,7 @@ import {
   BadgeCheck,
 } from 'lucide-react'
 import { isPremiumPlan, isFamilyPlan } from '@/lib/plan-config'
+import { SHOPIER_LINKS } from '@/lib/shopier-links'
 
 const PLANS_UI = [
   {
@@ -80,6 +81,18 @@ export default function PremiumPage() {
 
   async function handleUpgrade(planId: string) {
     if (planId === currentPlan) {return}
+
+    // Premium/family planlar için Shopier'e yönlendir
+    if (planId === 'premium') {
+      window.open(SHOPIER_LINKS.premium, '_blank', 'noopener,noreferrer')
+      return
+    }
+    if (planId === 'family') {
+      window.open(SHOPIER_LINKS.family, '_blank', 'noopener,noreferrer')
+      return
+    }
+
+    // Free plana düşmek için API çağır
     setUpgrading(planId)
     try {
       const res = await fetch('/api/subscription/upgrade', {
@@ -129,7 +142,12 @@ export default function PremiumPage() {
             return (
               <div
                 key={plan.id}
-                className={`relative flex flex-col rounded-2xl border bg-white/5 p-6 backdrop-blur transition ${plan.borderClass} ${plan.id === 'premium' ? 'ring-2 ring-purple-500/40' : ''}`}
+                className={`relative flex flex-col rounded-2xl border bg-white/5 p-6 backdrop-blur transition ${plan.borderClass} ${
+                  (currentPlan === 'free' && plan.id === 'premium') ||
+                  ((currentPlan === 'premium' || currentPlan === 'enterprise') && plan.id === 'family')
+                    ? 'ring-2 ring-purple-500/40'
+                    : ''
+                }`}
               >
                 {plan.badge && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">

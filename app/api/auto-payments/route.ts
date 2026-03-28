@@ -124,22 +124,22 @@ async function validateRelations(
   ])
 
   if (!currency) {
-    return 'Gecerli bir para birimi secin.'
+    return 'Geçerli bir para birimi seçin.'
   }
   if (!category) {
-    return 'Gecerli bir kategori secin.'
+    return 'Geçerli bir kategori seçin.'
   }
   if (input.accountId && !account) {
-    return 'Secilen hesap size ait degil veya aktif degil.'
+    return 'Seçilen hesap size ait değil veya aktif değil.'
   }
   if (input.creditCardId && !creditCard) {
-    return 'Secilen kredi karti size ait degil veya aktif degil.'
+    return 'Seçilen kredi kartı size ait değil veya aktif değil.'
   }
   if (input.eWalletId && !eWallet) {
-    return 'Secilen e-cuzdan size ait degil veya aktif degil.'
+    return 'Seçilen e-cüzdan size ait değil veya aktif değil.'
   }
   if (input.beneficiaryId && !beneficiary) {
-    return 'Secilen lehtar size ait degil veya aktif degil.'
+    return 'Seçilen lehtar size ait değil veya aktif değil.'
   }
 
   return null
@@ -169,7 +169,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(autoPayments.map(serializeAutoPaymentRecord))
   } catch (error) {
     console.error('Auto payments GET error:', error)
-    return NextResponse.json({ error: 'Otomatik odemeler alinamadi' }, { status: 500 })
+    return NextResponse.json({ error: 'Otomatik ödemeler alınamadı' }, { status: 500 })
   }
 }
 
@@ -184,9 +184,9 @@ export async function POST(request: NextRequest) {
     if (!hasPremiumAccess) {
       return NextResponse.json(
         {
-          error: 'Otomatik odemeler premium uyelik gerektirir.',
+          error: 'Otomatik ödemeler premium üyelik gerektirir.',
           requiresPremium: true,
-          feature: 'Otomatik Odemeler',
+          feature: 'Otomatik Ödemeler',
         },
         { status: 403 }
       )
@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
 
     const paymentMethodId = await resolvePaymentMethodId(parsed.data.paymentMethodId)
     if (!paymentMethodId) {
-      return NextResponse.json({ error: 'Gecerli bir odeme yontemi secin.' }, { status: 400 })
+      return NextResponse.json({ error: 'Geçerli bir ödeme yöntemi seçin.' }, { status: 400 })
     }
 
     const relationError = await validateRelations(user.id, parsed.data)

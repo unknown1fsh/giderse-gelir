@@ -9,7 +9,11 @@
       "Bash(for file:*)",
       "Bash(do echo:*)",
       "Bash(for path:*)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(find /c/projects/giderse-gelir -type f \\\\\\( -name \"*.tsx\" -o -name \"*.ts\" -o -name \"*.jsx\" -o -name \"*.js\" \\\\\\) -path \"*/app/\\(dashboard\\)/*\")",
+      "Bash(grep -r \"Shopier\\\\|shopier\" /c/projects/giderse-gelir/lib --include=*.ts --include=*.tsx)",
+      "Bash(grep -r \"isLocked\\\\|Premium Özellik\\\\|Pro\\\\|Family\" /c/projects/giderse-gelir/app --include=*.tsx --include=*.ts)",
+      "Bash(grep -r \"nisan ayı\\\\|ilk 1 ay\\\\|ücretsiz dene\\\\|geliş\\\\|Premium Özellik\\\\|Family\\\\|Pro\" /c/projects/giderse-gelir --include=*.tsx --include=*.ts)"
     ]
   }
 }

@@ -229,13 +229,13 @@ export default function DashboardPage() {
         if (!user || user.plan === 'free' || !user.plan) {return null}
         if (user.plan === 'enterprise_premium') {return { icon: Award, label: 'Kurumsal Premium', cls: 'border-amber-500/25 bg-amber-500/10 text-amber-200' }}
         if (user.plan === 'enterprise') {return { icon: Star, label: 'Kurumsal', cls: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-200' }}
-        if (user.plan === 'family') {return { icon: Crown, label: 'Family', cls: 'border-cyan-500/25 bg-cyan-500/10 text-cyan-200' }}
+        if (user.plan === 'family') {return { icon: Crown, label: 'Premium', cls: 'border-cyan-500/25 bg-cyan-500/10 text-cyan-200' }}
         return { icon: Crown, label: 'Pro', cls: 'border-violet-500/25 bg-violet-500/10 text-violet-200' }
     }
     const getUpgradeCTA = () => {
         if (!user || user.plan === 'family' || user.plan === 'enterprise_premium') {return null}
-        if (user.plan === 'premium' || user.plan === 'enterprise') {return { label: 'Family\'e Yükselt', href: '/premium', cls: 'text-cyan-400 hover:text-cyan-300' }}
-        return { label: 'Pro\'ya Geç →', href: '/premium', cls: 'text-violet-400 hover:text-violet-300' }
+        if (user.plan === 'premium' || user.plan === 'enterprise') {return { label: 'Premium\'a Yükselt', href: '/premium', cls: 'text-cyan-400 hover:text-cyan-300' }}
+        return { label: 'Pro\'ya Yükselt →', href: '/premium', cls: 'text-violet-400 hover:text-violet-300' }
     }
 
     // ── Early returns ─────────────────────────────────────────────────────────

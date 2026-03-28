@@ -92,7 +92,7 @@ export default function PremiumUpgradeModal({
               <FeatureIcon className="h-7 w-7 text-white" />
             </div>
             <DialogTitle className="text-xl font-bold text-white">
-              Pro&apos;ya Geç
+              Pro&apos;ya Yükselt
             </DialogTitle>
             <DialogDescription className="mt-2 text-sm text-slate-400">
               {getFeatureDescription()}

@@ -187,7 +187,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-cyan-500/15 to-blue-500/15 border border-cyan-500/25 hover:from-cyan-500/25 hover:to-blue-500/25 transition-all duration-300 group"
                 >
                   <Crown className="h-3.5 w-3.5 text-cyan-400" />
-                  <span className="text-xs font-semibold text-cyan-300">Family</span>
+                  <span className="text-xs font-semibold text-cyan-300">Premium</span>
                   <Sparkles className="h-3 w-3 text-cyan-500/50" />
                 </Link>
               ) : user.plan === 'premium' ||
@@ -225,7 +225,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   <Crown className="h-4 w-4 text-indigo-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white">Pro&apos;ya Geç</p>
+                  <p className="text-sm font-medium text-white">Pro&apos;ya Yükselt</p>
                   <p className="text-xs text-indigo-300/70 truncate">₺99/ay — Tüm özellikleri aç</p>
                 </div>
               </div>
@@ -244,7 +244,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   <Crown className="h-4 w-4 text-cyan-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white">Family&apos;e Yükselt</p>
+                  <p className="text-sm font-medium text-white">Premium&apos;a Yükselt</p>
                   <p className="text-xs text-cyan-300/70 truncate">₺199/ay — Gelişmiş analizler</p>
                 </div>
               </div>

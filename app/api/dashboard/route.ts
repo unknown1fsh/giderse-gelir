@@ -6,6 +6,8 @@ import { getNetWorthSummary } from '@/lib/finance/net-worth'
 import { getBudgetSummary } from '@/lib/finance/budgets'
 import { syncNotificationEvents } from '@/lib/notifications/service'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     // Kullanıcı doğrulama ve aktif period paralel al
@@ -188,6 +190,10 @@ export async function GET(request: NextRequest) {
       budgets: budgetSummary,
       notifications: {
         unreadCount,
+      },
+    }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
       },
     })
   } catch (error) {

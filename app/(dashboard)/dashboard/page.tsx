@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { formatCurrency } from '@/lib/validators'
+import { formatCurrency, parseCurrencyInput } from '@/lib/validators'
 import { useUser } from '@/lib/user-context'
 import { getDisplayName } from '@/lib/utils'
 import { useToast } from '@/lib/use-toast'
@@ -12,12 +12,26 @@ import {
     Button,
     Card,
     CardContent,
+    Drawer,
+    DrawerBody,
+    DrawerContent,
+    DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
     DistributionBar,
     EmptyState,
     ErrorState,
+    Input,
     QuickActionTile,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
     StatCard,
     StatsGrid,
+    Textarea,
 } from '@/components/mosaic'
 import {
     Area,
@@ -118,6 +132,16 @@ interface DashboardData {
     notifications?: { unreadCount: number }
 }
 
+interface TxReferenceData {
+    txTypes: Array<{ id: number; code: string; name: string }>
+    categories: Array<{ id: number; name: string; txTypeId: number }>
+    paymentMethods: Array<{ id: number; code: string; name: string }>
+    accounts: Array<{ id: number; name: string; bank: { name: string }; currency: { code: string } }>
+    creditCards: Array<{ id: number; name: string; bank: { name: string }; currency: { code: string } }>
+    eWallets: Array<{ id: number; name: string; provider: string; currency: { code: string } }>
+    currencies: Array<{ id: number; code: string; name: string }>
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getDaysUntilDate(dateStr: string): number {
@@ -146,11 +170,28 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 export default function DashboardPage() {
     const { user, loading, refreshUser } = useUser()
-    const { error: toastError } = useToast()
+    const { success: toastSuccess, error: toastError } = useToast()
     const [data, setData] = useState<DashboardData | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [currentTime, setCurrentTime] = useState(new Date())
     const fetchedRef = useRef(false)
+
+    // ── Transaction drawer ────────────────────────────────────────────────────
+    const [txDrawerOpen, setTxDrawerOpen] = useState(false)
+    const [txMode, setTxMode] = useState<'income' | 'expense'>('expense')
+    const [txRefData, setTxRefData] = useState<TxReferenceData | null>(null)
+    const [txSaving, setTxSaving] = useState(false)
+    const [txForm, setTxForm] = useState({
+        categoryId: 0,
+        paymentMethodId: 0,
+        accountId: 0,
+        creditCardId: 0,
+        eWalletId: 0,
+        amount: '',
+        currencyId: 0,
+        transactionDate: new Date().toISOString().split('T')[0],
+        description: '',
+    })
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 60000)
@@ -173,7 +214,10 @@ export default function DashboardPage() {
     async function fetchDashboardData() {
         try {
             setError(null)
-            const res = await fetch('/api/dashboard', { credentials: 'include' })
+            const res = await fetch(`/api/dashboard?_t=${Date.now()}`, {
+                credentials: 'include',
+                cache: 'no-store',
+            })
             if (!res.ok) {
                 if (res.status === 401) { setData(null); return }
                 throw new Error('Dashboard verileri alınamadı')
@@ -190,6 +234,108 @@ export default function DashboardPage() {
     const handleRefresh = () => {
         fetchedRef.current = false
         void fetchDashboardData()
+    }
+
+    // ── Transaction drawer helpers ────────────────────────────────────────────
+    const resetTxForm = () => {
+        setTxForm({
+            categoryId: 0,
+            paymentMethodId: 0,
+            accountId: 0,
+            creditCardId: 0,
+            eWalletId: 0,
+            amount: '',
+            currencyId: txRefData?.currencies.find(c => c.code === 'TRY')?.id ?? 0,
+            transactionDate: new Date().toISOString().split('T')[0],
+            description: '',
+        })
+    }
+
+    const openTxDrawer = async (mode: 'income' | 'expense') => {
+        setTxMode(mode)
+        setTxDrawerOpen(true)
+        if (!txRefData) {
+            try {
+                const res = await fetch('/api/reference-data', { credentials: 'include' })
+                if (res.ok) {
+                    const d = (await res.json()) as TxReferenceData
+                    setTxRefData(d)
+                    const tryCurrency = d.currencies.find(c => c.code === 'TRY')
+                    if (tryCurrency) {
+                        setTxForm(prev => ({ ...prev, currencyId: tryCurrency.id }))
+                    }
+                }
+            } catch { /* silent */ }
+        }
+    }
+
+    const getTxPaymentFieldType = () => {
+        const method = txRefData?.paymentMethods.find(p => p.id === txForm.paymentMethodId)
+        if (!method) { return null }
+        const c = method.code
+        if (c === 'BANK_TRANSFER' || c === 'DEBIT_KARTI' || c === 'HAVALE_EFT') { return 'account' }
+        if (c === 'CREDIT_CARD') { return 'creditCard' }
+        if (c === 'E_CUZDAN') { return 'eWallet' }
+        return 'none'
+    }
+
+    const handleTxSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!txRefData) { return }
+
+        const txType = txRefData.txTypes.find(
+            t => t.code === (txMode === 'income' ? 'GELIR' : 'GIDER')
+        )
+        if (!txType) { toastError('Hata', 'İşlem tipi bulunamadı'); return }
+        if (!txForm.categoryId) { toastError('Hata', 'Lütfen kategori seçiniz'); return }
+        if (!txForm.paymentMethodId) { toastError('Hata', 'Lütfen ödeme yöntemi seçiniz'); return }
+
+        const paymentFieldType = getTxPaymentFieldType()
+        if (paymentFieldType === 'account' && !txForm.accountId) { toastError('Hata', 'Lütfen hesap seçiniz'); return }
+        if (paymentFieldType === 'creditCard' && !txForm.creditCardId) { toastError('Hata', 'Lütfen kredi kartı seçiniz'); return }
+        if (paymentFieldType === 'eWallet' && !txForm.eWalletId) { toastError('Hata', 'Lütfen e-cüzdan seçiniz'); return }
+
+        const amount = parseCurrencyInput(txForm.amount)
+        if (!amount || amount <= 0) { toastError('Hata', 'Geçerli bir tutar girin'); return }
+
+        setTxSaving(true)
+        try {
+            const body: Record<string, unknown> = {
+                txTypeId: txType.id,
+                categoryId: txForm.categoryId,
+                paymentMethodId: txForm.paymentMethodId,
+                amount,
+                currencyId: txForm.currencyId,
+                transactionDate: txForm.transactionDate,
+            }
+            if (txForm.accountId > 0) { body.accountId = txForm.accountId }
+            if (txForm.creditCardId > 0) { body.creditCardId = txForm.creditCardId }
+            if (txForm.eWalletId > 0) { body.eWalletId = txForm.eWalletId }
+            if (txForm.description) { body.description = txForm.description }
+
+            const res = await fetch('/api/transactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+                credentials: 'include',
+            })
+
+            if (!res.ok) {
+                const err = (await res.json()) as { error?: string }
+                toastError('Hata', err.error ?? `${txMode === 'income' ? 'Gelir' : 'Gider'} eklenemedi`)
+                return
+            }
+
+            toastSuccess('Başarılı', `${txMode === 'income' ? 'Gelir' : 'Gider'} başarıyla eklendi`)
+            setTxDrawerOpen(false)
+            resetTxForm()
+            fetchedRef.current = false
+            await fetchDashboardData()
+        } catch {
+            toastError('Hata', 'İşlem eklenirken hata oluştu')
+        } finally {
+            setTxSaving(false)
+        }
     }
 
     // ── Greeting ──────────────────────────────────────────────────────────────
@@ -461,24 +607,28 @@ export default function DashboardPage() {
 
                             {/* quick actions */}
                             <div className="grid grid-cols-2 gap-3">
-                                {[
-                                    { href: '/transactions/new-income', label: 'Gelir Ekle', icon: ArrowUpRight, color: 'bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25' },
-                                    { href: '/transactions/new-expense', label: 'Gider Ekle', icon: ArrowDownRight, color: 'bg-rose-500/15 text-rose-300 hover:bg-rose-500/25' },
-                                    { href: '/accounts', label: 'Hesaplar', icon: Wallet, color: 'bg-blue-500/15 text-blue-300 hover:bg-blue-500/25' },
-                                    { href: '/cards', label: 'Kartlar', icon: CreditCard, color: 'bg-purple-500/15 text-purple-300 hover:bg-purple-500/25' },
-                                ].map(a => (
-                                    <Link
-                                        key={a.href}
-                                        href={a.href}
-                                        className={cn(
-                                            'flex items-center gap-2.5 rounded-2xl border border-white/8 px-3.5 py-3 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5',
-                                            a.color
-                                        )}
-                                    >
-                                        <a.icon className="h-4 w-4 shrink-0" />
-                                        {a.label}
-                                    </Link>
-                                ))}
+                                <button
+                                    onClick={() => { void openTxDrawer('income') }}
+                                    className="flex items-center gap-2.5 rounded-2xl border border-white/8 px-3.5 py-3 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25"
+                                >
+                                    <ArrowUpRight className="h-4 w-4 shrink-0" />
+                                    Gelir Ekle
+                                </button>
+                                <button
+                                    onClick={() => { void openTxDrawer('expense') }}
+                                    className="flex items-center gap-2.5 rounded-2xl border border-white/8 px-3.5 py-3 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 bg-rose-500/15 text-rose-300 hover:bg-rose-500/25"
+                                >
+                                    <ArrowDownRight className="h-4 w-4 shrink-0" />
+                                    Gider Ekle
+                                </button>
+                                <Link href="/accounts" className="flex items-center gap-2.5 rounded-2xl border border-white/8 px-3.5 py-3 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 bg-blue-500/15 text-blue-300 hover:bg-blue-500/25">
+                                    <Wallet className="h-4 w-4 shrink-0" />
+                                    Hesaplar
+                                </Link>
+                                <Link href="/cards" className="flex items-center gap-2.5 rounded-2xl border border-white/8 px-3.5 py-3 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 bg-purple-500/15 text-purple-300 hover:bg-purple-500/25">
+                                    <CreditCard className="h-4 w-4 shrink-0" />
+                                    Kartlar
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -829,6 +979,221 @@ export default function DashboardPage() {
                     </div>
                 </div>
             </div>
+
+            {/* ─── TRANSACTION DRAWER ─────────────────────────────────────── */}
+            <Drawer
+                open={txDrawerOpen}
+                onOpenChange={open => {
+                    if (!open) { setTxDrawerOpen(false); resetTxForm(); return }
+                    setTxDrawerOpen(true)
+                }}
+            >
+                <DrawerContent>
+                    <form onSubmit={e => { void handleTxSubmit(e) }} className="flex h-full flex-col">
+                        <DrawerHeader>
+                            <DrawerTitle className={txMode === 'income' ? 'text-emerald-400' : 'text-rose-400'}>
+                                {txMode === 'income' ? 'Gelir Ekle' : 'Gider Ekle'}
+                            </DrawerTitle>
+                            <DrawerDescription>
+                                {txMode === 'income' ? 'Gelir işlemi bilgilerini girin' : 'Gider işlemi bilgilerini girin'}
+                            </DrawerDescription>
+                            {/* mode toggle */}
+                            <div className="mt-3 flex rounded-lg border border-border p-1">
+                                <button
+                                    type="button"
+                                    onClick={() => { setTxMode('income'); setTxForm(prev => ({ ...prev, categoryId: 0 })) }}
+                                    className={cn('flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors', txMode === 'income' ? 'bg-emerald-500/20 text-emerald-300' : 'text-muted-foreground hover:text-foreground')}
+                                >
+                                    Gelir
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => { setTxMode('expense'); setTxForm(prev => ({ ...prev, categoryId: 0 })) }}
+                                    className={cn('flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors', txMode === 'expense' ? 'bg-rose-500/20 text-rose-300' : 'text-muted-foreground hover:text-foreground')}
+                                >
+                                    Gider
+                                </button>
+                            </div>
+                        </DrawerHeader>
+
+                        <DrawerBody className="space-y-4">
+                            {!txRefData ? (
+                                <p className="py-8 text-center text-sm text-muted-foreground">Yükleniyor...</p>
+                            ) : (<>
+                                {/* Tutar */}
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Tutar</label>
+                                    <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        placeholder="0,00"
+                                        value={txForm.amount}
+                                        onChange={e => setTxForm(prev => ({ ...prev, amount: e.target.value }))}
+                                        autoFocus
+                                    />
+                                </div>
+
+                                {/* Para birimi */}
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Para Birimi</label>
+                                    <Select
+                                        value={txForm.currencyId ? String(txForm.currencyId) : ''}
+                                        onValueChange={v => setTxForm(prev => ({ ...prev, currencyId: Number(v) }))}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Seçiniz" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {txRefData.currencies.map(c => (
+                                                <SelectItem key={c.id} value={String(c.id)}>{c.code} — {c.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Tarih */}
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Tarih</label>
+                                    <Input
+                                        type="date"
+                                        value={txForm.transactionDate}
+                                        onChange={e => setTxForm(prev => ({ ...prev, transactionDate: e.target.value }))}
+                                    />
+                                </div>
+
+                                {/* Kategori */}
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Kategori</label>
+                                    <Select
+                                        value={txForm.categoryId ? String(txForm.categoryId) : ''}
+                                        onValueChange={v => setTxForm(prev => ({ ...prev, categoryId: Number(v) }))}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Kategori seçiniz" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {txRefData.categories
+                                                .filter(cat => {
+                                                    const targetType = txRefData.txTypes.find(t => t.code === (txMode === 'income' ? 'GELIR' : 'GIDER'))
+                                                    return targetType ? cat.txTypeId === targetType.id : true
+                                                })
+                                                .map(c => (
+                                                    <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                                                ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Ödeme yöntemi */}
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Ödeme Yöntemi</label>
+                                    <Select
+                                        value={txForm.paymentMethodId ? String(txForm.paymentMethodId) : ''}
+                                        onValueChange={v => setTxForm(prev => ({ ...prev, paymentMethodId: Number(v), accountId: 0, creditCardId: 0, eWalletId: 0 }))}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Ödeme yöntemi seçiniz" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {txRefData.paymentMethods.map(p => (
+                                                <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Koşullu: Hesap / Kart / E-Cüzdan */}
+                                {getTxPaymentFieldType() === 'account' && (
+                                    <div>
+                                        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Hesap</label>
+                                        <Select
+                                            value={txForm.accountId ? String(txForm.accountId) : ''}
+                                            onValueChange={v => setTxForm(prev => ({ ...prev, accountId: Number(v) }))}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Hesap seçiniz" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {txRefData.accounts.map(a => (
+                                                    <SelectItem key={a.id} value={String(a.id)}>{a.name} — {a.bank.name} ({a.currency.code})</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
+                                {getTxPaymentFieldType() === 'creditCard' && (
+                                    <div>
+                                        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Kredi Kartı</label>
+                                        <Select
+                                            value={txForm.creditCardId ? String(txForm.creditCardId) : ''}
+                                            onValueChange={v => setTxForm(prev => ({ ...prev, creditCardId: Number(v) }))}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Kart seçiniz" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {txRefData.creditCards.map(c => (
+                                                    <SelectItem key={c.id} value={String(c.id)}>{c.name} — {c.bank.name} ({c.currency.code})</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
+                                {getTxPaymentFieldType() === 'eWallet' && (
+                                    <div>
+                                        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">E-Cüzdan</label>
+                                        <Select
+                                            value={txForm.eWalletId ? String(txForm.eWalletId) : ''}
+                                            onValueChange={v => setTxForm(prev => ({ ...prev, eWalletId: Number(v) }))}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="E-cüzdan seçiniz" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {txRefData.eWallets.map(w => (
+                                                    <SelectItem key={w.id} value={String(w.id)}>{w.name} — {w.provider} ({w.currency.code})</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
+
+                                {/* Açıklama */}
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Açıklama (opsiyonel)</label>
+                                    <Textarea
+                                        rows={2}
+                                        value={txForm.description}
+                                        onChange={e => setTxForm(prev => ({ ...prev, description: e.target.value }))}
+                                        placeholder="İşlem açıklaması..."
+                                    />
+                                </div>
+                            </>)}
+                        </DrawerBody>
+
+                        <DrawerFooter className="gap-2">
+                            <div className="flex flex-col-reverse gap-2 sm:flex-row">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    className="flex-1"
+                                    onClick={() => { setTxDrawerOpen(false); resetTxForm() }}
+                                >
+                                    İptal
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    variant="glow"
+                                    className="flex-1"
+                                    disabled={txSaving || !txRefData}
+                                >
+                                    {txSaving ? 'Kaydediliyor...' : txMode === 'income' ? 'Gelir Kaydet' : 'Gider Kaydet'}
+                                </Button>
+                            </div>
+                        </DrawerFooter>
+                    </form>
+                </DrawerContent>
+            </Drawer>
         </div>
     )
 }

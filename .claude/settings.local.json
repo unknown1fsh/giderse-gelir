@@ -13,7 +13,13 @@
       "Bash(find /c/projects/giderse-gelir -type f \\\\\\( -name \"*.tsx\" -o -name \"*.ts\" -o -name \"*.jsx\" -o -name \"*.js\" \\\\\\) -path \"*/app/\\(dashboard\\)/*\")",
       "Bash(grep -r \"Shopier\\\\|shopier\" /c/projects/giderse-gelir/lib --include=*.ts --include=*.tsx)",
       "Bash(grep -r \"isLocked\\\\|Premium Özellik\\\\|Pro\\\\|Family\" /c/projects/giderse-gelir/app --include=*.tsx --include=*.ts)",
-      "Bash(grep -r \"nisan ayı\\\\|ilk 1 ay\\\\|ücretsiz dene\\\\|geliş\\\\|Premium Özellik\\\\|Family\\\\|Pro\" /c/projects/giderse-gelir --include=*.tsx --include=*.ts)"
+      "Bash(grep -r \"nisan ayı\\\\|ilk 1 ay\\\\|ücretsiz dene\\\\|geliş\\\\|Premium Özellik\\\\|Family\\\\|Pro\" /c/projects/giderse-gelir --include=*.tsx --include=*.ts)",
+      "Bash(ls -la /c/projects/giderse-gelir/app/\\\\\\(dashboard\\\\\\)/transactions/)",
+      "Bash(wc -l /c/projects/giderse-gelir/app/\\\\\\(dashboard\\\\\\)/transactions/new-expense/page.tsx)",
+      "Bash(wc -l /c/projects/giderse-gelir/app/\\\\\\(dashboard\\\\\\)/transactions/new-income/page.tsx)",
+      "Bash(head -100 \"c:/projects/giderse-gelir/app/\\(dashboard\\)/auto-payments/page.tsx\")",
+      "Bash(grep -n export.*Drawer c:/projects/giderse-gelir/components/mosaic.tsx)",
+      "Bash(npx next:*)"
     ]
   }
 }

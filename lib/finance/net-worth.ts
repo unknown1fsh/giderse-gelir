@@ -98,7 +98,7 @@ export async function getNetWorthSummary(
       where: {
         userId,
         active: true,
-        ...(activePeriodId ? { periodId: activePeriodId } : {}),
+        ...(activePeriodId ? { OR: [{ periodId: activePeriodId }, { periodId: null }] } : {}),
       },
       include: {
         currency: true,
@@ -108,7 +108,7 @@ export async function getNetWorthSummary(
       where: {
         userId,
         active: true,
-        ...(activePeriodId ? { periodId: activePeriodId } : {}),
+        ...(activePeriodId ? { OR: [{ periodId: activePeriodId }, { periodId: null }] } : {}),
       },
       include: {
         currency: true,
@@ -118,7 +118,7 @@ export async function getNetWorthSummary(
       where: {
         userId,
         active: true,
-        ...(activePeriodId ? { periodId: activePeriodId } : {}),
+        ...(activePeriodId ? { OR: [{ periodId: activePeriodId }, { periodId: null }] } : {}),
       },
       include: {
         currency: true,
@@ -127,14 +127,14 @@ export async function getNetWorthSummary(
     prisma.goldItem.findMany({
       where: {
         userId,
-        ...(activePeriodId ? { periodId: activePeriodId } : {}),
+        ...(activePeriodId ? { OR: [{ periodId: activePeriodId }, { periodId: null }] } : {}),
       },
     }),
     prisma.investment.findMany({
       where: {
         userId,
         active: true,
-        ...(activePeriodId ? { periodId: activePeriodId } : {}),
+        ...(activePeriodId ? { OR: [{ periodId: activePeriodId }, { periodId: null }] } : {}),
       },
       include: {
         currency: true,

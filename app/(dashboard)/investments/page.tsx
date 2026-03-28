@@ -138,7 +138,7 @@ export default function InvestmentsPage() {
   const pageSize = 8
 
   useEffect(() => {
-    if (userLoading) return
+    if (userLoading) { return }
     if (!isPremium) {
       void router.push('/premium')
     }

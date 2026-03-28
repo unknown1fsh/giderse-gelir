@@ -151,7 +151,7 @@ export default function AutoPaymentsPage() {
   const fetchedRef = useRef(false)
 
   useEffect(() => {
-    if (userLoading) return
+    if (userLoading) { return }
     if (!isPremium) {
       void router.push('/premium')
     }

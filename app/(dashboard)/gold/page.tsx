@@ -156,7 +156,7 @@ export default function GoldPage() {
   const { success: toastSuccess, error: toastError } = useToast()
 
   useEffect(() => {
-    if (userLoading) return
+    if (userLoading) { return }
     if (!isPremiumPlan(user?.plan || 'free')) {
       void router.push('/premium')
     }
@@ -532,7 +532,7 @@ export default function GoldPage() {
     )
   }
 
-  if (!userLoading && !isPremiumPlan(user?.plan || 'free')) return null
+  if (!userLoading && !isPremiumPlan(user?.plan || 'free')) { return null }
 
   return (
     <>

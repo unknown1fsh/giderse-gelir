@@ -95,7 +95,7 @@ export default function AnalysisPage() {
   const fetchedRef = useRef(false)
 
   useEffect(() => {
-    if (userLoading) return
+    if (userLoading) { return }
     if (!isPremiumPlan(user?.plan || 'free')) {
       void router.push('/premium')
     }
@@ -292,7 +292,7 @@ export default function AnalysisPage() {
     'from-cyan-500 to-sky-600',
   ]
 
-  if (!userLoading && !isPremiumPlan(user?.plan || 'free')) return null
+  if (!userLoading && !isPremiumPlan(user?.plan || 'free')) { return null }
 
   return (
     <AppPageShell

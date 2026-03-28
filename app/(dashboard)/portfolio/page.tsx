@@ -78,7 +78,7 @@ export default function PortfolioPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (userLoading) return
+    if (userLoading) { return }
     if (!isPremiumPlan(user?.plan || 'free')) {
       void router.push('/premium')
     }
@@ -143,7 +143,7 @@ export default function PortfolioPage() {
     [data]
   )
 
-  if (!userLoading && !isPremiumPlan(user?.plan || 'free')) return null
+  if (!userLoading && !isPremiumPlan(user?.plan || 'free')) { return null }
 
   return (
     <AppPageShell

@@ -17,7 +17,7 @@ export default function KVKKPage() {
                     <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/10">
                         <h2 className="text-2xl font-bold text-white mb-4">Veri Sorumlusunun Kimliği</h2>
                         <p className="text-slate-300 leading-relaxed">
-                            GiderSE-Gelir (“Şirket” veya “Platform”) olarak, 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) uyarınca, veri sorumlusu sıfatıyla, kişisel verilerinizin aşağıda açıklanan amaçlar kapsamında işlenmesine büyük önem veriyoruz.
+                            GiderSE-Gelir (“Platform”) olarak, 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) uyarınca, veri sorumlusu sıfatıyla, kişisel verilerinizin aşağıda açıklanan amaçlar kapsamında işlenmesine büyük önem veriyoruz. Kişisel verileriniz Platform tarafından bu Aydınlatma Metni kapsamında belirtilen amaçlarla sınırlı olarak işlenmektedir.
                         </p>
                     </div>
 
@@ -98,7 +98,7 @@ export default function KVKKPage() {
                                 </p>
                                 <p className="flex items-center">
                                     <MapPin className="h-4 w-4 mr-2 text-emerald-400" />
-                                    Adres: Türkiye
+                                    Adres: Ankara / Çankaya
                                 </p>
                             </div>
                         </div>

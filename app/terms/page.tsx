@@ -7,7 +7,6 @@ import {
   CreditCard,
   AlertTriangle,
   Mail,
-  Phone,
   MapPin,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -159,10 +158,10 @@ export default function TermsOfServicePage() {
                       ve fiyatları platform içinde belirtilmiştir.
                     </p>
                     <ul className="list-disc list-inside space-y-1 text-slate-300 ml-4">
-                      <li>Ücretsiz Plan: Temel özellikler</li>
-                      <li>Premium Plan: ₺250/ay</li>
-                      <li>Kurumsal Plan: ₺450/ay</li>
-                      <li>Kurumsal Premium Plan: Özel fiyatlandırma</li>
+                      <li>Başlangıç Planı: Ücretsiz (Temel özellikler)</li>
+                      <li>Pro Planı: ₺99/ay</li>
+                      <li>Premium Planı: ₺199/ay</li>
+                      <li>Lifetime (Ömür Boyu) Paket: ₺999 (Tek seferlik ödeme)</li>
                     </ul>
                   </div>
                   <div>
@@ -375,7 +374,7 @@ export default function TermsOfServicePage() {
                 <h3 className="text-lg font-semibold text-white mb-2">9.3. Yetkili Mahkeme</h3>
                 <p className="text-slate-300">
                   Uyuşmazlıkların çözülememesi durumunda, Türkiye Cumhuriyeti yasaları geçerlidir ve
-                  İstanbul Mahkemeleri yetkilidir.
+                  Ankara Mahkemeleri ve İcra Daireleri yetkilidir.
                 </p>
               </div>
             </div>
@@ -434,14 +433,9 @@ export default function TermsOfServicePage() {
                   E-posta: info@giderse-gelir.com
                 </p>
                 <p className="flex items-center">
-                  <Phone className="h-4 w-4 mr-2 text-blue-400" />
-                  Telefon: +90 (5xx) xxx xx xx
-                </p>
-                <p className="flex items-center">
                   <MapPin className="h-4 w-4 mr-2 text-blue-400" />
-                  Adres: Türkiye
+                  Adres: Ankara / Çankaya
                 </p>
-                Broadway, NY 10013, United States
               </div>
             </div>
             <p className="text-slate-300 mt-4 text-sm">

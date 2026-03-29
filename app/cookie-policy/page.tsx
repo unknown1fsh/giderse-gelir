@@ -101,7 +101,7 @@ export default function CookiePolicyPage() {
                                 </p>
                                 <p className="flex items-center">
                                     <MapPin className="h-4 w-4 mr-2 text-blue-400" />
-                                    Adres: Türkiye
+                                    Adres: Ankara / Çankaya
                                 </p>
                             </div>
                         </div>

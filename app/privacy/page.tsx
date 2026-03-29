@@ -1,6 +1,6 @@
 'use client'
 
-import { Shield, Lock, Eye, Database, FileText, Mail, Phone, MapPin } from 'lucide-react'
+import { Shield, Lock, Eye, Database, FileText, Mail, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button, LegalPageShell } from '@/components/mosaic'
 
@@ -37,18 +37,14 @@ export default function PrivacyPolicyPage() {
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-white mb-4">1. Veri Sorumlusu</h2>
                 <p className="text-slate-300 mb-4 leading-relaxed">
-                  Kişisel verilerinizin işlenmesinden sorumlu olan veri sorumlusu:
+                  6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) uyarınca, kişisel verileriniz; veri sorumlusu olarak GiderSE-Gelir tarafından aşağıda açıklanan kapsamda işlenebilecektir.
                 </p>
                 <div className="bg-white/5 rounded-lg p-4 space-y-2">
                   <p className="text-white font-semibold">GiderSE-Gelir</p>
                   <div className="space-y-1 text-slate-300 text-sm">
                     <p className="flex items-center">
                       <MapPin className="h-4 w-4 mr-2 text-purple-400" />
-                      Adres: Türkiye
-                    </p>
-                    <p className="flex items-center">
-                      <Phone className="h-4 w-4 mr-2 text-purple-400" />
-                      Telefon: +90 (5xx) xxx xx xx
+                      Adres: Ankara / Çankaya
                     </p>
                     <p className="flex items-center">
                       <Mail className="h-4 w-4 mr-2 text-purple-400" />
@@ -399,12 +395,8 @@ export default function PrivacyPolicyPage() {
                   E-posta: info@giderse-gelir.com
                 </p>
                 <p className="flex items-center">
-                  <Phone className="h-4 w-4 mr-2 text-purple-400" />
-                  Telefon: +90 (5xx) xxx xx xx
-                </p>
-                <p className="flex items-center">
                   <MapPin className="h-4 w-4 mr-2 text-purple-400" />
-                  Adres: Türkiye
+                  Adres: Ankara / Çankaya
                 </p>
               </div>
             </div>

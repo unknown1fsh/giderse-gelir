@@ -53,12 +53,12 @@ const requiredEnvVars: EnvVar[] = [
 
 const optionalEnvVars: EnvVar[] = [
   {
-    name: 'RESEND_API_KEY',
+    name: 'BREVO_API_KEY',
     required: false,
-    description: 'Resend email servisi API key',
+    description: 'Brevo email servisi API key',
     validate: value => {
-      if (value && !value.startsWith('re_')) {
-        return 'RESEND_API_KEY re_ ile başlamalıdır'
+      if (value && !value.startsWith('xkeysib-')) {
+        return 'BREVO_API_KEY xkeysib- ile başlamalıdır'
       }
       return true
     },

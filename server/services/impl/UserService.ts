@@ -97,7 +97,7 @@ export class UserService extends BaseService<UserDTO> {
       email: data.email,
       phone: data.phone,
       passwordHash,
-      emailVerified: false,
+      emailVerified: true,
       phoneVerified: false,
       timezone: 'Europe/Istanbul',
       language: 'tr',
@@ -108,7 +108,7 @@ export class UserService extends BaseService<UserDTO> {
       notifications: {},
       settings: {},
       role: 'USER',
-      isActive: false,
+      isActive: true,
     })
 
     return UserMapper.prismaToDTO(user)

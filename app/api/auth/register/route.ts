@@ -5,9 +5,7 @@ import { AuthService } from '@/server/services/impl/AuthService'
 import { RegisterUserDTO } from '@/server/dto/UserDTO'
 import { ExceptionMapper } from '@/server/errors'
 import { BadRequestError, TooManyRequestsError } from '@/server/errors'
-import { sendVerificationEmail } from '@/lib/email'
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
-import crypto from 'crypto'
 
 // Bu metot yeni kullanıcı kaydı oluşturur (POST).
 // Girdi: NextRequest (JSON body: username, email, password, name?, phone?, plan?)
@@ -70,13 +68,13 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     password,
   })
 
-  const user = await authService.register(registerDTO)
+  await authService.register(registerDTO)
 
-  // Email verification token oluştur
+  /* 
+  // Hesabı otomatik aktif ettiğimiz için e-posta doğrulamasına gerek yok
   const verificationToken = crypto.randomBytes(32).toString('hex')
   const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 saat
 
-  // Token'ı veritabanına kaydet
   await prisma.user.update({
     where: { id: user.id },
     data: {
@@ -85,12 +83,11 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     },
   })
 
-  // Verification email gönder (async, hata olsa bile kayıt devam eder)
   const displayName = user.name || user.username
   sendVerificationEmail(user.email, displayName, verificationToken).catch(error => {
     console.error('Email gönderme hatası (kayıt sonrası):', error)
-    // Email gönderilemese bile kayıt başarılı, kullanıcıya bilgi verilecek
   })
+  */
 
   // Kayıt sonrası otomatik giriş YAPMA (Admin onayı gerekli)
   // const userAgent = request.headers.get('user-agent') || undefined
@@ -109,13 +106,13 @@ export const POST = ExceptionMapper.asyncHandler(async (request: NextRequest) =>
     }
   }
 
-  const successMessage = 'Kayıt işleminiz başarılı! Lütfen e-posta adresinize gönderilen bağlantıya tıklayarak hesabınızı aktifleştirin.'
+  const successMessage = 'Kayıt işleminiz başarılı! Hesabınız aktif edildi, şimdi giriş yapabilirsiniz.'
 
   return NextResponse.json(
     {
       success: true,
       message: successMessage,
-      emailVerificationSent: true,
+      emailVerificationSent: false,
       requiresApproval: false,
     },
     { status: 201 }

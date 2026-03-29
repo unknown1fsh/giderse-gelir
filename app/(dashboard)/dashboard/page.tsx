@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { formatCurrency, parseCurrencyInput } from '@/lib/validators'
+import { formatCurrency, formatCompactCurrency, parseCurrencyInput } from '@/lib/validators'
 import { useUser } from '@/lib/user-context'
 import { getDisplayName } from '@/lib/utils'
 import { useToast } from '@/lib/use-toast'
@@ -496,10 +496,10 @@ export default function DashboardPage() {
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Net Varlık</p>
                             <h1 className={cn(
-                                'mt-2 text-5xl font-black tracking-tight sm:text-6xl',
+                                'mt-2 text-3xl font-black tracking-tight min-[480px]:text-4xl sm:text-5xl md:text-6xl',
                                 netWorth >= 0 ? 'text-white' : 'text-rose-300'
                             )}>
-                                {formatCurrency(netWorth, 'TRY')}
+                                {formatCompactCurrency(netWorth, 'TRY')}
                             </h1>
 
                             <div className="mt-3 flex items-center gap-2">
@@ -542,7 +542,7 @@ export default function DashboardPage() {
                             )}
 
                             {/* income / expense / savings row */}
-                            <div className="mt-5 grid grid-cols-3 gap-3">
+                            <div className="mt-5 grid grid-cols-1 gap-3 min-[480px]:grid-cols-3">
                                 {[
                                     { label: 'Gelir', value: totalIncome, color: 'border-emerald-500/20 bg-emerald-500/8', text: 'text-emerald-300', count: data.kpi.income_count },
                                     { label: 'Gider', value: totalExpense, color: 'border-rose-500/20 bg-rose-500/8', text: 'text-rose-300', count: data.kpi.expense_count },
@@ -550,8 +550,8 @@ export default function DashboardPage() {
                                 ].map(item => (
                                     <div key={item.label} className={cn('rounded-2xl border p-4', item.color)}>
                                         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{item.label}</p>
-                                        <p className={cn('mt-1.5 text-lg font-bold', item.text)}>
-                                            {item.value !== null ? formatCurrency(item.value, 'TRY') : item.suffix}
+                                        <p className={cn('mt-1.5 text-base font-bold truncate sm:text-lg', item.text)}>
+                                            {item.value !== null ? formatCompactCurrency(item.value, 'TRY') : item.suffix}
                                         </p>
                                         {item.count !== null && (
                                             <p className="mt-0.5 text-[10px] text-slate-600">{item.count} işlem</p>
@@ -639,7 +639,7 @@ export default function DashboardPage() {
             <StatsGrid>
                 <StatCard
                     title="Toplam Gelir"
-                    value={formatCurrency(totalIncome, 'TRY')}
+                    value={formatCompactCurrency(totalIncome, 'TRY')}
                     icon={ArrowUpRight}
                     color="green"
                     subtitle={`${data.kpi.income_count} işlem · Son 30 gün`}
@@ -647,7 +647,7 @@ export default function DashboardPage() {
                 />
                 <StatCard
                     title="Toplam Gider"
-                    value={formatCurrency(totalExpense, 'TRY')}
+                    value={formatCompactCurrency(totalExpense, 'TRY')}
                     icon={ArrowDownRight}
                     color="red"
                     subtitle={`${data.kpi.expense_count} işlem · Son 30 gün`}
@@ -655,7 +655,7 @@ export default function DashboardPage() {
                 />
                 <StatCard
                     title="Net Durum"
-                    value={`${netAmount >= 0 ? '+' : ''}${formatCurrency(netAmount, 'TRY')}`}
+                    value={`${netAmount >= 0 ? '+' : ''}${formatCompactCurrency(netAmount, 'TRY')}`}
                     icon={DollarSign}
                     color={netAmount >= 0 ? 'blue' : 'red'}
                     subtitle={netAmount >= 0 ? 'Pozitif nakit dengesi' : 'Negatif nakit dengesi'}

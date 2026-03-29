@@ -19,7 +19,14 @@
       "Bash(wc -l /c/projects/giderse-gelir/app/\\\\\\(dashboard\\\\\\)/transactions/new-income/page.tsx)",
       "Bash(head -100 \"c:/projects/giderse-gelir/app/\\(dashboard\\)/auto-payments/page.tsx\")",
       "Bash(grep -n export.*Drawer c:/projects/giderse-gelir/components/mosaic.tsx)",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "Bash(find c:/projects/giderse-gelir -name *.tsx -o -name *.ts -o -name *.jsx -o -name *.js)",
+      "Bash(ls -la \"c:/projects/giderse-gelir/app/\\(dashboard\\)/\")",
+      "Bash(ls -la \"c:/projects/giderse-gelir/app/\\(dashboard\\)/dashboard/\")",
+      "Bash(wc -l c:/projects/giderse-gelir/app/\\\\\\(dashboard\\\\\\)/dashboard/page.tsx)",
+      "Bash(grep -E \"^\\\\\\(/dashboard\\\\\\)/page\\\\.tsx$\" -v)",
+      "Bash(ls -la \"/c/projects/giderse-gelir/app/\\(dashboard\\)/\")",
+      "Bash(ls -la \"/c/projects/giderse-gelir/app/\\(dashboard\\)/dashboard/\")"
     ]
   }
 }

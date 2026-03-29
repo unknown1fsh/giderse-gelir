@@ -148,7 +148,7 @@ export default function StatCard({
                         </div>
                     </div>
                 </div>
-                <p className={cn('text-xl font-bold sm:text-2xl', colors.valueBg)}>{value}</p>
+                <p className={cn('text-lg font-bold truncate sm:text-xl lg:text-2xl', colors.valueBg)}>{value}</p>
                 {helperText && <p className="mt-1 text-xs text-muted-foreground">{helperText}</p>}
             </CardContent>
         </Card>

@@ -109,6 +109,30 @@ export function formatCurrency(amount: number, currencyCode: string): string {
   return `${symbol} ${amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
+export function formatCompactCurrency(amount: number, currencyCode: string): string {
+  const symbols: Record<string, string> = {
+    TRY: '₺',
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    CHF: 'CHF',
+    JPY: '¥',
+    XAU: 'Au',
+  }
+
+  const symbol = symbols[currencyCode] || currencyCode
+  const abs = Math.abs(amount)
+  const sign = amount < 0 ? '-' : ''
+
+  if (abs >= 1_000_000_000) {
+    return `${sign}${symbol} ${(abs / 1_000_000_000).toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}Mr`
+  }
+  if (abs >= 1_000_000) {
+    return `${sign}${symbol} ${(abs / 1_000_000).toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}Mn`
+  }
+  return formatCurrency(amount, currencyCode)
+}
+
 export function parseCurrencyInput(value: string): number {
   // Türkçe sayı formatını parse et (1.234,56 -> 1234.56)
   const cleaned = value.replace(/[^\d,.-]/g, '')

@@ -54,13 +54,20 @@ export class AuthService {
 
     const user = await this.userService.create(data)
 
+    // 🎁 Kampanya: Nisan 2026 sonuna kadar yeni üyelere 1 ay PREMIUM hediye
+    const now = new Date()
+    const campaignEndDate = new Date('2026-04-30T23:59:59')
+    const isCampaignActive = now <= campaignEndDate
+
     await this.prisma.userSubscription.create({
       data: {
         userId: user.id,
-        planId: PlanId.FREE, // Her zaman free olarak başlat
+        planId: isCampaignActive ? PlanId.PREMIUM : PlanId.FREE,
         status: 'active',
-        startDate: new Date(),
-        endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        startDate: now,
+        endDate: isCampaignActive
+          ? new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) // 1 Ay Ücretsiz Premium
+          : new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000), // Standart Free (1 Yıl)
         amount: 0,
         currency: 'TRY',
       },

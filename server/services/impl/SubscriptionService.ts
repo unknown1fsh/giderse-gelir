@@ -16,6 +16,7 @@ export class SubscriptionService {
   // Çıktı: Plan ID
   // Hata: NotFoundError
   async getUserPlan(userId: number): Promise<string> {
+    const now = new Date()
     const subscription = await this.prisma.userSubscription.findFirst({
       where: {
         userId,
@@ -24,7 +25,27 @@ export class SubscriptionService {
       orderBy: { createdAt: 'desc' },
     })
 
-    return subscription?.planId || PlanId.FREE
+    if (!subscription) {
+      return PlanId.FREE
+    }
+
+    // Süresi dolmuş mu kontrol et (Lazy Expiration)
+    if (subscription.endDate < now) {
+      try {
+        await this.prisma.userSubscription.update({
+          where: { id: subscription.id },
+          data: { status: SubscriptionStatus.EXPIRED },
+        })
+        // eslint-disable-next-line no-console
+        console.log(`[SUBSCRIPTION] User ${userId} subscription ${subscription.id} expired and downgraded to FREE.`)
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('[SUBSCRIPTION] Expiration update failed:', error)
+      }
+      return PlanId.FREE
+    }
+
+    return subscription.planId
   }
 
   // Bu metot kullanıcının aboneliğini yükseltir.

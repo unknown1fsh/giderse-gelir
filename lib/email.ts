@@ -210,3 +210,37 @@ export async function sendAdminNewTicketNotification(
     htmlContent: `<p>Yeni talep: ${subject} (${userName} - ${userEmail}) - Kategori: ${category}</p>`,
   })
 }
+/**
+ * Destek talebi durumu değiştiğinde kullanıcıya bildirim gönderir
+ */
+export async function sendSupportTicketStatusChangedEmail(
+  email: string,
+  name: string,
+  ticketNumber: string,
+  subject: string,
+  _oldStatus: string,
+  newStatus: string
+): Promise<{ success: boolean; error?: string }> {
+  const statusLabels: Record<string, string> = {
+    pending: 'Beklemede',
+    in_progress: 'İşlemde',
+    resolved: 'Çözüldü',
+    closed: 'Kapatıldı',
+  }
+
+  return sendEmail({
+    to: [{ email, name }],
+    subject: `Destek Talebi Durum Güncellemesi - ${ticketNumber}`,
+    htmlContent: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2>Merhaba ${name},</h2>
+        <p>Destek talebinizin durumu güncellendi:</p>
+        <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p><b>Talep No:</b> ${ticketNumber}</p>
+          <p><b>Konu:</b> ${subject}</p>
+          <p><b>Yeni Durum:</b> ${statusLabels[newStatus] || newStatus}</p>
+        </div>
+      </div>
+    `,
+  })
+}

@@ -50,12 +50,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="tr" className={`${inter.variable} ${jakarta.variable} ${caveat.variable} scroll-smooth`} data-scroll-behavior="smooth">
       <body className={`${inter.className} antialiased`}>
         {/* Analytics — yalnızca production'da yüklenir */}
-        {isProduction && (
+        {isProduction && googleTagId && (
           <>
             <Script
               src={`https://www.googletagmanager.com/gtag/js?id=${googleTagId}`}
               strategy="afterInteractive"
-              crossOrigin="anonymous"
             />
             <Script
               id="google-gtag"

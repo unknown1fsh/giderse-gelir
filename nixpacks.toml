@@ -1,0 +1,3 @@
+# Railway Nixpacks: Dockerfile ile uyumlu Node sürümü
+[variables]
+NIXPACKS_NODE_VERSION = "18"

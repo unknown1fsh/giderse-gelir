@@ -19,13 +19,16 @@
 | Değişken | Format | Açıklama |
 |----------|--------|----------|
 | `NODE_ENV` | `development` / `production` / `test` | Ortam tipi |
-| `RESEND_API_KEY` | `re_xxxxx` | E-posta servisi (Resend) |
+| `BREVO_API_KEY` | `xkeysib-...` | Brevo e-posta ([`lib/email.ts`](../../lib/email.ts)) |
+| `FROM_EMAIL`, `FROM_NAME` | string | Gönderici (varsayılanlar kodda) |
 | `PAYTR_MERCHANT_ID` | sayı | PayTR ödeme gateway |
 | `PAYTR_MERCHANT_KEY` | string | PayTR imzalama anahtarı |
 | `PAYTR_MERCHANT_SALT` | string | PayTR tuz değeri |
 | `PAYTR_API_URL` | URL | PayTR API endpoint'i |
-| `SHOPIER_API_KEY` | string | Shopier API anahtarı |
-| `SHOPIER_API_SECRET` | string | Shopier imzalama sırrı |
+| `SHOPIER_CLIENT_ID` | string | Shopier ([`lib/shopier.ts`](../../lib/shopier.ts)) |
+| `SHOPIER_CLIENT_SECRET` | string | Shopier client secret |
+| `SHOPIER_WEBHOOK_TOKEN` | string | Webhook doğrulama |
+| `SHOPIER_API_KEY` | string | Shopier API key |
 | `OPENAI_API_KEY` | `sk-xxxxx` | AI analiz raporları için |
 | `NEXT_PUBLIC_GOOGLE_TAG_ID` | `AW-xxxxx` | Google Ads conversion ID |
 | `NEXTAUTH_URL` | URL | NextAuth URL (kullanılmıyor, geriye dönük uyumluluk) |
@@ -117,6 +120,20 @@ railway up            # Deploy et
 git push origin main  # Railway GitHub entegrasyonu varsa otomatik tetiklenir
 ```
 
+### PowerShell: degisken kontrolu, toplu gonderme, health, seed
+
+1. Kok dizinde `.env.railway.example` dosyasini `.env.railway` olarak kopyalayip doldurun (`.env.railway` gitignore'da).
+2. `railway login` ve `railway link` sonrasi:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File ./scripts/railway-deploy.ps1 -Action Check
+powershell -ExecutionPolicy Bypass -File ./scripts/railway-deploy.ps1 -Action PushEnv -Service <app-servis-adi>
+powershell -ExecutionPolicy Bypass -File ./scripts/railway-deploy.ps1 -Action Health -BaseUrl https://<domain>
+powershell -ExecutionPolicy Bypass -File ./scripts/railway-deploy.ps1 -Action Seed -Service <app-servis-adi>
+```
+
+Nixpacks Node surumu: kokteki [`nixpacks.toml`](../../nixpacks.toml) (`NIXPACKS_NODE_VERSION=18`, Dockerfile ile uyum).
+
 ---
 
 ## Sıfırdan Production Kurulum
@@ -128,7 +145,7 @@ git push origin main  # Railway GitHub entegrasyonu varsa otomatik tetiklenir
 #    - DATABASE_URL (Railway otomatik sağlar)
 #    - JWT_SECRET (rastgele 64 karakter)
 #    - NEXT_PUBLIC_APP_URL (Railway'nin verdiği URL)
-#    - RESEND_API_KEY (e-posta için)
+#    - BREVO_API_KEY (e-posta için, kullaniliyorsa)
 #    - OPENAI_API_KEY (AI için)
 
 # 4. Deploy et
